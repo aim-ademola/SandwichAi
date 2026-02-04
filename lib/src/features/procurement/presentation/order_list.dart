@@ -1,0 +1,1101 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+
+import 'package:intl/intl.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_model.dart';
+import 'package:sandwich_ai/src/features/procurement/presentation/order_list_details.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/order_list-bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/order_list-bloc/event.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/order_list-bloc/state.dart';
+
+class OrdersListScreen extends StatefulWidget {
+  const OrdersListScreen({super.key});
+
+  @override
+  State<OrdersListScreen> createState() => _OrdersListScreenState();
+}
+
+class _OrdersListScreenState extends State<OrdersListScreen> {
+  final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
+
+  String? _selectedStatus;
+  String? _selectedPriority;
+  String? _selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<OrdersListBloc>().add(const LoadOrders());
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<OrdersListBloc>().add(const LoadMoreOrders());
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
+  }
+
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildFilterSheet(),
+    );
+  }
+
+  void _applyFilters(String? status, String? priority, String? category) {
+    setState(() {
+      _selectedStatus = status;
+      _selectedPriority = priority;
+      _selectedCategory = category;
+    });
+
+    context.read<OrdersListBloc>().add(
+      FilterOrders(
+        status: status,
+        priority: priority,
+        primaryCategory: category,
+      ),
+    );
+
+    Navigator.pop(context);
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _selectedStatus = null;
+      _selectedPriority = null;
+      _selectedCategory = null;
+    });
+    context.read<OrdersListBloc>().add(const ClearFilters());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle.merge(
+      style: WorkSansAppTextStyles.medium,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F6F6),
+        appBar: _buildAppBar(context),
+        body: _buildBody(context),
+        // floatingActionButton: _buildFAB(),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      title: Text(
+        'Purchase Orders',
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: Colors.black,
+        ),
+      ),
+      centerTitle: true,
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalPadding = _getHorizontalPadding(constraints.maxWidth);
+        final maxContentWidth = _getMaxContentWidth(constraints.maxWidth);
+
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxContentWidth),
+            child: Column(
+              children: [
+                // Search and Filter Bar
+                Container(
+                  color: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(child: _buildSearchBar()),
+                      const SizedBox(width: 12),
+                      _buildFilterButton(),
+                    ],
+                  ),
+                ),
+
+                // Active Filters
+                if (_hasActiveFilters()) _buildActiveFilters(horizontalPadding),
+
+                // Orders List
+                Expanded(
+                  child: BlocBuilder<OrdersListBloc, OrdersListState>(
+                    builder: (context, state) {
+                      if (state is OrdersLoading) {
+                        return _buildLoadingState();
+                      } else if (state is OrdersError) {
+                        return _buildErrorState(state);
+                      } else if (state is OrdersEmpty) {
+                        return _buildEmptyState(state);
+                      } else if (state is OrdersLoaded) {
+                        return _buildOrdersList(state, horizontalPadding);
+                      } else if (state is OrdersLoadingMore) {
+                        return _buildOrdersListWithLoadMore(
+                          state,
+                          horizontalPadding,
+                        );
+                      }
+                      return _buildEmptyState(
+                        const OrdersEmpty(message: 'No orders found'),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextField(
+        controller: _searchController,
+        style: WorkSansAppTextStyles.medium.copyWith(fontSize: 14),
+        decoration: InputDecoration(
+          hintText: 'Search by order number or supplier...',
+          hintStyle: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: const Color(0xFFBDBDBD),
+          ),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: Color(0xFF9E9E9E),
+            size: 20,
+          ),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 20),
+                  onPressed: () {
+                    _searchController.clear();
+                    context.read<OrdersListBloc>().add(const SearchOrders(''));
+                  },
+                )
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+        onSubmitted: (value) {
+          if (value.isNotEmpty) {
+            context.read<OrdersListBloc>().add(SearchOrders(value));
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildFilterButton() {
+    final hasFilters = _hasActiveFilters();
+    return Stack(
+      children: [
+        Container(
+          height: 48,
+          width: 48,
+          decoration: BoxDecoration(
+            color: hasFilters ? kPrimary : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: hasFilters ? kPrimary : const Color(0xFFE0E0E0),
+            ),
+          ),
+          child: IconButton(
+            icon: Icon(
+              Icons.filter_list,
+              color: hasFilters ? Colors.white : Colors.black,
+            ),
+            onPressed: _showFilterBottomSheet,
+          ),
+        ),
+        if (hasFilters)
+          Positioned(
+            right: 8,
+            top: 8,
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildActiveFilters(double padding) {
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.only(left: padding, right: padding, bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Active Filters:',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: _clearFilters,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Clear All',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 12,
+                    color: kPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (_selectedStatus != null)
+                _buildFilterChip(
+                  'Status: $_selectedStatus',
+                  () =>
+                      _applyFilters(null, _selectedPriority, _selectedCategory),
+                ),
+              if (_selectedPriority != null)
+                _buildFilterChip(
+                  'Priority: $_selectedPriority',
+                  () => _applyFilters(_selectedStatus, null, _selectedCategory),
+                ),
+              if (_selectedCategory != null)
+                _buildFilterChip(
+                  'Category: $_selectedCategory',
+                  () => _applyFilters(_selectedStatus, _selectedPriority, null),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, VoidCallback onRemove) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: kPrimary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: kPrimary.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 12,
+              color: kPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: onRemove,
+            child: Icon(Icons.close, size: 16, color: kPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrdersList(OrdersLoaded state, double padding) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<OrdersListBloc>().add(const RefreshOrders());
+        await Future.delayed(const Duration(seconds: 1));
+      },
+      color: kPrimary,
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16),
+        itemCount: state.orders.length,
+        itemBuilder: (context, index) {
+          return _buildOrderCard(state.orders[index]);
+        },
+      ),
+    );
+  }
+
+  Widget _buildOrdersListWithLoadMore(OrdersLoadingMore state, double padding) {
+    return ListView.builder(
+      controller: _scrollController,
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16),
+      itemCount: state.currentOrders.length + 1,
+      itemBuilder: (context, index) {
+        if (index == state.currentOrders.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator(color: kPrimary)),
+          );
+        }
+        return _buildOrderCard(state.currentOrders[index]);
+      },
+    );
+  }
+
+  Widget _buildOrderCard(PurchaseOrder order) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // Navigate to order details
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => OrderDetailsScreen(order: order),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            order.orderNumber,
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            order.supplier.businessName,
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildStatusBadge(order.status),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Amount and Items
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF7EADD),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Total Amount',
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 12,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '₦${NumberFormat('#,##0.00').format(order.totalAmount)}',
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: kPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${order.items.length} item${order.items.length > 1 ? 's' : ''}',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Dates and Priority Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoItem(
+                        icon: Icons.calendar_today_outlined,
+                        label: 'Order Date',
+                        value: DateFormat(
+                          'MMM dd, yyyy',
+                        ).format(order.orderDate),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildInfoItem(
+                        icon: Icons.local_shipping_outlined,
+                        label: 'Delivery',
+                        value: DateFormat(
+                          'MMM dd',
+                        ).format(order.expectedDeliveryDate),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Priority and Payment
+                Row(
+                  children: [
+                    _buildPriorityBadge(order.priority),
+                    const SizedBox(width: 8),
+                    _buildPaymentBadge(order.paymentStatus),
+                    if (order.deliveryStatus != null) ...[
+                      const SizedBox(width: 8),
+                      _buildDeliveryBadge(order.deliveryStatus!),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoItem({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.grey.shade600),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 11,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              Text(
+                value,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    Color backgroundColor;
+    Color textColor;
+
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        backgroundColor = Colors.orange.shade50;
+        textColor = Colors.orange.shade700;
+        break;
+      case 'ACCEPTED':
+        backgroundColor = Colors.blue.shade50;
+        textColor = Colors.blue.shade700;
+        break;
+      case 'DECLINED':
+        backgroundColor = Colors.red.shade50;
+        textColor = Colors.red.shade700;
+        break;
+      case 'IN_TRANSIT':
+        backgroundColor = Colors.purple.shade50;
+        textColor = Colors.purple.shade700;
+        break;
+      case 'DELIVERED':
+        backgroundColor = Colors.teal.shade50;
+        textColor = Colors.teal.shade700;
+        break;
+      case 'COMPLETED':
+        backgroundColor = Colors.green.shade50;
+        textColor = Colors.green.shade700;
+        break;
+      case 'CANCELLED':
+        backgroundColor = Colors.grey.shade200;
+        textColor = Colors.grey.shade700;
+        break;
+      default:
+        backgroundColor = Colors.grey.shade100;
+        textColor = Colors.grey.shade700;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        status.replaceAll('_', ' '),
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPriorityBadge(String priority) {
+    Color color;
+    switch (priority.toUpperCase()) {
+      case 'URGENT':
+        color = Colors.red;
+        break;
+      case 'HIGH':
+        color = Colors.orange;
+        break;
+      default:
+        color = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.flag, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            priority,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentBadge(String status) {
+    Color color;
+    switch (status.toUpperCase()) {
+      case 'COMPLETED':
+        color = Colors.green;
+        break;
+      case 'FAILED':
+        color = Colors.red;
+        break;
+      default:
+        color = Colors.amber;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.payment, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            status,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeliveryBadge(String status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.blue.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.local_shipping, size: 12, color: Colors.blue),
+          const SizedBox(width: 4),
+          Text(
+            status.replaceAll('_', ' '),
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.blue,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(child: CircularProgressIndicator(color: kPrimary));
+  }
+
+  Widget _buildErrorState(OrdersError state) {
+    String message = 'Failed to load orders';
+    IconData icon = Icons.error_outline;
+
+    switch (state.errorType) {
+      case OrdersErrorType.network:
+        message = 'No internet connection';
+        icon = Icons.wifi_off;
+        break;
+      case OrdersErrorType.timeout:
+        message = 'Request timed out';
+        icon = Icons.timer_off;
+        break;
+      case OrdersErrorType.server:
+        message = 'Server error';
+        icon = Icons.dns;
+        break;
+      case OrdersErrorType.general:
+        message = state.error;
+        break;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 64, color: Colors.grey.shade400),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 16,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                context.read<OrdersListBloc>().add(const RefreshOrders());
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kPrimary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Try Again',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(OrdersEmpty state) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox_outlined, size: 80, color: Colors.grey.shade300),
+            const SizedBox(height: 24),
+            Text(
+              state.message,
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Create your first order to get started',
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 14,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterSheet() {
+    String? tempStatus = _selectedStatus;
+    String? tempPriority = _selectedPriority;
+    String? tempCategory = _selectedCategory;
+
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Filter Orders',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Status Filter
+              Text(
+                'Status',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children:
+                    [
+                      'PENDING',
+                      'ACCEPTED',
+                      'DECLINED',
+                      'IN_TRANSIT',
+                      'DELIVERED',
+                      'COMPLETED',
+                      'CANCELLED',
+                    ].map((status) {
+                      return _buildFilterChipSelector(
+                        status,
+                        tempStatus == status,
+                        () {
+                          setModalState(() {
+                            tempStatus = tempStatus == status ? null : status;
+                          });
+                        },
+                      );
+                    }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Priority Filter
+              Text(
+                'Priority',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: ['LOW', 'NORMAL', 'HIGH', 'URGENT'].map((priority) {
+                  return _buildFilterChipSelector(
+                    priority,
+                    tempPriority == priority,
+                    () {
+                      setModalState(() {
+                        tempPriority = tempPriority == priority
+                            ? null
+                            : priority;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Category Filter
+              Text(
+                'Category',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children:
+                    [
+                      'PROTEIN',
+                      'GRAIN',
+                      'SPICES',
+                      'VEGETABLE',
+                      'DAIRY',
+                      'BEVERAGE',
+                      'OIL',
+                      'SEASONING',
+                    ].map((category) {
+                      return _buildFilterChipSelector(
+                        category,
+                        tempCategory == category,
+                        () {
+                          setModalState(() {
+                            tempCategory = tempCategory == category
+                                ? null
+                                : category;
+                          });
+                        },
+                      );
+                    }).toList(),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Apply Button
+              ElevatedButton(
+                onPressed: () {
+                  _applyFilters(tempStatus, tempPriority, tempCategory);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Apply Filters',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterChipSelector(
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? kPrimary : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? kPrimary : Colors.grey.shade300,
+          ),
+        ),
+        child: Text(
+          label.replaceAll('_', ' '),
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: isSelected ? Colors.white : Colors.black87,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFAB() {
+    return FloatingActionButton.extended(
+      onPressed: () {
+        // Navigate to create order screen
+        // Navigator.push(context, MaterialPageRoute(...));
+      },
+      backgroundColor: kPrimary,
+      icon: const Icon(Icons.add, color: Colors.white),
+      label: Text(
+        'New Order',
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  bool _hasActiveFilters() {
+    return _selectedStatus != null ||
+        _selectedPriority != null ||
+        _selectedCategory != null;
+  }
+
+  double _getHorizontalPadding(double width) {
+    if (width < 360) return 16;
+    if (width < 600) return 20;
+    if (width < 900) return 32;
+    return 48;
+  }
+
+  double _getMaxContentWidth(double width) {
+    if (width < 600) return double.infinity;
+    if (width < 900) return 600;
+    return 900;
+  }
+}

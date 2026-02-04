@@ -1,0 +1,715 @@
+import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+
+class ProcurementRequestsScreen extends StatefulWidget {
+  const ProcurementRequestsScreen({super.key});
+
+  @override
+  State<ProcurementRequestsScreen> createState() =>
+      _ProcurementRequestsScreenState();
+}
+
+class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String _selectedFilter = 'All';
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  final List<Request> _allRequests = [
+    Request(
+      from: 'Kitchen',
+      timeAgo: '2h ago',
+      title: 'Stock Replenishment',
+      description: '10kg Tomatoes, 5kg Onions, 2L Olive Oil...',
+      priority: 'High',
+    ),
+    Request(
+      from: 'Procurement',
+      timeAgo: '8h ago',
+      title: 'Invoice Approval #INV-12045',
+      supplier: 'Global Foods Inc.',
+      amount: 1250.30,
+      priority: 'Medium',
+    ),
+    Request(
+      from: 'Bar',
+      timeAgo: '1d ago',
+      title: 'New Cocktail Glassware Order',
+      description: '24x Highball, 24x Coupe glasses...',
+      priority: 'Low',
+    ),
+  ];
+
+  List<Request> get _filteredRequests {
+    if (_selectedFilter == 'All') return _allRequests;
+    return _allRequests
+        .where((req) => req.from.toLowerCase() == _selectedFilter.toLowerCase())
+        .toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 5, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle.merge(
+      style: WorkSansAppTextStyles.medium,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F6F6),
+        appBar: _buildAppBar(context),
+        body: _buildBody(context),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.menu, color: Colors.black),
+        onPressed: () {},
+      ),
+      title: Text(
+        'Requests',
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: Colors.black,
+        ),
+      ),
+      centerTitle: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+          onPressed: () {},
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalPadding = _getHorizontalPadding(constraints.maxWidth);
+        final maxContentWidth = _getMaxContentWidth(constraints.maxWidth);
+
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxContentWidth),
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: _buildSearchBar(constraints.maxWidth),
+                ),
+                const SizedBox(height: 16),
+                _buildFilterTabs(constraints.maxWidth),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: _filteredRequests.isEmpty
+                      ? _buildEmptyState(constraints.maxWidth)
+                      : _buildRequestsList(
+                          horizontalPadding,
+                          maxContentWidth,
+                          constraints.maxWidth,
+                        ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSearchBar(double screenWidth) {
+    final fontSize = _getSearchFontSize(screenWidth);
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: _getSearchPaddingHorizontal(screenWidth),
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.search,
+            color: const Color(0xFF9E9E9E),
+            size: _getSearchIconSize(screenWidth),
+          ),
+          SizedBox(width: _getSearchIconSpacing(screenWidth)),
+          Expanded(
+            child: TextField(
+              cursorColor: kPrimary,
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w400,
+                color: Colors.black,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Search by item or department...',
+                hintStyle: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF9E9E9E),
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 12),
+                isDense: true,
+              ),
+            ),
+          ),
+          if (_searchQuery.isNotEmpty)
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _searchController.clear();
+                  _searchQuery = '';
+                });
+              },
+              child: Icon(
+                Icons.clear,
+                color: const Color(0xFF9E9E9E),
+                size: _getSearchIconSize(screenWidth),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterTabs(double screenWidth) {
+    final filters = ['All', 'Urgent', 'Kitchen', 'Procurement', 'Inventory'];
+    final fontSize = _getFilterFontSize(screenWidth);
+
+    return SizedBox(
+      height: _getFilterHeight(screenWidth),
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(
+          horizontal: _getHorizontalPadding(screenWidth),
+        ),
+        itemCount: filters.length,
+        separatorBuilder: (context, index) =>
+            SizedBox(width: _getFilterSpacing(screenWidth)),
+        itemBuilder: (context, index) {
+          final filter = filters[index];
+          final isSelected = _selectedFilter == filter;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedFilter = filter;
+              });
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: _getFilterPaddingHorizontal(screenWidth),
+                vertical: _getFilterPaddingVertical(screenWidth),
+              ),
+              decoration: BoxDecoration(
+                color: isSelected ? kPrimary : Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: isSelected ? kPrimary : const Color(0xFFE0E0E0),
+                ),
+              ),
+              child: Text(
+                filter,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected ? Colors.white : const Color(0xFF424242),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRequestsList(
+    double horizontalPadding,
+    double maxContentWidth,
+    double screenWidth,
+  ) {
+    return ListView.separated(
+      padding: EdgeInsets.only(
+        left: horizontalPadding,
+        right: horizontalPadding,
+        bottom: 24,
+      ),
+      itemCount: _filteredRequests.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        return _buildRequestCard(_filteredRequests[index], screenWidth);
+      },
+    );
+  }
+
+  Widget _buildRequestCard(Request request, double screenWidth) {
+    final fromFontSize = _getFromFontSize(screenWidth);
+    final titleFontSize = _getTitleFontSize(screenWidth);
+    final descriptionFontSize = _getDescriptionFontSize(screenWidth);
+    final priorityFontSize = _getPriorityFontSize(screenWidth);
+    final buttonFontSize = _getButtonFontSize(screenWidth);
+
+    return Container(
+      padding: EdgeInsets.all(_getCardPadding(screenWidth)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'From: ${request.from} • ${request.timeAgo}',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: fromFontSize,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF757575),
+                ),
+              ),
+              _buildPriorityBadge(
+                request.priority,
+                priorityFontSize,
+                screenWidth,
+              ),
+            ],
+          ),
+          SizedBox(height: _getTitleSpacing(screenWidth)),
+
+          // Title
+          Text(
+            request.title,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: titleFontSize,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: _getDescriptionSpacing(screenWidth)),
+
+          // Description or details
+          if (request.description != null)
+            Text(
+              request.description!,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: descriptionFontSize,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF757575),
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          if (request.supplier != null && request.amount != null) ...[
+            Text(
+              'Supplier: ${request.supplier}',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: descriptionFontSize,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF757575),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Amount: \$${request.amount!.toStringAsFixed(2)}',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: descriptionFontSize,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF757575),
+              ),
+            ),
+          ],
+          SizedBox(height: _getButtonSpacing(screenWidth)),
+
+          // Action buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _buildActionButton(
+                'Reject',
+                const Color(0xFFE0E0E0),
+                Colors.black,
+                buttonFontSize,
+                screenWidth,
+                () {},
+              ),
+              SizedBox(width: _getButtonGap(screenWidth)),
+              _buildActionButton(
+                'Approve',
+                kPrimary,
+                Colors.white,
+                buttonFontSize,
+                screenWidth,
+                () {},
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+    String text,
+    Color bgColor,
+    Color textColor,
+    double fontSize,
+    double screenWidth,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: _getButtonPaddingHorizontal(screenWidth),
+          vertical: _getButtonPaddingVertical(screenWidth),
+        ),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          text,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPriorityBadge(
+    String priority,
+    double fontSize,
+    double screenWidth,
+  ) {
+    Color bgColor;
+    Color textColor;
+
+    switch (priority.toLowerCase()) {
+      case 'high':
+        bgColor = const Color(0xFFFFEBEE);
+        textColor = const Color(0xFFE53935);
+        break;
+      case 'medium':
+        bgColor = const Color(0xFFFEE2E2);
+        textColor = kPrimary;
+        break;
+      case 'low':
+        bgColor = const Color(0xFFDCFCE7);
+        textColor = const Color(0xFF4CAF50);
+        break;
+      default:
+        bgColor = const Color(0xFFF5F5F5);
+        textColor = const Color(0xFF757575);
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: _getPriorityPaddingHorizontal(screenWidth),
+        vertical: _getPriorityPaddingVertical(screenWidth),
+      ),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        priority,
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(double screenWidth) {
+    final iconSize = _getEmptyIconSize(screenWidth);
+    final titleFontSize = _getEmptyTitleFontSize(screenWidth);
+    final descriptionFontSize = _getEmptyDescriptionFontSize(screenWidth);
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: _getHorizontalPadding(screenWidth),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: iconSize,
+              height: iconSize,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.check_circle_outline,
+                size: iconSize * 0.6,
+                color: const Color(0xFF9E9E9E),
+              ),
+            ),
+            SizedBox(height: _getEmptySpacing(screenWidth)),
+            Text(
+              'All caught up!',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(height: _getEmptyDescriptionSpacing(screenWidth)),
+            Text(
+              'There are no new requests for you to\nreview at this time.',
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: descriptionFontSize,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF757575),
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Responsive sizing functions
+  double _getHorizontalPadding(double width) {
+    if (width < 360) return 16;
+    if (width < 600) return 20;
+    if (width < 900) return 32;
+    return 48;
+  }
+
+  double _getMaxContentWidth(double width) {
+    if (width < 600) return double.infinity;
+    if (width < 900) return 600;
+    return 800;
+  }
+
+  double _getSearchFontSize(double width) {
+    if (width < 360) return 13;
+    if (width < 600) return 14;
+    return 15;
+  }
+
+  double _getSearchPaddingHorizontal(double width) {
+    if (width < 360) return 12;
+    if (width < 600) return 14;
+    return 16;
+  }
+
+  double _getSearchIconSize(double width) {
+    if (width < 360) return 20;
+    if (width < 600) return 22;
+    return 24;
+  }
+
+  double _getSearchIconSpacing(double width) {
+    if (width < 360) return 8;
+    if (width < 600) return 10;
+    return 12;
+  }
+
+  double _getFilterHeight(double width) {
+    if (width < 360) return 36;
+    if (width < 600) return 40;
+    return 44;
+  }
+
+  double _getFilterFontSize(double width) {
+    if (width < 360) return 13;
+    if (width < 600) return 14;
+    return 15;
+  }
+
+  double _getFilterSpacing(double width) {
+    if (width < 360) return 8;
+    if (width < 600) return 10;
+    return 12;
+  }
+
+  double _getFilterPaddingHorizontal(double width) {
+    if (width < 360) return 16;
+    if (width < 600) return 18;
+    return 20;
+  }
+
+  double _getFilterPaddingVertical(double width) {
+    if (width < 360) return 8;
+    if (width < 600) return 10;
+    return 12;
+  }
+
+  double _getCardPadding(double width) {
+    if (width < 360) return 16;
+    if (width < 600) return 18;
+    return 20;
+  }
+
+  double _getFromFontSize(double width) {
+    if (width < 360) return 12;
+    if (width < 600) return 13;
+    return 14;
+  }
+
+  double _getTitleFontSize(double width) {
+    if (width < 360) return 15;
+    if (width < 600) return 16;
+    return 17;
+  }
+
+  double _getDescriptionFontSize(double width) {
+    if (width < 360) return 13;
+    if (width < 600) return 14;
+    return 15;
+  }
+
+  double _getPriorityFontSize(double width) {
+    if (width < 360) return 11;
+    if (width < 600) return 12;
+    return 13;
+  }
+
+  double _getButtonFontSize(double width) {
+    if (width < 360) return 13;
+    if (width < 600) return 14;
+    return 15;
+  }
+
+  double _getTitleSpacing(double width) {
+    if (width < 360) return 8;
+    if (width < 600) return 10;
+    return 12;
+  }
+
+  double _getDescriptionSpacing(double width) {
+    if (width < 360) return 6;
+    if (width < 600) return 8;
+    return 10;
+  }
+
+  double _getButtonSpacing(double width) {
+    if (width < 360) return 12;
+    if (width < 600) return 14;
+    return 16;
+  }
+
+  double _getButtonGap(double width) {
+    if (width < 360) return 8;
+    if (width < 600) return 10;
+    return 12;
+  }
+
+  double _getButtonPaddingHorizontal(double width) {
+    if (width < 360) return 20;
+    if (width < 600) return 24;
+    return 28;
+  }
+
+  double _getButtonPaddingVertical(double width) {
+    if (width < 360) return 8;
+    if (width < 600) return 10;
+    return 12;
+  }
+
+  double _getPriorityPaddingHorizontal(double width) {
+    if (width < 360) return 10;
+    if (width < 600) return 12;
+    return 14;
+  }
+
+  double _getPriorityPaddingVertical(double width) {
+    if (width < 360) return 4;
+    if (width < 600) return 5;
+    return 6;
+  }
+
+  double _getEmptyIconSize(double width) {
+    if (width < 360) return 80;
+    if (width < 600) return 100;
+    return 120;
+  }
+
+  double _getEmptyTitleFontSize(double width) {
+    if (width < 360) return 18;
+    if (width < 600) return 20;
+    return 22;
+  }
+
+  double _getEmptyDescriptionFontSize(double width) {
+    if (width < 360) return 14;
+    if (width < 600) return 15;
+    return 16;
+  }
+
+  double _getEmptySpacing(double width) {
+    if (width < 360) return 16;
+    if (width < 600) return 20;
+    return 24;
+  }
+
+  double _getEmptyDescriptionSpacing(double width) {
+    if (width < 360) return 8;
+    if (width < 600) return 10;
+    return 12;
+  }
+}
+
+// Request Model
+class Request {
+  final String from;
+  final String timeAgo;
+  final String title;
+  final String? description;
+  final String? supplier;
+  final double? amount;
+  final String priority;
+
+  Request({
+    required this.from,
+    required this.timeAgo,
+    required this.title,
+    this.description,
+    this.supplier,
+    this.amount,
+    required this.priority,
+  });
+}

@@ -729,16 +729,16 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  if (product.primaryImage != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
-                        product.primaryImage!,
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  // if (product.primaryImage != null)
+                  //   ClipRRect(
+                  //     borderRadius: BorderRadius.circular(16),
+                  //     child: Image.network(
+                  //       product.primaryImage!,
+                  //       width: double.infinity,
+                  //       height: 200,
+                  //       fit: BoxFit.cover,
+                  //     ),
+                  //   ),
                   const SizedBox(height: 24),
                   Text(
                     product.productName ?? '',

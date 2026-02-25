@@ -1,3 +1,4 @@
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/local_notification.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/branch_stock_model.dart';
@@ -31,7 +32,7 @@ class StockNotificationHelper {
           userDept == 'PROCESSING' ||
           userDept == 'KITCHEN';
     } catch (e) {
-      print('Error checking user department: $e');
+      AppLogger.log('Error checking user department: $e');
       return false;
     }
   }
@@ -53,7 +54,9 @@ class StockNotificationHelper {
   Future<void> checkStockLevels(List<CatalogItem> items) async {
     // Only allow notifications for STOCK_CONTROL department
     if (!await _isAllowedUser()) {
-      print('User not in STOCK_CONTROL department. Notifications blocked.');
+      AppLogger.log(
+        'User not in STOCK_CONTROL department. Notifications blocked.',
+      );
       return;
     }
 
@@ -92,7 +95,7 @@ class StockNotificationHelper {
         type: StockAlertType.outOfStock,
         quantity: item.quantity.toInt(),
       );
-      print(
+      AppLogger.log(
         '🚨 OUT OF STOCK alert sent for ${item.name} (CRITICAL - No blocking)',
       );
       return;
@@ -111,7 +114,7 @@ class StockNotificationHelper {
             : StockAlertType.lowStock,
         quantity: item.quantity.toInt(),
       );
-      print(
+      AppLogger.log(
         '⚠️ LOW STOCK alert sent for ${item.name} (CRITICAL - No blocking)',
       );
       return;
@@ -164,7 +167,7 @@ class StockNotificationHelper {
   /// Clear notification history (useful for testing or reset)
   void clearNotificationHistory() {
     _notifiedItems.clear();
-    print(
+    AppLogger.log(
       '✅ Notification history cleared. Critical alerts (low/out of stock) will continue to repeat.',
     );
   }
@@ -180,7 +183,7 @@ class StockNotificationHelper {
     _notifiedItems.remove('${itemKey}_near_reorder');
     _notifiedItems.remove('${itemKey}_expired');
     _notifiedItems.remove('${itemKey}_expiring');
-    print(
+    AppLogger.log(
       '✅ ${itemName} marked as restocked. Notification history cleared for this item.',
     );
   }
@@ -253,7 +256,9 @@ class StockNotificationHelper {
     required int minute,
   }) async {
     if (!await _isAllowedUser()) {
-      print('User not in STOCK_CONTROL department. Daily check not scheduled.');
+      AppLogger.log(
+        'User not in STOCK_CONTROL department. Daily check not scheduled.',
+      );
       return;
     }
 

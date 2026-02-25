@@ -137,7 +137,6 @@ class AddBranchStockRepository extends BaseRepository
   }
 
   @override
-  @override
   Future<ApiResponse<StockAdjustmentResponse>> adjustBranchStock(
     String stockId,
     StockAdjustmentRequest request,
@@ -284,16 +283,19 @@ class AddBranchStockRepository extends BaseRepository
     try {
       final response = StockAdjustmentResponse.fromJson(json);
 
+      // ✅ FIX: Don't throw error if response has a valid message
+      // The API might not include a 'success' field, but if there's a message, it's valid
       if (!response.isValid) {
-        throw FormatException(
-          response.message.isNotEmpty
-              ? response.message
-              : 'Invalid adjustment data received',
-        );
+        throw FormatException('Invalid adjustment data received');
       }
 
       return response;
     } catch (e) {
+      // Only throw if it's a parsing error, not a validation error
+      if (e is FormatException &&
+          e.message == 'Invalid adjustment data received') {
+        throw e;
+      }
       throw FormatException('Unable to process response: ${e.toString()}');
     }
   }
@@ -408,5 +410,7 @@ class StockAdjustmentResponse {
     );
   }
 
-  bool get isValid => success && message.isNotEmpty;
+  // ✅ FIX: Changed from AND to OR - if there's a message, consider it valid
+  // Many APIs don't include an explicit 'success' field
+  bool get isValid => success || message.isNotEmpty;
 }

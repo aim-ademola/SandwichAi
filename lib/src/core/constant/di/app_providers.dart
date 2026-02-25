@@ -10,6 +10,7 @@ import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen-dash_bloc/bloc.da
 import 'package:sandwich_ai/src/features/kitchen/data/repo/kitchen_dash_repo.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/api_menu_blocs/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/customer_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/order_status_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/payment_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_dashboard_state_bloc/bloc.dart';
@@ -327,6 +328,9 @@ class AppBlocProviders extends StatelessWidget {
             create: (context) => ResetPasswordBloc(
               repository: context.read<ForgotPasswordRepositoryInterface>(),
             ),
+          ),
+          BlocProvider<OrderSessionCubit>(
+            create: (context) => OrderSessionCubit(),
           ),
           BlocProvider<PaymentBloc>(
             create: (context) => PaymentBloc(

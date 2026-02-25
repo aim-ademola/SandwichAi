@@ -170,7 +170,7 @@ class VerificationDetailsScreen extends StatelessWidget {
         const SizedBox(height: 16),
         _buildInfoRow('Batch Code', verification.batchCode ?? 'N/A'),
         const SizedBox(height: 16),
-        _buildCopyableInfoRow('Recipe ID', verification.recipeId, context),
+        // _buildCopyableInfoRow('Recipe ID', verification.recipeId, context),
       ],
     );
   }

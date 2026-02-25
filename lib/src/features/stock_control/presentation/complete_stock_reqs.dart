@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
-
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/event.dart';
@@ -11,10 +10,32 @@ import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/stat
 import 'package:sandwich_ai/src/features/processing/data/model/stock_reuest_model.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/stock_req_details.dart';
 
-class CompleteStockRequestDetailsScreen extends StatefulWidget {
-  final String branchId;
+// Each tab maps to one API status value (null = All).
+class _TabDef {
+  final String label;
+  final String? apiStatus;
+  final bool showActions;
 
-  const CompleteStockRequestDetailsScreen({super.key, required this.branchId});
+  const _TabDef({
+    required this.label,
+    required this.apiStatus,
+    required this.showActions,
+  });
+}
+
+const List<_TabDef> _tabs = [
+  _TabDef(label: 'All', apiStatus: null, showActions: true),
+  _TabDef(label: 'Pending', apiStatus: 'PENDING', showActions: true),
+  _TabDef(label: 'Approved', apiStatus: 'APPROVED', showActions: true),
+  _TabDef(label: 'In Queue', apiStatus: 'IN_QUEUE', showActions: true),
+  _TabDef(label: 'Processing', apiStatus: 'PROCESSING', showActions: true),
+  _TabDef(label: 'Completed', apiStatus: 'COMPLETED', showActions: false),
+  _TabDef(label: 'Rejected', apiStatus: 'REJECTED', showActions: false),
+  _TabDef(label: 'Cancelled', apiStatus: 'CANCELLED', showActions: false),
+];
+
+class CompleteStockRequestDetailsScreen extends StatefulWidget {
+  const CompleteStockRequestDetailsScreen({super.key});
 
   @override
   State<CompleteStockRequestDetailsScreen> createState() =>
@@ -25,18 +46,18 @@ class _CompleteStockRequestDetailsScreenState
     extends State<CompleteStockRequestDetailsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String? _currentFilter;
-  String? _completingRequestId;
+
+  // The API status for the currently selected tab.
+  String? get _currentApiStatus => _tabs[_tabController.index].apiStatus;
+  bool get _currentShowActions => _tabs[_tabController.index].showActions;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(_onTabChanged);
-
-    context.read<StockRequestBloc>().add(
-      LoadStockRequests(branchId: widget.branchId),
-    );
+    // Load all requests on open
+    context.read<StockRequestBloc>().add(LoadStockRequests(branchId: ''));
   }
 
   @override
@@ -47,25 +68,17 @@ class _CompleteStockRequestDetailsScreenState
 
   void _onTabChanged() {
     if (!_tabController.indexIsChanging) {
-      setState(() {
-        if (_tabController.index == 0) {
-          _currentFilter = null;
-        } else if (_tabController.index == 1) {
-          _currentFilter = 'PENDING';
-        } else {
-          _currentFilter = 'COMPLETED';
-        }
-      });
-
+      // Re-fetch from API with the selected status filter.
+      // Passing null = no filter = all results.
       context.read<StockRequestBloc>().add(
-        FilterRequestsByStatus(status: _currentFilter),
+        LoadStockRequests(branchId: '', status: _currentApiStatus),
       );
     }
   }
 
   Future<void> _onRefresh() async {
     context.read<StockRequestBloc>().add(
-      RefreshStockRequests(branchId: widget.branchId, status: _currentFilter),
+      RefreshStockRequests(branchId: '', status: _currentApiStatus),
     );
   }
 
@@ -78,47 +91,104 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  void _handleTransferItems(StockRequest request) {
-    // Show confirmation dialog
+  void _handleAction(StockRequest request, StockRequestAction action) {
+    final config = _dialogConfigFor(action, request.requestId);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: Text(
-          'Complete Transfer',
+          config.title,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         content: Text(
-          'Are you sure you want to complete the transfer for ${request.requestId}?\n\nThis will mark all items as transferred and complete the request.',
+          config.body,
           style: WorkSansAppTextStyles.medium.copyWith(fontSize: 14),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text('Cancel', style: TextStyle(color: kprimaryTextColor2)),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _completingRequestId = request.id;
-              });
+              Navigator.pop(dialogContext);
               context.read<StockRequestBloc>().add(
-                CompleteStockRequest(requestId: request.id),
+                PerformStockRequestAction(
+                  requestId: request.id,
+                  action: action,
+                ),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
+              backgroundColor: config.confirmColor,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-            child: Text('Complete Transfer'),
+            child: Text(config.confirmLabel),
           ),
         ],
       ),
     );
   }
+
+  _ActionDialogConfig _dialogConfigFor(
+    StockRequestAction action,
+    String requestId,
+  ) {
+    return switch (action) {
+      StockRequestAction.approve => _ActionDialogConfig(
+        title: 'Approve Request',
+        body:
+            'Are you sure you want to approve $requestId?\n\nThis will mark the request as approved.',
+        confirmLabel: 'Approve',
+        confirmColor: const Color(0xFF42A5F5),
+      ),
+      StockRequestAction.queue => _ActionDialogConfig(
+        title: 'Send to Queue',
+        body:
+            'Are you sure you want to queue $requestId?\n\nThis will move the request to the processing queue.',
+        confirmLabel: 'Send to Queue',
+        confirmColor: const Color(0xFFAB47BC),
+      ),
+      StockRequestAction.process => _ActionDialogConfig(
+        title: 'Start Processing',
+        body:
+            'Are you sure you want to start processing $requestId?\n\nThis will move the request to PROCESSING status.',
+        confirmLabel: 'Start Processing',
+        confirmColor: const Color(0xFF26A69A),
+      ),
+      StockRequestAction.complete => _ActionDialogConfig(
+        title: 'Complete Transfer',
+        body:
+            'Are you sure you want to complete the transfer for $requestId?\n\nThis will mark all items as transferred and complete the request.',
+        confirmLabel: 'Complete Transfer',
+        confirmColor: kPrimary,
+      ),
+      StockRequestAction.reject => _ActionDialogConfig(
+        title: 'Reject Request',
+        body:
+            'Are you sure you want to reject $requestId?\n\nThis action cannot be undone.',
+        confirmLabel: 'Reject',
+        confirmColor: const Color(0xFFEF5350),
+      ),
+      StockRequestAction.cancel => _ActionDialogConfig(
+        title: 'Cancel Request',
+        body:
+            'Are you sure you want to cancel $requestId?\n\nThis action cannot be undone.',
+        confirmLabel: 'Cancel Request',
+        confirmColor: const Color(0xFFEF5350),
+      ),
+    };
+  }
+
+  // ─── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -129,113 +199,106 @@ class _CompleteStockRequestDetailsScreenState
         return Scaffold(
           backgroundColor: const Color(0xFFF8F6F6),
           appBar: _buildAppBar(screenWidth),
-          body: BlocConsumer<StockRequestBloc, StockRequestState>(
-            listener: (context, state) {
-              if (state is StockRequestError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.error),
-                    backgroundColor: const Color(0xFFE53935),
-                  ),
-                );
-                setState(() {
-                  _completingRequestId = null;
-                });
-              } else if (state is StockRequestCompleted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: kGreen,
-                  ),
-                );
-                setState(() {
-                  _completingRequestId = null;
-                });
-              }
-            },
-            builder: (context, state) {
-              if (state is StockRequestLoading) {
-                return _buildLoadingState();
-              }
+          body: Column(
+            children: [
+              _buildTabBar(screenWidth),
+              Expanded(
+                child: BlocConsumer<StockRequestBloc, StockRequestState>(
+                  listener: (context, state) {
+                    if (state is StockRequestError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.error),
+                          backgroundColor: const Color(0xFFE53935),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } else if (state is StockRequestActionSuccess) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: kGreen,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      // Reload current tab after a successful action
+                      context.read<StockRequestBloc>().add(
+                        LoadStockRequests(
+                          branchId: '',
+                          status: _currentApiStatus,
+                        ),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    // Loading spinner
+                    if (state is StockRequestLoading) {
+                      return _buildLoadingState();
+                    }
 
-              if (state is StockRequestEmpty) {
-                return _buildEmptyState(screenWidth);
-              }
+                    // Empty
+                    if (state is StockRequestEmpty) {
+                      return _buildEmptyState(screenWidth);
+                    }
 
-              if (state is StockRequestListLoaded ||
-                  state is StockRequestRefreshing ||
-                  state is StockRequestCompleted) {
-                List<StockRequest> actualRequests;
+                    // Any state that carries a request list
+                    if (state is StockRequestListLoaded ||
+                        state is StockRequestRefreshing ||
+                        state is StockRequestActionInProgress) {
+                      final requests = _extractRequests(state);
+                      final isRefreshing = state is StockRequestRefreshing;
 
-                if (state is StockRequestListLoaded) {
-                  actualRequests = state.requests;
-                } else if (state is StockRequestRefreshing) {
-                  actualRequests = (state).currentRequests;
-                } else {
-                  actualRequests =
-                      (state as StockRequestCompleted).currentRequests;
-                }
+                      if (requests.isEmpty) {
+                        return _buildEmptyState(screenWidth);
+                      }
 
-                final List<StockRequest> pending =
-                    state is StockRequestListLoaded
-                    ? state.pendingRequests
-                    : actualRequests
-                          .where(
-                            (r) =>
-                                r.status == 'PENDING' || r.status == 'APPROVED',
-                          )
-                          .toList();
+                      // All tabs share the same list — the API already
+                      // filtered it by status when the tab was tapped.
+                      // We just render the list with the correct showActions
+                      // flag for the current tab.
+                      return _buildRequestsList(
+                        requests,
+                        screenWidth,
+                        isRefreshing,
+                        state,
+                        showActions: _currentShowActions,
+                      );
+                    }
 
-                final List<StockRequest> completed =
-                    state is StockRequestListLoaded
-                    ? state.completedRequests
-                    : actualRequests
-                          .where(
-                            (r) =>
-                                r.status == 'COMPLETED' ||
-                                r.status == 'REJECTED',
-                          )
-                          .toList();
-
-                return Column(
-                  children: [
-                    _buildTabBar(screenWidth),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _buildRequestsList(
-                            actualRequests,
-                            screenWidth,
-                            state is StockRequestRefreshing,
-                            showTransferButton: true,
-                          ),
-                          _buildRequestsList(
-                            pending,
-                            screenWidth,
-                            state is StockRequestRefreshing,
-                            showTransferButton: true,
-                          ),
-                          _buildRequestsList(
-                            completed,
-                            screenWidth,
-                            state is StockRequestRefreshing,
-                            showTransferButton: false,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              }
-
-              return _buildEmptyState(screenWidth);
-            },
+                    return _buildEmptyState(screenWidth);
+                  },
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
+
+  // ─── State helpers ────────────────────────────────────────────────────────
+
+  List<StockRequest> _extractRequests(StockRequestState state) {
+    if (state is StockRequestListLoaded) return state.requests;
+    if (state is StockRequestRefreshing) return state.currentRequests;
+    if (state is StockRequestActionInProgress) return state.currentRequests;
+    if (state is StockRequestActionSuccess) return state.currentRequests;
+    return [];
+  }
+
+  bool _isActionInProgress(
+    StockRequestState state,
+    String requestId,
+    StockRequestAction action,
+  ) =>
+      state is StockRequestActionInProgress &&
+      state.requestId == requestId &&
+      state.action == action;
+
+  bool _isAnyActionInProgress(StockRequestState state, String requestId) =>
+      state is StockRequestActionInProgress && state.requestId == requestId;
+
+  // ─── App Bar ──────────────────────────────────────────────────────────────
 
   PreferredSizeWidget _buildAppBar(double screenWidth) {
     return AppBar(
@@ -261,11 +324,15 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
+  // ─── Tab Bar ──────────────────────────────────────────────────────────────
+
   Widget _buildTabBar(double screenWidth) {
     return Container(
       color: Colors.white,
       child: TabBar(
         controller: _tabController,
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
         labelColor: kPrimary,
         unselectedLabelColor: kprimaryTextColor2,
         indicatorColor: kPrimary,
@@ -278,14 +345,32 @@ class _CompleteStockRequestDetailsScreenState
           fontSize: _getTabFontSize(screenWidth),
           fontWeight: FontWeight.w500,
         ),
-        tabs: const [
-          Tab(text: 'All'),
-          Tab(text: 'Pending'),
-          Tab(text: 'Completed'),
-        ],
+        tabs: _tabs.map((t) => Tab(child: _buildTabLabel(t))).toList(),
       ),
     );
   }
+
+  Widget _buildTabLabel(_TabDef tab) {
+    if (tab.apiStatus == null) return Text(tab.label);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: _getStatusColor(tab.apiStatus!),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(tab.label),
+      ],
+    );
+  }
+
+  // ─── Loading / Empty ──────────────────────────────────────────────────────
 
   Widget _buildLoadingState() {
     return Center(
@@ -324,9 +409,9 @@ class _CompleteStockRequestDetailsScreenState
                 color: kprimaryTextColor1,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Create your first stock request to get started',
+              'No requests found for this status',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
                 color: kprimaryTextColor2,
@@ -339,39 +424,40 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
+  // ─── List ─────────────────────────────────────────────────────────────────
+
   Widget _buildRequestsList(
     List<StockRequest> requests,
     double screenWidth,
-    bool isRefreshing, {
-    bool showTransferButton = false,
+    bool isRefreshing,
+    StockRequestState state, {
+    bool showActions = true,
   }) {
-    if (requests.isEmpty) {
-      return _buildEmptyState(screenWidth);
-    }
-
     return RefreshIndicator(
       onRefresh: _onRefresh,
       color: kPrimary,
       child: ListView.builder(
         padding: EdgeInsets.all(_getHorizontalPadding(screenWidth)),
         itemCount: requests.length,
-        itemBuilder: (context, index) {
-          return _buildRequestCard(
-            requests[index],
-            screenWidth,
-            showTransferButton: showTransferButton,
-          );
-        },
+        itemBuilder: (context, index) => _buildRequestCard(
+          requests[index],
+          screenWidth,
+          state,
+          showActions: showActions,
+        ),
       ),
     );
   }
 
+  // ─── Card ─────────────────────────────────────────────────────────────────
+
   Widget _buildRequestCard(
     StockRequest request,
-    double screenWidth, {
-    bool showTransferButton = false,
+    double screenWidth,
+    StockRequestState state, {
+    bool showActions = true,
   }) {
-    final isCompleting = _completingRequestId == request.id;
+    final anyInProgress = _isAnyActionInProgress(state, request.id);
 
     return Container(
       margin: EdgeInsets.only(bottom: _getFieldSpacing(screenWidth)),
@@ -397,7 +483,10 @@ class _CompleteStockRequestDetailsScreenState
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(request.status).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(6),
@@ -416,12 +505,9 @@ class _CompleteStockRequestDetailsScreenState
                 ],
               ),
               SizedBox(height: _getFieldSpacing(screenWidth)),
-
-              // Items Section with Show More/Less
               _buildItemsSection(request, screenWidth),
-
               if (request.notes.isNotEmpty) ...[
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -471,52 +557,9 @@ class _CompleteStockRequestDetailsScreenState
                   ),
                 ],
               ),
-              if (showTransferButton &&
-                  (request.status == 'PENDING' ||
-                      request.status == 'APPROVED')) ...[
+              if (showActions) ...[
                 SizedBox(height: _getFieldSpacing(screenWidth)),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    iconAlignment: IconAlignment.end,
-                    onPressed: isCompleting
-                        ? null
-                        : () => _handleTransferItems(request),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: kPrimary,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: kPrimary.withOpacity(0.6),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 0,
-                    ),
-                    icon: isCompleting
-                        ? SizedBox(
-                            width: _getIconSize(screenWidth) - 2,
-                            height: _getIconSize(screenWidth) - 2,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
-                        : Icon(
-                            Icons.send_outlined,
-                            size: _getIconSize(screenWidth) - 2,
-                          ),
-                    label: Text(
-                      isCompleting ? 'Completing...' : 'Complete Transfer',
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: _getInputFontSize(screenWidth),
-                        fontWeight: FontWeight.w600,
-                        color: kWhite,
-                      ),
-                    ),
-                  ),
-                ),
+                _buildActionButtons(request, screenWidth, state, anyInProgress),
               ],
             ],
           ),
@@ -525,7 +568,154 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // New widget to handle items section with show more/less
+  // ─── Action Buttons ───────────────────────────────────────────────────────
+
+  Widget _buildActionButtons(
+    StockRequest request,
+    double screenWidth,
+    StockRequestState state,
+    bool anyInProgress,
+  ) {
+    final List<_ActionButtonConfig> actions = switch (request.status
+        .toUpperCase()) {
+      'PENDING' => [
+        _ActionButtonConfig(
+          action: StockRequestAction.approve,
+          label: 'Approve',
+          icon: Icons.check_circle_outline,
+          color: const Color(0xFF42A5F5),
+          flex: 1,
+        ),
+        _ActionButtonConfig(
+          action: StockRequestAction.reject,
+          label: 'Reject',
+          icon: Icons.cancel_outlined,
+          color: const Color(0xFFEF5350),
+          flex: 1,
+        ),
+      ],
+      'APPROVED' => [
+        _ActionButtonConfig(
+          action: StockRequestAction.queue,
+          label: 'Send to Queue',
+          icon: Icons.queue_outlined,
+          color: const Color(0xFFAB47BC),
+          flex: 2,
+        ),
+        _ActionButtonConfig(
+          action: StockRequestAction.cancel,
+          label: 'Cancel',
+          icon: Icons.cancel_outlined,
+          color: const Color(0xFFEF5350),
+          flex: 1,
+        ),
+      ],
+      'IN_QUEUE' => [
+        _ActionButtonConfig(
+          action: StockRequestAction.process,
+          label: 'Start Processing',
+          icon: Icons.settings_outlined,
+          color: const Color(0xFF26A69A),
+          flex: 2,
+        ),
+        _ActionButtonConfig(
+          action: StockRequestAction.cancel,
+          label: 'Cancel',
+          icon: Icons.cancel_outlined,
+          color: const Color(0xFFEF5350),
+          flex: 1,
+        ),
+      ],
+      'PROCESSING' => [
+        _ActionButtonConfig(
+          action: StockRequestAction.complete,
+          label: 'Complete Transfer',
+          icon: Icons.send_outlined,
+          color: kPrimary,
+          flex: 2,
+        ),
+        _ActionButtonConfig(
+          action: StockRequestAction.cancel,
+          label: 'Cancel',
+          icon: Icons.cancel_outlined,
+          color: const Color(0xFFEF5350),
+          flex: 1,
+        ),
+      ],
+      _ => [],
+    };
+
+    if (actions.isEmpty) return const SizedBox.shrink();
+
+    return Row(
+      children: actions
+          .expand(
+            (cfg) => [
+              Expanded(
+                flex: cfg.flex,
+                child: _buildActionButton(
+                  request: request,
+                  config: cfg,
+                  screenWidth: screenWidth,
+                  state: state,
+                  disabled: anyInProgress,
+                ),
+              ),
+              if (cfg != actions.last) const SizedBox(width: 8),
+            ],
+          )
+          .toList(),
+    );
+  }
+
+  Widget _buildActionButton({
+    required StockRequest request,
+    required _ActionButtonConfig config,
+    required double screenWidth,
+    required StockRequestState state,
+    required bool disabled,
+  }) {
+    final inProgress = _isActionInProgress(state, request.id, config.action);
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        iconAlignment: IconAlignment.end,
+        onPressed: disabled
+            ? null
+            : () => _handleAction(request, config.action),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: config.color,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: config.color.withOpacity(0.5),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 0,
+        ),
+        icon: inProgress
+            ? SizedBox(
+                width: _getIconSize(screenWidth) - 4,
+                height: _getIconSize(screenWidth) - 4,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Icon(config.icon, size: _getIconSize(screenWidth) - 4),
+        label: Text(
+          inProgress ? '${config.label}...' : config.label,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: _getInputFontSize(screenWidth) - 1,
+            fontWeight: FontWeight.w600,
+            color: kWhite,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Items Section ────────────────────────────────────────────────────────
+
   Widget _buildItemsSection(StockRequest request, double screenWidth) {
     final items = request.items;
 
@@ -551,7 +741,7 @@ class _CompleteStockRequestDetailsScreenState
     }
 
     return StatefulBuilder(
-      builder: (context, setState) {
+      builder: (context, setLocalState) {
         bool showAll = false;
         final displayItems = showAll ? items : items.take(3).toList();
 
@@ -633,11 +823,7 @@ class _CompleteStockRequestDetailsScreenState
             }),
             if (items.length > 3)
               GestureDetector(
-                onTap: () {
-                  setState(() {
-                    showAll = !showAll;
-                  });
-                },
+                onTap: () => setLocalState(() => showAll = !showAll),
                 child: Padding(
                   padding: const EdgeInsets.only(top: 4, left: 22),
                   child: Row(
@@ -670,6 +856,8 @@ class _CompleteStockRequestDetailsScreenState
       },
     );
   }
+
+  // ─── Small Widgets ────────────────────────────────────────────────────────
 
   Widget _buildStatusBadge(String status, double screenWidth) {
     return Container(
@@ -718,40 +906,37 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
+  // ─── Status helpers ───────────────────────────────────────────────────────
+
   Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        return const Color(0xFFFFA726);
-      case 'APPROVED':
-        return const Color(0xFF42A5F5);
-      case 'COMPLETED':
-        return const Color(0xFF66BB6A);
-      case 'REJECTED':
-        return const Color(0xFFEF5350);
-      default:
-        return kprimaryTextColor2;
-    }
+    return switch (status.toUpperCase()) {
+      'PENDING' => const Color(0xFFFFA726),
+      'APPROVED' => const Color(0xFF42A5F5),
+      'IN_QUEUE' => const Color(0xFFAB47BC),
+      'PROCESSING' => const Color(0xFF26A69A),
+      'COMPLETED' => const Color(0xFF66BB6A),
+      'REJECTED' => const Color(0xFFEF5350),
+      'CANCELLED' => const Color(0xFFBDBDBD),
+      _ => kprimaryTextColor2,
+    };
   }
 
   String _getStatusText(String status) {
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        return 'Pending';
-      case 'APPROVED':
-        return 'Approved';
-      case 'COMPLETED':
-        return 'Completed';
-      case 'REJECTED':
-        return 'Rejected';
-      default:
-        return status;
-    }
+    return switch (status.toUpperCase()) {
+      'PENDING' => 'Pending',
+      'APPROVED' => 'Approved',
+      'IN_QUEUE' => 'In Queue',
+      'PROCESSING' => 'Processing',
+      'COMPLETED' => 'Completed',
+      'REJECTED' => 'Rejected',
+      'CANCELLED' => 'Cancelled',
+      _ => status,
+    };
   }
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-
     if (difference.inDays == 0) {
       return 'Today ${DateFormat('HH:mm').format(date)}';
     } else if (difference.inDays == 1) {
@@ -763,65 +948,96 @@ class _CompleteStockRequestDetailsScreenState
     }
   }
 
-  // Responsive sizing functions
-  double _getHorizontalPadding(double width) => width < 360
+  // ─── Responsive sizing ────────────────────────────────────────────────────
+
+  double _getHorizontalPadding(double w) => w < 360
       ? 16
-      : width < 600
+      : w < 600
       ? 20
       : 24;
-  double _getCardPadding(double width) => width < 360
+  double _getCardPadding(double w) => w < 360
       ? 14
-      : width < 600
+      : w < 600
       ? 16
       : 18;
-  double _getSectionSpacing(double width) => width < 360
+  double _getSectionSpacing(double w) => w < 360
       ? 20
-      : width < 600
+      : w < 600
       ? 24
       : 28;
-  double _getFieldSpacing(double width) => width < 360
+  double _getFieldSpacing(double w) => w < 360
       ? 10
-      : width < 600
+      : w < 600
       ? 12
       : 14;
-  double _getAppBarTitleFontSize(double width) => width < 360
+  double _getAppBarTitleFontSize(double w) => w < 360
       ? 17
-      : width < 600
+      : w < 600
       ? 18
       : 19;
-  double _getTabFontSize(double width) => width < 360
+  double _getTabFontSize(double w) => w < 360
       ? 13
-      : width < 600
+      : w < 600
       ? 14
       : 15;
-  double _getSectionTitleFontSize(double width) => width < 360
+  double _getSectionTitleFontSize(double w) => w < 360
       ? 16
-      : width < 600
+      : w < 600
       ? 17
       : 18;
-  double _getInputFontSize(double width) => width < 360
+  double _getInputFontSize(double w) => w < 360
       ? 14
-      : width < 600
+      : w < 600
       ? 15
       : 16;
-  double _getCaptionFontSize(double width) => width < 360
+  double _getCaptionFontSize(double w) => w < 360
       ? 11
-      : width < 600
+      : w < 600
       ? 12
       : 13;
-  double _getIconSize(double width) => width < 360
+  double _getIconSize(double w) => w < 360
       ? 20
-      : width < 600
+      : w < 600
       ? 22
       : 24;
-  double _getBorderRadius(double width) => width < 360
+  double _getBorderRadius(double w) => w < 360
       ? 8
-      : width < 600
+      : w < 600
       ? 10
       : 12;
-  double _getEmptyIconSize(double width) => width < 360
+  double _getEmptyIconSize(double w) => w < 360
       ? 80
-      : width < 600
+      : w < 600
       ? 100
       : 120;
+}
+
+// ─── Private config classes ───────────────────────────────────────────────────
+
+class _ActionDialogConfig {
+  final String title;
+  final String body;
+  final String confirmLabel;
+  final Color confirmColor;
+  const _ActionDialogConfig({
+    required this.title,
+    required this.body,
+    required this.confirmLabel,
+    required this.confirmColor,
+  });
+}
+
+class _ActionButtonConfig {
+  final StockRequestAction action;
+  final String label;
+  final IconData icon;
+  final Color color;
+  final int flex;
+  const _ActionButtonConfig({
+    required this.action,
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.flex,
+  });
 }

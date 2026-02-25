@@ -66,11 +66,62 @@ class LoadStockRequestDetails extends StockRequestEvent {
   List<Object?> get props => [requestId];
 }
 
-class CompleteStockRequest extends StockRequestEvent {
+/// Generic action event — covers approve, cancel, complete, queue, reject
+class PerformStockRequestAction extends StockRequestEvent {
+  final String requestId;
+  final StockRequestAction action;
+
+  const PerformStockRequestAction({
+    required this.requestId,
+    required this.action,
+  });
+
+  @override
+  List<Object?> get props => [requestId, action];
+}
+
+class LoadStockRequestStatus extends StockRequestEvent {
   final String requestId;
 
-  const CompleteStockRequest({required this.requestId});
+  const LoadStockRequestStatus({required this.requestId});
 
   @override
   List<Object?> get props => [requestId];
+}
+
+/// Enum representing all available actions on a stock request
+enum StockRequestAction {
+  approve,
+  cancel,
+  complete,
+  queue,
+  reject,
+  process;
+
+  String get endpoint => switch (this) {
+    approve => 'approve',
+    cancel => 'cancel',
+    complete => 'complete',
+    queue => 'queue',
+    reject => 'reject',
+    process => 'process',
+  };
+
+  String get label => switch (this) {
+    approve => 'Approved',
+    cancel => 'Cancelled',
+    complete => 'Completed',
+    queue => 'Queued',
+    reject => 'Rejected',
+    process => 'process',
+  };
+
+  String get successMessage => switch (this) {
+    approve => 'Stock request approved successfully!',
+    cancel => 'Stock request cancelled successfully!',
+    complete => 'Stock request completed successfully!',
+    queue => 'Stock request queued successfully!',
+    reject => 'Stock request rejected successfully!',
+    process => 'Stock request processed succssfully!',
+  };
 }

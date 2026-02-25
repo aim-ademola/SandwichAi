@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:intl/intl.dart';
@@ -61,7 +62,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   Future<void> _checkMicrophonePermission() async {
     final hasPermission = await _audioRecorder.hasPermission();
     if (!hasPermission) {
-      print('Microphone permission not granted');
+      AppLogger.log('Microphone permission not granted');
     }
   }
 
@@ -641,7 +642,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
         onPressed: () {
-          print('ji');
+          AppLogger.log('ji');
           widget.showNavBarCallback?.call();
           // Navigator.pop(context);
         },

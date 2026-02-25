@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/bloc.dart';
@@ -302,7 +303,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
   }
 
   void _submitForm() {
-    print("Submit called!");
+    AppLogger.log("Submit called!");
 
     if (!_formKey.currentState!.validate()) {
       _showSnackBar(
@@ -354,7 +355,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
         expiryDate: _expiryDateController.text.trim(),
       );
 
-      print("Dispatching event with request: ${request.toJson()}");
+      AppLogger.log("Dispatching event with request: ${request.toJson()}");
 
       if (widget.itemId == null) {
         context.read<AddBranchStockBloc>().add(
@@ -366,7 +367,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
         );
       }
     } catch (e) {
-      print("Error in _submitForm: $e");
+      AppLogger.log("Error in _submitForm: $e");
       _showSnackBar('Invalid input: ${e.toString()}', isError: true);
     }
   }
@@ -1218,7 +1219,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
             onPressed: isLoading
                 ? null
                 : () {
-                    print('Hit');
+                    AppLogger.log('Hit');
                     _submitForm();
                   },
             style: ElevatedButton.styleFrom(

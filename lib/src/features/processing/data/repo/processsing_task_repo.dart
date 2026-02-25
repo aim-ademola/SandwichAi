@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
@@ -169,41 +170,41 @@ class ProcessingTaskRepository extends BaseRepository
         throw FormatException('Task ID cannot be empty');
       }
 
-      print('🗑️ Repository: Starting delete for task: $taskId');
+      AppLogger.log('🗑️ Repository: Starting delete for task: $taskId');
 
       final response = await _apiClient
           .delete('processing/tasks/$taskId')
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
-              print('❌ Repository: Delete timed out');
+              AppLogger.log(' Repository: Delete timed out');
               throw TimeoutException('Request timed out. Please try again.');
             },
           );
 
-      print('✅ Repository: Delete completed');
-      print('   Data: ${response.data}');
+      AppLogger.log(' Repository: Delete completed');
+      AppLogger.log('   Data: ${response.data}');
 
       // Return true instead of null to avoid null check error in ApiResponse.when()
       return ApiResponse.success(true);
     } on SocketException catch (e) {
-      print('❌ Repository: SocketException - $e');
+      AppLogger.log(' Repository: SocketException - $e');
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
     } on TimeoutException catch (e) {
-      print('❌ Repository: TimeoutException - $e');
+      AppLogger.log(' Repository: TimeoutException - $e');
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
     } on FormatException catch (e) {
-      print('❌ Repository: FormatException - ${e.message}');
+      AppLogger.log(' Repository: FormatException - ${e.message}');
       return ApiResponse.errorMessage(e.message);
     } catch (e, stackTrace) {
-      print('❌ Repository: Unexpected exception');
-      print('   Error: $e');
-      print('   Type: ${e.runtimeType}');
-      print(
+      AppLogger.log(' Repository: Unexpected exception');
+      AppLogger.log('   Error: $e');
+      AppLogger.log('   Type: ${e.runtimeType}');
+      AppLogger.log(
         '   Stack: ${stackTrace.toString().split('\n').take(5).join('\n')}',
       );
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));

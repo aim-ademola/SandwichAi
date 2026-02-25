@@ -165,6 +165,10 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                         ),
                       ),
                       backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   );
                 }
@@ -391,27 +395,26 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                 ),
 
                 // Membership Badge
-                if (customer.membershipTier != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getMembershipColor(
-                        customer.membershipTier,
-                      ).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      customer.membershipTier!,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: _getMembershipColor(customer.membershipTier),
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getMembershipColor(
+                      customer.membershipTier,
+                    ).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    customer.membershipTier,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: _getMembershipColor(customer.membershipTier),
                     ),
                   ),
+                ),
               ],
             ),
             const SizedBox(height: 12),

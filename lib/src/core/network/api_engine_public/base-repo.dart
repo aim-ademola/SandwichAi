@@ -1,3 +1,4 @@
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 
@@ -73,7 +74,7 @@ abstract class BaseRepository {
       success: (data) {
         try {
           if (data is Map<String, dynamic>) {
-            print('handleObjectResponse - Full data: $data'); // Debug
+            AppLogger.log('handleObjectResponse - Full data: $data'); // Debug
 
             // Don't extract the 'data' field - let the model handle its own structure
             final item = fromJson(data);
@@ -86,8 +87,8 @@ abstract class BaseRepository {
             );
           }
         } catch (e, stackTrace) {
-          print('handleObjectResponse error: $e');
-          print('Stack trace: $stackTrace');
+          AppLogger.log('handleObjectResponse error: $e');
+          AppLogger.log('Stack trace: $stackTrace');
           return ApiResponse.error(
             NetworkException.formatException('Failed to parse object: $e'),
           );

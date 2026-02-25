@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/processing_task_bloc/bloc.dart';
@@ -61,7 +62,7 @@ class _ProcessingTaskHistoryScreenState
 
   void _showUpdateTaskDialog(ProcessingTask task, double screenWidth) {
     // Debug: Print the actual status value
-    print('🔍 Task status from API: "${task.status}"');
+    AppLogger.log(' Task status from API: "${task.status}"');
 
     // Normalize the status to match dropdown values
     String selectedStatus = task.status.toUpperCase().trim();
@@ -69,13 +70,13 @@ class _ProcessingTaskHistoryScreenState
     // Ensure the status is one of the valid dropdown options
     final validStatuses = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
     if (!validStatuses.contains(selectedStatus)) {
-      print(
+      AppLogger.log(
         '⚠️ Status "$selectedStatus" not in valid list, defaulting to PENDING',
       );
       // Default to PENDING if status is not recognized
       selectedStatus = 'PENDING';
     } else {
-      print('✅ Status "$selectedStatus" is valid');
+      AppLogger.log(' Status "$selectedStatus" is valid');
     }
 
     final batchesCompletedController = TextEditingController(

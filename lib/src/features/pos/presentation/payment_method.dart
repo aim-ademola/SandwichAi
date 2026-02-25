@@ -3,17 +3,35 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/payment_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/payment_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/payment_bloc/state.dart';
-
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/payment_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/pos_order_repo.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/recietp.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/cash_approval_waiting.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/minimze.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/online_qr.dart';
+
+enum _PaymentMethod { cash, cardOrBankTransfer }
+
+class _PaymentMethodOption {
+  final _PaymentMethod method;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  const _PaymentMethodOption({
+    required this.method,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+}
 
 class PaymentMethodScreen extends StatefulWidget {
   final Map<ApiMenuItem, int> orderItems;
@@ -25,6 +43,7 @@ class PaymentMethodScreen extends StatefulWidget {
   final double discount;
   final String? specialInstructions;
   final double totalAmount;
+  final String? sessionId;
 
   const PaymentMethodScreen({
     super.key,
@@ -37,6 +56,7 @@ class PaymentMethodScreen extends StatefulWidget {
     this.discount = 0,
     this.specialInstructions,
     required this.totalAmount,
+    this.sessionId,
   });
 
   @override
@@ -44,94 +64,161 @@ class PaymentMethodScreen extends StatefulWidget {
 }
 
 class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
-  PaymentMethod? _selectedPaymentMethod;
+  _PaymentMethod? _selectedMethod;
   String? _createdOrderId;
+  String _branchId = '';
+  String? _customerEmail;
 
-  // Bank Transfer Form Controllers
-  final _bankReferenceController = TextEditingController();
-  final _accountNumberController = TextEditingController();
-  final _bankNameController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  /// Prefer the sessionId passed from the parent. Falls back to the
+  /// cubit's active session — covers both fresh navigation and resume paths.
+  String? _sessionId;
 
-  @override
-  void dispose() {
-    _bankReferenceController.dispose();
-    _accountNumberController.dispose();
-    _bankNameController.dispose();
-    super.dispose();
-  }
-
-  final List<PaymentMethodOption> _paymentMethods = [
-    PaymentMethodOption(
-      method: PaymentMethod.cash,
+  final List<_PaymentMethodOption> _options = const [
+    _PaymentMethodOption(
+      method: _PaymentMethod.cash,
       title: 'Cash',
+      subtitle: 'Requires manager approval before finalizing',
       icon: Icons.account_balance_wallet_outlined,
     ),
-    PaymentMethodOption(
-      method: PaymentMethod.bankTransfer,
-      title: 'Bank Transfer',
-      icon: Icons.account_balance,
+    _PaymentMethodOption(
+      method: _PaymentMethod.cardOrBankTransfer,
+      title: 'Card / Bank Transfer',
+      subtitle: 'Pay via Paystack — scan QR or link',
+      icon: Icons.credit_card_rounded,
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBranchId();
+    _sessionId =
+        widget.sessionId ??
+        context.read<OrderSessionCubit>().state.activeSession?.sessionId;
+    _restorePaymentState();
+  }
+
+  Future<void> _loadBranchId() async {
+    _branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+  }
+
+  void _restorePaymentState() {
+    final session = context.read<OrderSessionCubit>().state.activeSession;
+    if (session == null) return;
+
+    final saved = session.paymentState;
+
+    if (saved.method != PaymentMethod.none) {
+      setState(() {
+        _selectedMethod = saved.method == PaymentMethod.cash
+            ? _PaymentMethod.cash
+            : _PaymentMethod.cardOrBankTransfer;
+        _createdOrderId = saved.createdOrderId;
+      });
+
+      if (saved.onlinePaymentInitData != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final cubit = context.read<OrderSessionCubit>();
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => BlocProvider.value(
+                value: cubit,
+                child: OnlinePaymentQrScreen(
+                  initData: saved.onlinePaymentInitData!,
+                  orderType: widget.orderType,
+                  tableNumber: widget.tableNumber,
+                  customerName: widget.customerName ?? 'Guest',
+                  sessionId: _sessionId,
+                ),
+              ),
+            ),
+          );
+        });
+      } else if (saved.cashTransaction != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final cubit = context.read<OrderSessionCubit>();
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => BlocProvider.value(
+                value: cubit,
+                child: CashApprovalWaitingScreen(
+                  transaction: saved.cashTransaction!,
+                  branchId: _branchId,
+                  orderType: widget.orderType,
+                  tableNumber: widget.tableNumber,
+                  sessionId: _sessionId,
+                ),
+              ),
+            ),
+          );
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        // Listen to POS Order creation
         BlocListener<PosOrderBloc, PosOrderState>(
           listener: (context, state) {
             if (state is PosOrderCreated) {
-              // Order created successfully, save order ID and proceed to payment
-              setState(() {
-                _createdOrderId = state.order.orderId;
-              });
+              setState(() => _createdOrderId = state.order.orderId);
+              context.read<OrderSessionCubit>().markOrderCreated(
+                state.order.orderId,
+              );
               _processPayment();
             } else if (state is PosOrderError) {
-              // Close loading dialog if showing
-              if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-              }
-              // Show error
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.error),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 4),
-                ),
-              );
+              _dismissLoading();
+              context.read<OrderSessionCubit>().markPaymentError(state.error);
+              _showSnack(state.error, Colors.red);
             }
           },
         ),
-        // Listen to Payment processing
         BlocListener<PaymentBloc, PaymentState>(
           listener: (context, state) {
-            if (state is PaymentSuccess) {
-              // Close loading dialog
-              Navigator.of(context).pop();
-              // Navigate to receipt screen
+            final cubit = context.read<OrderSessionCubit>();
+
+            if (state is CashPaymentPendingApproval) {
+              cubit.markCashPendingApproval(transaction: state.transaction);
+              _dismissLoading();
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
-                  builder: (context) => ReceiptScreen(
-                    paymentResponse: state.paymentResponse,
-                    orderType: widget.orderType,
-                    tableNumber: widget.tableNumber,
+                  builder: (_) => BlocProvider.value(
+                    value: cubit,
+                    child: CashApprovalWaitingScreen(
+                      transaction: state.transaction,
+                      branchId: _branchId,
+                      orderType: widget.orderType,
+                      tableNumber: widget.tableNumber,
+                      sessionId: _sessionId,
+                    ),
+                  ),
+                ),
+              );
+            } else if (state is OnlinePaymentInitialized) {
+              cubit.markOnlinePaymentInitialized(initData: state.initData);
+              _dismissLoading();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: cubit,
+                    child: OnlinePaymentQrScreen(
+                      initData: state.initData,
+                      orderType: widget.orderType,
+                      tableNumber: widget.tableNumber,
+                      customerName: widget.customerName ?? 'Guest',
+                      sessionId: _sessionId,
+                    ),
                   ),
                 ),
               );
             } else if (state is PaymentError) {
-              // Close loading dialog if showing
-              if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-              }
-              // Show error
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.error),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 4),
-                ),
-              );
+              cubit.markPaymentError(state.error);
+              _dismissLoading();
+              _showSnack(state.error, Colors.red);
             }
           },
         ),
@@ -156,9 +243,16 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               ),
             ),
             centerTitle: true,
+            actions: [
+              MinimizeButton(
+                sessionId: _sessionId,
+                screen: MinimizedScreen.paymentMethod,
+              ),
+            ],
           ),
           body: LayoutBuilder(
             builder: (context, constraints) {
+              final w = constraints.maxWidth;
               return Column(
                 children: [
                   Expanded(
@@ -166,16 +260,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildHeader(constraints.maxWidth),
-                          _buildPaymentOptions(constraints.maxWidth),
-                          if (_selectedPaymentMethod ==
-                              PaymentMethod.bankTransfer)
-                            _buildBankTransferForm(constraints.maxWidth),
+                          _buildHeader(w),
+                          _buildOptions(w),
+                          const SizedBox(height: 32),
                         ],
                       ),
                     ),
                   ),
-                  _buildBottomActions(constraints.maxWidth),
+                  _buildBottomBar(w),
                 ],
               );
             },
@@ -185,34 +277,32 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
-  Widget _buildHeader(double screenWidth) {
-    final horizontalPadding = _getHorizontalPadding(screenWidth);
-    final headerTextSize = _getHeaderTextSize(screenWidth);
-
+  Widget _buildHeader(double w) {
     return Container(
       color: Colors.white,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: 20,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: _hp(w), vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Choose a Payment Method',
+            'Choose Payment Method',
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: headerTextSize,
+              fontSize: w < 360
+                  ? 15
+                  : w < 600
+                  ? 16
+                  : 17,
               fontWeight: FontWeight.w600,
               color: kprimaryTextColor1,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
-            'Total Amount: ₦${widget.totalAmount.toStringAsFixed(2)}',
+            'Total: ₦${widget.totalAmount.toStringAsFixed(2)}',
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
               color: kPrimary,
             ),
           ),
@@ -221,21 +311,15 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
-  Widget _buildPaymentOptions(double screenWidth) {
-    final horizontalPadding = _getHorizontalPadding(screenWidth);
-    final verticalSpacing = _getVerticalSpacing(screenWidth);
-
+  Widget _buildOptions(double w) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: verticalSpacing * 1.5,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: _hp(w), vertical: 20),
       child: Column(
-        children: _paymentMethods
+        children: _options
             .map(
-              (option) => Padding(
-                padding: EdgeInsets.only(bottom: verticalSpacing),
-                child: _buildPaymentMethodCard(option, screenWidth),
+              (opt) => Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _buildOptionCard(opt, w),
               ),
             )
             .toList(),
@@ -243,85 +327,84 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
-  Widget _buildPaymentMethodCard(
-    PaymentMethodOption option,
-    double screenWidth,
-  ) {
-    final isSelected = _selectedPaymentMethod == option.method;
-    final textSize = _getBodyTextSize(screenWidth);
-    final iconSize = _getIconSize(screenWidth);
-
+  Widget _buildOptionCard(_PaymentMethodOption opt, double w) {
+    final selected = _selectedMethod == opt.method;
     return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedPaymentMethod = option.method;
-          // Clear bank transfer form when switching payment methods
-          if (option.method != PaymentMethod.bankTransfer) {
-            _bankReferenceController.clear();
-            _accountNumberController.clear();
-            _bankNameController.clear();
-          }
-        });
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: EdgeInsets.all(_getCardPadding(screenWidth)),
+      onTap: () => setState(() => _selectedMethod = opt.method),
+      borderRadius: BorderRadius.circular(14),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.all(_cp(w)),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? kPrimary : Colors.transparent,
+            color: selected ? kPrimary : Colors.transparent,
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: selected
+                  ? kPrimary.withOpacity(0.08)
+                  : Colors.black.withOpacity(0.04),
+              blurRadius: selected ? 12 : 8,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Row(
           children: [
-            // Icon container
             Container(
-              padding: EdgeInsets.all(_getIconPadding(screenWidth)),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: kPrimary,
+                color: selected ? kPrimary : kPrimary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(option.icon, color: Colors.white, size: iconSize),
-            ),
-            SizedBox(width: _getIconTextSpacing(screenWidth)),
-            // Title
-            Expanded(
-              child: Text(
-                option.title,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: textSize,
-                  fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
-                ),
+              child: Icon(
+                opt.icon,
+                color: selected ? Colors.white : kPrimary,
+                size: w < 360 ? 22 : 24,
               ),
             ),
-            // Selection indicator
-            Container(
-              width: _getRadioSize(screenWidth),
-              height: _getRadioSize(screenWidth),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    opt.title,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: w < 360 ? 14 : 15,
+                      fontWeight: FontWeight.w600,
+                      color: kprimaryTextColor1,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    opt.subtitle,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: w < 360 ? 11 : 12,
+                      color: kprimaryTextColor2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 22,
+              height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? kPrimary : Colors.grey[400]!,
+                  color: selected ? kPrimary : Colors.grey[350]!,
                   width: 2,
                 ),
-                color: isSelected ? kPrimary : Colors.transparent,
+                color: selected ? kPrimary : Colors.transparent,
               ),
-              child: isSelected
-                  ? Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: _getRadioSize(screenWidth) * 0.6,
-                    )
+              child: selected
+                  ? const Icon(Icons.check, color: Colors.white, size: 13)
                   : null,
             ),
           ],
@@ -330,166 +413,9 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
-  Widget _buildBankTransferForm(double screenWidth) {
-    final horizontalPadding = _getHorizontalPadding(screenWidth);
-    final verticalSpacing = _getVerticalSpacing(screenWidth);
-
+  Widget _buildBottomBar(double w) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
-      padding: EdgeInsets.all(_getCardPadding(screenWidth)),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bank Transfer Details',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: _getBodyTextSize(screenWidth),
-                fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
-              ),
-            ),
-            SizedBox(height: verticalSpacing),
-
-            // Bank Reference
-            TextFormField(
-              controller: _bankReferenceController,
-              decoration: InputDecoration(
-                labelText: 'Bank Reference *',
-                labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: kprimaryTextColor2,
-                ),
-                hintText: 'e.g., TRF123456789',
-                hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: Colors.grey[400],
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: kPrimary, width: 2),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.red),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Bank reference is required';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: verticalSpacing),
-
-            // Account Number (optional)
-            TextFormField(
-              controller: _accountNumberController,
-              decoration: InputDecoration(
-                labelText: 'Sender Account Number (Optional)',
-                labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: kprimaryTextColor2,
-                ),
-                hintText: 'e.g., 1234567890',
-                hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: Colors.grey[400],
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: kPrimary, width: 2),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: verticalSpacing),
-
-            // Bank Name (optional)
-            TextFormField(
-              controller: _bankNameController,
-              decoration: InputDecoration(
-                labelText: 'Sender Bank (Optional)',
-                labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: kprimaryTextColor2,
-                ),
-                hintText: 'e.g., GTBank',
-                hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: Colors.grey[400],
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: kPrimary, width: 2),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomActions(double screenWidth) {
-    final horizontalPadding = _getHorizontalPadding(screenWidth);
-    final buttonTextSize = _getButtonTextSize(screenWidth);
-    final buttonPadding = _getButtonVerticalPadding(screenWidth);
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: 16,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: _hp(w), vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -503,15 +429,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       child: SafeArea(
         child: Row(
           children: [
-            // Cancel button
             Expanded(
               child: OutlinedButton(
-                onPressed: () => _handleCancel(),
+                onPressed: () => Navigator.of(context).pop(),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.grey[700],
                   side: BorderSide(color: Colors.grey[300]!),
                   backgroundColor: Colors.grey[100],
-                  padding: EdgeInsets.symmetric(vertical: buttonPadding),
+                  padding: EdgeInsets.symmetric(vertical: w < 360 ? 13 : 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -519,7 +444,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 child: Text(
                   'Cancel',
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: buttonTextSize,
+                    fontSize: w < 360 ? 14 : 15,
                     fontWeight: FontWeight.w600,
                     color: Colors.grey[700],
                   ),
@@ -527,19 +452,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            // Process payment button
             Expanded(
               flex: 2,
               child: ElevatedButton(
-                onPressed: _selectedPaymentMethod != null
-                    ? () => _handleProcessOrder()
-                    : null,
+                onPressed: _selectedMethod != null ? _handleProcessOrder : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kPrimary,
-                  foregroundColor: Colors.white,
                   disabledBackgroundColor: Colors.grey[300],
-                  disabledForegroundColor: Colors.grey[500],
-                  padding: EdgeInsets.symmetric(vertical: buttonPadding),
+                  padding: EdgeInsets.symmetric(vertical: w < 360 ? 13 : 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -548,9 +468,11 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 child: Text(
                   'Process Order',
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: buttonTextSize,
+                    fontSize: w < 360 ? 14 : 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: _selectedMethod != null
+                        ? Colors.white
+                        : Colors.grey[500],
                   ),
                 ),
               ),
@@ -561,70 +483,136 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
-  void _handleCancel() {
-    Navigator.of(context).pop();
+  void _handleProcessOrder() {
+    if (_selectedMethod == null) return;
+    if (_selectedMethod == _PaymentMethod.cardOrBankTransfer) {
+      // _showEmailDialog();
+      _createOrderAndPay();
+    } else {
+      _createOrderAndPay();
+    }
   }
 
-  void _handleProcessOrder() {
-    if (_selectedPaymentMethod == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a payment method'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return;
-    }
+  void _showEmailDialog() {
+    final emailController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
 
-    // Validate bank transfer form if selected
-    if (_selectedPaymentMethod == PaymentMethod.bankTransfer) {
-      if (_formKey.currentState?.validate() != true) {
-        return;
-      }
-    }
-
-    // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Center(
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(color: kPrimary),
-                const SizedBox(height: 16),
-                Text(
-                  'Creating order...',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Customer Email',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: kprimaryTextColor1,
           ),
         ),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'An email address is required for card/bank transfer payments.',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 13,
+                  color: kprimaryTextColor2,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Email Address',
+                  hintText: 'customer@example.com',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: kPrimary, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Email is required';
+                  }
+                  final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                  if (!emailRegex.hasMatch(v.trim())) {
+                    return 'Enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              'Cancel',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: kprimaryTextColor2,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (formKey.currentState?.validate() == true) {
+                _customerEmail = emailController.text.trim();
+                Navigator.of(ctx).pop();
+                _createOrderAndPay();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Continue',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
 
-    // Create order first
-    final orderItemsPayload = widget.orderItems.entries.map((entry) {
-      final item = entry.key;
-      final quantity = entry.value;
+  void _createOrderAndPay() {
+    _showLoading('Creating order…');
 
+    context.read<OrderSessionCubit>().markPaymentStarted(
+      method: _selectedMethod == _PaymentMethod.cash
+          ? PaymentMethod.cash
+          : PaymentMethod.cardOrBankTransfer,
+    );
+
+    final items = widget.orderItems.entries.map((e) {
       return PosOrderItemPayload(
-        menuItemId: item.id,
-        quantity: quantity,
-        specialRequest: widget.specialRequests[item.id],
+        menuItemId: e.key.id,
+        quantity: e.value,
+        specialRequest: widget.specialRequests[e.key.id],
       );
     }).toList();
 
@@ -634,7 +622,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         tableNumber: widget.tableNumber,
         customerName: widget.customerName,
         customerPhone: widget.customerPhone,
-        items: orderItemsPayload,
+        items: items,
         discount: widget.discount,
         specialInstructions: widget.specialInstructions,
       ),
@@ -642,22 +630,55 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   }
 
   Future<void> _processPayment() async {
-    // Update loading dialog
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
+    _dismissLoading();
+    _showLoading('Processing payment…');
+
+    if (_branchId.isEmpty) {
+      _branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
     }
 
+    if (_selectedMethod == _PaymentMethod.cash) {
+      context.read<PaymentBloc>().add(
+        RecordCashPayment(
+          request: CashPaymentRequest(
+            amount: widget.totalAmount,
+            customerName: widget.customerName ?? 'Guest',
+            branchId: _branchId,
+            customerPhone: widget.customerPhone,
+            orderId: _createdOrderId,
+            description: 'Cash payment for Order #$_createdOrderId',
+          ),
+        ),
+      );
+    } else {
+      context.read<PaymentBloc>().add(
+        InitializeOnlinePayment(
+          request: OnlinePaymentRequest(
+            amount: widget.totalAmount,
+            customerName: widget.customerName ?? 'Guest',
+            email: _customerEmail ?? 'customer@gmail.com',
+            branchId: _branchId,
+            customerPhone: widget.customerPhone,
+            orderId: _createdOrderId,
+            description: 'Payment for Order #$_createdOrderId',
+          ),
+        ),
+      );
+    }
+  }
+
+  void _showLoading(String message) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Center(
+      builder: (_) => Center(
         child: Material(
           color: Colors.transparent,
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -665,9 +686,9 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 const CircularProgressIndicator(color: kPrimary),
                 const SizedBox(height: 16),
                 Text(
-                  'Processing payment...',
+                  message,
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -677,133 +698,35 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         ),
       ),
     );
-
-    final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
-
-    if (_selectedPaymentMethod == PaymentMethod.cash) {
-      final request = CashPaymentRequest(
-        amount: widget.totalAmount,
-        customerName: widget.customerName ?? 'Guest',
-        branchId: branchId,
-        customerPhone: widget.customerPhone,
-        orderId: _createdOrderId,
-        description: 'Cash payment for Order #$_createdOrderId',
-      );
-
-      context.read<PaymentBloc>().add(ProcessCashPayment(request: request));
-    } else if (_selectedPaymentMethod == PaymentMethod.bankTransfer) {
-      final request = BankTransferPaymentRequest(
-        amount: widget.totalAmount,
-        customerName: widget.customerName ?? 'Guest',
-        branchId: branchId,
-        bankReference: _bankReferenceController.text.trim(),
-        senderAccountNumber: _accountNumberController.text.trim().isNotEmpty
-            ? _accountNumberController.text.trim()
-            : null,
-        senderBank: _bankNameController.text.trim().isNotEmpty
-            ? _bankNameController.text.trim()
-            : null,
-        customerPhone: widget.customerPhone,
-        orderId: _createdOrderId,
-        description: 'Bank transfer for Order #$_createdOrderId',
-      );
-
-      context.read<PaymentBloc>().add(
-        ProcessBankTransferPayment(request: request),
-      );
-    }
   }
 
-  // Responsive sizing functions
-  double _getHorizontalPadding(double width) {
-    if (width < 360) return 16;
-    if (width < 600) return 20;
-    if (width < 900) return 24;
+  void _dismissLoading() {
+    if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+  }
+
+  void _showSnack(String msg, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg, style: WorkSansAppTextStyles.medium),
+        backgroundColor: color,
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  double _hp(double w) {
+    if (w < 360) return 16;
+    if (w < 600) return 20;
+    if (w < 900) return 24;
     return 32;
   }
 
-  double _getVerticalSpacing(double width) {
-    if (width < 360) return 12;
-    if (width < 600) return 14;
-    if (width < 900) return 16;
-    return 18;
-  }
-
-  double _getCardPadding(double width) {
-    if (width < 360) return 14;
-    if (width < 600) return 16;
-    if (width < 900) return 18;
+  double _cp(double w) {
+    if (w < 360) return 14;
+    if (w < 600) return 16;
+    if (w < 900) return 18;
     return 20;
   }
-
-  double _getIconPadding(double width) {
-    if (width < 360) return 10;
-    if (width < 600) return 12;
-    if (width < 900) return 14;
-    return 16;
-  }
-
-  double _getHeaderTextSize(double width) {
-    if (width < 360) return 16;
-    if (width < 600) return 17;
-    if (width < 900) return 18;
-    return 19;
-  }
-
-  double _getBodyTextSize(double width) {
-    if (width < 360) return 15;
-    if (width < 600) return 16;
-    if (width < 900) return 17;
-    return 18;
-  }
-
-  double _getIconSize(double width) {
-    if (width < 360) return 22;
-    if (width < 600) return 24;
-    if (width < 900) return 26;
-    return 28;
-  }
-
-  double _getRadioSize(double width) {
-    if (width < 360) return 22;
-    if (width < 600) return 24;
-    if (width < 900) return 26;
-    return 28;
-  }
-
-  double _getIconTextSpacing(double width) {
-    if (width < 360) return 14;
-    if (width < 600) return 16;
-    if (width < 900) return 18;
-    return 20;
-  }
-
-  double _getButtonTextSize(double width) {
-    if (width < 360) return 14;
-    if (width < 600) return 15;
-    if (width < 900) return 16;
-    return 17;
-  }
-
-  double _getButtonVerticalPadding(double width) {
-    if (width < 360) return 14;
-    if (width < 600) return 16;
-    if (width < 900) return 18;
-    return 20;
-  }
-}
-
-// Data models
-enum PaymentMethod { cash, card, bankTransfer, digitalWallet }
-
-class PaymentMethodOption {
-  final PaymentMethod method;
-  final String title;
-  final IconData icon;
-
-  PaymentMethodOption({
-    required this.method,
-    required this.title,
-    required this.icon,
-  });
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
@@ -36,10 +37,10 @@ class ProcessingTransferRepository extends BaseRepository
         throw FormatException('Request ID is required');
       }
 
-      print('=== COMPLETE STOCK REQUEST ===');
-      print('Request ID: $requestId');
-      print('Endpoint: /stock-requests/$requestId/complete');
-      print('==============================');
+      AppLogger.log('=== COMPLETE STOCK REQUEST ===');
+      AppLogger.log('Request ID: $requestId');
+      AppLogger.log('Endpoint: /stock-requests/$requestId/complete');
+      AppLogger.log('==============================');
 
       final response = await _apiClient
           .patch('/stock-requests/$requestId/complete')
@@ -50,43 +51,43 @@ class ProcessingTransferRepository extends BaseRepository
             },
           );
 
-      print('=== COMPLETE REQUEST RESPONSE ===');
-      print('Response type: ${response.runtimeType}');
-      print('=================================');
+      AppLogger.log('=== COMPLETE REQUEST RESPONSE ===');
+      AppLogger.log('Response type: ${response.runtimeType}');
+      AppLogger.log('=================================');
 
       return response.when(
         success: (data) {
           try {
             return ApiResponse.success(data as Map<String, dynamic>);
           } catch (e, stackTrace) {
-            print('Error parsing response: $e');
-            print('Stack trace: $stackTrace');
+            AppLogger.log('Error parsing response: $e');
+            AppLogger.log('Stack trace: $stackTrace');
             return ApiResponse.errorMessage(
               'Failed to parse server response: $e',
             );
           }
         },
         error: (error) {
-          print('Error response: $error');
+          AppLogger.log('Error response: $error');
           return ApiResponse.errorMessage(_parseErrorMessage(error.toString()));
         },
       );
     } on SocketException catch (e) {
-      print('SocketException: $e');
+      AppLogger.log('SocketException: $e');
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
     } on TimeoutException catch (e) {
-      print('TimeoutException: $e');
+      AppLogger.log('TimeoutException: $e');
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
     } on FormatException catch (e) {
-      print('FormatException: $e');
+      AppLogger.log('FormatException: $e');
       return ApiResponse.errorMessage('Invalid data format. ${e.message}');
     } catch (e, stackTrace) {
-      print('General Exception: $e');
-      print('Stack trace: $stackTrace');
+      AppLogger.log('General Exception: $e');
+      AppLogger.log('Stack trace: $stackTrace');
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
   }
@@ -118,11 +119,13 @@ class ProcessingTransferRepository extends BaseRepository
         }
       }
 
-      print('=== RECEIVE TRANSFER REQUEST ===');
-      print('Transfer ID: $transferId');
-      print('Endpoint: kitchen/processing-transfers/$transferId/receive');
-      print('Request Data: ${request.toJson()}');
-      print('===============================');
+      AppLogger.log('=== RECEIVE TRANSFER REQUEST ===');
+      AppLogger.log('Transfer ID: $transferId');
+      AppLogger.log(
+        'Endpoint: kitchen/processing-transfers/$transferId/receive',
+      );
+      AppLogger.log('Request Data: ${request.toJson()}');
+      AppLogger.log('===============================');
 
       final response = await _apiClient
           .patch(
@@ -136,9 +139,9 @@ class ProcessingTransferRepository extends BaseRepository
             },
           );
 
-      print('=== RECEIVE TRANSFER RESPONSE ===');
-      print('Response type: ${response.runtimeType}');
-      print('=================================');
+      AppLogger.log('=== RECEIVE TRANSFER RESPONSE ===');
+      AppLogger.log('Response type: ${response.runtimeType}');
+      AppLogger.log('=================================');
 
       return response.when(
         success: (data) {
@@ -148,15 +151,15 @@ class ProcessingTransferRepository extends BaseRepository
             );
             return ApiResponse.success(transferResponse);
           } catch (e, stackTrace) {
-            print('Error parsing response: $e');
-            print('Stack trace: $stackTrace');
+            AppLogger.log('Error parsing response: $e');
+            AppLogger.log('Stack trace: $stackTrace');
             return ApiResponse.errorMessage(
               'Failed to parse server response: $e',
             );
           }
         },
         error: (error) {
-          print('Error response: $error');
+          AppLogger.log('Error response: $error');
           return ApiResponse.errorMessage(_parseErrorMessage(error.toString()));
         },
       );
@@ -166,21 +169,21 @@ class ProcessingTransferRepository extends BaseRepository
         (json) => ProcessingTransferResponse.fromJson(json),
       );
     } on SocketException catch (e) {
-      print('SocketException: $e');
+      AppLogger.log('SocketException: $e');
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
     } on TimeoutException catch (e) {
-      print('TimeoutException: $e');
+      AppLogger.log('TimeoutException: $e');
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
     } on FormatException catch (e) {
-      print('FormatException: $e');
+      AppLogger.log('FormatException: $e');
       return ApiResponse.errorMessage('Invalid data format. ${e.message}');
     } catch (e, stackTrace) {
-      print('General Exception: $e');
-      print('Stack trace: $stackTrace');
+      AppLogger.log('General Exception: $e');
+      AppLogger.log('Stack trace: $stackTrace');
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
   }
@@ -192,10 +195,10 @@ class ProcessingTransferRepository extends BaseRepository
     try {
       _validateTransferRequest(request);
 
-      print('=== API REQUEST ===');
-      print('Endpoint: kitchen/processing-transfers');
-      print('Request Data: ${request.toJson()}');
-      print('==================');
+      AppLogger.log('=== API REQUEST ===');
+      AppLogger.log('Endpoint: kitchen/processing-transfers');
+      AppLogger.log('Request Data: ${request.toJson()}');
+      AppLogger.log('==================');
 
       final response = await _apiClient
           .post('kitchen/processing-transfers', data: request.toJson())
@@ -206,17 +209,17 @@ class ProcessingTransferRepository extends BaseRepository
             },
           );
 
-      print('=== API RESPONSE ===');
-      print('Response: $response');
-      print('Response type: ${response.runtimeType}');
-      print('===================');
+      AppLogger.log('=== API RESPONSE ===');
+      AppLogger.log('Response: $response');
+      AppLogger.log('Response type: ${response.runtimeType}');
+      AppLogger.log('===================');
 
       // Check if response is already an ApiResponse
-      print('=== RESPONSE IS ApiResponse ===');
+      AppLogger.log('=== RESPONSE IS ApiResponse ===');
       return response.when(
         success: (data) {
-          print('Success data: $data');
-          print('Data type: ${data.runtimeType}');
+          AppLogger.log('Success data: $data');
+          AppLogger.log('Data type: ${data.runtimeType}');
 
           try {
             // Parse the data into ProcessingTransferResponse
@@ -225,18 +228,18 @@ class ProcessingTransferRepository extends BaseRepository
             );
             return ApiResponse.success(transferResponse);
           } catch (e, stackTrace) {
-            print('Error parsing response: $e');
-            print('Stack trace: $stackTrace');
+            AppLogger.log('Error parsing response: $e');
+            AppLogger.log('Stack trace: $stackTrace');
             return ApiResponse.errorMessage(
               'Failed to parse server response: $e',
             );
           }
         },
         error: (error) {
-          print('=== ERROR RESPONSE ===');
-          print('Error: $error');
-          print('Error type: ${error.runtimeType}');
-          print('=====================');
+          AppLogger.log('=== ERROR RESPONSE ===');
+          AppLogger.log('Error: $error');
+          AppLogger.log('Error type: ${error.runtimeType}');
+          AppLogger.log('=====================');
 
           // Extract meaningful error message
           String errorMessage = error.toString();
@@ -254,7 +257,7 @@ class ProcessingTransferRepository extends BaseRepository
               // Check for specific status codes
               if (errorMap.containsKey('statusCode')) {
                 final statusCode = errorMap['statusCode'];
-                print('Status Code: $statusCode');
+                AppLogger.log('Status Code: $statusCode');
 
                 if (statusCode == 500) {
                   errorMessage =
@@ -263,7 +266,7 @@ class ProcessingTransferRepository extends BaseRepository
               }
             }
           } catch (e) {
-            print('Could not parse error details: $e');
+            AppLogger.log('Could not parse error details: $e');
           }
 
           return ApiResponse.errorMessage(_parseErrorMessage(errorMessage));
@@ -271,27 +274,27 @@ class ProcessingTransferRepository extends BaseRepository
       );
 
       // If response is raw data (Map), wrap it
-      print('=== RESPONSE IS RAW DATA ===');
+      AppLogger.log('=== RESPONSE IS RAW DATA ===');
       return handleObjectResponse(
         Future.value(response),
         (json) => ProcessingTransferResponse.fromJson(json),
       );
     } on SocketException catch (e) {
-      print('SocketException: $e');
+      AppLogger.log('SocketException: $e');
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
     } on TimeoutException catch (e) {
-      print('TimeoutException: $e');
+      AppLogger.log('TimeoutException: $e');
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
     } on FormatException catch (e) {
-      print('FormatException: $e');
+      AppLogger.log('FormatException: $e');
       return ApiResponse.errorMessage('Invalid data format. ${e.message}');
     } catch (e, stackTrace) {
-      print('General Exception: $e');
-      print('Stack trace: $stackTrace');
+      AppLogger.log('General Exception: $e');
+      AppLogger.log('Stack trace: $stackTrace');
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
   }
@@ -309,9 +312,9 @@ class ProcessingTransferRepository extends BaseRepository
         if (status != null && status.isNotEmpty) 'status': status,
       };
 
-      print('=== GET TRANSFERS REQUEST ===');
-      print('Query params: $queryParams');
-      print('============================');
+      AppLogger.log('=== GET TRANSFERS REQUEST ===');
+      AppLogger.log('Query params: $queryParams');
+      AppLogger.log('============================');
 
       final response = await _apiClient
           .get('kitchen/processing-transfers', queryParameters: queryParams)
@@ -322,9 +325,9 @@ class ProcessingTransferRepository extends BaseRepository
             },
           );
 
-      print('=== GET TRANSFERS RESPONSE ===');
-      print('Response type: ${response.runtimeType}');
-      print('=============================');
+      AppLogger.log('=== GET TRANSFERS RESPONSE ===');
+      AppLogger.log('Response type: ${response.runtimeType}');
+      AppLogger.log('=============================');
 
       // Check if response is already an ApiResponse
       return response.when(
@@ -340,8 +343,8 @@ class ProcessingTransferRepository extends BaseRepository
                 .toList();
             return ApiResponse.success(transfers);
           } catch (e, stackTrace) {
-            print('Error parsing list response: $e');
-            print('Stack trace: $stackTrace');
+            AppLogger.log('Error parsing list response: $e');
+            AppLogger.log('Stack trace: $stackTrace');
             return ApiResponse.errorMessage(
               'Failed to parse server response: $e',
             );
@@ -358,21 +361,21 @@ class ProcessingTransferRepository extends BaseRepository
         (json) => ProcessingTransferResponse.fromJson(json),
       );
     } on SocketException catch (e) {
-      print('SocketException: $e');
+      AppLogger.log('SocketException: $e');
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
     } on TimeoutException catch (e) {
-      print('TimeoutException: $e');
+      AppLogger.log('TimeoutException: $e');
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
     } on FormatException catch (e) {
-      print('FormatException: $e');
+      AppLogger.log('FormatException: $e');
       return ApiResponse.errorMessage('Invalid response format. ${e.message}');
     } catch (e, stackTrace) {
-      print('General Exception: $e');
-      print('Stack trace: $stackTrace');
+      AppLogger.log('General Exception: $e');
+      AppLogger.log('Stack trace: $stackTrace');
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
   }

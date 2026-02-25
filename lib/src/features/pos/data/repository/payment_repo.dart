@@ -6,13 +6,20 @@ import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/payment_model.dart';
 
 abstract class PaymentRepositoryInterface {
-  Future<ApiResponse<PaymentResponseModel>> processCashPayment({
+  Future<ApiResponse<CashRecordResponseModel>> recordCashPayment({
     required CashPaymentRequest request,
   });
 
-  Future<ApiResponse<PaymentResponseModel>> processBankTransferPayment({
-    required BankTransferPaymentRequest request,
+  Future<ApiResponse<PendingCashListResponseModel>> getPendingCashTransactions({
+    required String branchId,
   });
+
+  Future<ApiResponse<OnlinePaymentInitResponseModel>> initializeOnlinePayment({
+    required OnlinePaymentRequest request,
+  });
+
+  Future<ApiResponse<OnlinePaymentStatusResponseModel>>
+  checkOnlinePaymentStatus({required String reference});
 }
 
 class PaymentRepository extends BaseRepository
@@ -20,16 +27,14 @@ class PaymentRepository extends BaseRepository
   final ApiClient _apiClient = ApiClient.instance;
 
   @override
-  Future<ApiResponse<PaymentResponseModel>> processCashPayment({
+  Future<ApiResponse<CashRecordResponseModel>> recordCashPayment({
     required CashPaymentRequest request,
   }) async {
     try {
-      // Validate required fields
-      _validateCashPaymentRequest(request);
+      _validateCashRequest(request);
 
-      // Make API request
       final response = await _apiClient
-          .post('payments/customer/cash', data: request.toJson())
+          .post('payments/cash/record', data: request.toJson())
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -37,39 +42,71 @@ class PaymentRepository extends BaseRepository
             },
           );
 
-      // Parse response
       if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to process cash payment');
+        return ApiResponse.errorMessage('Failed to record cash payment');
       }
 
-      final paymentResponse = PaymentResponseModel.fromJson(response.data);
-      return ApiResponse.success(paymentResponse);
-    } on SocketException catch (e) {
+      return ApiResponse.success(
+        CashRecordResponseModel.fromJson(response.data),
+      );
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
     } on FormatException catch (e) {
       return ApiResponse.errorMessage(e.message);
     } catch (e) {
-      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+      return ApiResponse.errorMessage(_parseError(e.toString()));
     }
   }
 
   @override
-  Future<ApiResponse<PaymentResponseModel>> processBankTransferPayment({
-    required BankTransferPaymentRequest request,
+  Future<ApiResponse<PendingCashListResponseModel>> getPendingCashTransactions({
+    required String branchId,
   }) async {
     try {
-      // Validate required fields
-      _validateBankTransferRequest(request);
-
-      // Make API request
       final response = await _apiClient
-          .post('payments/customer/transfer', data: request.toJson())
+          .get('payments/cash/pending', queryParameters: {'branchId': branchId})
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      if (response.data == null) {
+        return ApiResponse.errorMessage('Failed to fetch pending transactions');
+      }
+
+      return ApiResponse.success(
+        PendingCashListResponseModel.fromJson(response.data),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseError(e.toString()));
+    }
+  }
+
+  @override
+  Future<ApiResponse<OnlinePaymentInitResponseModel>> initializeOnlinePayment({
+    required OnlinePaymentRequest request,
+  }) async {
+    try {
+      _validateOnlineRequest(request);
+
+      final response = await _apiClient
+          .post('payments/initialize', data: request.toJson())
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -77,30 +114,62 @@ class PaymentRepository extends BaseRepository
             },
           );
 
-      // Parse response
       if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to process bank transfer');
+        return ApiResponse.errorMessage('Failed to initialize payment');
       }
 
-      final paymentResponse = PaymentResponseModel.fromJson(response.data);
-      return ApiResponse.success(paymentResponse);
-    } on SocketException catch (e) {
+      return ApiResponse.success(
+        OnlinePaymentInitResponseModel.fromJson(response.data),
+      );
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
     } on FormatException catch (e) {
       return ApiResponse.errorMessage(e.message);
     } catch (e) {
-      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+      return ApiResponse.errorMessage(_parseError(e.toString()));
     }
   }
 
-  // Validation methods
-  void _validateCashPaymentRequest(CashPaymentRequest request) {
+  @override
+  Future<ApiResponse<OnlinePaymentStatusResponseModel>>
+  checkOnlinePaymentStatus({required String reference}) async {
+    try {
+      final response = await _apiClient
+          .get('payments/status/$reference')
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      if (response.data == null) {
+        return ApiResponse.errorMessage('Failed to check payment status');
+      }
+
+      return ApiResponse.success(
+        OnlinePaymentStatusResponseModel.fromJson(response.data),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseError(e.toString()));
+    }
+  }
+
+  void _validateCashRequest(CashPaymentRequest request) {
     if (request.amount <= 0) {
       throw FormatException('Payment amount must be greater than zero');
     }
@@ -112,7 +181,7 @@ class PaymentRepository extends BaseRepository
     }
   }
 
-  void _validateBankTransferRequest(BankTransferPaymentRequest request) {
+  void _validateOnlineRequest(OnlinePaymentRequest request) {
     if (request.amount <= 0) {
       throw FormatException('Payment amount must be greater than zero');
     }
@@ -122,43 +191,31 @@ class PaymentRepository extends BaseRepository
     if (request.branchId.isEmpty) {
       throw FormatException('Branch ID is required');
     }
-    if (request.bankReference.isEmpty) {
-      throw FormatException('Bank reference is required');
-    }
   }
 
-  // Error message parser
-  String _parseErrorMessage(String error) {
-    final lowercaseError = error.toLowerCase();
-
-    if (lowercaseError.contains('401') ||
-        lowercaseError.contains('unauthorized')) {
+  String _parseError(String error) {
+    final e = error.toLowerCase();
+    if (e.contains('401') || e.contains('unauthorized')) {
       return 'Unauthorized access. Please login again.';
     }
-    if (lowercaseError.contains('403') ||
-        lowercaseError.contains('forbidden')) {
+    if (e.contains('403') || e.contains('forbidden')) {
       return 'Access denied. You do not have permission to process payments.';
     }
-    if (lowercaseError.contains('404') ||
-        lowercaseError.contains('not found')) {
+    if (e.contains('404') || e.contains('not found')) {
       return 'Payment endpoint not found. Please contact support.';
     }
-    if (lowercaseError.contains('400') ||
-        lowercaseError.contains('bad request')) {
+    if (e.contains('400') || e.contains('bad request')) {
       return 'Invalid payment data. Please check your payment details.';
     }
-    if (lowercaseError.contains('500') ||
-        lowercaseError.contains('internal server')) {
+    if (e.contains('500') || e.contains('internal server')) {
       return 'Server error. Please try again later.';
     }
-    if (lowercaseError.contains('network') ||
-        lowercaseError.contains('connection')) {
+    if (e.contains('network') || e.contains('connection')) {
       return 'Network error. Please check your connection.';
     }
-    if (lowercaseError.contains('timeout')) {
+    if (e.contains('timeout')) {
       return 'Request timeout. Please try again.';
     }
-
     return 'An error occurred while processing payment. Please try again.';
   }
 }

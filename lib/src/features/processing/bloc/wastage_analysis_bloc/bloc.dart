@@ -4,6 +4,8 @@ import 'package:sandwich_ai/src/features/processing/bloc/wastage_analysis_bloc/e
 import 'package:sandwich_ai/src/features/processing/bloc/wastage_analysis_bloc/state.dart';
 import 'package:sandwich_ai/src/features/processing/data/repo/wasage_analysis_repo.dart';
 
+import '../../../../core/config/prod_print.dart';
+
 class WastageAnalysisBloc
     extends Bloc<WastageAnalysisEvent, WastageAnalysisState> {
   final WastageAnalysisRepositoryInterface _repository;
@@ -61,7 +63,7 @@ class WastageAnalysisBloc
         },
       );
     } catch (e) {
-      print('Bloc Error: $e');
+      AppLogger.log('Bloc Error: $e');
       emit(
         const WastageAnalysisError(
           error: 'An unexpected error occurred. Please try again.',

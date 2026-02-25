@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_summary_bloc/bloc.dart';
@@ -60,7 +61,7 @@ class _StockControlDashboardBodyScreenState
         body: BlocConsumer<BranchStockSummaryBloc, BranchStockSummaryState>(
           listener: (context, state) {
             if (state is BranchStockSummaryError) {
-              print(state.error);
+              AppLogger.log(state.error);
             }
             if (state is BranchStockSummaryEmpty) {
               Center(

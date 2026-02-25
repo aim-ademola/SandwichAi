@@ -121,12 +121,18 @@ class Branch {
   final String country;
   final String zipCode;
   final String email;
-  final String? openingHours;
+  final Map<String, dynamic>? openingHours; // Changed to Map
   final bool isActive;
-  final String managerId;
+  final String? managerId; // Changed to nullable
   final String organizationId;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? paystackAccountNumber;
+  final String? paystackAccountName;
+  final String? paystackBankName;
+  final String? paystackCustomerCode;
+  final String? paystackDVAId;
+  final DateTime? dvaCreatedAt;
 
   Branch({
     required this.id,
@@ -140,34 +146,104 @@ class Branch {
     required this.email,
     this.openingHours,
     required this.isActive,
-    required this.managerId,
+    this.managerId,
     required this.organizationId,
     required this.createdAt,
     required this.updatedAt,
+    this.paystackAccountNumber,
+    this.paystackAccountName,
+    this.paystackBankName,
+    this.paystackCustomerCode,
+    this.paystackDVAId,
+    this.dvaCreatedAt,
   });
 
   factory Branch.fromJson(Map<String, dynamic> json) {
-    return Branch(
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? '',
-      branchCode: json['branch_code'] as String? ?? '',
-      address: json['address'] as String? ?? '',
-      city: json['city'] as String? ?? '',
-      state: json['state'] as String? ?? '',
-      country: json['country'] as String? ?? '',
-      zipCode: json['zipCode'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      openingHours: json['openingHours'] as String?,
-      isActive: json['isActive'] as bool? ?? true,
-      managerId: json['managerId'] as String? ?? '',
-      organizationId: json['organizationId'] as String? ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : DateTime.now(),
-    );
+    try {
+      return Branch(
+        id: _parseString(json['id']),
+        name: _parseString(json['name']),
+        branchCode: _parseString(json['branch_code'] ?? json['branchCode']),
+        address: _parseString(json['address']),
+        city: _parseString(json['city']),
+        state: _parseString(json['state']),
+        country: _parseString(json['country']),
+        zipCode: _parseString(json['zipCode']),
+        email: _parseString(json['email']),
+        openingHours: json['openingHours'] is Map
+            ? Map<String, dynamic>.from(json['openingHours'])
+            : null,
+        isActive: _parseBool(json['isActive']),
+        managerId: _parseStringOrNull(json['managerId']),
+        organizationId: _parseString(json['organizationId']),
+        createdAt: _parseDateTime(json['createdAt']),
+        updatedAt: _parseDateTime(json['updatedAt']),
+        paystackAccountNumber: _parseStringOrNull(
+          json['paystackAccountNumber'],
+        ),
+        paystackAccountName: _parseStringOrNull(json['paystackAccountName']),
+        paystackBankName: _parseStringOrNull(json['paystackBankName']),
+        paystackCustomerCode: _parseStringOrNull(json['paystackCustomerCode']),
+        paystackDVAId: _parseStringOrNull(json['paystackDVAId']),
+        dvaCreatedAt: _parseDateTimeOrNull(json['dvaCreatedAt']),
+      );
+    } catch (e) {
+      print('Error parsing Branch: $e');
+      print('JSON data: $json');
+      rethrow;
+    }
+  }
+
+  static String _parseString(dynamic value) {
+    if (value == null) return '';
+    if (value is String) return value;
+    if (value is Map) return '';
+    if (value is num) return value.toString();
+    return value.toString();
+  }
+
+  static String? _parseStringOrNull(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value.isEmpty ? null : value;
+    if (value is Map) return null;
+    if (value is num) return value.toString();
+    return value.toString();
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value == null) return false;
+    if (value is bool) return value;
+    if (value is String) {
+      return value.toLowerCase() == 'true' || value == '1';
+    }
+    if (value is num) return value != 0;
+    return false;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return DateTime.now();
+      }
+    }
+    if (value is DateTime) return value;
+    return DateTime.now();
+  }
+
+  static DateTime? _parseDateTimeOrNull(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    if (value is DateTime) return value;
+    return null;
   }
 
   Map<String, dynamic> toJson() {
@@ -187,7 +263,40 @@ class Branch {
       'organizationId': organizationId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'paystackAccountNumber': paystackAccountNumber,
+      'paystackAccountName': paystackAccountName,
+      'paystackBankName': paystackBankName,
+      'paystackCustomerCode': paystackCustomerCode,
+      'paystackDVAId': paystackDVAId,
+      'dvaCreatedAt': dvaCreatedAt?.toIso8601String(),
     };
+  }
+
+  // Helper method to get opening hours for a specific day
+  String? getOpeningTime(String day) {
+    if (openingHours == null) return null;
+    final dayHours = openingHours![day.toLowerCase()];
+    if (dayHours is Map) {
+      return dayHours['open'] as String?;
+    }
+    return null;
+  }
+
+  String? getClosingTime(String day) {
+    if (openingHours == null) return null;
+    final dayHours = openingHours![day.toLowerCase()];
+    if (dayHours is Map) {
+      return dayHours['close'] as String?;
+    }
+    return null;
+  }
+
+  // Get formatted opening hours for display
+  String getFormattedHours(String day) {
+    final open = getOpeningTime(day);
+    final close = getClosingTime(day);
+    if (open == null || close == null) return 'Closed';
+    return '$open - $close';
   }
 }
 
@@ -243,60 +352,6 @@ class Recipe {
   }
 }
 
-class RecipeIngredient {
-  final String id;
-  final String recipeId;
-  final String itemId;
-  final String expectedQuantity;
-  final String unit;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final InventoryItem? item;
-
-  RecipeIngredient({
-    required this.id,
-    required this.recipeId,
-    required this.itemId,
-    required this.expectedQuantity,
-    required this.unit,
-    required this.createdAt,
-    required this.updatedAt,
-    this.item,
-  });
-
-  factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
-    return RecipeIngredient(
-      id: json['id'] as String? ?? '',
-      recipeId: json['recipeId'] as String? ?? '',
-      itemId: json['itemId'] as String? ?? '',
-      expectedQuantity: json['expectedQuantity'] as String? ?? '0',
-      unit: json['unit'] as String? ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : DateTime.now(),
-      item: json['item'] != null
-          ? InventoryItem.fromJson(json['item'] as Map<String, dynamic>)
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'recipeId': recipeId,
-      'itemId': itemId,
-      'expectedQuantity': expectedQuantity,
-      'unit': unit,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
-      'item': item?.toJson(),
-    };
-  }
-}
-
 class InventoryItem {
   final String id;
   final String itemName;
@@ -321,21 +376,40 @@ class InventoryItem {
   });
 
   factory InventoryItem.fromJson(Map<String, dynamic> json) {
-    return InventoryItem(
-      id: json['id'] as String? ?? '',
-      itemName: json['itemName'] as String? ?? '',
-      category: json['category'] as String? ?? '',
-      unit: json['unit'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      sku: json['sku'] as String? ?? '',
-      organizationId: json['organizationId'] as String? ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : DateTime.now(),
-    );
+    try {
+      return InventoryItem(
+        id: _parseString(json['id']),
+        itemName: _parseString(json['itemName']),
+        category: _parseString(json['category']),
+        unit: _parseString(json['unit']),
+        description: _parseString(json['description']),
+        sku: _parseString(json['sku']),
+        organizationId: _parseString(json['organizationId']),
+        createdAt: _parseDateTime(json['createdAt']),
+        updatedAt: _parseDateTime(json['updatedAt']),
+      );
+    } catch (e) {
+      print('Error parsing InventoryItem: $e');
+      print('JSON data: $json');
+      rethrow;
+    }
+  }
+
+  static String _parseString(dynamic value) {
+    if (value == null) return '';
+    if (value is String) return value;
+    if (value is Map) {
+      print('Warning: Expected String but got Map: $value');
+      return '';
+    }
+    return value.toString();
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is String) return DateTime.parse(value);
+    if (value is DateTime) return value;
+    return DateTime.now();
   }
 
   Map<String, dynamic> toJson() {
@@ -349,6 +423,79 @@ class InventoryItem {
       'organizationId': organizationId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+}
+
+class RecipeIngredient {
+  final String id;
+  final String recipeId;
+  final String itemId;
+  final String expectedQuantity;
+  final String unit;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final InventoryItem? item;
+
+  RecipeIngredient({
+    required this.id,
+    required this.recipeId,
+    required this.itemId,
+    required this.expectedQuantity,
+    required this.unit,
+    required this.createdAt,
+    required this.updatedAt,
+    this.item,
+  });
+
+  factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
+    try {
+      return RecipeIngredient(
+        id: _parseString(json['id']),
+        recipeId: _parseString(json['recipeId']),
+        itemId: _parseString(json['itemId']),
+        expectedQuantity: _parseString(json['expectedQuantity']),
+        unit: _parseString(json['unit']),
+        createdAt: _parseDateTime(json['createdAt']),
+        updatedAt: _parseDateTime(json['updatedAt']),
+        item: json['item'] != null
+            ? InventoryItem.fromJson(json['item'] as Map<String, dynamic>)
+            : null,
+      );
+    } catch (e) {
+      print('Error parsing RecipeIngredient: $e');
+      print('JSON data: $json');
+      rethrow;
+    }
+  }
+
+  static String _parseString(dynamic value) {
+    if (value == null) return '';
+    if (value is String) return value;
+    if (value is Map) {
+      print('Warning: Expected String but got Map: $value');
+      return '';
+    }
+    return value.toString();
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is String) return DateTime.parse(value);
+    if (value is DateTime) return value;
+    return DateTime.now();
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'recipeId': recipeId,
+      'itemId': itemId,
+      'expectedQuantity': expectedQuantity,
+      'unit': unit,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'item': item?.toJson(),
     };
   }
 }

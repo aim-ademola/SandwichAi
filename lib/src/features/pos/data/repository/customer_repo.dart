@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart'; // Add this import
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
@@ -76,7 +77,7 @@ class CustomerRepository extends BaseRepository
         return ApiResponse.errorMessage('Failed to fetch customers');
       }
 
-      print('API Response: ${response.data}');
+      AppLogger.log('API Response: ${response.data}');
 
       final customersResponse = CustomersListResponse.fromJson(response.data);
       return ApiResponse.success(customersResponse);
@@ -93,7 +94,7 @@ class CustomerRepository extends BaseRepository
     } on FormatException catch (e) {
       return ApiResponse.errorMessage(e.message);
     } catch (e) {
-      print('Error in getCustomers: $e');
+      AppLogger.log('Error in getCustomers: $e');
       return ApiResponse.errorMessage(_parseErrorMessage(e));
     }
   }
@@ -179,7 +180,7 @@ class CustomerRepository extends BaseRepository
         data['allowsEmail'] = allowsEmail;
       }
 
-      print('Creating customer with data: $data');
+      AppLogger.log('Creating customer with data: $data');
 
       final response = await _apiClient
           .post('customer-service/customers', data: data)
@@ -190,7 +191,7 @@ class CustomerRepository extends BaseRepository
             },
           );
 
-      print('Create customer response: ${response.data}');
+      AppLogger.log('Create customer response: ${response.data}');
 
       if (response.data == null) {
         return ApiResponse.errorMessage('Failed to create customer');
@@ -199,7 +200,7 @@ class CustomerRepository extends BaseRepository
       final customer = CustomerModel.fromJson(response.data);
       return ApiResponse.success(customer);
     } on DioException catch (e) {
-      print('DioException in createCustomer: ${e.response?.data}');
+      AppLogger.log('DioException in createCustomer: ${e.response?.data}');
       return ApiResponse.errorMessage(_handleDioError(e));
     } on SocketException catch (e) {
       return ApiResponse.errorMessage(
@@ -212,7 +213,7 @@ class CustomerRepository extends BaseRepository
     } on FormatException catch (e) {
       return ApiResponse.errorMessage(e.message);
     } catch (e) {
-      print('Exception in createCustomer: $e');
+      AppLogger.log('Exception in createCustomer: $e');
       return ApiResponse.errorMessage(_parseErrorMessage(e));
     }
   }
@@ -356,8 +357,8 @@ class CustomerRepository extends BaseRepository
 
   // Handle DioException specifically
   String _handleDioError(DioException error) {
-    print('DioException type: ${error.type}');
-    print('DioException response: ${error.response?.data}');
+    AppLogger.log('DioException type: ${error.type}');
+    AppLogger.log('DioException response: ${error.response?.data}');
 
     // Check if there's a response with error data
     if (error.response?.data != null) {
@@ -377,7 +378,7 @@ class CustomerRepository extends BaseRepository
           }
         }
       } catch (e) {
-        print('Error parsing DioException response: $e');
+        AppLogger.log('Error parsing DioException response: $e');
       }
     }
 
@@ -413,7 +414,7 @@ class CustomerRepository extends BaseRepository
         return json.decode(jsonString) as Map<String, dynamic>;
       }
     } catch (e) {
-      print('Error parsing error response: $e');
+      AppLogger.log('Error parsing error response: $e');
     }
     return null;
   }

@@ -1,8 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
+import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/minimze.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/payment_method.dart';
 
 class OrderSummaryScreen extends StatefulWidget {
@@ -14,9 +19,11 @@ class OrderSummaryScreen extends StatefulWidget {
   final String? customerPhone;
   final double discount;
   final String? specialInstructions;
+  final String? sessionId;
 
   const OrderSummaryScreen({
     super.key,
+    this.sessionId,
     required this.orderItems,
     required this.specialRequests,
     required this.orderType,
@@ -43,7 +50,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
   double _calculateTaxes() {
     final subtotal = _calculateSubtotal();
     final discount = widget.discount;
-    return (subtotal - discount) * 0.0250; // 2.5% tax
+    return (subtotal - discount) * 0.0250;
   }
 
   double _calculateGrandTotal() {
@@ -58,19 +65,25 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
   }
 
   void _continueToPayment() {
-    Navigator.push(
-      context,
+    Navigator.of(context).push(
       CupertinoPageRoute(
-        builder: (context) => PaymentMethodScreen(
-          orderItems: widget.orderItems,
-          specialRequests: widget.specialRequests,
-          orderType: widget.orderType,
-          tableNumber: widget.tableNumber,
-          customerName: widget.customerName,
-          customerPhone: widget.customerPhone,
-          discount: widget.discount,
-          specialInstructions: widget.specialInstructions,
-          totalAmount: _calculateGrandTotal(),
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.read<PosOrderBloc>()),
+            BlocProvider.value(value: context.read<OrderSessionCubit>()),
+          ],
+          child: PaymentMethodScreen(
+            orderItems: widget.orderItems,
+            specialRequests: widget.specialRequests,
+            orderType: widget.orderType,
+            tableNumber: widget.tableNumber,
+            customerName: widget.customerName,
+            customerPhone: widget.customerPhone,
+            discount: widget.discount,
+            specialInstructions: widget.specialInstructions,
+            totalAmount: _calculateGrandTotal(),
+            sessionId: widget.sessionId,
+          ),
         ),
       ),
     );
@@ -102,6 +115,12 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
               color: kprimaryTextColor1,
             ),
           ),
+          actions: [
+            MinimizeButton(
+              sessionId: widget.sessionId,
+              screen: MinimizedScreen.orderSummary,
+            ),
+          ],
           centerTitle: true,
         ),
         body: Column(
@@ -200,7 +219,6 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
 
                     const SizedBox(height: 24),
 
-                    // Order Items Header
                     Text(
                       'Order Items',
                       style: WorkSansAppTextStyles.medium.copyWith(
@@ -211,7 +229,6 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Order Items List
                     ...widget.orderItems.entries.map((entry) {
                       final item = entry.key;
                       final quantity = entry.value;
@@ -231,7 +248,6 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                           children: [
                             Row(
                               children: [
-                                // Item image
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
@@ -253,7 +269,6 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                // Item details
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -281,7 +296,6 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                     ],
                                   ),
                                 ),
-                                // Total price
                                 Text(
                                   _formatPrice(totalPrice),
                                   style: WorkSansAppTextStyles.medium.copyWith(
@@ -292,7 +306,6 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                 ),
                               ],
                             ),
-                            // Special request
                             if (hasSpecialRequest) ...[
                               const SizedBox(height: 8),
                               Container(
@@ -330,16 +343,12 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                     }),
 
                     const SizedBox(height: 8),
-
-                    // Divider
                     Divider(color: Colors.grey[300], thickness: 1),
                     const SizedBox(height: 16),
 
-                    // Subtotal
                     _buildSummaryRow('Subtotal', _formatPrice(subtotal)),
                     const SizedBox(height: 12),
 
-                    // Discount
                     if (discount > 0)
                       _buildSummaryRow(
                         'Discount',
@@ -348,11 +357,9 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                       ),
                     if (discount > 0) const SizedBox(height: 12),
 
-                    // Taxes
                     _buildSummaryRow('Taxes (2.5%)', _formatPrice(taxes)),
                     const SizedBox(height: 16),
 
-                    // Grand Total
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -380,7 +387,6 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
               ),
             ),
 
-            // Bottom button
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(

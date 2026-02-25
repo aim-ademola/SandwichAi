@@ -145,7 +145,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                     color: Colors.white,
                   ),
                 ),
-                backgroundColor: kPrimary,
+                backgroundColor: kGreen,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
             Navigator.pop(context);
@@ -161,6 +165,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   ),
                 ),
                 backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
           }
@@ -269,7 +277,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                           color: kprimaryTextColor2,
                         ),
                       ),
-                      if (customer.membershipTier != null) ...[
+                      ...[
                         const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(

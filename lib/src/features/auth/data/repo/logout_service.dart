@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 
 class LogoutService {
@@ -20,7 +21,7 @@ class LogoutService {
         context.go('/');
       }
     } catch (e) {
-      debugPrint('Error during logout: $e');
+      AppLogger.log('Error during logout: $e');
 
       // Even if cleanup fails, still navigate to login
       if (context.mounted) {

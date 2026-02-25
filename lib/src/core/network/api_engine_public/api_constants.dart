@@ -1,7 +1,7 @@
 class ApiConstants {
   static const String baseUrl = 'https://sandwichai-m7yo5.ondigitalocean.app/';
   static const String aiBaseUrl =
-      'https://sandwich-ai-backend-fyn2f.ondigitalocean.app/';
+      'https://sandwich-ai-backend-fyn2f.ondigitalocean.app/api/ai/';
 
   // Timeout configurations
   static const Duration connectTimeout = Duration(seconds: 30);

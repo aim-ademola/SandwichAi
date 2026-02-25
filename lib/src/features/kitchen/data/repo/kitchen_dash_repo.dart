@@ -6,6 +6,8 @@ import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper
 import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
 import 'package:sandwich_ai/src/features/kitchen/data/model/kitchen_dash_model.dart';
 
+import '../../../../core/config/prod_print.dart';
+
 abstract class KitchenDashboardRepositoryInterface {
   Future<ApiResponse<KitchenDashboardData>> getDashboardData({
     required String branchId,
@@ -31,7 +33,9 @@ class KitchenDashboardRepository extends BaseRepository
 
       final queryParams = <String, dynamic>{'branchId': branchId};
 
-      print('DEBUG REPO: Fetching dashboard data for branch: $branchId');
+      AppLogger.log(
+        'DEBUG REPO: Fetching dashboard data for branch: $branchId',
+      );
 
       final response = await _apiClient
           .get('kitchen/dashboard', queryParameters: queryParams)
@@ -42,31 +46,31 @@ class KitchenDashboardRepository extends BaseRepository
             },
           );
 
-      print('DEBUG REPO: Dashboard response received');
-      print('DEBUG REPO: Response type: ${response.runtimeType}');
+      AppLogger.log('DEBUG REPO: Dashboard response received');
+      AppLogger.log('DEBUG REPO: Response type: ${response.runtimeType}');
 
       // The response is already an ApiResponse, so we need to check if it succeeded
       return response.when(
         success: (data) {
-          print('DEBUG REPO: Response data received');
+          AppLogger.log('DEBUG REPO: Response data received');
 
           if (data == null) {
-            print('DEBUG REPO: Response data is null');
+            AppLogger.log('DEBUG REPO: Response data is null');
             return ApiResponse.errorMessage('No data received from server');
           }
 
           final dashboardData = KitchenDashboardData.fromJson(data);
-          print('DEBUG REPO: Dashboard data parsed successfully');
+          AppLogger.log('DEBUG REPO: Dashboard data parsed successfully');
           return ApiResponse.success(dashboardData);
         },
         error: (error) {
-          print('DEBUG REPO: Response returned error: $error');
+          AppLogger.log('DEBUG REPO: Response returned error: $error');
           return ApiResponse.errorMessage(error.toString());
         },
       );
     } on DioException catch (e) {
-      print('DEBUG REPO: DioException - ${e.message}');
-      print('DEBUG REPO: Response data - ${e.response?.data}');
+      AppLogger.log('DEBUG REPO: DioException - ${e.message}');
+      AppLogger.log('DEBUG REPO: Response data - ${e.response?.data}');
 
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
@@ -87,22 +91,22 @@ class KitchenDashboardRepository extends BaseRepository
           'Failed to fetch dashboard data';
       return ApiResponse.errorMessage(errorMessage);
     } on SocketException catch (e) {
-      print('DEBUG REPO: SocketException - $e');
+      AppLogger.log('DEBUG REPO: SocketException - $e');
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
     } on TimeoutException catch (e) {
-      print('DEBUG REPO: TimeoutException - $e');
+      AppLogger.log('DEBUG REPO: TimeoutException - $e');
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
     } on FormatException catch (e) {
-      print('DEBUG REPO: FormatException - ${e.message}');
+      AppLogger.log('DEBUG REPO: FormatException - ${e.message}');
       return ApiResponse.errorMessage(e.message);
     } catch (e, stackTrace) {
-      print('DEBUG REPO: Unexpected error - $e');
-      print('DEBUG REPO: Error type: ${e.runtimeType}');
-      print('DEBUG REPO: Stack trace - $stackTrace');
+      AppLogger.log('DEBUG REPO: Unexpected error - $e');
+      AppLogger.log('DEBUG REPO: Error type: ${e.runtimeType}');
+      AppLogger.log('DEBUG REPO: Stack trace - $stackTrace');
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
   }
@@ -120,10 +124,10 @@ class KitchenDashboardRepository extends BaseRepository
 
       final requestBody = {'status': status, 'updatedBy': updatedBy};
 
-      print(
+      AppLogger.log(
         'DEBUG REPO: Updating order $orderId to status $status by $updatedBy',
       );
-      print('DEBUG REPO: Request body: $requestBody');
+      AppLogger.log('DEBUG REPO: Request body: $requestBody');
 
       final response = await _apiClient
           .patch('kitchen/orders/$orderId/status', data: requestBody)
@@ -134,26 +138,26 @@ class KitchenDashboardRepository extends BaseRepository
             },
           );
 
-      print('DEBUG REPO: Update response received');
-      print('DEBUG REPO: Response type: ${response.runtimeType}');
+      AppLogger.log('DEBUG REPO: Update response received');
+      AppLogger.log('DEBUG REPO: Response type: ${response.runtimeType}');
 
       // The response is already an ApiResponse, so we handle it accordingly
       return response.when(
         success: (data) {
-          print('DEBUG REPO: ✅ Order status updated successfully');
-          print('DEBUG REPO: Response data: $data');
+          AppLogger.log('DEBUG REPO: ✅ Order status updated successfully');
+          AppLogger.log('DEBUG REPO: Response data: $data');
           return ApiResponse.success(null);
         },
         error: (error) {
-          print('DEBUG REPO: ❌ Update failed with error: $error');
+          AppLogger.log('DEBUG REPO: ❌ Update failed with error: $error');
           return ApiResponse.errorMessage(error.toString());
         },
       );
     } on DioException catch (e) {
-      print('DEBUG REPO: DioException - ${e.message}');
-      print('DEBUG REPO: DioException type - ${e.type}');
-      print('DEBUG REPO: Response status - ${e.response?.statusCode}');
-      print('DEBUG REPO: Response data - ${e.response?.data}');
+      AppLogger.log('DEBUG REPO: DioException - ${e.message}');
+      AppLogger.log('DEBUG REPO: DioException type - ${e.type}');
+      AppLogger.log('DEBUG REPO: Response status - ${e.response?.statusCode}');
+      AppLogger.log('DEBUG REPO: Response data - ${e.response?.data}');
 
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
@@ -186,22 +190,22 @@ class KitchenDashboardRepository extends BaseRepository
 
       return ApiResponse.errorMessage(errorMessage);
     } on SocketException catch (e) {
-      print('DEBUG REPO: SocketException - $e');
+      AppLogger.log('DEBUG REPO: SocketException - $e');
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
     } on TimeoutException catch (e) {
-      print('DEBUG REPO: TimeoutException - $e');
+      AppLogger.log('DEBUG REPO: TimeoutException - $e');
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
     } on FormatException catch (e) {
-      print('DEBUG REPO: FormatException - ${e.message}');
+      AppLogger.log('DEBUG REPO: FormatException - ${e.message}');
       return ApiResponse.errorMessage(e.message);
     } catch (e, stackTrace) {
-      print('DEBUG REPO: Unexpected error - $e');
-      print('DEBUG REPO: Error type - ${e.runtimeType}');
-      print('DEBUG REPO: Stack trace - $stackTrace');
+      AppLogger.log('DEBUG REPO: Unexpected error - $e');
+      AppLogger.log('DEBUG REPO: Error type - ${e.runtimeType}');
+      AppLogger.log('DEBUG REPO: Stack trace - $stackTrace');
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
   }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -13,7 +14,7 @@ class AuthInterceptor extends Interceptor {
     final token = await AuthCacheHelper.instance.getAccessToken();
 
     if (token != null && token.isNotEmpty) {
-      print('Token Gotten =====> $token');
+      AppLogger.log('Token Gotten =====> $token');
       options.headers['Authorization'] = 'Bearer $token';
     }
     super.onRequest(options, handler);

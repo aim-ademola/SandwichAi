@@ -5,6 +5,7 @@ import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
 import 'package:sandwich_ai/src/core/network/connectivity_service.dart';
 import 'package:sandwich_ai/src/core/offline/offline_queue_manager.dart';
 import 'package:sandwich_ai/src/core/offline/pending_req.dart';
+import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/event.dart';
 import 'package:sandwich_ai/src/features/processing/data/model/stock_reuest_model.dart';
 
 abstract class StockRequestRepositoryInterface {
@@ -19,7 +20,15 @@ abstract class StockRequestRepositoryInterface {
 
   Future<ApiResponse<StockRequest>> getStockRequestDetails(String requestId);
 
-  Future<ApiResponse<StockRequest>> completeStockRequest(String requestId);
+  /// Unified action method — replaces completeStockRequest and future equivalents
+  Future<ApiResponse<StockRequest>> performAction(
+    String requestId,
+    StockRequestAction action,
+  );
+
+  Future<ApiResponse<Map<String, dynamic>>> getStockRequestStatus(
+    String requestId,
+  );
 }
 
 class StockRequestRepository extends BaseRepository
@@ -36,19 +45,14 @@ class StockRequestRepository extends BaseRepository
         return ApiResponse.errorMessage('Branch ID is required');
       }
 
-      final online = await ConnectivityService.instance.isOnline;
-
-      if (!online) {
+      if (!await ConnectivityService.instance.isOnline) {
         return ApiResponse.errorMessage(
           'No internet connection. Please check your network.',
         );
       }
 
       final queryParams = <String, dynamic>{'branchId': branchId};
-
-      if (status != null && status.isNotEmpty) {
-        queryParams['status'] = status;
-      }
+      if (status != null && status.isNotEmpty) queryParams['status'] = status;
 
       final response = await _apiClient
           .get('stock-requests', queryParameters: queryParams)
@@ -56,7 +60,7 @@ class StockRequestRepository extends BaseRepository
 
       return handleObjectResponse(
         Future.value(response),
-        (json) => _parseStockRequestsResponse(json),
+        _parseStockRequestsResponse,
       );
     } catch (e) {
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
@@ -70,20 +74,14 @@ class StockRequestRepository extends BaseRepository
     try {
       _validateCreateRequest(request);
 
-      final online = await ConnectivityService.instance.isOnline;
-
-      if (!online) {
+      if (!await ConnectivityService.instance.isOnline) {
         await OfflineQueueManager.instance.add(
           PendingRequest(
             method: "POST",
             url: "stock-requests",
             body: request.toJson(),
           ),
-          onSaved: () {
-            // Optional: show toast notification
-          },
         );
-
         return ApiResponse.errorMessage(
           "No internet. Request saved and will sync automatically.",
         );
@@ -95,7 +93,7 @@ class StockRequestRepository extends BaseRepository
 
       return handleObjectResponse(
         Future.value(response),
-        (json) => _parseCreateStockRequestResponse(json),
+        _parseCreateStockRequestResponse,
       );
     } catch (e) {
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
@@ -111,9 +109,7 @@ class StockRequestRepository extends BaseRepository
         return ApiResponse.errorMessage('Request ID is required');
       }
 
-      final online = await ConnectivityService.instance.isOnline;
-
-      if (!online) {
+      if (!await ConnectivityService.instance.isOnline) {
         return ApiResponse.errorMessage(
           'No internet connection. Please check your network.',
         );
@@ -125,7 +121,7 @@ class StockRequestRepository extends BaseRepository
 
       return handleObjectResponse(
         Future.value(response),
-        (json) => _parseStockRequestDetails(json),
+        _parseStockRequestDetails,
       );
     } catch (e) {
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
@@ -133,36 +129,34 @@ class StockRequestRepository extends BaseRepository
   }
 
   @override
-  Future<ApiResponse<StockRequest>> completeStockRequest(
+  Future<ApiResponse<StockRequest>> performAction(
     String requestId,
+    StockRequestAction action,
   ) async {
     try {
       if (requestId.isEmpty) {
         return ApiResponse.errorMessage('Request ID is required');
       }
 
-      final online = await ConnectivityService.instance.isOnline;
-
-      if (!online) {
+      if (!await ConnectivityService.instance.isOnline) {
         return ApiResponse.errorMessage(
           'No internet connection. Please check your network.',
         );
       }
 
       final response = await _apiClient
-          .patch('stock-requests/$requestId/complete')
+          .patch('stock-requests/$requestId/${action.endpoint}')
           .timeout(const Duration(seconds: 30));
 
       if (response.data == null) {
         return ApiResponse.errorMessage('Invalid response from server');
       }
 
-      // Parse the response
       final responseData = response.data is Map<String, dynamic>
           ? (response.data.containsKey('data')
                 ? response.data['data'] as Map<String, dynamic>
                 : response.data as Map<String, dynamic>)
-          : throw FormatException('Invalid response format');
+          : throw const FormatException('Invalid response format');
 
       return ApiResponse.success(StockRequest.fromJson(responseData));
     } catch (e) {
@@ -170,38 +164,44 @@ class StockRequestRepository extends BaseRepository
     }
   }
 
-  void _validateCreateRequest(CreateStockRequestRequest request) {
-    if (request.requestingBranchId.isEmpty) {
-      throw FormatException('Requesting branch ID cannot be empty');
-    }
-
-    if (request.requestedBy.isEmpty) {
-      throw FormatException('Requested by cannot be empty');
-    }
-
-    if (request.department.isEmpty) {
-      throw FormatException('Department cannot be empty');
-    }
-
-    if (request.items.isEmpty) {
-      throw FormatException('At least one item is required');
-    }
-
-    for (final item in request.items) {
-      if (item.itemId.isEmpty) {
-        throw FormatException('Item ID cannot be empty');
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> getStockRequestStatus(
+    String requestId,
+  ) async {
+    try {
+      if (requestId.isEmpty) {
+        return ApiResponse.errorMessage('Request ID is required');
       }
 
-      if (item.qtyRequested <= 0) {
-        throw FormatException('Quantity must be greater than zero');
+      if (!await ConnectivityService.instance.isOnline) {
+        return ApiResponse.errorMessage(
+          'No internet connection. Please check your network.',
+        );
       }
+
+      final response = await _apiClient
+          .get('stock-requests/$requestId/status')
+          .timeout(const Duration(seconds: 30));
+
+      if (response.data == null) {
+        return ApiResponse.errorMessage('Invalid response from server');
+      }
+
+      final data = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : throw const FormatException('Invalid response format');
+
+      return ApiResponse.success(data);
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
   }
 
+  // ─── Parsers ─────────────────────────────────────────────────────────────
+
   StockRequestResponse _parseStockRequestsResponse(Map<String, dynamic> json) {
     try {
-      final response = StockRequestResponse.fromJson(json);
-      return response;
+      return StockRequestResponse.fromJson(json);
     } catch (e) {
       throw FormatException('Unable to process response: ${e.toString()}');
     }
@@ -212,7 +212,6 @@ class StockRequestRepository extends BaseRepository
   ) {
     try {
       final response = CreateStockRequestResponse.fromJson(json);
-
       if (!response.isValid) {
         throw FormatException(
           response.message.isNotEmpty
@@ -220,7 +219,6 @@ class StockRequestRepository extends BaseRepository
               : 'Invalid stock request data received',
         );
       }
-
       return response;
     } catch (e) {
       throw FormatException('Unable to process response: ${e.toString()}');
@@ -236,60 +234,61 @@ class StockRequestRepository extends BaseRepository
   }
 
   String _parseErrorMessage(String error) {
-    final lowercaseError = error.toLowerCase();
-
-    if (lowercaseError.contains('401') ||
-        lowercaseError.contains('unauthorized')) {
+    final e = error.toLowerCase();
+    if (e.contains('401') || e.contains('unauthorized')) {
       return 'Unauthorized. Please log in again.';
     }
-
-    if (lowercaseError.contains('403') ||
-        lowercaseError.contains('forbidden')) {
+    if (e.contains('403') || e.contains('forbidden')) {
       return 'Access denied. You do not have permission.';
     }
-
-    if (lowercaseError.contains('404') ||
-        lowercaseError.contains('not found')) {
+    if (e.contains('404') || e.contains('not found')) {
       return 'Stock request not found.';
     }
-
-    if (lowercaseError.contains('409') || lowercaseError.contains('conflict')) {
+    if (e.contains('409') || e.contains('conflict')) {
       return 'Stock request already exists.';
     }
-
-    if (lowercaseError.contains('422') ||
-        lowercaseError.contains('unprocessable')) {
+    if (e.contains('422') || e.contains('unprocessable')) {
       return 'Invalid data provided. Please check your input.';
     }
-
-    if (lowercaseError.contains('429') ||
-        lowercaseError.contains('too many requests')) {
+    if (e.contains('429') || e.contains('too many requests')) {
       return 'Too many requests. Please try again later.';
     }
-
-    if (lowercaseError.contains('500') ||
-        lowercaseError.contains('internal server')) {
+    if (e.contains('500') || e.contains('internal server')) {
       return 'Server error. Please try again later.';
     }
-
-    if (lowercaseError.contains('503') ||
-        lowercaseError.contains('service unavailable')) {
+    if (e.contains('503') || e.contains('service unavailable')) {
       return 'Service temporarily unavailable. Please try again.';
     }
-
-    if (lowercaseError.contains('network') ||
-        lowercaseError.contains('connection')) {
+    if (e.contains('network') || e.contains('connection')) {
       return 'Network error. Please check your connection.';
     }
-
-    if (lowercaseError.contains('timeout')) {
-      return 'Request timeout. Please try again.';
-    }
-
-    if (lowercaseError.contains('format') || lowercaseError.contains('parse')) {
+    if (e.contains('timeout')) return 'Request timeout. Please try again.';
+    if (e.contains('format') || e.contains('parse')) {
       return 'Invalid response format. Please try again.';
     }
-
     return 'Operation failed. Please try again later.';
+  }
+
+  void _validateCreateRequest(CreateStockRequestRequest request) {
+    if (request.requestingBranchId.isEmpty) {
+      throw const FormatException('Requesting branch ID cannot be empty');
+    }
+    if (request.requestedBy.isEmpty) {
+      throw const FormatException('Requested by cannot be empty');
+    }
+    if (request.department.isEmpty) {
+      throw const FormatException('Department cannot be empty');
+    }
+    if (request.items.isEmpty) {
+      throw const FormatException('At least one item is required');
+    }
+    for (final item in request.items) {
+      if (item.itemId.isEmpty) {
+        throw const FormatException('Item ID cannot be empty');
+      }
+      if (item.qtyRequested <= 0) {
+        throw const FormatException('Quantity must be greater than zero');
+      }
+    }
   }
 }

@@ -361,6 +361,8 @@ class _MyTaskScreenState extends State<MyTaskScreen>
       SnackBar(
         content: Text('Started: ${task.title}'),
         duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -373,6 +375,8 @@ class _MyTaskScreenState extends State<MyTaskScreen>
       SnackBar(
         content: Text('Completed: ${task.title}'),
         duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

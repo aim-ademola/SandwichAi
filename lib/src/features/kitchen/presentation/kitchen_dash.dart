@@ -836,14 +836,14 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                       ),
                     ),
                   ),
-                  Text(
-                    '₦${order.totalAmount}',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: orderNumberFontSize,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
+                  // Text(
+                  //   '₦${order.totalAmount}',
+                  //   style: WorkSansAppTextStyles.medium.copyWith(
+                  //     fontSize: orderNumberFontSize,
+                  //     fontWeight: FontWeight.w700,
+                  //     color: Colors.black,
+                  //   ),
+                  // ),
                 ],
               ),
               if (buttonText != null) ...[

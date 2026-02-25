@@ -25,11 +25,47 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Add multiDexEnabled if you have many dependencies
+        multiDexEnabled = true
     }
 
     buildTypes {
         release {
+            // Enables code shrinking, obfuscation, and optimization
+            isMinifyEnabled = true
+            
+            // Enables resource shrinking
+            isShrinkResources = true
+            
+            // Include ProGuard rules
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            
             signingConfig = signingConfigs.getByName("debug")
+        }
+        
+        // Add a separate build type for testing release builds
+        create("releaseTest") {
+            initWith(getByName("release"))
+            isMinifyEnabled = false
+            isShrinkResources = false
+            matchingFallbacks += listOf("release")
+        }
+    }
+    
+    // Prevent R8 from being too aggressive
+    buildFeatures {
+        buildConfig = true
+    }
+    
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
         }
     }
 }

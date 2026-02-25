@@ -293,10 +293,10 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                                 ),
                               ),
                               backgroundColor: kGreen,
-                              behavior: SnackBarBehavior.floating,
                               duration: const Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                           );

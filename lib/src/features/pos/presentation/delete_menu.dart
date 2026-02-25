@@ -50,8 +50,12 @@ class _DeleteMenuItemDialogState extends State<DeleteMenuItemDialog> {
                   color: Colors.white,
                 ),
               ),
-              backgroundColor: kPrimary,
+              backgroundColor: kGreen,
               duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         } else if (state is MenuItemDeletionError) {
@@ -69,6 +73,10 @@ class _DeleteMenuItemDialogState extends State<DeleteMenuItemDialog> {
               ),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         }

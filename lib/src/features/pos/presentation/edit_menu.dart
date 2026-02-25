@@ -75,6 +75,10 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
       if (_selectedCategory == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             content: Text(
               'Please select a category',
               style: WorkSansAppTextStyles.medium.copyWith(color: Colors.white),
@@ -142,6 +146,10 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     content: Text(
                       'Camera feature coming soon',
                       style: WorkSansAppTextStyles.medium.copyWith(
@@ -168,6 +176,10 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     content: Text(
                       'Gallery feature coming soon',
                       style: WorkSansAppTextStyles.medium.copyWith(
@@ -203,8 +215,12 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                   color: Colors.white,
                 ),
               ),
-              backgroundColor: kPrimary,
+              backgroundColor: kGreen,
               duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         } else if (state is MenuItemUpdateError) {
@@ -222,6 +238,10 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
               ),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         }

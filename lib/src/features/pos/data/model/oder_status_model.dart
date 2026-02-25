@@ -334,9 +334,9 @@ class Branch {
   final String country;
   final String zipCode;
   final String email;
-  final String? openingHours;
+  final Map<String, dynamic>? openingHours; // Changed from String? to Map
   final bool isActive;
-  final String managerId;
+  final String? managerId; // Changed to nullable
   final String organizationId;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -353,34 +353,78 @@ class Branch {
     required this.email,
     this.openingHours,
     required this.isActive,
-    required this.managerId,
+    this.managerId, // Made nullable
     required this.organizationId,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory Branch.fromJson(Map<String, dynamic> json) {
-    return Branch(
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? '',
-      branchCode: json['branch_code'] as String? ?? '',
-      address: json['address'] as String? ?? '',
-      city: json['city'] as String? ?? '',
-      state: json['state'] as String? ?? '',
-      country: json['country'] as String? ?? '',
-      zipCode: json['zipCode'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      openingHours: json['openingHours'] as String?,
-      isActive: json['isActive'] as bool? ?? true,
-      managerId: json['managerId'] as String? ?? '',
-      organizationId: json['organizationId'] as String? ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : DateTime.now(),
-    );
+    try {
+      return Branch(
+        id: _parseString(json['id']),
+        name: _parseString(json['name']),
+        branchCode: _parseString(json['branch_code'] ?? json['branchCode']),
+        address: _parseString(json['address']),
+        city: _parseString(json['city']),
+        state: _parseString(json['state']),
+        country: _parseString(json['country']),
+        zipCode: _parseString(json['zipCode']),
+        email: _parseString(json['email']),
+        openingHours:
+            json['openingHours'] != null && json['openingHours'] is Map
+            ? Map<String, dynamic>.from(json['openingHours'])
+            : null,
+        isActive: _parseBool(json['isActive']),
+        managerId: _parseStringOrNull(json['managerId']),
+        organizationId: _parseString(json['organizationId']),
+        createdAt: _parseDateTime(json['createdAt']),
+        updatedAt: _parseDateTime(json['updatedAt']),
+      );
+    } catch (e) {
+      print('Error parsing Branch: $e');
+      print('JSON data: $json');
+      rethrow;
+    }
+  }
+
+  static String _parseString(dynamic value) {
+    if (value == null) return '';
+    if (value is String) return value;
+    if (value is Map) return '';
+    if (value is num) return value.toString();
+    return value.toString();
+  }
+
+  static String? _parseStringOrNull(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value.isEmpty ? null : value;
+    if (value is Map) return null;
+    if (value is num) return value.toString();
+    return value.toString();
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value == null) return false;
+    if (value is bool) return value;
+    if (value is String) {
+      return value.toLowerCase() == 'true' || value == '1';
+    }
+    if (value is num) return value != 0;
+    return false;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return DateTime.now();
+      }
+    }
+    if (value is DateTime) return value;
+    return DateTime.now();
   }
 
   Map<String, dynamic> toJson() {
@@ -401,6 +445,32 @@ class Branch {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
+  }
+
+  // Helper methods to work with opening hours
+  String? getOpeningTime(String day) {
+    if (openingHours == null) return null;
+    final dayHours = openingHours![day.toLowerCase()];
+    if (dayHours is Map) {
+      return dayHours['open'] as String?;
+    }
+    return null;
+  }
+
+  String? getClosingTime(String day) {
+    if (openingHours == null) return null;
+    final dayHours = openingHours![day.toLowerCase()];
+    if (dayHours is Map) {
+      return dayHours['close'] as String?;
+    }
+    return null;
+  }
+
+  String getFormattedHours(String day) {
+    final open = getOpeningTime(day);
+    final close = getClosingTime(day);
+    if (open == null || close == null) return 'Closed';
+    return '$open - $close';
   }
 }
 

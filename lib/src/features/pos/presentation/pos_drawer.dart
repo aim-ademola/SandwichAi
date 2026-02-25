@@ -6,6 +6,7 @@ import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/compaints.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_staff_screen.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/printer_settings_screen.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_to_stock_requisitin_tab.dart';
 
 class PosAppDrawer extends StatelessWidget {
@@ -96,13 +97,26 @@ class PosAppDrawer extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 8),
-
                   _buildDrawerItem(
                     context,
                     icon: Icons.people_alt_outlined,
                     title: 'Manage Customers',
                     onTap: () {
                       context.push('/customer-list');
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _buildDrawerItem(
+                    context,
+                    icon: Icons.print_outlined,
+                    title: 'Printer Settings',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                          builder: (_) => PrinterSettingsScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],

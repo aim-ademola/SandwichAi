@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -59,7 +60,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
 
       // Load inventory items - context is now available after first frame
       if (orgId.isNotEmpty) {
-        print('Loading inventory items for org: $orgId'); // Debug
+        AppLogger.log('Loading inventory items for org: $orgId'); // Debug
         context.read<InventoryItemsBloc>().add(
           LoadInventoryItems(organizationId: orgId),
         );
@@ -816,7 +817,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
   ) {
     return BlocBuilder<InventoryItemsBloc, InventoryItemsState>(
       builder: (context, state) {
-        print('InventoryItemsBloc State: $state'); // Debug print
+        AppLogger.log('InventoryItemsBloc State: $state'); // Debug print
 
         if (state is InventoryItemsLoading) {
           return Column(
@@ -851,7 +852,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         }
 
         if (state is InventoryItemsError) {
-          print('InventoryItemsError: ${state.error}'); // Debug print
+          AppLogger.log('InventoryItemsError: ${state.error}'); // Debug print
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -890,7 +891,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         }
 
         if (state is InventoryItemsLoaded) {
-          print(
+          AppLogger.log(
             'InventoryItemsLoaded: ${state.items.length} items',
           ); // Debug print
 
@@ -977,7 +978,9 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                       // Auto-set unit based on item's unit
                       _selectedUnit = UnitExtension.fromString(item.unit);
                     });
-                    print('Selected item: ${item.itemName}'); // Debug print
+                    AppLogger.log(
+                      'Selected item: ${item.itemName}',
+                    ); // Debug print
                   }
                 },
                 validator: (value) {
@@ -1200,7 +1203,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
   Widget _buildEmployeeDropdown(double labelFontSize, double inputFontSize) {
     return BlocBuilder<EmployeeBloc, EmployeeState>(
       builder: (context, state) {
-        print('EmployeeBloc State: $state'); // Debug print
+        AppLogger.log('EmployeeBloc State: $state'); // Debug print
 
         // Load employees when branchId is available
         if (branchId.isNotEmpty && state is EmployeeInitial) {
@@ -1246,7 +1249,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         }
 
         if (state is EmployeeError) {
-          print('EmployeeError: ${state.error}'); // Debug print
+          AppLogger.log('EmployeeError: ${state.error}'); // Debug print
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1289,7 +1292,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         }
 
         if (state is EmployeeLoaded) {
-          print(
+          AppLogger.log(
             'EmployeeLoaded: ${state.employees.length} employees',
           ); // Debug print
 
@@ -1376,7 +1379,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     setState(() {
                       _selectedEmployee = employee;
                     });
-                    print(
+                    AppLogger.log(
                       'Selected employee: ${employee.fullName}',
                     ); // Debug print
                   }

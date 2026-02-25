@@ -214,6 +214,10 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                   ),
                 ),
                 backgroundColor: kGreen,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
             // Navigator.pop(context);
@@ -228,7 +232,11 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                     color: Colors.white,
                   ),
                 ),
-                backgroundColor: kPrimary,
+                backgroundColor: kGreen,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
             // Navigator.pop(context);
@@ -244,6 +252,10 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                   ),
                 ),
                 backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
           }

@@ -8,22 +8,44 @@ abstract class PaymentEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class ProcessCashPayment extends PaymentEvent {
+class RecordCashPayment extends PaymentEvent {
   final CashPaymentRequest request;
 
-  const ProcessCashPayment({required this.request});
+  const RecordCashPayment({required this.request});
 
   @override
   List<Object?> get props => [request];
 }
 
-class ProcessBankTransferPayment extends PaymentEvent {
-  final BankTransferPaymentRequest request;
+class PollCashApprovalStatus extends PaymentEvent {
+  final String transactionId;
+  final String branchId;
 
-  const ProcessBankTransferPayment({required this.request});
+  const PollCashApprovalStatus({
+    required this.transactionId,
+    required this.branchId,
+  });
+
+  @override
+  List<Object?> get props => [transactionId, branchId];
+}
+
+class InitializeOnlinePayment extends PaymentEvent {
+  final OnlinePaymentRequest request;
+
+  const InitializeOnlinePayment({required this.request});
 
   @override
   List<Object?> get props => [request];
+}
+
+class PollOnlinePaymentStatus extends PaymentEvent {
+  final String reference;
+
+  const PollOnlinePaymentStatus({required this.reference});
+
+  @override
+  List<Object?> get props => [reference];
 }
 
 class ResetPaymentState extends PaymentEvent {

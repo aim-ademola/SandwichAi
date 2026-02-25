@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:sandwich_ai/src/features/processing/data/model/stock_reuest_model.dart';
+import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/event.dart';
 
 enum StockRequestErrorType { network, timeout, server, validation, general }
 
@@ -78,28 +79,51 @@ class StockRequestDetailsLoaded extends StockRequestState {
   List<Object?> get props => [request];
 }
 
-class StockRequestCompleting extends StockRequestState {
+class StockRequestStatusLoaded extends StockRequestState {
   final String requestId;
+  final String status;
 
-  const StockRequestCompleting({required this.requestId});
+  const StockRequestStatusLoaded({
+    required this.requestId,
+    required this.status,
+  });
 
   @override
-  List<Object?> get props => [requestId];
+  List<Object?> get props => [requestId, status];
 }
 
-class StockRequestCompleted extends StockRequestState {
+/// Single "action in progress" state — replaces StockRequestCompleting
+class StockRequestActionInProgress extends StockRequestState {
+  final String requestId;
+  final StockRequestAction action;
+  final List<StockRequest> currentRequests;
+
+  const StockRequestActionInProgress({
+    required this.requestId,
+    required this.action,
+    required this.currentRequests,
+  });
+
+  @override
+  List<Object?> get props => [requestId, action, currentRequests];
+}
+
+/// Single "action succeeded" state — replaces StockRequestCompleted
+class StockRequestActionSuccess extends StockRequestState {
   final StockRequest request;
+  final StockRequestAction action;
   final String message;
   final List<StockRequest> currentRequests;
 
-  const StockRequestCompleted({
+  const StockRequestActionSuccess({
     required this.request,
+    required this.action,
     required this.message,
     required this.currentRequests,
   });
 
   @override
-  List<Object?> get props => [request, message, currentRequests];
+  List<Object?> get props => [request, action, message, currentRequests];
 }
 
 class StockRequestError extends StockRequestState {

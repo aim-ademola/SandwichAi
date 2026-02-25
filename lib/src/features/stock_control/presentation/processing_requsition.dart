@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -104,10 +105,10 @@ class _StockTransferToProcessingOrKItchenScreenState
     final bId = await AuthCacheHelper.instance.getBranchID() ?? '';
     final empId = await AuthCacheHelper.instance.getEmpID() ?? '';
 
-    print('=== BRANCH & EMPLOYEE DATA ===');
-    print('Branch ID: $bId');
-    print('Employee ID: $empId');
-    print('==============================');
+    AppLogger.log('=== BRANCH & EMPLOYEE DATA ===');
+    AppLogger.log('Branch ID: $bId');
+    AppLogger.log('Employee ID: $empId');
+    AppLogger.log('==============================');
 
     if (mounted) {
       setState(() {
@@ -230,18 +231,18 @@ class _StockTransferToProcessingOrKItchenScreenState
           : _notesController.text.trim(),
     );
 
-    print('=== SUBMITTING Transfer ===');
-    print('Branch ID: ${request.branchId}');
-    print('Sent By: ${request.sentBy}');
-    print('Batch Code: ${request.batchCode}');
-    print('Items Count: ${request.items.length}');
-    print('Items Detail:');
+    AppLogger.log('=== SUBMITTING Transfer ===');
+    AppLogger.log('Branch ID: ${request.branchId}');
+    AppLogger.log('Sent By: ${request.sentBy}');
+    AppLogger.log('Batch Code: ${request.batchCode}');
+    AppLogger.log('Items Count: ${request.items.length}');
+    AppLogger.log('Items Detail:');
     for (var item in request.items) {
-      print('  - Item ID: ${item.itemId}, Qty: ${item.qtySent}');
+      AppLogger.log('  - Item ID: ${item.itemId}, Qty: ${item.qtySent}');
     }
-    print('Notes: ${request.notes ?? "None"}');
-    print('Request JSON: ${request.toJson()}');
-    print('==============================');
+    AppLogger.log('Notes: ${request.notes ?? "None"}');
+    AppLogger.log('Request JSON: ${request.toJson()}');
+    AppLogger.log('==============================');
 
     context.read<ProcessingTransferBloc>().add(
       CreateProcessingTransfer(request: request),
@@ -249,21 +250,21 @@ class _StockTransferToProcessingOrKItchenScreenState
   }
 
   void _completeStockRequest(String requestId) async {
-    print('Completing stock request: $requestId');
+    AppLogger.log('Completing stock request: $requestId');
 
     final repository = ProcessingTransferRepository();
     final result = await repository.completeStockRequest(requestId: requestId);
 
     await result.when(
       success: (data) {
-        print('Stock request completed successfully: $data');
+        AppLogger.log('Stock request completed successfully: $data');
         _showSnackBar(
           'Stock request marked as completed!',
           backgroundColor: Colors.green,
         );
       },
       error: (error) {
-        print('⚠️ Failed to complete stock request: $error');
+        AppLogger.log('⚠️ Failed to complete stock request: $error');
       },
     );
   }
@@ -451,7 +452,7 @@ class _StockTransferToProcessingOrKItchenScreenState
 
   @override
   Widget build(BuildContext context) {
-    print(widget.requestId);
+    AppLogger.log(widget.requestId);
     return MultiBlocListener(
       listeners: [
         BlocListener<ProcessingTransferBloc, ProcessingTransferState>(

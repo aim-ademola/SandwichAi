@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/wastage_bloc/bloc.dart';
@@ -79,7 +80,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
         }
 
         if (state is WasteLogsError) {
-          print(state.error);
+          AppLogger.log(state.error);
           return _buildErrorState(state.error);
         }
 

@@ -10,7 +10,6 @@ final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-// rm -rf build .dart_tool
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

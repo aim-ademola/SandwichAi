@@ -13,7 +13,22 @@
     <string>fetch</string>
     <string>remote-notification</string>
 </array>
-
+ <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>This app needs Bluetooth to connect to printers</string>
+    
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>This app needs Bluetooth to connect to printers</string>
+    
+    <!-- Local Network -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>This app needs local network access to discover printers</string>
+    
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_pdl-datastream._tcp</string>
+        <string>_printer._tcp</string>
+        <string>_ipp._tcp</string>
+    </array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

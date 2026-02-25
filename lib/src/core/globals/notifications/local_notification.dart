@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:flutter/foundation.dart';
@@ -51,9 +52,9 @@ class NotificationService {
       await _requestPermissions();
 
       _initialized = true;
-      debugPrint('✅ Notification Service initialized successfully');
+      AppLogger.log(' Notification Service initialized successfully');
     } catch (e) {
-      debugPrint('❌ Failed to initialize Notification Service: $e');
+      AppLogger.log(' Failed to initialize Notification Service: $e');
     }
   }
 
@@ -83,13 +84,13 @@ class NotificationService {
 
   /// Handle notification tap - shows beautiful dialog
   void _onNotificationTapped(NotificationResponse response) {
-    debugPrint('Notification tapped: ${response.payload}');
+    AppLogger.log('Notification tapped: ${response.payload}');
 
     if (response.payload == null) return;
 
     final context = navigatorKey?.currentContext;
     if (context == null) {
-      debugPrint('⚠️ Navigator context not available');
+      AppLogger.log('⚠️ Navigator context not available');
       return;
     }
 
@@ -262,7 +263,7 @@ class NotificationService {
     NotificationImportance importance = NotificationImportance.high,
   }) async {
     if (!_initialized) {
-      debugPrint('⚠️ Notification Service not initialized');
+      AppLogger.log('⚠️ Notification Service not initialized');
       return;
     }
 
@@ -285,9 +286,9 @@ class NotificationService {
 
       await _notifications.show(id, title, body, details, payload: payload);
 
-      debugPrint('✅ Notification sent: $title');
+      AppLogger.log(' Notification sent: $title');
     } catch (e) {
-      debugPrint('❌ Failed to show notification: $e');
+      AppLogger.log(' Failed to show notification: $e');
     }
   }
 
@@ -302,7 +303,7 @@ class NotificationService {
     // Check if this notification type is enabled
     final isEnabled = await _isNotificationEnabled(type);
     if (!isEnabled) {
-      debugPrint('⚠️ Notification type ${type.name} is disabled');
+      AppLogger.log('⚠️ Notification type ${type.name} is disabled');
       return;
     }
 
@@ -336,7 +337,7 @@ class NotificationService {
     NotificationImportance importance = NotificationImportance.high,
   }) async {
     if (!_initialized) {
-      debugPrint('⚠️ Notification Service not initialized');
+      AppLogger.log('⚠️ Notification Service not initialized');
       return;
     }
 
@@ -367,22 +368,22 @@ class NotificationService {
         payload: payload,
       );
 
-      debugPrint('✅ Notification scheduled: $title at $scheduledTime');
+      AppLogger.log(' Notification scheduled: $title at $scheduledTime');
     } catch (e) {
-      debugPrint('❌ Failed to schedule notification: $e');
+      AppLogger.log(' Failed to schedule notification: $e');
     }
   }
 
   /// Cancel a specific notification
   Future<void> cancelNotification(int id) async {
     await _notifications.cancel(id);
-    debugPrint('✅ Notification $id cancelled');
+    AppLogger.log(' Notification $id cancelled');
   }
 
   /// Cancel all notifications
   Future<void> cancelAllNotifications() async {
     await _notifications.cancelAll();
-    debugPrint('✅ All notifications cancelled');
+    AppLogger.log(' All notifications cancelled');
   }
 
   /// Build stock alert notification details
@@ -424,7 +425,7 @@ class NotificationService {
 
       case StockAlertType.expired:
         return _StockAlertNotification(
-          title: '❌ Expired Item',
+          title: ' Expired Item',
           body: '$itemName has expired! Consider reordering.',
           payload: 'stock_alert|expired|$itemName',
           priority: NotificationPriority.max,

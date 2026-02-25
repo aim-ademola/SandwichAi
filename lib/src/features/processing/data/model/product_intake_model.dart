@@ -98,7 +98,7 @@ class Branch {
   final String country;
   final String zipCode;
   final String email;
-  final String? openingHours;
+  final Map<String, dynamic>? openingHours;
   final bool isActive;
   final String managerId;
   final String organizationId;
@@ -134,7 +134,7 @@ class Branch {
       country: json['country'] ?? '',
       zipCode: json['zipCode'] ?? '',
       email: json['email'] ?? '',
-      openingHours: json['openingHours'],
+      openingHours: json['openingHours'] as Map<String, dynamic>?, // ← Updated
       isActive: json['isActive'] ?? false,
       managerId: json['managerId'] ?? '',
       organizationId: json['organizationId'] ?? '',
@@ -267,32 +267,48 @@ class Employee {
   });
 
   factory Employee.fromJson(Map<String, dynamic> json) {
-    return Employee(
-      id: json['id'] ?? '',
-      employeeId: json['employeeId'] ?? '',
-      firstName: json['firstName'] ?? '',
-      lastName: json['lastName'] ?? '',
-      email: json['email'] ?? '',
-      phone: json['phone'] ?? '',
-      address: json['address'] ?? '',
-      dateOfBirth: DateTime.parse(json['dateOfBirth']),
-      role: json['role'] ?? '',
-      department: json['department'] ?? '',
-      isDepartmentManager: json['isDepartmentManager'] ?? false,
-      status: EmployeeStatusExtension.fromString(json['status']),
-      hireDate: DateTime.parse(json['hireDate']),
-      terminationDate: json['terminationDate'] != null
-          ? DateTime.parse(json['terminationDate'])
-          : null,
-      lastLogin: DateTime.parse(json['lastLogin']),
-      emergencyContactName: json['emergencyContactName'],
-      emergencyContactPhone: json['emergencyContactPhone'],
-      emergencyContactRelation: json['emergencyContactRelation'],
-      organizationId: json['organizationId'] ?? '',
-      branchId: json['branchId'] ?? '',
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-    );
+    try {
+      return Employee(
+        id: json['id']?.toString() ?? '',
+        employeeId: json['employeeId']?.toString() ?? '',
+        firstName: json['firstName']?.toString() ?? '',
+        lastName: json['lastName']?.toString() ?? '',
+        email: json['email']?.toString() ?? '',
+        phone: json['phone']?.toString() ?? '',
+        address: json['address']?.toString() ?? '',
+        dateOfBirth: json['dateOfBirth'] != null
+            ? DateTime.parse(json['dateOfBirth'])
+            : DateTime.now(),
+        role: json['role']?.toString() ?? '',
+        department: json['department']?.toString() ?? '',
+        isDepartmentManager: json['isDepartmentManager'] == true,
+        status: json['status'] != null
+            ? EmployeeStatusExtension.fromString(json['status'])
+            : EmployeeStatus.active,
+        hireDate: json['hireDate'] != null
+            ? DateTime.parse(json['hireDate'])
+            : DateTime.now(),
+        terminationDate: json['terminationDate'] != null
+            ? DateTime.parse(json['terminationDate'])
+            : null,
+        lastLogin: json['lastLogin'] != null
+            ? DateTime.parse(json['lastLogin'])
+            : DateTime.now(),
+        emergencyContactName: json['emergencyContactName']?.toString(),
+        emergencyContactPhone: json['emergencyContactPhone']?.toString(),
+        emergencyContactRelation: json['emergencyContactRelation']?.toString(),
+        organizationId: json['organizationId']?.toString() ?? '',
+        branchId: json['branchId']?.toString() ?? '',
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'])
+            : DateTime.now(),
+        updatedAt: json['updatedAt'] != null
+            ? DateTime.parse(json['updatedAt'])
+            : DateTime.now(),
+      );
+    } catch (e) {
+      throw FormatException('Failed to parse Employee: $e\nJSON: $json');
+    }
   }
 
   String get fullName => '$firstName $lastName';

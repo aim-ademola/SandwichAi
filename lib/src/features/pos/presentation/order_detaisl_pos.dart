@@ -97,9 +97,13 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
       if (_selectedOrderType == 'DINE_IN' &&
           _tableNumberController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Please enter table number for dine-in orders'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
         return;

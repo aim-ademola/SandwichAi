@@ -6,6 +6,7 @@ import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/procurement_order_model.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/Procurement_req_dtls.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_drawer.dart';
+import 'package:sandwich_ai/src/features/procurement/presentation/order_form.dart'; // Add this import
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_order_blocs/bloc.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_order_blocs/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_order_blocs/state.dart';
@@ -296,6 +297,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
     final orderNumberFontSize = _getOrderNumberFontSize(screenWidth);
     final amountFontSize = _getAmountFontSize(screenWidth);
     final statusFontSize = _getStatusFontSize(screenWidth);
+    final isApproved = order.status.toUpperCase() == 'APPROVED';
 
     return InkWell(
       onTap: () {
@@ -394,6 +396,43 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                       ),
                     ),
                   ],
+                ),
+              ),
+            ],
+            // Order Item button for approved orders
+            if (isApproved) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => OrderFormScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.shopping_cart, size: 18),
+                  label: Text(
+                    'Order Item',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: _getButtonFontSize(screenWidth),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kPrimary,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      vertical: _getButtonPaddingVertical(screenWidth),
+                      horizontal: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
                 ),
               ),
             ],
@@ -528,5 +567,17 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
     if (width < 360) return 4;
     if (width < 600) return 5;
     return 6;
+  }
+
+  double _getButtonFontSize(double width) {
+    if (width < 360) return 13;
+    if (width < 600) return 14;
+    return 15;
+  }
+
+  double _getButtonPaddingVertical(double width) {
+    if (width < 360) return 10;
+    if (width < 600) return 12;
+    return 14;
   }
 }

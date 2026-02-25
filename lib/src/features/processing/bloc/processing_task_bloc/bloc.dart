@@ -5,6 +5,8 @@ import 'package:sandwich_ai/src/features/processing/bloc/processing_task_bloc/st
 import 'package:sandwich_ai/src/features/processing/data/model/processing_task_model.dart';
 import 'package:sandwich_ai/src/features/processing/data/repo/processsing_task_repo.dart';
 
+import '../../../../core/config/prod_print.dart';
+
 class ProcessingTaskBloc
     extends Bloc<ProcessingTaskEvent, ProcessingTaskState> {
   final ProcessingTaskRepositoryInterface _repository;
@@ -170,34 +172,34 @@ class ProcessingTaskBloc
       // Emit loading state for delete
       emit(const ProcessingTaskSubmitting());
 
-      print('🗑️ BLoC: Starting delete for task ${event.taskId}');
+      AppLogger.log('🗑️ BLoC: Starting delete for task ${event.taskId}');
 
       final response = await _repository.deleteProcessingTask(
         taskId: event.taskId,
       );
 
-      print('🗑️ BLoC: Delete response received');
+      AppLogger.log('🗑️ BLoC: Delete response received');
 
       await response.when(
         success: (_) async {
-          print('✅ BLoC: Delete successful, emitting success state');
+          AppLogger.log(' BLoC: Delete successful, emitting success state');
 
           emit(
             const ProcessingTaskDeleted(message: 'Task deleted successfully!'),
           );
 
-          print('✅ BLoC: Success state emitted, waiting before reload');
+          AppLogger.log(' BLoC: Success state emitted, waiting before reload');
 
           // Small delay before reloading
           await Future.delayed(const Duration(milliseconds: 500));
 
-          print('🔄 BLoC: Triggering reload');
+          AppLogger.log(' BLoC: Triggering reload');
 
           // Reload tasks after deletion
           add(const LoadProcessingTasks());
         },
         error: (error) async {
-          print('❌ BLoC: Delete error - $error');
+          AppLogger.log(' BLoC: Delete error - $error');
           final errorType = _determineErrorType(error.toString());
           emit(
             ProcessingTaskError(error: error.toString(), errorType: errorType),
@@ -205,11 +207,13 @@ class ProcessingTaskBloc
         },
       );
     } catch (e, stackTrace) {
-      print('❌ BLoC: Delete exception caught');
-      print('   Error: $e');
-      print('   Type: ${e.runtimeType}');
-      print('   Stack trace:');
-      print('   ${stackTrace.toString().split('\n').take(10).join('\n   ')}');
+      AppLogger.log(' BLoC: Delete exception caught');
+      AppLogger.log('   Error: $e');
+      AppLogger.log('   Type: ${e.runtimeType}');
+      AppLogger.log('   Stack trace:');
+      AppLogger.log(
+        '   ${stackTrace.toString().split('\n').take(10).join('\n   ')}',
+      );
 
       emit(
         const ProcessingTaskError(

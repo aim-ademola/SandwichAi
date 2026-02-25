@@ -5,6 +5,8 @@ import 'package:sandwich_ai/src/features/procurement/data/repository/purchase_or
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/state.dart';
 
+import '../../../../core/config/prod_print.dart';
+
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final OrderRepositoryInterface _repository;
   String branchId = '';
@@ -42,7 +44,9 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         buyerBranchId = await AuthCacheHelper.instance.getBranchID() ?? '';
       }
 
-      print('Creating order with branchId: $buyerBranchId, empId: $buyerId');
+      AppLogger.log(
+        'Creating order with branchId: $buyerBranchId, empId: $buyerId',
+      );
 
       if (buyerId.isEmpty || buyerBranchId.isEmpty) {
         emit(
@@ -107,7 +111,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         },
       );
     } catch (e) {
-      print('Order creation error: $e');
+      AppLogger.log('Order creation error: $e');
       emit(
         OrderError(
           error: 'An unexpected error occurred: ${e.toString()}',

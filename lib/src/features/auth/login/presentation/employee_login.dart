@@ -13,6 +13,8 @@ import 'package:sandwich_ai/src/features/auth/login_bloc/login_bloc.dart';
 import 'package:sandwich_ai/src/features/auth/login_bloc/login_event.dart';
 import 'package:sandwich_ai/src/features/auth/login_bloc/login_state.dart';
 
+import '../../../../core/config/prod_print.dart';
+
 class EmployeeLoginScreen extends StatefulWidget {
   const EmployeeLoginScreen({super.key});
 
@@ -67,7 +69,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
         }
       }
     } catch (e) {
-      debugPrint('Error loading saved credentials: $e');
+      AppLogger.log('Error loading saved credentials: $e');
     }
   }
 
@@ -86,7 +88,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
         rememberMe: rememberMe,
       );
     } catch (e) {
-      debugPrint('Error saving credentials: $e');
+      AppLogger.log('Error saving credentials: $e');
     }
   }
 
@@ -149,12 +151,14 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
           showSuccessSnackBar(state.message ?? 'Login successful!', context);
 
           final dpt = state.response.user.department;
-          print('Department: $dpt');
-          print('Organization: ${state.response.user.organizationName}');
-          print('Branch: ${state.response.user.branch?.name}');
+          AppLogger.log('Department: $dpt');
+          AppLogger.log(
+            'Organization: ${state.response.user.organizationName}',
+          );
+          AppLogger.log('Branch: ${state.response.user.branch?.name}');
 
           // Navigate based on department
-          context.go('/Pos-nav');
+          context.go('/Stock-control-nav');
 
           // Uncomment to enable department-based navigation
           // if (dpt == null) {

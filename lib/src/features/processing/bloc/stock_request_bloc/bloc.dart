@@ -19,13 +19,15 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
     on<CreateStockRequest>(_onCreateRequest);
     on<FilterRequestsByStatus>(_onFilterByStatus);
     on<LoadStockRequestDetails>(_onLoadDetails);
-    on<CompleteStockRequest>(_onCompleteRequest);
+    on<LoadStockRequestStatus>(_onLoadStatus);
+    on<PerformStockRequestAction>(_onPerformAction);
   }
 
   void _getBranchId() async {
-    final id = await AuthCacheHelper.instance.getBranchID() ?? '';
-    branchId = id;
+    branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
   }
+
+  // ─── List / Refresh ───────────────────────────────────────────────────────
 
   Future<void> _onLoadRequests(
     LoadStockRequests event,
@@ -34,69 +36,36 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
     try {
       emit(const StockRequestLoading());
 
+      // ✅ Always resolve branchId from cache — never trust the event's value
+      final resolvedBranchId = branchId.isNotEmpty
+          ? branchId
+          : await AuthCacheHelper.instance.getBranchID() ?? '';
+
+      if (resolvedBranchId.isEmpty) {
+        emit(
+          const StockRequestError(
+            error: 'Branch ID not found. Please log in again.',
+            errorType: StockRequestErrorType.general,
+          ),
+        );
+        return;
+      }
+
+      // Cache it for future calls
+      branchId = resolvedBranchId;
+
       final response = await _repository.getStockRequests(
-        branchId: branchId,
+        branchId: resolvedBranchId,
         status: event.status,
       );
 
       await response.when(
-        success: (data) async {
-          if (data.data.isEmpty) {
-            emit(const StockRequestEmpty());
-            return;
-          }
-
-          // Filter by department if provided
-          var filteredData = data.data;
-          if (event.department != null && event.department!.isNotEmpty) {
-            filteredData = data.data
-                .where((request) => request.department == event.department)
-                .toList();
-          }
-
-          if (filteredData.isEmpty) {
-            emit(const StockRequestEmpty());
-            return;
-          }
-
-          final pending = filteredData
-              .where(
-                (request) =>
-                    request.status == 'PENDING' || request.status == 'APPROVED',
-              )
-              .toList();
-
-          final completed = filteredData
-              .where(
-                (request) =>
-                    request.status == 'COMPLETED' ||
-                    request.status == 'REJECTED',
-              )
-              .toList();
-
-          emit(
-            StockRequestListLoaded(
-              requests: filteredData,
-              pendingRequests: pending,
-              completedRequests: completed,
-              currentFilter: event.status,
-            ),
-          );
-        },
-        error: (error) async {
-          final errorType = _determineErrorType(error.toString());
-          emit(
-            StockRequestError(error: error.toString(), errorType: errorType),
-          );
-        },
+        success: (data) async =>
+            emit(_buildListState(data.data, event.status, event.department)),
+        error: (error) async => emit(_buildError(error as String)),
       );
-    } catch (e) {
-      emit(
-        const StockRequestError(
-          error: 'An unexpected error occurred. Please try again.',
-          errorType: StockRequestErrorType.general,
-        ),
-      );
+    } catch (_) {
+      emit(_unexpectedError());
     }
   }
 
@@ -105,73 +74,38 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
     Emitter<StockRequestState> emit,
   ) async {
     if (state is! StockRequestListLoaded) {
-      add(
-        LoadStockRequests(
-          branchId: branchId,
-          status: event.status,
-          department: event.department,
-        ),
-      );
+      add(LoadStockRequests(branchId: branchId, status: event.status));
       return;
     }
 
-    final currentState = state as StockRequestListLoaded;
-    emit(StockRequestRefreshing(currentRequests: currentState.requests));
-
-    final response = await _repository.getStockRequests(
-      branchId: branchId,
-      status: event.status,
+    emit(
+      StockRequestRefreshing(
+        currentRequests: (state as StockRequestListLoaded).requests,
+      ),
     );
 
-    await response.when(
-      success: (data) async {
-        if (data.data.isEmpty) {
-          emit(const StockRequestEmpty());
-          return;
-        }
+    // ✅ Same resolution logic
+    final resolvedBranchId = branchId.isNotEmpty
+        ? branchId
+        : await AuthCacheHelper.instance.getBranchID() ?? '';
 
-        // Filter by department if provided
-        var filteredData = data.data;
-        if (event.department != null && event.department!.isNotEmpty) {
-          filteredData = data.data
-              .where((request) => request.department == event.department)
-              .toList();
-        }
+    try {
+      final response = await _repository.getStockRequests(
+        branchId: resolvedBranchId,
+        status: event.status,
+      );
 
-        if (filteredData.isEmpty) {
-          emit(const StockRequestEmpty());
-          return;
-        }
-
-        final pending = filteredData
-            .where(
-              (request) =>
-                  request.status == 'PENDING' || request.status == 'APPROVED',
-            )
-            .toList();
-
-        final completed = filteredData
-            .where(
-              (request) =>
-                  request.status == 'COMPLETED' || request.status == 'REJECTED',
-            )
-            .toList();
-
-        emit(
-          StockRequestListLoaded(
-            requests: filteredData,
-            pendingRequests: pending,
-            completedRequests: completed,
-            currentFilter: event.status,
-          ),
-        );
-      },
-      error: (error) async {
-        final errorType = _determineErrorType(error.toString());
-        emit(StockRequestError(error: error.toString(), errorType: errorType));
-      },
-    );
+      await response.when(
+        success: (data) async =>
+            emit(_buildListState(data.data, event.status, event.department)),
+        error: (error) async => emit(_buildError(error as String)),
+      );
+    } catch (_) {
+      emit(_unexpectedError());
+    }
   }
+
+  // ─── Create ───────────────────────────────────────────────────────────────
 
   Future<void> _onCreateRequest(
     CreateStockRequest event,
@@ -179,7 +113,6 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
   ) async {
     try {
       emit(const StockRequestCreating());
-
       final response = await _repository.createStockRequest(
         event.request as CreateStockRequestRequest,
       );
@@ -187,26 +120,16 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
       await response.when(
         success: (data) async {
           emit(StockRequestCreated(request: data.data));
-
-          // Reload the list
           add(LoadStockRequests(branchId: branchId));
         },
-        error: (error) async {
-          final errorType = _determineErrorType(error.toString());
-          emit(
-            StockRequestError(error: error.toString(), errorType: errorType),
-          );
-        },
+        error: (error) async => emit(_buildError(error as String)),
       );
-    } catch (e) {
-      emit(
-        const StockRequestError(
-          error: 'An unexpected error occurred while creating request.',
-          errorType: StockRequestErrorType.general,
-        ),
-      );
+    } catch (_) {
+      emit(_unexpectedError());
     }
   }
+
+  // ─── Details & Status ────────────────────────────────────────────────────
 
   Future<void> _onLoadDetails(
     LoadStockRequestDetails event,
@@ -214,99 +137,93 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
   ) async {
     try {
       emit(const StockRequestLoading());
-
       final response = await _repository.getStockRequestDetails(
         event.requestId,
       );
 
       await response.when(
-        success: (data) async {
-          emit(StockRequestDetailsLoaded(request: data));
-        },
-        error: (error) async {
-          final errorType = _determineErrorType(error.toString());
-          emit(
-            StockRequestError(error: error.toString(), errorType: errorType),
-          );
-        },
+        success: (data) async => emit(StockRequestDetailsLoaded(request: data)),
+        error: (error) async => emit(_buildError(error as String)),
       );
-    } catch (e) {
-      emit(
-        const StockRequestError(
-          error: 'An unexpected error occurred. Please try again.',
-          errorType: StockRequestErrorType.general,
-        ),
-      );
+    } catch (_) {
+      emit(_unexpectedError());
     }
   }
 
-  Future<void> _onCompleteRequest(
-    CompleteStockRequest event,
+  Future<void> _onLoadStatus(
+    LoadStockRequestStatus event,
     Emitter<StockRequestState> emit,
   ) async {
     try {
-      final response = await _repository.completeStockRequest(event.requestId);
+      final response = await _repository.getStockRequestStatus(event.requestId);
+
+      await response.when(
+        success: (data) async => emit(
+          StockRequestStatusLoaded(
+            requestId: event.requestId,
+            status: data['status']?.toString() ?? '',
+          ),
+        ),
+        error: (error) async => emit(_buildError(error as String)),
+      );
+    } catch (_) {
+      emit(_unexpectedError());
+    }
+  }
+
+  // ─── Generic Action ───────────────────────────────────────────────────────
+
+  Future<void> _onPerformAction(
+    PerformStockRequestAction event,
+    Emitter<StockRequestState> emit,
+  ) async {
+    final currentRequests = _currentRequests();
+
+    // Optimistically show in-progress state so the UI can reflect it immediately
+    emit(
+      StockRequestActionInProgress(
+        requestId: event.requestId,
+        action: event.action,
+        currentRequests: currentRequests,
+      ),
+    );
+
+    try {
+      final response = await _repository.performAction(
+        event.requestId,
+        event.action,
+      );
 
       await response.when(
         success: (data) async {
-          // Get current requests to pass along
-          List<StockRequest> currentRequests = [];
-          if (state is StockRequestListLoaded) {
-            currentRequests = (state as StockRequestListLoaded).requests;
-          }
-
           emit(
-            StockRequestCompleted(
+            StockRequestActionSuccess(
               request: data,
-              message: 'Stock request completed successfully!',
+              action: event.action,
+              message: event.action.successMessage,
               currentRequests: currentRequests,
             ),
           );
 
-          // Small delay for user to see the success message
           await Future.delayed(const Duration(milliseconds: 800));
 
-          // Get the current filter if available
-          String? currentFilter;
-          if (state is StockRequestCompleted) {
-            // We need to track the filter separately or get it from somewhere
-            // For now, just reload all
-            currentFilter = null;
-          }
-
-          // Use RefreshStockRequests to reload without full loading spinner
-          if (state is StockRequestListLoaded ||
-              state is StockRequestCompleted) {
-            add(
-              RefreshStockRequests(branchId: branchId, status: currentFilter),
-            );
-          } else {
-            add(LoadStockRequests(branchId: branchId, status: currentFilter));
-          }
+          // Silently refresh the list
+          add(RefreshStockRequests(branchId: branchId));
         },
-        error: (error) async {
-          final errorType = _determineErrorType(error.toString());
-          emit(
-            StockRequestError(error: error.toString(), errorType: errorType),
-          );
-        },
+        error: (error) async => emit(_buildError(error as String)),
       );
-    } catch (e) {
-      emit(
-        const StockRequestError(
-          error: 'An unexpected error occurred while completing request.',
-          errorType: StockRequestErrorType.general,
-        ),
-      );
+    } catch (_) {
+      emit(_unexpectedError());
     }
   }
+
+  // ─── Filter ───────────────────────────────────────────────────────────────
 
   void _onFilterByStatus(
     FilterRequestsByStatus event,
     Emitter<StockRequestState> emit,
   ) {
     if (state is! StockRequestListLoaded) return;
-
     add(
       LoadStockRequests(
         branchId: branchId,
@@ -316,30 +233,71 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
     );
   }
 
-  StockRequestErrorType _determineErrorType(String error) {
-    final lowercaseError = error.toLowerCase();
+  // ─── Helpers ─────────────────────────────────────────────────────────────
 
-    if (lowercaseError.contains('network') ||
-        lowercaseError.contains('connection') ||
-        lowercaseError.contains('internet')) {
+  List<StockRequest> _currentRequests() {
+    if (state is StockRequestListLoaded) {
+      return (state as StockRequestListLoaded).requests;
+    }
+    if (state is StockRequestActionInProgress) {
+      return (state as StockRequestActionInProgress).currentRequests;
+    }
+    return [];
+  }
+
+  StockRequestState _buildListState(
+    List<StockRequest> data,
+    String? status,
+    String? department,
+  ) {
+    var filtered = data;
+    if (department != null && department.isNotEmpty) {
+      filtered = data.where((r) => r.department == department).toList();
+    }
+
+    if (filtered.isEmpty) return const StockRequestEmpty();
+
+    final pending = filtered
+        .where((r) => r.status == 'PENDING' || r.status == 'APPROVED')
+        .toList();
+    final completed = filtered
+        .where((r) => r.status == 'COMPLETED' || r.status == 'REJECTED')
+        .toList();
+
+    return StockRequestListLoaded(
+      requests: filtered,
+      pendingRequests: pending,
+      completedRequests: completed,
+      currentFilter: status,
+    );
+  }
+
+  StockRequestError _buildError(String error) {
+    return StockRequestError(
+      error: error,
+      errorType: _determineErrorType(error),
+    );
+  }
+
+  StockRequestError _unexpectedError() => const StockRequestError(
+    error: 'An unexpected error occurred. Please try again.',
+    errorType: StockRequestErrorType.general,
+  );
+
+  StockRequestErrorType _determineErrorType(String error) {
+    final e = error.toLowerCase();
+    if (e.contains('network') ||
+        e.contains('connection') ||
+        e.contains('internet')) {
       return StockRequestErrorType.network;
     }
-
-    if (lowercaseError.contains('timeout')) {
-      return StockRequestErrorType.timeout;
-    }
-
-    if (lowercaseError.contains('server') ||
-        lowercaseError.contains('500') ||
-        lowercaseError.contains('503')) {
+    if (e.contains('timeout')) return StockRequestErrorType.timeout;
+    if (e.contains('server') || e.contains('500') || e.contains('503')) {
       return StockRequestErrorType.server;
     }
-
-    if (lowercaseError.contains('format') ||
-        lowercaseError.contains('validation')) {
+    if (e.contains('format') || e.contains('validation')) {
       return StockRequestErrorType.validation;
     }
-
     return StockRequestErrorType.general;
   }
 }

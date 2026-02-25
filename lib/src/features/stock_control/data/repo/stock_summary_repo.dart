@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
@@ -47,7 +48,7 @@ class BranchStockSummaryRepository extends BaseRepository
             // Just return the summary as-is
             return ApiResponse.success(summary);
           } catch (e) {
-            print('Failed to parse stock summary: $e');
+            AppLogger.log('Failed to parse stock summary: $e');
             // Return error for actual parsing failures
             return ApiResponse.error(
               NetworkException.formatException(

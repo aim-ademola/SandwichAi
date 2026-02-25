@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -93,10 +94,10 @@ class _ValidateStockTransferToProcessingcreenState
     final bId = await AuthCacheHelper.instance.getBranchID() ?? '';
     final empId = await AuthCacheHelper.instance.getEmpID() ?? '';
 
-    print('=== BRANCH & EMPLOYEE DATA ===');
-    print('Branch ID: $bId');
-    print('Employee ID: $empId');
-    print('==============================');
+    AppLogger.log('=== BRANCH & EMPLOYEE DATA ===');
+    AppLogger.log('Branch ID: $bId');
+    AppLogger.log('Employee ID: $empId');
+    AppLogger.log('==============================');
 
     if (mounted) {
       setState(() {

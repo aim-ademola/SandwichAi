@@ -1,824 +1,1040 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sandwich_ai/src/core/constant/appcolors.dart';
-import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/cupertino.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+// import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+// import 'package:intl/intl.dart';
+// import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/bloc.dart';
+// import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/event.dart';
+// import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/state.dart';
+// import 'package:sandwich_ai/src/features/processing/data/model/stock_reuest_model.dart';
+// import 'package:sandwich_ai/src/features/processing/presentation/stock_req_details.dart';
 
-import 'package:intl/intl.dart';
-import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/bloc.dart';
-import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/event.dart';
-import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/state.dart';
-import 'package:sandwich_ai/src/features/processing/data/model/stock_reuest_model.dart';
-import 'package:sandwich_ai/src/features/processing/presentation/stock_req_details.dart';
+// class CompleteStockRequestDetailsScreen extends StatefulWidget {
+//   final String branchId;
 
-class CompleteStockRequestDetailsScreen extends StatefulWidget {
-  final String branchId;
+//   const CompleteStockRequestDetailsScreen({super.key, required this.branchId});
 
-  const CompleteStockRequestDetailsScreen({super.key, required this.branchId});
+//   @override
+//   State<CompleteStockRequestDetailsScreen> createState() =>
+//       _CompleteStockRequestDetailsScreenState();
+// }
 
-  @override
-  State<CompleteStockRequestDetailsScreen> createState() =>
-      _CompleteStockRequestDetailsScreenState();
-}
+// class _CompleteStockRequestDetailsScreenState
+//     extends State<CompleteStockRequestDetailsScreen>
+//     with SingleTickerProviderStateMixin {
+//   late TabController _tabController;
+//   String? _currentFilter;
 
-class _CompleteStockRequestDetailsScreenState
-    extends State<CompleteStockRequestDetailsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  String? _currentFilter;
-  String? _completingRequestId;
+//   @override
+//   void initState() {
+//     super.initState();
+//     _tabController = TabController(length: 3, vsync: this);
+//     _tabController.addListener(_onTabChanged);
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(_onTabChanged);
+//     context.read<StockRequestBloc>().add(
+//       LoadStockRequests(branchId: widget.branchId),
+//     );
+//   }
 
-    context.read<StockRequestBloc>().add(
-      LoadStockRequests(branchId: widget.branchId),
-    );
-  }
+//   @override
+//   void dispose() {
+//     _tabController.dispose();
+//     super.dispose();
+//   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+//   void _onTabChanged() {
+//     if (!_tabController.indexIsChanging) {
+//       setState(() {
+//         _currentFilter = switch (_tabController.index) {
+//           1 => 'PENDING',
+//           2 => 'COMPLETED',
+//           _ => null,
+//         };
+//       });
 
-  void _onTabChanged() {
-    if (!_tabController.indexIsChanging) {
-      setState(() {
-        if (_tabController.index == 0) {
-          _currentFilter = null;
-        } else if (_tabController.index == 1) {
-          _currentFilter = 'PENDING';
-        } else {
-          _currentFilter = 'COMPLETED';
-        }
-      });
+//       context.read<StockRequestBloc>().add(
+//         FilterRequestsByStatus(status: _currentFilter),
+//       );
+//     }
+//   }
 
-      context.read<StockRequestBloc>().add(
-        FilterRequestsByStatus(status: _currentFilter),
-      );
-    }
-  }
+//   Future<void> _onRefresh() async {
+//     context.read<StockRequestBloc>().add(
+//       RefreshStockRequests(branchId: widget.branchId, status: _currentFilter),
+//     );
+//   }
 
-  Future<void> _onRefresh() async {
-    context.read<StockRequestBloc>().add(
-      RefreshStockRequests(branchId: widget.branchId, status: _currentFilter),
-    );
-  }
+//   void _navigateToDetails(StockRequest request) {
+//     Navigator.push(
+//       context,
+//       CupertinoPageRoute(
+//         builder: (_) => StockRequestDetailsScreen(request: request),
+//       ),
+//     );
+//   }
 
-  void _navigateToDetails(StockRequest request) {
-    Navigator.push(
-      context,
-      CupertinoPageRoute(
-        builder: (_) => StockRequestDetailsScreen(request: request),
-      ),
-    );
-  }
+//   void _handleAction(StockRequest request, StockRequestAction action) {
+//     final config = _dialogConfigFor(action, request.requestId);
 
-  void _handleTransferItems(StockRequest request) {
-    // Show confirmation dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Complete Transfer',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to complete the transfer for ${request.requestId}?\n\nThis will mark all items as transferred and complete the request.',
-          style: WorkSansAppTextStyles.medium.copyWith(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: kprimaryTextColor2)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _completingRequestId = request.id;
-              });
-              context.read<StockRequestBloc>().add(
-                CompleteStockRequest(requestId: request.id),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('Complete Transfer'),
-          ),
-        ],
-      ),
-    );
-  }
+//     showDialog(
+//       context: context,
+//       builder: (dialogContext) => AlertDialog(
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//         title: Text(
+//           config.title,
+//           style: WorkSansAppTextStyles.medium.copyWith(
+//             fontSize: 18,
+//             fontWeight: FontWeight.w600,
+//           ),
+//         ),
+//         content: Text(
+//           config.body,
+//           style: WorkSansAppTextStyles.medium.copyWith(fontSize: 14),
+//         ),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.pop(dialogContext),
+//             child: Text('Cancel', style: TextStyle(color: kprimaryTextColor2)),
+//           ),
+//           ElevatedButton(
+//             onPressed: () {
+//               Navigator.pop(dialogContext);
+//               context.read<StockRequestBloc>().add(
+//                 PerformStockRequestAction(
+//                   requestId: request.id,
+//                   action: action,
+//                 ),
+//               );
+//             },
+//             style: ElevatedButton.styleFrom(
+//               backgroundColor: config.confirmColor,
+//               foregroundColor: Colors.white,
+//               shape: RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.circular(8),
+//               ),
+//             ),
+//             child: Text(config.confirmLabel),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
+//   _ActionDialogConfig _dialogConfigFor(
+//     StockRequestAction action,
+//     String requestId,
+//   ) {
+//     return switch (action) {
+//       StockRequestAction.process => _ActionDialogConfig(
+//         title: 'Start Processing',
+//         body:
+//             'Are you sure you want to start processing $requestId?\n\nThis will move the request to PROCESSING status.',
+//         confirmLabel: 'Start Processing',
+//         confirmColor: const Color(0xFF26A69A),
+//       ),
+//       StockRequestAction.approve => _ActionDialogConfig(
+//         title: 'Approve Request',
+//         body:
+//             'Are you sure you want to approve $requestId?\n\nThis will mark the request as approved.',
+//         confirmLabel: 'Approve',
+//         confirmColor: const Color(0xFF42A5F5),
+//       ),
+//       StockRequestAction.queue => _ActionDialogConfig(
+//         title: 'Send to Queue',
+//         body:
+//             'Are you sure you want to queue $requestId?\n\nThis will move the request to the processing queue.',
+//         confirmLabel: 'Send to Queue',
+//         confirmColor: const Color(0xFFAB47BC),
+//       ),
+//       StockRequestAction.complete => _ActionDialogConfig(
+//         title: 'Complete Transfer',
+//         body:
+//             'Are you sure you want to complete the transfer for $requestId?\n\nThis will mark all items as transferred and complete the request.',
+//         confirmLabel: 'Complete Transfer',
+//         confirmColor: kPrimary,
+//       ),
+//       StockRequestAction.reject => _ActionDialogConfig(
+//         title: 'Reject Request',
+//         body:
+//             'Are you sure you want to reject $requestId?\n\nThis action cannot be undone.',
+//         confirmLabel: 'Reject',
+//         confirmColor: const Color(0xFFEF5350),
+//       ),
+//       StockRequestAction.cancel => _ActionDialogConfig(
+//         title: 'Cancel Request',
+//         body:
+//             'Are you sure you want to cancel $requestId?\n\nThis action cannot be undone.',
+//         confirmLabel: 'Cancel Request',
+//         confirmColor: const Color(0xFFEF5350),
+//       ),
+//     };
+//   }
 
-        return Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
-          appBar: _buildAppBar(screenWidth),
-          body: BlocConsumer<StockRequestBloc, StockRequestState>(
-            listener: (context, state) {
-              if (state is StockRequestError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.error),
-                    backgroundColor: const Color(0xFFE53935),
-                  ),
-                );
-                setState(() {
-                  _completingRequestId = null;
-                });
-              } else if (state is StockRequestCompleted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: kGreen,
-                  ),
-                );
-                setState(() {
-                  _completingRequestId = null;
-                });
-              }
-            },
-            builder: (context, state) {
-              if (state is StockRequestLoading) {
-                return _buildLoadingState();
-              }
+//   // ─── Build ────────────────────────────────────────────────────────────────
 
-              if (state is StockRequestEmpty) {
-                return _buildEmptyState(screenWidth);
-              }
+//   @override
+//   Widget build(BuildContext context) {
+//     return LayoutBuilder(
+//       builder: (context, constraints) {
+//         final screenWidth = constraints.maxWidth;
 
-              if (state is StockRequestListLoaded ||
-                  state is StockRequestRefreshing) {
-                List<StockRequest> actualRequests;
+//         return Scaffold(
+//           backgroundColor: const Color(0xFFF8F6F6),
+//           appBar: _buildAppBar(screenWidth),
+//           body: BlocConsumer<StockRequestBloc, StockRequestState>(
+//             listener: (context, state) {
+//               if (state is StockRequestError) {
+//                 ScaffoldMessenger.of(context).showSnackBar(
+//                   SnackBar(
+//                     content: Text(state.error),
+//                     backgroundColor: const Color(0xFFE53935),
+//                     behavior: SnackBarBehavior.floating,
+//                   ),
+//                 );
+//               } else if (state is StockRequestActionSuccess) {
+//                 ScaffoldMessenger.of(context).showSnackBar(
+//                   SnackBar(
+//                     content: Text(state.message),
+//                     backgroundColor: kGreen,
+//                     behavior: SnackBarBehavior.floating,
+//                   ),
+//                 );
+//               }
+//             },
+//             builder: (context, state) {
+//               if (state is StockRequestLoading) {
+//                 return _buildLoadingState();
+//               }
 
-                if (state is StockRequestListLoaded) {
-                  actualRequests = state.requests;
-                } else {
-                  actualRequests =
-                      (state as StockRequestRefreshing).currentRequests;
-                }
+//               if (state is StockRequestEmpty) {
+//                 return _buildEmptyState(screenWidth);
+//               }
 
-                final List<StockRequest> pending =
-                    state is StockRequestListLoaded
-                    ? state.pendingRequests
-                    : actualRequests
-                          .where(
-                            (r) =>
-                                r.status == 'PENDING' || r.status == 'APPROVED',
-                          )
-                          .toList();
+//               if (state is StockRequestListLoaded ||
+//                   state is StockRequestRefreshing ||
+//                   state is StockRequestActionSuccess ||
+//                   state is StockRequestActionInProgress) {
+//                 final actualRequests = _extractRequests(state);
+//                 final isRefreshing = state is StockRequestRefreshing;
 
-                final List<StockRequest> completed =
-                    state is StockRequestListLoaded
-                    ? state.completedRequests
-                    : actualRequests
-                          .where(
-                            (r) =>
-                                r.status == 'COMPLETED' ||
-                                r.status == 'REJECTED',
-                          )
-                          .toList();
+//                 // Server state machine groupings:
+//                 // "Pending" tab  → PENDING, APPROVED, IN_QUEUE  (still actionable)
+//                 // "Completed" tab→ COMPLETED, REJECTED, CANCELLED (terminal)
+//                 final pending = actualRequests
+//                     .where(
+//                       (r) =>
+//                           r.status == 'PENDING' ||
+//                           r.status == 'APPROVED' ||
+//                           r.status == 'IN_QUEUE' ||
+//                           r.status == 'PROCESSING',
+//                     ) // ← add
+//                     .toList();
 
-                return Column(
-                  children: [
-                    _buildTabBar(screenWidth),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _buildRequestsList(
-                            actualRequests,
-                            screenWidth,
-                            state is StockRequestRefreshing,
-                            showTransferButton: true,
-                          ),
-                          _buildRequestsList(
-                            pending,
-                            screenWidth,
-                            state is StockRequestRefreshing,
-                            showTransferButton: true,
-                          ),
-                          _buildRequestsList(
-                            completed,
-                            screenWidth,
-                            state is StockRequestRefreshing,
-                            showTransferButton: false,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              }
+//                 final completed = actualRequests
+//                     .where(
+//                       (r) =>
+//                           r.status == 'COMPLETED' ||
+//                           r.status == 'REJECTED' ||
+//                           r.status == 'CANCELLED',
+//                     )
+//                     .toList();
 
-              return _buildEmptyState(screenWidth);
-            },
-          ),
-        );
-      },
-    );
-  }
+//                 return Column(
+//                   children: [
+//                     _buildTabBar(screenWidth),
+//                     Expanded(
+//                       child: TabBarView(
+//                         controller: _tabController,
+//                         children: [
+//                           _buildRequestsList(
+//                             actualRequests,
+//                             screenWidth,
+//                             isRefreshing,
+//                             state,
+//                             showActions: true,
+//                           ),
+//                           _buildRequestsList(
+//                             pending,
+//                             screenWidth,
+//                             isRefreshing,
+//                             state,
+//                             showActions: true,
+//                           ),
+//                           _buildRequestsList(
+//                             completed,
+//                             screenWidth,
+//                             isRefreshing,
+//                             state,
+//                             showActions: false,
+//                           ),
+//                         ],
+//                       ),
+//                     ),
+//                   ],
+//                 );
+//               }
 
-  PreferredSizeWidget _buildAppBar(double screenWidth) {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: kprimaryTextColor1,
-          size: _getIconSize(screenWidth),
-        ),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Text(
-        'Stock Requests',
-        style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: _getAppBarTitleFontSize(screenWidth),
-          fontWeight: FontWeight.w600,
-          color: kprimaryTextColor1,
-        ),
-      ),
-      centerTitle: true,
-    );
-  }
+//               return _buildEmptyState(screenWidth);
+//             },
+//           ),
+//         );
+//       },
+//     );
+//   }
 
-  Widget _buildTabBar(double screenWidth) {
-    return Container(
-      color: Colors.white,
-      child: TabBar(
-        controller: _tabController,
-        labelColor: kPrimary,
-        unselectedLabelColor: kprimaryTextColor2,
-        indicatorColor: kPrimary,
-        indicatorWeight: 3,
-        labelStyle: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: _getTabFontSize(screenWidth),
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: _getTabFontSize(screenWidth),
-          fontWeight: FontWeight.w500,
-        ),
-        tabs: const [
-          Tab(text: 'All'),
-          Tab(text: 'Pending'),
-          Tab(text: 'Completed'),
-        ],
-      ),
-    );
-  }
+//   // ─── State helpers ────────────────────────────────────────────────────────
 
-  Widget _buildLoadingState() {
-    return Center(
-      child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
-      ),
-    );
-  }
+//   List<StockRequest> _extractRequests(StockRequestState state) {
+//     if (state is StockRequestListLoaded) return state.requests;
+//     if (state is StockRequestRefreshing) return state.currentRequests;
+//     if (state is StockRequestActionInProgress) return state.currentRequests;
+//     if (state is StockRequestActionSuccess) return state.currentRequests;
+//     return [];
+//   }
 
-  Widget _buildEmptyState(double screenWidth) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(_getHorizontalPadding(screenWidth)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: _getEmptyIconSize(screenWidth),
-              height: _getEmptyIconSize(screenWidth),
-              decoration: BoxDecoration(
-                color: kPrimary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.inbox_outlined,
-                size: _getEmptyIconSize(screenWidth) * 0.5,
-                color: kPrimary,
-              ),
-            ),
-            SizedBox(height: _getSectionSpacing(screenWidth)),
-            Text(
-              'No stock requests',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: _getSectionTitleFontSize(screenWidth),
-                fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Create your first stock request to get started',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor2,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+//   bool _isActionInProgress(
+//     StockRequestState state,
+//     String requestId,
+//     StockRequestAction action,
+//   ) =>
+//       state is StockRequestActionInProgress &&
+//       state.requestId == requestId &&
+//       state.action == action;
 
-  Widget _buildRequestsList(
-    List<StockRequest> requests,
-    double screenWidth,
-    bool isRefreshing, {
-    bool showTransferButton = false,
-  }) {
-    if (requests.isEmpty) {
-      return _buildEmptyState(screenWidth);
-    }
+//   bool _isAnyActionInProgress(StockRequestState state, String requestId) =>
+//       state is StockRequestActionInProgress && state.requestId == requestId;
 
-    return RefreshIndicator(
-      onRefresh: _onRefresh,
-      color: kPrimary,
-      child: ListView.builder(
-        padding: EdgeInsets.all(_getHorizontalPadding(screenWidth)),
-        itemCount: requests.length,
-        itemBuilder: (context, index) {
-          return _buildRequestCard(
-            requests[index],
-            screenWidth,
-            showTransferButton: showTransferButton,
-          );
-        },
-      ),
-    );
-  }
+//   // ─── App Bar ──────────────────────────────────────────────────────────────
 
-  Widget _buildRequestCard(
-    StockRequest request,
-    double screenWidth, {
-    bool showTransferButton = false,
-  }) {
-    final isCompleting = _completingRequestId == request.id;
+//   PreferredSizeWidget _buildAppBar(double screenWidth) {
+//     return AppBar(
+//       backgroundColor: Colors.white,
+//       elevation: 0,
+//       leading: IconButton(
+//         icon: Icon(
+//           Icons.arrow_back,
+//           color: kprimaryTextColor1,
+//           size: _getIconSize(screenWidth),
+//         ),
+//         onPressed: () => Navigator.pop(context),
+//       ),
+//       title: Text(
+//         'Stock Requests',
+//         style: WorkSansAppTextStyles.medium.copyWith(
+//           fontSize: _getAppBarTitleFontSize(screenWidth),
+//           fontWeight: FontWeight.w600,
+//           color: kprimaryTextColor1,
+//         ),
+//       ),
+//       centerTitle: true,
+//     );
+//   }
 
-    return Container(
-      margin: EdgeInsets.only(bottom: _getFieldSpacing(screenWidth)),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => _navigateToDetails(request),
-        borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        child: Padding(
-          padding: EdgeInsets.all(_getCardPadding(screenWidth)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(request.status).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      request.requestId,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: _getCaptionFontSize(screenWidth),
-                        fontWeight: FontWeight.w600,
-                        color: _getStatusColor(request.status),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  _buildStatusBadge(request.status, screenWidth),
-                ],
-              ),
-              SizedBox(height: _getFieldSpacing(screenWidth)),
+//   // ─── Tab Bar ──────────────────────────────────────────────────────────────
 
-              // Items Section with Show More/Less
-              _buildItemsSection(request, screenWidth),
+//   Widget _buildTabBar(double screenWidth) {
+//     return Container(
+//       color: Colors.white,
+//       child: TabBar(
+//         controller: _tabController,
+//         labelColor: kPrimary,
+//         unselectedLabelColor: kprimaryTextColor2,
+//         indicatorColor: kPrimary,
+//         indicatorWeight: 3,
+//         labelStyle: WorkSansAppTextStyles.medium.copyWith(
+//           fontSize: _getTabFontSize(screenWidth),
+//           fontWeight: FontWeight.w600,
+//         ),
+//         unselectedLabelStyle: WorkSansAppTextStyles.medium.copyWith(
+//           fontSize: _getTabFontSize(screenWidth),
+//           fontWeight: FontWeight.w500,
+//         ),
+//         tabs: const [
+//           Tab(text: 'All'),
+//           Tab(text: 'Pending'),
+//           Tab(text: 'Completed'),
+//         ],
+//       ),
+//     );
+//   }
 
-              if (request.notes.isNotEmpty) ...[
-                SizedBox(height: 8),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.note_outlined,
-                      size: _getIconSize(screenWidth) - 2,
-                      color: kprimaryTextColor2,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        request.notes,
-                        style: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: _getCaptionFontSize(screenWidth),
-                          color: kprimaryTextColor2,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              SizedBox(height: _getFieldSpacing(screenWidth)),
-              Divider(height: 1, color: Colors.grey.shade200),
-              SizedBox(height: _getFieldSpacing(screenWidth)),
-              Row(
-                children: [
-                  _buildInfoChip(
-                    icon: Icons.inventory_2_outlined,
-                    label: '${request.totalItemsCount} Items',
-                    screenWidth: screenWidth,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildInfoChip(
-                    icon: Icons.shopping_cart_outlined,
-                    label: '${request.totalQuantityRequested} Units',
-                    screenWidth: screenWidth,
-                  ),
-                  const Spacer(),
-                  Text(
-                    _formatDate(request.createdAt),
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: _getCaptionFontSize(screenWidth),
-                      color: kprimaryTextColor2,
-                    ),
-                  ),
-                ],
-              ),
-              if (showTransferButton &&
-                  (request.status == 'PENDING' ||
-                      request.status == 'APPROVED')) ...[
-                SizedBox(height: _getFieldSpacing(screenWidth)),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    iconAlignment: IconAlignment.end,
-                    onPressed: isCompleting
-                        ? null
-                        : () => _handleTransferItems(request),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: kPrimary,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: kPrimary.withOpacity(0.6),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 0,
-                    ),
-                    icon: isCompleting
-                        ? SizedBox(
-                            width: _getIconSize(screenWidth) - 2,
-                            height: _getIconSize(screenWidth) - 2,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
-                        : Icon(
-                            Icons.send_outlined,
-                            size: _getIconSize(screenWidth) - 2,
-                          ),
-                    label: Text(
-                      isCompleting ? 'Completing...' : 'Complete Transfer',
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: _getInputFontSize(screenWidth),
-                        fontWeight: FontWeight.w600,
-                        color: kWhite,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+//   // ─── Loading / Empty ──────────────────────────────────────────────────────
 
-  // New widget to handle items section with show more/less
-  Widget _buildItemsSection(StockRequest request, double screenWidth) {
-    final items = request.items;
+//   Widget _buildLoadingState() {
+//     return Center(
+//       child: CircularProgressIndicator(
+//         valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
+//       ),
+//     );
+//   }
 
-    if (items.isEmpty) {
-      return Row(
-        children: [
-          Icon(
-            Icons.inventory_outlined,
-            size: _getIconSize(screenWidth) - 2,
-            color: kprimaryTextColor2,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'No items requested',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: _getCaptionFontSize(screenWidth),
-              color: kprimaryTextColor2,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      );
-    }
+//   Widget _buildEmptyState(double screenWidth) {
+//     return Center(
+//       child: Padding(
+//         padding: EdgeInsets.all(_getHorizontalPadding(screenWidth)),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Container(
+//               width: _getEmptyIconSize(screenWidth),
+//               height: _getEmptyIconSize(screenWidth),
+//               decoration: BoxDecoration(
+//                 color: kPrimary.withOpacity(0.1),
+//                 shape: BoxShape.circle,
+//               ),
+//               child: Icon(
+//                 Icons.inbox_outlined,
+//                 size: _getEmptyIconSize(screenWidth) * 0.5,
+//                 color: kPrimary,
+//               ),
+//             ),
+//             SizedBox(height: _getSectionSpacing(screenWidth)),
+//             Text(
+//               'No stock requests',
+//               style: WorkSansAppTextStyles.medium.copyWith(
+//                 fontSize: _getSectionTitleFontSize(screenWidth),
+//                 fontWeight: FontWeight.w600,
+//                 color: kprimaryTextColor1,
+//               ),
+//             ),
+//             const SizedBox(height: 8),
+//             Text(
+//               'Create your first stock request to get started',
+//               style: WorkSansAppTextStyles.medium.copyWith(
+//                 fontSize: _getInputFontSize(screenWidth),
+//                 color: kprimaryTextColor2,
+//               ),
+//               textAlign: TextAlign.center,
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
 
-    return StatefulBuilder(
-      builder: (context, setState) {
-        bool showAll = false;
-        final displayItems = showAll ? items : items.take(3).toList();
+//   // ─── List ─────────────────────────────────────────────────────────────────
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.inventory_outlined,
-                  size: _getIconSize(screenWidth) - 2,
-                  color: kprimaryTextColor2,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Requested Items',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: _getInputFontSize(screenWidth),
-                    fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            ...displayItems.map((item) {
-              final itemName = item.item?.itemName ?? 'Unknown Item';
-              final unit = item.item?.unit ?? '';
-              final qty = item.qtyRequested;
+//   Widget _buildRequestsList(
+//     List<StockRequest> requests,
+//     double screenWidth,
+//     bool isRefreshing,
+//     StockRequestState state, {
+//     bool showActions = true,
+//   }) {
+//     if (requests.isEmpty) return _buildEmptyState(screenWidth);
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      margin: const EdgeInsets.only(left: 8),
-                      decoration: BoxDecoration(
-                        color: kPrimary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: _getCaptionFontSize(screenWidth),
-                            color: kprimaryTextColor2,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: itemName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            TextSpan(
-                              text: ' - ',
-                              style: TextStyle(
-                                color: kprimaryTextColor2.withOpacity(0.6),
-                              ),
-                            ),
-                            TextSpan(
-                              text: '$qty ${unit.toLowerCase()}',
-                              style: TextStyle(
-                                color: kPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-            if (items.length > 3)
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    showAll = !showAll;
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 4, left: 22),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        showAll
-                            ? 'Show less'
-                            : 'Show ${items.length - 3} more item${items.length - 3 > 1 ? 's' : ''}',
-                        style: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: _getCaptionFontSize(screenWidth),
-                          fontWeight: FontWeight.w600,
-                          color: kPrimary,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        showAll
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        size: _getIconSize(screenWidth) - 4,
-                        color: kPrimary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
+//     return RefreshIndicator(
+//       onRefresh: _onRefresh,
+//       color: kPrimary,
+//       child: ListView.builder(
+//         padding: EdgeInsets.all(_getHorizontalPadding(screenWidth)),
+//         itemCount: requests.length,
+//         itemBuilder: (context, index) {
+//           return _buildRequestCard(
+//             requests[index],
+//             screenWidth,
+//             state,
+//             showActions: showActions,
+//           );
+//         },
+//       ),
+//     );
+//   }
 
-  Widget _buildStatusBadge(String status, double screenWidth) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: _getStatusColor(status).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        _getStatusText(status),
-        style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: _getCaptionFontSize(screenWidth),
-          fontWeight: FontWeight.w600,
-          color: _getStatusColor(status),
-        ),
-      ),
-    );
-  }
+//   // ─── Card ─────────────────────────────────────────────────────────────────
 
-  Widget _buildInfoChip({
-    required IconData icon,
-    required String label,
-    required double screenWidth,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: kPrimary.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: _getIconSize(screenWidth) - 6, color: kPrimary),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: _getCaptionFontSize(screenWidth),
-              fontWeight: FontWeight.w500,
-              color: kPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+//   Widget _buildRequestCard(
+//     StockRequest request,
+//     double screenWidth,
+//     StockRequestState state, {
+//     bool showActions = true,
+//   }) {
+//     final anyInProgress = _isAnyActionInProgress(state, request.id);
 
-  Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        return const Color(0xFFFFA726);
-      case 'APPROVED':
-        return const Color(0xFF42A5F5);
-      case 'COMPLETED':
-        return const Color(0xFF66BB6A);
-      case 'REJECTED':
-        return const Color(0xFFEF5350);
-      default:
-        return kprimaryTextColor2;
-    }
-  }
+//     return Container(
+//       margin: EdgeInsets.only(bottom: _getFieldSpacing(screenWidth)),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.04),
+//             blurRadius: 8,
+//             offset: const Offset(0, 2),
+//           ),
+//         ],
+//       ),
+//       child: InkWell(
+//         onTap: () => _navigateToDetails(request),
+//         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+//         child: Padding(
+//           padding: EdgeInsets.all(_getCardPadding(screenWidth)),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               // ── Header row ──
+//               Row(
+//                 children: [
+//                   Container(
+//                     padding: const EdgeInsets.symmetric(
+//                       horizontal: 12,
+//                       vertical: 6,
+//                     ),
+//                     decoration: BoxDecoration(
+//                       color: _getStatusColor(request.status).withOpacity(0.1),
+//                       borderRadius: BorderRadius.circular(6),
+//                     ),
+//                     child: Text(
+//                       request.requestId,
+//                       style: WorkSansAppTextStyles.medium.copyWith(
+//                         fontSize: _getCaptionFontSize(screenWidth),
+//                         fontWeight: FontWeight.w600,
+//                         color: _getStatusColor(request.status),
+//                       ),
+//                     ),
+//                   ),
+//                   const Spacer(),
+//                   _buildStatusBadge(request.status, screenWidth),
+//                 ],
+//               ),
 
-  String _getStatusText(String status) {
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        return 'Pending';
-      case 'APPROVED':
-        return 'Approved';
-      case 'COMPLETED':
-        return 'Completed';
-      case 'REJECTED':
-        return 'Rejected';
-      default:
-        return status;
-    }
-  }
+//               SizedBox(height: _getFieldSpacing(screenWidth)),
 
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
+//               // ── Items ──
+//               _buildItemsSection(request, screenWidth),
 
-    if (difference.inDays == 0) {
-      return 'Today ${DateFormat('HH:mm').format(date)}';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
-    } else {
-      return DateFormat('MMM dd, yyyy').format(date);
-    }
-  }
+//               // ── Notes ──
+//               if (request.notes.isNotEmpty) ...[
+//                 const SizedBox(height: 8),
+//                 Row(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Icon(
+//                       Icons.note_outlined,
+//                       size: _getIconSize(screenWidth) - 2,
+//                       color: kprimaryTextColor2,
+//                     ),
+//                     const SizedBox(width: 8),
+//                     Expanded(
+//                       child: Text(
+//                         request.notes,
+//                         style: WorkSansAppTextStyles.medium.copyWith(
+//                           fontSize: _getCaptionFontSize(screenWidth),
+//                           color: kprimaryTextColor2,
+//                         ),
+//                         maxLines: 2,
+//                         overflow: TextOverflow.ellipsis,
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ],
 
-  // Responsive sizing functions
-  double _getHorizontalPadding(double width) => width < 360
-      ? 16
-      : width < 600
-      ? 20
-      : 24;
-  double _getCardPadding(double width) => width < 360
-      ? 14
-      : width < 600
-      ? 16
-      : 18;
-  double _getSectionSpacing(double width) => width < 360
-      ? 20
-      : width < 600
-      ? 24
-      : 28;
-  double _getFieldSpacing(double width) => width < 360
-      ? 10
-      : width < 600
-      ? 12
-      : 14;
-  double _getAppBarTitleFontSize(double width) => width < 360
-      ? 17
-      : width < 600
-      ? 18
-      : 19;
-  double _getTabFontSize(double width) => width < 360
-      ? 13
-      : width < 600
-      ? 14
-      : 15;
-  double _getSectionTitleFontSize(double width) => width < 360
-      ? 16
-      : width < 600
-      ? 17
-      : 18;
-  double _getInputFontSize(double width) => width < 360
-      ? 14
-      : width < 600
-      ? 15
-      : 16;
-  double _getCaptionFontSize(double width) => width < 360
-      ? 11
-      : width < 600
-      ? 12
-      : 13;
-  double _getIconSize(double width) => width < 360
-      ? 20
-      : width < 600
-      ? 22
-      : 24;
-  double _getBorderRadius(double width) => width < 360
-      ? 8
-      : width < 600
-      ? 10
-      : 12;
-  double _getEmptyIconSize(double width) => width < 360
-      ? 80
-      : width < 600
-      ? 100
-      : 120;
-}
+//               SizedBox(height: _getFieldSpacing(screenWidth)),
+//               Divider(height: 1, color: Colors.grey.shade200),
+//               SizedBox(height: _getFieldSpacing(screenWidth)),
+
+//               // ── Footer chips ──
+//               Row(
+//                 children: [
+//                   _buildInfoChip(
+//                     icon: Icons.inventory_2_outlined,
+//                     label: '${request.totalItemsCount} Items',
+//                     screenWidth: screenWidth,
+//                   ),
+//                   const SizedBox(width: 8),
+//                   _buildInfoChip(
+//                     icon: Icons.shopping_cart_outlined,
+//                     label: '${request.totalQuantityRequested} Units',
+//                     screenWidth: screenWidth,
+//                   ),
+//                   const Spacer(),
+//                   Text(
+//                     _formatDate(request.createdAt),
+//                     style: WorkSansAppTextStyles.medium.copyWith(
+//                       fontSize: _getCaptionFontSize(screenWidth),
+//                       color: kprimaryTextColor2,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+
+//               // ── Action buttons ──
+//               if (showActions) ...[
+//                 SizedBox(height: _getFieldSpacing(screenWidth)),
+//                 _buildActionButtons(request, screenWidth, state, anyInProgress),
+//               ],
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   // ─── Action Buttons ───────────────────────────────────────────────────────
+
+//   /// Server state machine:
+//   ///   PENDING  → approve, reject
+//   ///   APPROVED → queue (→ IN_QUEUE), cancel
+//   ///   IN_QUEUE → complete, cancel
+//   ///   COMPLETED / REJECTED / CANCELLED → (terminal — no actions)
+//   Widget _buildActionButtons(
+//     StockRequest request,
+//     double screenWidth,
+//     StockRequestState state,
+//     bool anyInProgress,
+//   ) {
+//     final List<_ActionButtonConfig> actions = switch (request.status
+//         .toUpperCase()) {
+//       'PENDING' => [
+//         _ActionButtonConfig(
+//           action: StockRequestAction.approve,
+//           label: 'Approve',
+//           icon: Icons.check_circle_outline,
+//           color: const Color(0xFF42A5F5),
+//           flex: 1,
+//         ),
+//         _ActionButtonConfig(
+//           action: StockRequestAction.reject,
+//           label: 'Reject',
+//           icon: Icons.cancel_outlined,
+//           color: const Color(0xFFEF5350),
+//           flex: 1,
+//         ),
+//       ],
+//       'APPROVED' => [
+//         _ActionButtonConfig(
+//           action: StockRequestAction.queue,
+//           label: 'Send to Queue',
+//           icon: Icons.queue_outlined,
+//           color: const Color(0xFFAB47BC),
+//           flex: 2,
+//         ),
+//         _ActionButtonConfig(
+//           action: StockRequestAction.cancel,
+//           label: 'Cancel',
+//           icon: Icons.cancel_outlined,
+//           color: const Color(0xFFEF5350),
+//           flex: 1,
+//         ),
+//       ],
+//       'IN_QUEUE' => [
+//         _ActionButtonConfig(
+//           action: StockRequestAction.complete,
+//           label: 'Complete Transfer',
+//           icon: Icons.send_outlined,
+//           color: kPrimary,
+//           flex: 2,
+//         ),
+//         _ActionButtonConfig(
+//           action: StockRequestAction.cancel,
+//           label: 'Cancel',
+//           icon: Icons.cancel_outlined,
+//           color: const Color(0xFFEF5350),
+//           flex: 1,
+//         ),
+//       ],
+//       _ => [],
+//     };
+
+//     if (actions.isEmpty) return const SizedBox.shrink();
+
+//     return Row(
+//       children: actions
+//           .expand(
+//             (cfg) => [
+//               Expanded(
+//                 flex: cfg.flex,
+//                 child: _buildActionButton(
+//                   request: request,
+//                   config: cfg,
+//                   screenWidth: screenWidth,
+//                   state: state,
+//                   disabled: anyInProgress,
+//                 ),
+//               ),
+//               if (cfg != actions.last) const SizedBox(width: 8),
+//             ],
+//           )
+//           .toList(),
+//     );
+//   }
+
+//   Widget _buildActionButton({
+//     required StockRequest request,
+//     required _ActionButtonConfig config,
+//     required double screenWidth,
+//     required StockRequestState state,
+//     required bool disabled,
+//   }) {
+//     final inProgress = _isActionInProgress(state, request.id, config.action);
+
+//     return SizedBox(
+//       width: double.infinity,
+//       child: ElevatedButton.icon(
+//         iconAlignment: IconAlignment.end,
+//         onPressed: disabled
+//             ? null
+//             : () => _handleAction(request, config.action),
+//         style: ElevatedButton.styleFrom(
+//           backgroundColor: config.color,
+//           foregroundColor: Colors.white,
+//           disabledBackgroundColor: config.color.withOpacity(0.5),
+//           padding: const EdgeInsets.symmetric(vertical: 12),
+//           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+//           elevation: 0,
+//         ),
+//         icon: inProgress
+//             ? SizedBox(
+//                 width: _getIconSize(screenWidth) - 4,
+//                 height: _getIconSize(screenWidth) - 4,
+//                 child: const CircularProgressIndicator(
+//                   strokeWidth: 2,
+//                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+//                 ),
+//               )
+//             : Icon(config.icon, size: _getIconSize(screenWidth) - 4),
+//         label: Text(
+//           inProgress ? '${config.label}...' : config.label,
+//           style: WorkSansAppTextStyles.medium.copyWith(
+//             fontSize: _getInputFontSize(screenWidth) - 1,
+//             fontWeight: FontWeight.w600,
+//             color: kWhite,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   // ─── Items Section ────────────────────────────────────────────────────────
+
+//   Widget _buildItemsSection(StockRequest request, double screenWidth) {
+//     final items = request.items;
+
+//     if (items.isEmpty) {
+//       return Row(
+//         children: [
+//           Icon(
+//             Icons.inventory_outlined,
+//             size: _getIconSize(screenWidth) - 2,
+//             color: kprimaryTextColor2,
+//           ),
+//           const SizedBox(width: 8),
+//           Text(
+//             'No items requested',
+//             style: WorkSansAppTextStyles.medium.copyWith(
+//               fontSize: _getCaptionFontSize(screenWidth),
+//               color: kprimaryTextColor2,
+//               fontStyle: FontStyle.italic,
+//             ),
+//           ),
+//         ],
+//       );
+//     }
+
+//     return StatefulBuilder(
+//       builder: (context, setLocalState) {
+//         bool showAll = false;
+//         final displayItems = showAll ? items : items.take(3).toList();
+
+//         return Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Row(
+//               children: [
+//                 Icon(
+//                   Icons.inventory_outlined,
+//                   size: _getIconSize(screenWidth) - 2,
+//                   color: kprimaryTextColor2,
+//                 ),
+//                 const SizedBox(width: 8),
+//                 Text(
+//                   'Requested Items',
+//                   style: WorkSansAppTextStyles.medium.copyWith(
+//                     fontSize: _getInputFontSize(screenWidth),
+//                     fontWeight: FontWeight.w600,
+//                     color: kprimaryTextColor1,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             const SizedBox(height: 8),
+//             ...displayItems.map((item) {
+//               final itemName = item.item?.itemName ?? 'Unknown Item';
+//               final unit = item.item?.unit ?? '';
+//               final qty = item.qtyRequested;
+
+//               return Padding(
+//                 padding: const EdgeInsets.only(bottom: 6),
+//                 child: Row(
+//                   children: [
+//                     Container(
+//                       width: 6,
+//                       height: 6,
+//                       margin: const EdgeInsets.only(left: 8),
+//                       decoration: BoxDecoration(
+//                         color: kPrimary,
+//                         shape: BoxShape.circle,
+//                       ),
+//                     ),
+//                     const SizedBox(width: 8),
+//                     Expanded(
+//                       child: RichText(
+//                         text: TextSpan(
+//                           style: WorkSansAppTextStyles.medium.copyWith(
+//                             fontSize: _getCaptionFontSize(screenWidth),
+//                             color: kprimaryTextColor2,
+//                           ),
+//                           children: [
+//                             TextSpan(
+//                               text: itemName,
+//                               style: const TextStyle(
+//                                 fontWeight: FontWeight.w500,
+//                               ),
+//                             ),
+//                             TextSpan(
+//                               text: ' - ',
+//                               style: TextStyle(
+//                                 color: kprimaryTextColor2.withOpacity(0.6),
+//                               ),
+//                             ),
+//                             TextSpan(
+//                               text: '$qty ${unit.toLowerCase()}',
+//                               style: TextStyle(
+//                                 color: kPrimary,
+//                                 fontWeight: FontWeight.w600,
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               );
+//             }),
+//             if (items.length > 3)
+//               GestureDetector(
+//                 onTap: () => setLocalState(() => showAll = !showAll),
+//                 child: Padding(
+//                   padding: const EdgeInsets.only(top: 4, left: 22),
+//                   child: Row(
+//                     mainAxisSize: MainAxisSize.min,
+//                     children: [
+//                       Text(
+//                         showAll
+//                             ? 'Show less'
+//                             : 'Show ${items.length - 3} more item${items.length - 3 > 1 ? 's' : ''}',
+//                         style: WorkSansAppTextStyles.medium.copyWith(
+//                           fontSize: _getCaptionFontSize(screenWidth),
+//                           fontWeight: FontWeight.w600,
+//                           color: kPrimary,
+//                         ),
+//                       ),
+//                       const SizedBox(width: 4),
+//                       Icon(
+//                         showAll
+//                             ? Icons.keyboard_arrow_up
+//                             : Icons.keyboard_arrow_down,
+//                         size: _getIconSize(screenWidth) - 4,
+//                         color: kPrimary,
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+
+//   // ─── Small Widgets ────────────────────────────────────────────────────────
+
+//   Widget _buildStatusBadge(String status, double screenWidth) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+//       decoration: BoxDecoration(
+//         color: _getStatusColor(status).withOpacity(0.1),
+//         borderRadius: BorderRadius.circular(20),
+//       ),
+//       child: Text(
+//         _getStatusText(status),
+//         style: WorkSansAppTextStyles.medium.copyWith(
+//           fontSize: _getCaptionFontSize(screenWidth),
+//           fontWeight: FontWeight.w600,
+//           color: _getStatusColor(status),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildInfoChip({
+//     required IconData icon,
+//     required String label,
+//     required double screenWidth,
+//   }) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+//       decoration: BoxDecoration(
+//         color: kPrimary.withOpacity(0.08),
+//         borderRadius: BorderRadius.circular(6),
+//       ),
+//       child: Row(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           Icon(icon, size: _getIconSize(screenWidth) - 6, color: kPrimary),
+//           const SizedBox(width: 4),
+//           Text(
+//             label,
+//             style: WorkSansAppTextStyles.medium.copyWith(
+//               fontSize: _getCaptionFontSize(screenWidth),
+//               fontWeight: FontWeight.w500,
+//               color: kPrimary,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   // ─── Status helpers ───────────────────────────────────────────────────────
+
+//   Color _getStatusColor(String status) {
+//     return switch (status.toUpperCase()) {
+//       'PROCESSING' => const Color(0xFF26A69A),
+//       'PENDING' => const Color(0xFFFFA726),
+//       'APPROVED' => const Color(0xFF42A5F5),
+//       'IN_QUEUE' => const Color(0xFFAB47BC),
+//       'COMPLETED' => const Color(0xFF66BB6A),
+//       'REJECTED' => const Color(0xFFEF5350),
+//       'CANCELLED' => const Color(0xFFBDBDBD),
+//       _ => kprimaryTextColor2,
+//     };
+//   }
+
+//   String _getStatusText(String status) {
+//     return switch (status.toUpperCase()) {
+//       'PROCESSING' => 'Processing',
+
+//       'PENDING' => 'Pending',
+//       'APPROVED' => 'Approved',
+//       'IN_QUEUE' => 'In Queue',
+//       'COMPLETED' => 'Completed',
+//       'REJECTED' => 'Rejected',
+//       'CANCELLED' => 'Cancelled',
+//       _ => status,
+//     };
+//   }
+
+//   String _formatDate(DateTime date) {
+//     final now = DateTime.now();
+//     final difference = now.difference(date);
+
+//     if (difference.inDays == 0) {
+//       return 'Today ${DateFormat('HH:mm').format(date)}';
+//     } else if (difference.inDays == 1) {
+//       return 'Yesterday';
+//     } else if (difference.inDays < 7) {
+//       return '${difference.inDays} days ago';
+//     } else {
+//       return DateFormat('MMM dd, yyyy').format(date);
+//     }
+//   }
+
+//   // ─── Responsive sizing ────────────────────────────────────────────────────
+
+//   double _getHorizontalPadding(double w) => w < 360
+//       ? 16
+//       : w < 600
+//       ? 20
+//       : 24;
+//   double _getCardPadding(double w) => w < 360
+//       ? 14
+//       : w < 600
+//       ? 16
+//       : 18;
+//   double _getSectionSpacing(double w) => w < 360
+//       ? 20
+//       : w < 600
+//       ? 24
+//       : 28;
+//   double _getFieldSpacing(double w) => w < 360
+//       ? 10
+//       : w < 600
+//       ? 12
+//       : 14;
+//   double _getAppBarTitleFontSize(double w) => w < 360
+//       ? 17
+//       : w < 600
+//       ? 18
+//       : 19;
+//   double _getTabFontSize(double w) => w < 360
+//       ? 13
+//       : w < 600
+//       ? 14
+//       : 15;
+//   double _getSectionTitleFontSize(double w) => w < 360
+//       ? 16
+//       : w < 600
+//       ? 17
+//       : 18;
+//   double _getInputFontSize(double w) => w < 360
+//       ? 14
+//       : w < 600
+//       ? 15
+//       : 16;
+//   double _getCaptionFontSize(double w) => w < 360
+//       ? 11
+//       : w < 600
+//       ? 12
+//       : 13;
+//   double _getIconSize(double w) => w < 360
+//       ? 20
+//       : w < 600
+//       ? 22
+//       : 24;
+//   double _getBorderRadius(double w) => w < 360
+//       ? 8
+//       : w < 600
+//       ? 10
+//       : 12;
+//   double _getEmptyIconSize(double w) => w < 360
+//       ? 80
+//       : w < 600
+//       ? 100
+//       : 120;
+// }
+
+// // ─── Private config classes ───────────────────────────────────────────────────
+
+// class _ActionDialogConfig {
+//   final String title;
+//   final String body;
+//   final String confirmLabel;
+//   final Color confirmColor;
+
+//   const _ActionDialogConfig({
+//     required this.title,
+//     required this.body,
+//     required this.confirmLabel,
+//     required this.confirmColor,
+//   });
+// }
+
+// class _ActionButtonConfig {
+//   final StockRequestAction action;
+//   final String label;
+//   final IconData icon;
+//   final Color color;
+//   final int flex;
+
+//   const _ActionButtonConfig({
+//     required this.action,
+//     required this.label,
+//     required this.icon,
+//     required this.color,
+//     required this.flex,
+//   });
+// }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/api_constants.dart';
@@ -33,11 +34,11 @@ class WastageAnalysisRepository extends BaseRepository
         'days_back': daysBack,
       };
 
-      print('=== WASTAGE ANALYSIS REQUEST ===');
-      print('Organization ID: $organizationId');
-      print('Branch ID: $branchId');
-      print('Days Back: $daysBack');
-      print('================================');
+      AppLogger.log('=== WASTAGE ANALYSIS REQUEST ===');
+      AppLogger.log('Organization ID: $organizationId');
+      AppLogger.log('Branch ID: $branchId');
+      AppLogger.log('Days Back: $daysBack');
+      AppLogger.log('================================');
 
       final response = await _apiClient
           .post('${ApiConstants.aiBaseUrl}wastage/analyze', data: requestBody)
@@ -50,24 +51,24 @@ class WastageAnalysisRepository extends BaseRepository
             },
           );
 
-      print('=== WASTAGE ANALYSIS RESPONSE ===');
-      print('Response Data: ${response.data}');
-      print('==================================');
+      AppLogger.log('=== WASTAGE ANALYSIS RESPONSE ===');
+      AppLogger.log('Response Data: ${response.data}');
+      AppLogger.log('==================================');
 
       // Handle null or empty response data
       if (response.data == null) {
-        print('Response data is null - returning empty analysis');
+        AppLogger.log('Response data is null - returning empty analysis');
         return ApiResponse.success(_createEmptyAnalysis());
       }
 
       // Handle empty map or list responses
       if (response.data is Map && (response.data as Map).isEmpty) {
-        print('Response data is empty map - returning empty analysis');
+        AppLogger.log('Response data is empty map - returning empty analysis');
         return ApiResponse.success(_createEmptyAnalysis());
       }
 
       if (response.data is List && (response.data as List).isEmpty) {
-        print('Response data is empty list - returning empty analysis');
+        AppLogger.log('Response data is empty list - returning empty analysis');
         return ApiResponse.success(_createEmptyAnalysis());
       }
 
@@ -75,26 +76,26 @@ class WastageAnalysisRepository extends BaseRepository
         final analysis = WastageAnalysisResponse.fromJson(response.data);
         return ApiResponse.success(analysis);
       } catch (e) {
-        print('Failed to parse response: $e');
+        AppLogger.log('Failed to parse response: $e');
         // If parsing fails, return empty analysis instead of error
         return ApiResponse.success(_createEmptyAnalysis());
       }
     } on SocketException catch (e) {
-      print('Socket Exception: $e');
+      AppLogger.log('Socket Exception: $e');
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
     } on TimeoutException catch (e) {
-      print('Timeout Exception: $e');
+      AppLogger.log('Timeout Exception: $e');
       return ApiResponse.errorMessage(
         'Request timeout. The AI service is taking longer than expected.',
       );
     } on FormatException catch (e) {
-      print('Format Exception: ${e.message}');
+      AppLogger.log('Format Exception: ${e.message}');
       return ApiResponse.errorMessage(e.message);
     } catch (e, stackTrace) {
-      print('Error: $e');
-      print('Stack Trace: $stackTrace');
+      AppLogger.log('Error: $e');
+      AppLogger.log('Stack Trace: $stackTrace');
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
   }

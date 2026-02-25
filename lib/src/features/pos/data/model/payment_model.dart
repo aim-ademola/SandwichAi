@@ -1,4 +1,4 @@
-// Payment Request Models
+// ─── Cash Record Request ──────────────────────────────────────────────────────
 class CashPaymentRequest {
   final double amount;
   final String customerName;
@@ -7,6 +7,7 @@ class CashPaymentRequest {
   final String? customerEmail;
   final String? orderId;
   final String? description;
+  final String? sessionId;
   final Map<String, dynamic>? metadata;
 
   CashPaymentRequest({
@@ -17,218 +18,335 @@ class CashPaymentRequest {
     this.customerEmail,
     this.orderId,
     this.description,
+    this.sessionId,
     this.metadata,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'amount': amount,
+      'amount': amount.toInt(),
       'customerName': customerName,
       'branchId': branchId,
       if (customerPhone != null) 'customerPhone': customerPhone,
       if (customerEmail != null) 'customerEmail': customerEmail,
       if (orderId != null) 'orderId': orderId,
       if (description != null) 'description': description,
+      if (sessionId != null) 'sessionId': sessionId,
       if (metadata != null) 'metadata': metadata,
     };
   }
 }
 
-class BankTransferPaymentRequest {
+// ─── Online Payment Initialize Request ───────────────────────────────────────
+class OnlinePaymentRequest {
   final double amount;
+  final String email;
   final String customerName;
   final String branchId;
-  final String bankReference;
-  final String? senderAccountNumber;
-  final String? senderBank;
   final String? customerPhone;
-  final String? customerEmail;
   final String? orderId;
   final String? description;
+  final String paymentMethod; // 'CARD' or 'BANK_TRANSFER'
+  final String? sessionId;
   final Map<String, dynamic>? metadata;
 
-  BankTransferPaymentRequest({
+  OnlinePaymentRequest({
     required this.amount,
+    required this.email,
     required this.customerName,
     required this.branchId,
-    required this.bankReference,
-    this.senderAccountNumber,
-    this.senderBank,
     this.customerPhone,
-    this.customerEmail,
     this.orderId,
     this.description,
+    this.paymentMethod = 'CARD',
+    this.sessionId,
     this.metadata,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'amount': amount,
+      'amount': amount.toInt(),
+      'email': email,
       'customerName': customerName,
       'branchId': branchId,
-      'bankReference': bankReference,
-      if (senderAccountNumber != null)
-        'senderAccountNumber': senderAccountNumber,
-      if (senderBank != null) 'senderBank': senderBank,
       if (customerPhone != null) 'customerPhone': customerPhone,
-      if (customerEmail != null) 'customerEmail': customerEmail,
       if (orderId != null) 'orderId': orderId,
       if (description != null) 'description': description,
+      'paymentMethod': paymentMethod,
+      if (sessionId != null) 'sessionId': sessionId,
       if (metadata != null) 'metadata': metadata,
     };
   }
 }
 
-// Payment Response Models
-class PaymentResponseModel {
+// ─── Cash Record Response ─────────────────────────────────────────────────────
+class CashRecordResponseModel {
   final bool success;
   final String message;
-  final PaymentData data;
+  final CashTransactionData data;
 
-  PaymentResponseModel({
+  CashRecordResponseModel({
     required this.success,
     required this.message,
     required this.data,
   });
 
-  factory PaymentResponseModel.fromJson(Map<String, dynamic> json) {
-    return PaymentResponseModel(
+  factory CashRecordResponseModel.fromJson(Map<String, dynamic> json) {
+    return CashRecordResponseModel(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      data: PaymentData.fromJson(json['data'] ?? {}),
+      data: CashTransactionData.fromJson(json['data'] ?? {}),
     );
   }
 }
 
-class PaymentData {
-  final Payment payment;
-  final Transaction transaction;
-  final Receipt receipt;
+class CashTransactionData {
+  final CashTransaction transaction;
 
-  PaymentData({
-    required this.payment,
-    required this.transaction,
-    required this.receipt,
-  });
+  CashTransactionData({required this.transaction});
 
-  factory PaymentData.fromJson(Map<String, dynamic> json) {
-    return PaymentData(
-      payment: Payment.fromJson(json['payment'] ?? {}),
-      transaction: Transaction.fromJson(json['transaction'] ?? {}),
-      receipt: Receipt.fromJson(json['receipt'] ?? {}),
+  factory CashTransactionData.fromJson(Map<String, dynamic> json) {
+    return CashTransactionData(
+      transaction: CashTransaction.fromJson(json['transaction'] ?? {}),
     );
   }
 }
 
-class Payment {
+class CashTransaction {
   final String id;
-  final String paymentId;
+  final String transactionId;
   final String reference;
   final String organizationId;
   final String branchId;
-  final String walletId;
-  final String? orderId;
   final String amount;
-  final String? customerEmail;
-  final String? customerPhone;
+  final String transactionType;
   final String customerName;
-  final String status;
-  final String paymentMethod;
+  final String? customerPhone;
+  final String? customerEmail;
+  final String? orderId;
   final String? description;
+  final String receivedBy;
+  final String status;
   final Map<String, dynamic>? metadata;
-  final String? paidAt;
   final String createdAt;
+  final String updatedAt;
+  final CashBranch? branch;
+  final CashReceiver? receiver;
 
-  Payment({
+  CashTransaction({
     required this.id,
-    required this.paymentId,
+    required this.transactionId,
     required this.reference,
     required this.organizationId,
     required this.branchId,
-    required this.walletId,
-    this.orderId,
     required this.amount,
-    this.customerEmail,
-    this.customerPhone,
+    required this.transactionType,
     required this.customerName,
-    required this.status,
-    required this.paymentMethod,
+    this.customerPhone,
+    this.customerEmail,
+    this.orderId,
     this.description,
+    required this.receivedBy,
+    required this.status,
     this.metadata,
-    this.paidAt,
     required this.createdAt,
+    required this.updatedAt,
+    this.branch,
+    this.receiver,
   });
 
-  factory Payment.fromJson(Map<String, dynamic> json) {
-    return Payment(
+  factory CashTransaction.fromJson(Map<String, dynamic> json) {
+    return CashTransaction(
       id: json['id'] ?? '',
-      paymentId: json['paymentId'] ?? '',
+      transactionId: json['transactionId'] ?? '',
       reference: json['reference'] ?? '',
       organizationId: json['organizationId'] ?? '',
       branchId: json['branchId'] ?? '',
-      walletId: json['walletId'] ?? '',
-      orderId: json['orderId'],
       amount: json['amount']?.toString() ?? '0',
-      customerEmail: json['customerEmail'],
-      customerPhone: json['customerPhone'],
+      transactionType: json['transactionType'] ?? '',
       customerName: json['customerName'] ?? '',
-      status: json['status'] ?? '',
-      paymentMethod: json['paymentMethod'] ?? '',
+      customerPhone: json['customerPhone'],
+      customerEmail: json['customerEmail'],
+      orderId: json['orderId'],
       description: json['description'],
+      receivedBy: json['receivedBy'] ?? '',
+      status: json['status'] ?? '',
       metadata: json['metadata'] != null
           ? Map<String, dynamic>.from(json['metadata'])
           : null,
-      paidAt: json['paidAt'],
       createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
+      branch: json['branch'] != null
+          ? CashBranch.fromJson(json['branch'])
+          : null,
+      receiver: json['receiver'] != null
+          ? CashReceiver.fromJson(json['receiver'])
+          : null,
     );
   }
 }
 
-class Transaction {
+class CashBranch {
   final String id;
-  final String transactionId;
-  final String walletId;
-  final String type;
-  final String source;
-  final String amount;
-  final String balanceBefore;
-  final String balanceAfter;
-  final String reference;
-  final String? description;
-  final String createdAt;
+  final String name;
 
-  Transaction({
+  CashBranch({required this.id, required this.name});
+
+  factory CashBranch.fromJson(Map<String, dynamic> json) {
+    return CashBranch(id: json['id'] ?? '', name: json['name'] ?? '');
+  }
+}
+
+class CashReceiver {
+  final String id;
+  final String firstName;
+  final String lastName;
+
+  CashReceiver({
     required this.id,
-    required this.transactionId,
-    required this.walletId,
-    required this.type,
-    required this.source,
-    required this.amount,
-    required this.balanceBefore,
-    required this.balanceAfter,
-    required this.reference,
-    this.description,
-    required this.createdAt,
+    required this.firstName,
+    required this.lastName,
   });
 
-  factory Transaction.fromJson(Map<String, dynamic> json) {
-    return Transaction(
+  factory CashReceiver.fromJson(Map<String, dynamic> json) {
+    return CashReceiver(
       id: json['id'] ?? '',
-      transactionId: json['transactionId'] ?? '',
-      walletId: json['walletId'] ?? '',
-      type: json['type'] ?? '',
-      source: json['source'] ?? '',
-      amount: json['amount']?.toString() ?? '0',
-      balanceBefore: json['balanceBefore']?.toString() ?? '0',
-      balanceAfter: json['balanceAfter']?.toString() ?? '0',
-      reference: json['reference'] ?? '',
-      description: json['description'],
-      createdAt: json['createdAt'] ?? '',
+      firstName: json['firstName'] ?? '',
+      lastName: json['lastName'] ?? '',
     );
   }
 }
 
-class Receipt {
+// ─── Pending Cash Transactions List ──────────────────────────────────────────
+class PendingCashListResponseModel {
+  final bool success;
+  final List<CashTransaction> data;
+
+  PendingCashListResponseModel({required this.success, required this.data});
+
+  factory PendingCashListResponseModel.fromJson(Map<String, dynamic> json) {
+    final list = json['data'] as List<dynamic>? ?? [];
+    return PendingCashListResponseModel(
+      success: json['success'] ?? false,
+      data: list.map((e) => CashTransaction.fromJson(e)).toList(),
+    );
+  }
+}
+
+// ─── Online Payment Initialize Response ──────────────────────────────────────
+class OnlinePaymentInitResponseModel {
+  final bool success;
+  final String message;
+  final OnlinePaymentInitData data;
+
+  OnlinePaymentInitResponseModel({
+    required this.success,
+    required this.message,
+    required this.data,
+  });
+
+  factory OnlinePaymentInitResponseModel.fromJson(Map<String, dynamic> json) {
+    return OnlinePaymentInitResponseModel(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      data: OnlinePaymentInitData.fromJson(json['data'] ?? {}),
+    );
+  }
+}
+
+class OnlinePaymentInitData {
+  final String reference;
+  final String authorizationUrl;
+  final String accessCode;
+  final double amount;
+  final String expiresAt;
+
+  OnlinePaymentInitData({
+    required this.reference,
+    required this.authorizationUrl,
+    required this.accessCode,
+    required this.amount,
+    required this.expiresAt,
+  });
+
+  factory OnlinePaymentInitData.fromJson(Map<String, dynamic> json) {
+    return OnlinePaymentInitData(
+      reference: json['reference'] ?? '',
+      authorizationUrl: json['authorizationUrl'] ?? '',
+      accessCode: json['accessCode'] ?? '',
+      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
+      expiresAt: json['expiresAt'] ?? '',
+    );
+  }
+}
+
+// ─── Online Payment Status Response ──────────────────────────────────────────
+class OnlinePaymentStatusResponseModel {
+  final bool success;
+  final OnlinePaymentStatusData data;
+
+  OnlinePaymentStatusResponseModel({required this.success, required this.data});
+
+  factory OnlinePaymentStatusResponseModel.fromJson(Map<String, dynamic> json) {
+    return OnlinePaymentStatusResponseModel(
+      success: json['success'] ?? false,
+      data: OnlinePaymentStatusData.fromJson(json['data'] ?? {}),
+    );
+  }
+}
+
+class OnlinePaymentStatusData {
+  final String id;
+  final String reference;
+  final String status; // PENDING, COMPLETED, FAILED
+  final String amount;
+  final String paymentMethod;
+  final String customerName;
+  final String? paidAt;
+  final String? failedAt;
+  final String? failureReason;
+  final String branchId;
+  final Map<String, dynamic>? metadata;
+  final OnlineReceipt? receipt;
+
+  OnlinePaymentStatusData({
+    required this.id,
+    required this.reference,
+    required this.status,
+    required this.amount,
+    required this.paymentMethod,
+    required this.customerName,
+    this.paidAt,
+    this.failedAt,
+    this.failureReason,
+    required this.branchId,
+    this.metadata,
+    this.receipt,
+  });
+
+  factory OnlinePaymentStatusData.fromJson(Map<String, dynamic> json) {
+    return OnlinePaymentStatusData(
+      id: json['id'] ?? '',
+      reference: json['reference'] ?? '',
+      status: json['status'] ?? '',
+      amount: json['amount']?.toString() ?? '0',
+      paymentMethod: json['paymentMethod'] ?? '',
+      customerName: json['customerName'] ?? '',
+      paidAt: json['paidAt'],
+      failedAt: json['failedAt'],
+      failureReason: json['failureReason'],
+      branchId: json['branchId'] ?? '',
+      metadata: json['metadata'] != null
+          ? Map<String, dynamic>.from(json['metadata'])
+          : null,
+      receipt: json['receipt'] != null
+          ? OnlineReceipt.fromJson(json['receipt'])
+          : null,
+    );
+  }
+}
+
+class OnlineReceipt {
   final String id;
   final String receiptNumber;
   final String organizationId;
@@ -245,8 +363,10 @@ class Receipt {
   final String issuedAt;
   final Map<String, dynamic>? metadata;
   final String createdAt;
+  final OnlineBranch? branch;
+  final OnlineOrganization? organization;
 
-  Receipt({
+  OnlineReceipt({
     required this.id,
     required this.receiptNumber,
     required this.organizationId,
@@ -263,10 +383,12 @@ class Receipt {
     required this.issuedAt,
     this.metadata,
     required this.createdAt,
+    this.branch,
+    this.organization,
   });
 
-  factory Receipt.fromJson(Map<String, dynamic> json) {
-    return Receipt(
+  factory OnlineReceipt.fromJson(Map<String, dynamic> json) {
+    return OnlineReceipt(
       id: json['id'] ?? '',
       receiptNumber: json['receiptNumber'] ?? '',
       organizationId: json['organizationId'] ?? '',
@@ -285,6 +407,36 @@ class Receipt {
           ? Map<String, dynamic>.from(json['metadata'])
           : null,
       createdAt: json['createdAt'] ?? '',
+      branch: json['branch'] != null
+          ? OnlineBranch.fromJson(json['branch'])
+          : null,
+      organization: json['organization'] != null
+          ? OnlineOrganization.fromJson(json['organization'])
+          : null,
     );
+  }
+}
+
+class OnlineBranch {
+  final String name;
+  final String address;
+
+  OnlineBranch({required this.name, required this.address});
+
+  factory OnlineBranch.fromJson(Map<String, dynamic> json) {
+    return OnlineBranch(
+      name: json['name'] ?? '',
+      address: json['address'] ?? 'N/A',
+    );
+  }
+}
+
+class OnlineOrganization {
+  final String name;
+
+  OnlineOrganization({required this.name});
+
+  factory OnlineOrganization.fromJson(Map<String, dynamic> json) {
+    return OnlineOrganization(name: json['name'] ?? '');
   }
 }

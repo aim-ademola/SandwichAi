@@ -179,8 +179,9 @@ class _StockControlAppDrawerContentState
                         Navigator.push(
                           context,
                           CupertinoPageRoute(
+                            // ✅ No branchId needed — bloc fetches it from cache
                             builder: (_) =>
-                                CompleteStockRequestDetailsScreen(branchId: ''),
+                                const CompleteStockRequestDetailsScreen(),
                           ),
                         );
                       },

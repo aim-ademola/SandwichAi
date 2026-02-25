@@ -56,6 +56,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
               style: WorkSansAppTextStyles.medium.copyWith(color: Colors.white),
             ),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
         return;
@@ -118,6 +122,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                 });
                 ScaffoldMessenger.of(rootContext).showSnackBar(
                   SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     content: Text(
                       'Camera feature coming soon',
                       style: WorkSansAppTextStyles.medium.copyWith(
@@ -144,6 +152,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                 });
                 ScaffoldMessenger.of(rootContext).showSnackBar(
                   SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     content: Text(
                       'Gallery feature coming soon',
                       style: WorkSansAppTextStyles.medium.copyWith(
@@ -184,6 +196,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                 ),
                 backgroundColor: kGreen,
                 duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
           });
@@ -202,6 +218,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
               ),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         }

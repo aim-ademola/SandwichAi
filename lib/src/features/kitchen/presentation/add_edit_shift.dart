@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -52,7 +53,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
       final end = DateTime.parse(shift.endTime);
       _endTime = TimeOfDay(hour: end.hour, minute: end.minute);
     } catch (e) {
-      print('Error parsing shift times: $e');
+      AppLogger.log('Error parsing shift times: $e');
     }
   }
 
@@ -233,14 +234,18 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                 // Employee Selection
                 BlocBuilder<KitchenShiftBloc, KitchenShiftState>(
                   builder: (context, state) {
-                    print('DEBUG: Current state: ${state.runtimeType}');
+                    AppLogger.log('DEBUG: Current state: ${state.runtimeType}');
 
                     final employees = state is KitchenShiftLoaded
                         ? state.employees
                         : <Employee>[];
 
-                    print('DEBUG: Employees count: ${employees.length}');
-                    print('DEBUG: Selected employee ID: $_selectedEmployeeId');
+                    AppLogger.log(
+                      'DEBUG: Employees count: ${employees.length}',
+                    );
+                    AppLogger.log(
+                      'DEBUG: Selected employee ID: $_selectedEmployeeId',
+                    );
 
                     // Remove duplicates by ID
                     final uniqueEmployees = <String, Employee>{};
@@ -249,7 +254,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                     }
                     final employeesList = uniqueEmployees.values.toList();
 
-                    print(
+                    AppLogger.log(
                       'DEBUG: Unique employees count: ${employeesList.length}',
                     );
 

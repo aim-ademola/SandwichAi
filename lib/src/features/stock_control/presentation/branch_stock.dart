@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/stock_notification_helper.dart';
@@ -95,7 +96,7 @@ class _InventoryBodyState extends State<InventoryBody> {
           }
 
           if (state is BranchStockError) {
-            print(state.error);
+            AppLogger.log(state.error);
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),

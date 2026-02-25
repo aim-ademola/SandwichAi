@@ -1,6 +1,7 @@
 // bloc/kitchen_dashboard_bloc/bloc.dart
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/local_notification.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen-dash_bloc/event.dart';
@@ -37,8 +38,8 @@ class KitchenDashboardBloc
     branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
     employeeId = await AuthCacheHelper.instance.getEmpID() ?? '';
 
-    print('DEBUG BLOC: Branch ID: $branchId');
-    print('DEBUG BLOC: Employee ID: $employeeId');
+    AppLogger.log('DEBUG BLOC: Branch ID: $branchId');
+    AppLogger.log('DEBUG BLOC: Employee ID: $employeeId');
   }
 
   Future<void> _onLoadDashboardData(
@@ -50,14 +51,14 @@ class KitchenDashboardBloc
       if (branchId.isEmpty) {
         branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
         employeeId = await AuthCacheHelper.instance.getEmpID() ?? '';
-        print(
+        AppLogger.log(
           'DEBUG BLOC: Initialized IDs - Branch: $branchId, Employee: $employeeId',
         );
       }
 
       emit(const DashboardLoading());
 
-      print('DEBUG BLOC: Loading dashboard data...');
+      AppLogger.log('DEBUG BLOC: Loading dashboard data...');
       final response = await _repository.getDashboardData(branchId: branchId);
 
       final pendingOrders = response.data?.recentOrders.where(
@@ -80,17 +81,19 @@ class KitchenDashboardBloc
 
       await response.when(
         success: (dashboardData) async {
-          print('DEBUG BLOC: Dashboard data loaded successfully');
+          AppLogger.log('DEBUG BLOC: Dashboard data loaded successfully');
           // Cache the dashboard data
           _cachedDashboardData = dashboardData;
 
           if (dashboardData.recentOrders.isEmpty) {
-            print('DEBUG BLOC: No orders found, emitting DashboardEmpty');
+            AppLogger.log(
+              'DEBUG BLOC: No orders found, emitting DashboardEmpty',
+            );
             emit(const DashboardEmpty());
             return;
           }
 
-          print(
+          AppLogger.log(
             'DEBUG BLOC: Emitting DashboardLoaded with ${dashboardData.recentOrders.length} orders',
           );
           emit(
@@ -101,14 +104,14 @@ class KitchenDashboardBloc
           );
         },
         error: (error) async {
-          print('DEBUG BLOC: Error loading dashboard - $error');
+          AppLogger.log('DEBUG BLOC: Error loading dashboard - $error');
           final errorType = _determineErrorType(error.toString());
           emit(DashboardError(error: error.toString(), errorType: errorType));
         },
       );
     } catch (e, stackTrace) {
-      print('DEBUG BLOC: Exception in _onLoadDashboardData - $e');
-      print('DEBUG BLOC: Stack trace - $stackTrace');
+      AppLogger.log('DEBUG BLOC: Exception in _onLoadDashboardData - $e');
+      AppLogger.log('DEBUG BLOC: Stack trace - $stackTrace');
       emit(
         const DashboardError(
           error: 'An unexpected error occurred. Please try again.',
@@ -123,7 +126,7 @@ class KitchenDashboardBloc
     Emitter<KitchenDashboardState> emit,
   ) async {
     try {
-      print('DEBUG BLOC: Refreshing dashboard data...');
+      AppLogger.log('DEBUG BLOC: Refreshing dashboard data...');
 
       // If we have cached data, use it for the refreshing state
       if (_cachedDashboardData != null) {
@@ -134,7 +137,7 @@ class KitchenDashboardBloc
 
       await response.when(
         success: (dashboardData) async {
-          print('DEBUG BLOC: Dashboard refresh successful');
+          AppLogger.log('DEBUG BLOC: Dashboard refresh successful');
           // Cache the new dashboard data
           _cachedDashboardData = dashboardData;
 
@@ -157,14 +160,14 @@ class KitchenDashboardBloc
           );
         },
         error: (error) async {
-          print('DEBUG BLOC: Error refreshing dashboard - $error');
+          AppLogger.log('DEBUG BLOC: Error refreshing dashboard - $error');
           final errorType = _determineErrorType(error.toString());
           emit(DashboardError(error: error.toString(), errorType: errorType));
         },
       );
     } catch (e, stackTrace) {
-      print('DEBUG BLOC: Exception in _onRefreshDashboardData - $e');
-      print('DEBUG BLOC: Stack trace - $stackTrace');
+      AppLogger.log('DEBUG BLOC: Exception in _onRefreshDashboardData - $e');
+      AppLogger.log('DEBUG BLOC: Stack trace - $stackTrace');
       emit(
         const DashboardError(
           error: 'Failed to refresh. Please try again.',
@@ -226,17 +229,17 @@ class KitchenDashboardBloc
     StartOrderPreparation event,
     Emitter<KitchenDashboardState> emit,
   ) async {
-    print(
+    AppLogger.log(
       'DEBUG BLOC: _onStartOrderPreparation called for order ${event.orderId}',
     );
 
     // Ensure we have employee ID
     if (employeeId.isEmpty) {
       employeeId = await AuthCacheHelper.instance.getEmpID() ?? '';
-      print('DEBUG BLOC: Retrieved employee ID: $employeeId');
+      AppLogger.log('DEBUG BLOC: Retrieved employee ID: $employeeId');
 
       if (employeeId.isEmpty) {
-        print('DEBUG BLOC: Employee ID is empty, cannot proceed');
+        AppLogger.log('DEBUG BLOC: Employee ID is empty, cannot proceed');
         emit(
           OrderActionError(
             orderId: event.orderId,
@@ -248,7 +251,7 @@ class KitchenDashboardBloc
     }
 
     try {
-      print('DEBUG BLOC: Making API call to start preparation...');
+      AppLogger.log('DEBUG BLOC: Making API call to start preparation...');
 
       // Make API call to update order status from PENDING to PREPARING
       final response = await _repository.updateOrderStatus(
@@ -257,13 +260,13 @@ class KitchenDashboardBloc
         updatedBy: employeeId,
       );
 
-      print('DEBUG BLOC: API response received');
-      print('DEBUG BLOC: Response is success: ${response.isSuccess}');
-      print('DEBUG BLOC: Response is error: ${response.hasError}');
+      AppLogger.log('DEBUG BLOC: API response received');
+      AppLogger.log('DEBUG BLOC: Response is success: ${response.isSuccess}');
+      AppLogger.log('DEBUG BLOC: Response is error: ${response.hasError}');
 
       // Check if response is success
       if (response.isSuccess) {
-        print('DEBUG BLOC: ✅ Order preparation started successfully');
+        AppLogger.log('DEBUG BLOC: ✅ Order preparation started successfully');
 
         // Show success message
         emit(
@@ -277,13 +280,15 @@ class KitchenDashboardBloc
         await Future.delayed(const Duration(milliseconds: 500));
 
         // Refresh data
-        print('DEBUG BLOC: Refreshing dashboard after successful update...');
+        AppLogger.log(
+          'DEBUG BLOC: Refreshing dashboard after successful update...',
+        );
         final refreshResponse = await _repository.getDashboardData(
           branchId: branchId,
         );
 
         if (refreshResponse.isSuccess) {
-          print('DEBUG BLOC: Refresh successful, updating state');
+          AppLogger.log('DEBUG BLOC: Refresh successful, updating state');
           final dashboardData = refreshResponse.data!;
           _cachedDashboardData = dashboardData;
 
@@ -300,7 +305,7 @@ class KitchenDashboardBloc
             ),
           );
         } else {
-          print('DEBUG BLOC: Refresh failed: ${refreshResponse.error}');
+          AppLogger.log('DEBUG BLOC: Refresh failed: ${refreshResponse.error}');
           // If refresh fails but we have cached data, use it
           if (_cachedDashboardData != null) {
             final filteredOrders = _applyFilter(
@@ -318,7 +323,9 @@ class KitchenDashboardBloc
           }
         }
       } else {
-        print('DEBUG BLOC: ❌ Order preparation failed: ${response.error}');
+        AppLogger.log(
+          'DEBUG BLOC: ❌ Order preparation failed: ${response.error}',
+        );
 
         emit(
           OrderActionError(
@@ -347,8 +354,8 @@ class KitchenDashboardBloc
         }
       }
     } catch (e, stackTrace) {
-      print('DEBUG BLOC: Exception in _onStartOrderPreparation: $e');
-      print('DEBUG BLOC: Stack trace: $stackTrace');
+      AppLogger.log('DEBUG BLOC: Exception in _onStartOrderPreparation: $e');
+      AppLogger.log('DEBUG BLOC: Stack trace: $stackTrace');
 
       emit(
         OrderActionError(
@@ -382,15 +389,17 @@ class KitchenDashboardBloc
     MarkOrderAsReady event,
     Emitter<KitchenDashboardState> emit,
   ) async {
-    print('DEBUG BLOC: _onMarkOrderAsReady called for order ${event.orderId}');
+    AppLogger.log(
+      'DEBUG BLOC: _onMarkOrderAsReady called for order ${event.orderId}',
+    );
 
     // Ensure we have employee ID
     if (employeeId.isEmpty) {
       employeeId = await AuthCacheHelper.instance.getEmpID() ?? '';
-      print('DEBUG BLOC: Retrieved employee ID: $employeeId');
+      AppLogger.log('DEBUG BLOC: Retrieved employee ID: $employeeId');
 
       if (employeeId.isEmpty) {
-        print('DEBUG BLOC: Employee ID is empty, cannot proceed');
+        AppLogger.log('DEBUG BLOC: Employee ID is empty, cannot proceed');
         emit(
           OrderActionError(
             orderId: event.orderId,
@@ -402,7 +411,7 @@ class KitchenDashboardBloc
     }
 
     try {
-      print('DEBUG BLOC: Making API call to mark order as ready...');
+      AppLogger.log('DEBUG BLOC: Making API call to mark order as ready...');
 
       // Make API call to update order status from PREPARING to READY
       final response = await _repository.updateOrderStatus(
@@ -420,13 +429,13 @@ class KitchenDashboardBloc
         priority: NotificationPriority.high,
       );
 
-      print('DEBUG BLOC: API response received');
-      print('DEBUG BLOC: Response is success: ${response.isSuccess}');
-      print('DEBUG BLOC: Response is error: ${response.hasError}');
+      AppLogger.log('DEBUG BLOC: API response received');
+      AppLogger.log('DEBUG BLOC: Response is success: ${response.isSuccess}');
+      AppLogger.log('DEBUG BLOC: Response is error: ${response.hasError}');
 
       // Check if response is success
       if (response.isSuccess) {
-        print('DEBUG BLOC: ✅ Order marked as ready successfully');
+        AppLogger.log('DEBUG BLOC: ✅ Order marked as ready successfully');
 
         // Show success message
         emit(
@@ -440,13 +449,15 @@ class KitchenDashboardBloc
         await Future.delayed(const Duration(milliseconds: 500));
 
         // Refresh data
-        print('DEBUG BLOC: Refreshing dashboard after successful update...');
+        AppLogger.log(
+          'DEBUG BLOC: Refreshing dashboard after successful update...',
+        );
         final refreshResponse = await _repository.getDashboardData(
           branchId: branchId,
         );
 
         if (refreshResponse.isSuccess) {
-          print('DEBUG BLOC: Refresh successful, updating state');
+          AppLogger.log('DEBUG BLOC: Refresh successful, updating state');
           final dashboardData = refreshResponse.data!;
           _cachedDashboardData = dashboardData;
 
@@ -463,7 +474,7 @@ class KitchenDashboardBloc
             ),
           );
         } else {
-          print('DEBUG BLOC: Refresh failed: ${refreshResponse.error}');
+          AppLogger.log('DEBUG BLOC: Refresh failed: ${refreshResponse.error}');
           // If refresh fails but we have cached data, use it
           if (_cachedDashboardData != null) {
             final filteredOrders = _applyFilter(
@@ -481,7 +492,7 @@ class KitchenDashboardBloc
           }
         }
       } else {
-        print('DEBUG BLOC: ❌ Mark as ready failed: ${response.error}');
+        AppLogger.log('DEBUG BLOC: ❌ Mark as ready failed: ${response.error}');
 
         emit(
           OrderActionError(
@@ -510,8 +521,8 @@ class KitchenDashboardBloc
         }
       }
     } catch (e, stackTrace) {
-      print('DEBUG BLOC: Exception in _onMarkOrderAsReady: $e');
-      print('DEBUG BLOC: Stack trace: $stackTrace');
+      AppLogger.log('DEBUG BLOC: Exception in _onMarkOrderAsReady: $e');
+      AppLogger.log('DEBUG BLOC: Stack trace: $stackTrace');
 
       emit(
         OrderActionError(

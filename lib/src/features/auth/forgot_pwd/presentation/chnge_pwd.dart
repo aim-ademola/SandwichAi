@@ -4,77 +4,64 @@ import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/config/responsive_config.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sandwich_ai/src/features/auth/data/models/forgot_pwd_model.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/bloc.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/event.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/state.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/shw-rst_snack.dart'
-    show showErrorSnackBar;
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/snackbar.dart'
-    show showSuccessSnackBar;
+import 'package:sandwich_ai/src/features/auth/data/models/chnage-pwd-res.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/cnage_pwd_blocs/bloc.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/cnage_pwd_blocs/event.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/cnage_pwd_blocs/state.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/snack_bar_chnge.dart';
+
 import 'package:sandwich_ai/src/features/auth/login/presentation/login_textfield.dart';
 
-class ResetPasswordScreen extends StatefulWidget {
-  final String email;
-  final String organizationCode;
-
-  const ResetPasswordScreen({
-    super.key,
-    required this.email,
-    required this.organizationCode,
-  });
+class ChangePasswordScreen extends StatefulWidget {
+  const ChangePasswordScreen({super.key});
 
   @override
-  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
-class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  final _otpController = TextEditingController();
-  final _passwordController = TextEditingController();
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    _otpController.dispose();
-    _passwordController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _handleResetPassword() {
+  void _handleChangePassword() {
     FocusScope.of(context).unfocus();
 
-    final otp = _otpController.text.trim();
-    final password = _passwordController.text.trim();
+    final currentPassword = _currentPasswordController.text.trim();
+    final newPassword = _newPasswordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    // Validate confirm password matches
-    final currentState = context.read<ResetPasswordBloc>().state;
-    if (currentState is ResetPasswordInitial) {
-      context.read<ResetPasswordBloc>().add(
+    // Validate confirm password first
+    final bloc = context.read<ChangePasswordBloc>();
+    final currentState = bloc.state;
+
+    if (currentState is ChangePasswordInitial) {
+      bloc.add(
         ValidateConfirmPassword(
-          password: password,
+          password: newPassword,
           confirmPassword: confirmPassword,
         ),
       );
-
-      // Check if there are any validation errors
-      if (password != confirmPassword) {
-        return;
-      }
+      if (newPassword != confirmPassword) return;
     }
 
-    final request = ResetPasswordRequest(
-      email: widget.email,
-      organizationCode: widget.organizationCode,
-      type: 'EMPLOYEE',
-      otp: otp,
-      password: password,
+    bloc.add(
+      ChangePassword(
+        request: ChangePasswordRequest(
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        ),
+      ),
     );
-
-    context.read<ResetPasswordBloc>().add(ResetPassword(request: request));
   }
 
   @override
@@ -83,24 +70,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     final screenWidth = context.screenWidth;
     final screenHeight = context.screenHeight;
 
-    return BlocListener<ResetPasswordBloc, ResetPasswordState>(
+    return BlocListener<ChangePasswordBloc, ChangePasswordState>(
       listener: (context, state) {
-        if (state is ResetPasswordError) {
+        if (state is ChangePasswordError) {
           showErrorSnackBar(
             state.error,
             context: context,
             errorType: state.errorType,
           );
         }
-        if (state is ResetPasswordSuccess) {
+        if (state is ChangePasswordSuccess) {
           showSuccessSnackBar(state.message, context);
-
-          // Navigate back to login after successful reset
           Future.delayed(const Duration(seconds: 1), () {
-            if (mounted) {
-              // Pop until we get back to login
-              context.go('/employee-login');
-            }
+            if (mounted) context.pop();
           });
         }
       },
@@ -119,6 +101,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ),
               onPressed: () => context.pop(),
             ),
+            title: Text(
+              'Change Password',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: responsive.getSubtitleFontSize(screenWidth) * 1.1,
+                fontWeight: FontWeight.w600,
+                color: kprimaryTextColor1,
+              ),
+            ),
+            centerTitle: true,
           ),
           body: SafeArea(
             child: Center(
@@ -129,7 +120,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                     maxWidth: responsive.getMaxContentWidth(screenWidth),
-                    minHeight: screenHeight - 100,
+                    minHeight: screenHeight - 150,
                   ),
                   child: Form(
                     key: _formKey,
@@ -137,8 +128,26 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Icon
-                        SvgPicture.asset('assets/svg/person.svg'),
+                        SizedBox(
+                          height: responsive.getVerticalSpacing(screenHeight),
+                        ),
+
+                        // Lock icon
+                        Center(
+                          child: Container(
+                            width: screenWidth * 0.2,
+                            height: screenWidth * 0.2,
+                            decoration: BoxDecoration(
+                              color: kPrimary.withOpacity(0.08),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.lock_outline_rounded,
+                              color: kPrimary,
+                              size: screenWidth * 0.1,
+                            ),
+                          ),
+                        ),
                         SizedBox(
                           height:
                               responsive.getVerticalSpacing(screenHeight) * 0.8,
@@ -146,7 +155,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                         // Title
                         Text(
-                          'Reset Password',
+                          'Change Password',
                           textAlign: TextAlign.center,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: responsive.getTitleFontSize(screenWidth),
@@ -162,7 +171,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                         // Subtitle
                         Text(
-                          'Enter the OTP sent to ${widget.email} and create a new password.',
+                          'Enter your current password and choose a new one to keep your account secure.',
                           textAlign: TextAlign.center,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: responsive.getSubtitleFontSize(
@@ -174,35 +183,56 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                         SizedBox(
                           height:
-                              responsive.getVerticalSpacing(screenHeight) * 1.5,
+                              responsive.getVerticalSpacing(screenHeight) * 1.8,
                         ),
 
-                        // OTP Field
-                        BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
+                        // Current Password Field
+                        BlocBuilder<ChangePasswordBloc, ChangePasswordState>(
                           builder: (context, state) {
+                            bool obscure = true;
                             String? errorText;
-                            if (state is ResetPasswordValidation) {
-                              errorText = state.otpError;
-                            } else if (state is ResetPasswordInitial) {
-                              errorText = state.otpError;
+
+                            if (state is ChangePasswordInitial) {
+                              obscure = state.obscureCurrentPassword;
+                              errorText = state.currentPasswordError;
+                            } else if (state is ChangePasswordError) {
+                              obscure = state.obscureCurrentPassword;
+                            } else if (state is ChangePasswordValidation) {
+                              obscure = state.obscureCurrentPassword;
+                              errorText = state.currentPasswordError;
+                            } else if (state is ChangePasswordLoading) {
+                              obscure = state.obscureCurrentPassword;
                             }
 
                             return buildTextField(
                               context: context,
-                              controller: _otpController,
-                              hintText: 'Enter 6-digit OTP',
+                              controller: _currentPasswordController,
+                              hintText: 'Current Password',
+                              obscureText: obscure,
                               fontSize: responsive.getInputFontSize(
                                 screenWidth,
                               ),
                               textInputAction: TextInputAction.next,
                               errorText: errorText,
-                              keyboardType: TextInputType.number,
-
                               onChanged: (value) {
-                                context.read<ResetPasswordBloc>().add(
-                                  ValidateOTP(otp: value),
+                                context.read<ChangePasswordBloc>().add(
+                                  ValidateCurrentPassword(password: value),
                                 );
                               },
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  obscure
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: const Color(0xFF9E9E9E),
+                                  size: responsive.getIconSize(screenWidth),
+                                ),
+                                onPressed: () {
+                                  context.read<ChangePasswordBloc>().add(
+                                    const ToggleCurrentPasswordVisibility(),
+                                  );
+                                },
+                              ),
                             );
                           },
                         ),
@@ -212,48 +242,48 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
 
                         // New Password Field
-                        BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
+                        BlocBuilder<ChangePasswordBloc, ChangePasswordState>(
                           builder: (context, state) {
-                            bool obscurePassword = true;
+                            bool obscure = true;
                             String? errorText;
 
-                            if (state is ResetPasswordInitial) {
-                              obscurePassword = state.obscurePassword;
-                              errorText = state.passwordError;
-                            } else if (state is ResetPasswordError) {
-                              obscurePassword = state.obscurePassword;
-                            } else if (state is ResetPasswordValidation) {
-                              obscurePassword = state.obscurePassword;
-                              errorText = state.passwordError;
-                            } else if (state is ResetPasswordLoading) {
-                              obscurePassword = state.obscurePassword;
+                            if (state is ChangePasswordInitial) {
+                              obscure = state.obscureNewPassword;
+                              errorText = state.newPasswordError;
+                            } else if (state is ChangePasswordError) {
+                              obscure = state.obscureNewPassword;
+                            } else if (state is ChangePasswordValidation) {
+                              obscure = state.obscureNewPassword;
+                              errorText = state.newPasswordError;
+                            } else if (state is ChangePasswordLoading) {
+                              obscure = state.obscureNewPassword;
                             }
 
                             return buildTextField(
                               context: context,
-                              controller: _passwordController,
+                              controller: _newPasswordController,
                               hintText: 'New Password',
-                              obscureText: obscurePassword,
+                              obscureText: obscure,
                               fontSize: responsive.getInputFontSize(
                                 screenWidth,
                               ),
                               textInputAction: TextInputAction.next,
                               errorText: errorText,
                               onChanged: (value) {
-                                context.read<ResetPasswordBloc>().add(
+                                context.read<ChangePasswordBloc>().add(
                                   ValidateNewPassword(password: value),
                                 );
                               },
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  obscurePassword
+                                  obscure
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
                                   color: const Color(0xFF9E9E9E),
                                   size: responsive.getIconSize(screenWidth),
                                 ),
                                 onPressed: () {
-                                  context.read<ResetPasswordBloc>().add(
+                                  context.read<ChangePasswordBloc>().add(
                                     const ToggleNewPasswordVisibility(),
                                   );
                                 },
@@ -266,57 +296,53 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               responsive.getVerticalSpacing(screenHeight) * 0.8,
                         ),
 
-                        // Confirm Password Field
-                        BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
+                        // Confirm New Password Field
+                        BlocBuilder<ChangePasswordBloc, ChangePasswordState>(
                           builder: (context, state) {
-                            bool obscureConfirmPassword = true;
+                            bool obscure = true;
                             String? errorText;
 
-                            if (state is ResetPasswordInitial) {
-                              obscureConfirmPassword =
-                                  state.obscureConfirmPassword;
+                            if (state is ChangePasswordInitial) {
+                              obscure = state.obscureConfirmPassword;
                               errorText = state.confirmPasswordError;
-                            } else if (state is ResetPasswordError) {
-                              obscureConfirmPassword =
-                                  state.obscureConfirmPassword;
-                            } else if (state is ResetPasswordValidation) {
-                              obscureConfirmPassword =
-                                  state.obscureConfirmPassword;
+                            } else if (state is ChangePasswordError) {
+                              obscure = state.obscureConfirmPassword;
+                            } else if (state is ChangePasswordValidation) {
+                              obscure = state.obscureConfirmPassword;
                               errorText = state.confirmPasswordError;
-                            } else if (state is ResetPasswordLoading) {
-                              obscureConfirmPassword =
-                                  state.obscureConfirmPassword;
+                            } else if (state is ChangePasswordLoading) {
+                              obscure = state.obscureConfirmPassword;
                             }
 
                             return buildTextField(
                               context: context,
                               controller: _confirmPasswordController,
                               hintText: 'Confirm New Password',
-                              obscureText: obscureConfirmPassword,
+                              obscureText: obscure,
                               fontSize: responsive.getInputFontSize(
                                 screenWidth,
                               ),
                               textInputAction: TextInputAction.done,
                               errorText: errorText,
                               onChanged: (value) {
-                                context.read<ResetPasswordBloc>().add(
+                                context.read<ChangePasswordBloc>().add(
                                   ValidateConfirmPassword(
-                                    password: _passwordController.text,
+                                    password: _newPasswordController.text,
                                     confirmPassword: value,
                                   ),
                                 );
                               },
-                              onSubmitted: (_) => _handleResetPassword(),
+                              onSubmitted: (_) => _handleChangePassword(),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  obscureConfirmPassword
+                                  obscure
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
                                   color: const Color(0xFF9E9E9E),
                                   size: responsive.getIconSize(screenWidth),
                                 ),
                                 onPressed: () {
-                                  context.read<ResetPasswordBloc>().add(
+                                  context.read<ChangePasswordBloc>().add(
                                     const ToggleConfirmPasswordVisibility(),
                                   );
                                 },
@@ -326,20 +352,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                         SizedBox(
                           height:
-                              responsive.getVerticalSpacing(screenHeight) * 1.2,
+                              responsive.getVerticalSpacing(screenHeight) * 1.5,
                         ),
 
-                        // Reset Password Button
-                        BlocBuilder<ResetPasswordBloc, ResetPasswordState>(
+                        // Change Password Button
+                        BlocBuilder<ChangePasswordBloc, ChangePasswordState>(
                           builder: (context, state) {
-                            final isLoading = state is ResetPasswordLoading;
+                            final isLoading = state is ChangePasswordLoading;
 
                             return SizedBox(
                               height: responsive.getButtonHeight(screenWidth),
                               child: ElevatedButton(
                                 onPressed: isLoading
                                     ? null
-                                    : _handleResetPassword,
+                                    : _handleChangePassword,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: kPrimary,
                                   foregroundColor: Colors.white,
@@ -368,7 +394,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                         ),
                                       )
                                     : Text(
-                                        'Reset Password',
+                                        'Change Password',
                                         style: WorkSansAppTextStyles.medium
                                             .copyWith(
                                               fontSize: responsive
@@ -383,29 +409,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               ),
                             );
                           },
-                        ),
-                        SizedBox(
-                          height:
-                              responsive.getVerticalSpacing(screenHeight) * 1.0,
-                        ),
-
-                        // Back to Login
-                        Center(
-                          child: TextButton(
-                            onPressed: () => context.go('/'),
-                            child: Text(
-                              'Back to Login',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize:
-                                    responsive.getSubtitleFontSize(
-                                      screenWidth,
-                                    ) *
-                                    0.95,
-                                color: kPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
                         ),
                         SizedBox(
                           height:
@@ -437,6 +440,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               ),
                             ),
                           ],
+                        ),
+                        SizedBox(
+                          height:
+                              responsive.getVerticalSpacing(screenHeight) * 1.0,
                         ),
                       ],
                     ),

@@ -158,7 +158,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
           AppLogger.log('Branch: ${state.response.user.branch?.name}');
 
           // Navigate based on department
-          context.go('/Stock-control-nav');
+          context.go('/Pos-nav');
 
           // Uncomment to enable department-based navigation
           // if (dpt == null) {

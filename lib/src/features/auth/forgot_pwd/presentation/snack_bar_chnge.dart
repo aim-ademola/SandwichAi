@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/cnage_pwd_blocs/state.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/state.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/bloc/state.dart';
-import 'package:sandwich_ai/src/features/auth/login_bloc/login_state.dart';
 
 void showErrorSnackBar(
   String message, {
-  ResetPasswordErrorType? errorType,
+  ChangePasswordErrorType? errorType,
   required BuildContext context,
 }) {
   final messenger = ScaffoldMessenger.of(context);
@@ -15,19 +14,19 @@ void showErrorSnackBar(
   IconData icon;
 
   switch (errorType) {
-    case ResetPasswordErrorType.network:
+    case ChangePasswordErrorType.network:
       backgroundColor = Colors.orange;
       icon = Icons.wifi_off;
       break;
-    case ResetPasswordErrorType.validation:
+    case ChangePasswordErrorType.validation:
       backgroundColor = Colors.red.shade700;
       icon = Icons.lock_outline;
       break;
-    case ResetPasswordErrorType.timeout:
+    case ChangePasswordErrorType.timeout:
       backgroundColor = Colors.amber.shade800;
       icon = Icons.access_time;
       break;
-    case ResetPasswordErrorType.server:
+    case ChangePasswordErrorType.server:
       backgroundColor = Colors.red.shade900;
       icon = Icons.cloud_off;
       break;

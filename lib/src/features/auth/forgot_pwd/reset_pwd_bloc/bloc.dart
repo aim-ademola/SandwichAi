@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/forgot_pwd_repo.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/bloc/reset_pwd_bloc/event.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/bloc/reset_pwd_bloc/state.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/event.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/state.dart';
 
 class ResetPasswordBloc extends Bloc<ResetPasswordEvent, ResetPasswordState> {
   final ForgotPasswordRepositoryInterface _repository;

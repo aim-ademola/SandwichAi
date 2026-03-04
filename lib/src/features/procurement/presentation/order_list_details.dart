@@ -742,7 +742,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                     children: [
                       _buildOverviewTab(horizontalPadding),
                       _buildItemsTab(horizontalPadding),
-                      _buildTimelineTab(horizontalPadding),
+                      // _buildTimelineTab(horizontalPadding),
                     ],
                   ),
                 ),

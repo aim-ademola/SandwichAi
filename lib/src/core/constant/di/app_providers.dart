@@ -4,7 +4,7 @@ import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/forgot_pwd_repo.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/login_repo.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/bloc/bloc.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/bloc/reset_pwd_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/auth/login_bloc/login_bloc.dart';
 import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen-dash_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/kitchen/data/repo/kitchen_dash_repo.dart';

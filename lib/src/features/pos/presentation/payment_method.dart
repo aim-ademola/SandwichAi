@@ -647,6 +647,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             customerPhone: widget.customerPhone,
             orderId: _createdOrderId,
             description: 'Cash payment for Order #$_createdOrderId',
+            sessionId: '',
           ),
         ),
       );
@@ -661,6 +662,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             customerPhone: widget.customerPhone,
             orderId: _createdOrderId,
             description: 'Payment for Order #$_createdOrderId',
+            sessionId: '',
           ),
         ),
       );

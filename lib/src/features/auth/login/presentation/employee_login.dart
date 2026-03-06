@@ -158,33 +158,33 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
           AppLogger.log('Branch: ${state.response.user.branch?.name}');
 
           // Navigate based on department
-          context.go('/Pos-nav');
+          // context.go('/Pos-nav');
 
           // Uncomment to enable department-based navigation
-          // if (dpt == null) {
-          //   context.go('/');
-          //   return;
-          // }
+          if (dpt == null) {
+            context.go('/');
+            return;
+          }
 
-          // switch (dpt) {
-          //   case 'KITCHEN':
-          //     context.go('/Kitchen-nav');
-          //     break;
-          //   case 'PROCESSING':
-          //     context.go('/Processing-nav');
-          //     break;
-          //   case 'PROCUREMENT':
-          //     context.go('/Procurement-nav');
-          //     break;
-          //   case 'STOCK_CONTROL':
-          //     context.go('/Stock-control-nav');
-          //     break;
-          //   case 'CUSTOMER_SERVICE':
-          //     context.go('/Pos-nav');
-          //     break;
-          //   default:
-          //     context.go('/');
-          // }
+          switch (dpt) {
+            case 'KITCHEN':
+              context.go('/Kitchen-nav');
+              break;
+            case 'PROCESSING':
+              context.go('/Processing-nav');
+              break;
+            case 'PROCUREMENT':
+              context.go('/Procurement-nav');
+              break;
+            case 'STOCK_CONTROL':
+              context.go('/Stock-control-nav');
+              break;
+            case 'CUSTOMER_SERVICE':
+              context.go('/Pos-nav');
+              break;
+            default:
+              context.go('/');
+          }
         }
       },
       child: DefaultTextStyle.merge(

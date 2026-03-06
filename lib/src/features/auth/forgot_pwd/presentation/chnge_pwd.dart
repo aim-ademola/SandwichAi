@@ -125,66 +125,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   child: Form(
                     key: _formKey,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SizedBox(
-                          height: responsive.getVerticalSpacing(screenHeight),
-                        ),
-
-                        // Lock icon
-                        Center(
-                          child: Container(
-                            width: screenWidth * 0.2,
-                            height: screenWidth * 0.2,
-                            decoration: BoxDecoration(
-                              color: kPrimary.withOpacity(0.08),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.lock_outline_rounded,
-                              color: kPrimary,
-                              size: screenWidth * 0.1,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height:
-                              responsive.getVerticalSpacing(screenHeight) * 0.8,
-                        ),
-
-                        // Title
-                        Text(
-                          'Change Password',
-                          textAlign: TextAlign.center,
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: responsive.getTitleFontSize(screenWidth),
-                            fontWeight: FontWeight.bold,
-                            color: kprimaryTextColor1,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        SizedBox(
-                          height:
-                              responsive.getVerticalSpacing(screenHeight) * 0.3,
-                        ),
-
                         // Subtitle
-                        Text(
-                          'Enter your current password and choose a new one to keep your account secure.',
-                          textAlign: TextAlign.center,
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: responsive.getSubtitleFontSize(
-                              screenWidth,
-                            ),
-                            color: kprimaryTextColor2,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(
-                          height:
-                              responsive.getVerticalSpacing(screenHeight) * 1.8,
-                        ),
 
                         // Current Password Field
                         BlocBuilder<ChangePasswordBloc, ChangePasswordState>(
@@ -416,31 +360,31 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         ),
 
                         // Footer
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/img/Logo-DqvzRW6_.png',
-                              width:
-                                  responsive.getSubtitleFontSize(screenWidth) *
-                                  0.85,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              'Powered by SandwichAI',
-                              textAlign: TextAlign.center,
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize:
-                                    responsive.getSubtitleFontSize(
-                                      screenWidth,
-                                    ) *
-                                    0.85,
-                                color: kprimaryTextColor2,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+                        // Row(
+                        //   mainAxisAlignment: MainAxisAlignment.center,
+                        //   children: [
+                        //     Image.asset(
+                        //       'assets/img/Logo-DqvzRW6_.png',
+                        //       width:
+                        //           responsive.getSubtitleFontSize(screenWidth) *
+                        //           0.85,
+                        //     ),
+                        //     const SizedBox(width: 5),
+                        //     Text(
+                        //       'Powered by SandwichAI',
+                        //       textAlign: TextAlign.center,
+                        //       style: WorkSansAppTextStyles.medium.copyWith(
+                        //         fontSize:
+                        //             responsive.getSubtitleFontSize(
+                        //               screenWidth,
+                        //             ) *
+                        //             0.85,
+                        //         color: kprimaryTextColor2,
+                        //         fontWeight: FontWeight.w500,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                         SizedBox(
                           height:
                               responsive.getVerticalSpacing(screenHeight) * 1.0,

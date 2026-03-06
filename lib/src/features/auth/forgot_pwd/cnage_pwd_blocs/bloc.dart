@@ -59,16 +59,11 @@ class ChangePasswordBloc
         );
         return;
       }
-
-      final currentObscureCurrentPassword = state is ChangePasswordInitial
-          ? (state as ChangePasswordInitial).obscureCurrentPassword
-          : true;
-      final currentObscureNewPassword = state is ChangePasswordInitial
-          ? (state as ChangePasswordInitial).obscureNewPassword
-          : true;
-      final currentObscureConfirmPassword = state is ChangePasswordInitial
-          ? (state as ChangePasswordInitial).obscureConfirmPassword
-          : true;
+      final (
+        currentObscureCurrentPassword,
+        currentObscureNewPassword,
+        currentObscureConfirmPassword,
+      ) = _getVisibilityState();
 
       emit(
         ChangePasswordLoading(
@@ -272,5 +267,32 @@ class ChangePasswordBloc
       return ChangePasswordErrorType.validation;
     }
     return ChangePasswordErrorType.general;
+  }
+
+  (bool, bool, bool) _getVisibilityState() {
+    if (state is ChangePasswordInitial) {
+      final s = state as ChangePasswordInitial;
+      return (
+        s.obscureCurrentPassword,
+        s.obscureNewPassword,
+        s.obscureConfirmPassword,
+      );
+    } else if (state is ChangePasswordError) {
+      final s = state as ChangePasswordError;
+      return (
+        s.obscureCurrentPassword,
+        s.obscureNewPassword,
+        s.obscureConfirmPassword,
+      );
+    } else if (state is ChangePasswordLoading) {
+      final s = state as ChangePasswordLoading;
+      return (
+        s.obscureCurrentPassword,
+        s.obscureNewPassword,
+        s.obscureConfirmPassword,
+      );
+    }
+
+    return (true, true, true);
   }
 }

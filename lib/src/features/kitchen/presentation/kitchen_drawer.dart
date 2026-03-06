@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/chnge_pwd.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/compaints.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_staff_screen.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_to_stock_requisitin_tab.dart';
@@ -85,6 +86,20 @@ class KitchenAppDrawer extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                 ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _buildDrawerItem(
+                context,
+                icon: Icons.lock_outline_rounded,
+                title: 'Change Password',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(builder: (_) => ChangePasswordScreen()),
+                  );
+                },
               ),
             ),
             // Logout Button

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/features/auth/data/repo/chnage_pwd_repo.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/forgot_pwd_repo.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/login_repo.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/cnage_pwd_blocs/bloc.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/auth/login_bloc/login_bloc.dart';
 import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen-dash_bloc/bloc.dart';
@@ -172,6 +174,9 @@ class AppBlocProviders extends StatelessWidget {
         RepositoryProvider<PaymentRepositoryInterface>(
           create: (context) => PaymentRepository(),
         ),
+        RepositoryProvider<ChangePasswordRepositoryInterface>(
+          create: (context) => ChangePasswordRepository(),
+        ),
       ],
 
       child: MultiBlocProvider(
@@ -335,6 +340,11 @@ class AppBlocProviders extends StatelessWidget {
           BlocProvider<PaymentBloc>(
             create: (context) => PaymentBloc(
               repository: context.read<PaymentRepositoryInterface>(),
+            ),
+          ),
+          BlocProvider<ChangePasswordBloc>(
+            create: (context) => ChangePasswordBloc(
+              repository: context.read<ChangePasswordRepositoryInterface>(),
             ),
           ),
         ],

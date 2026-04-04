@@ -71,6 +71,11 @@ class PosOrderBloc extends Bloc<PosOrderEvent, PosOrderState> {
     try {
       emit(const PosOrderCreating());
 
+      AppLogger.log('=== CREATE POS ORDER ===');
+      AppLogger.log('orderType: ${event.orderType}');
+      AppLogger.log('branchId: $branchId');
+      AppLogger.log('items count: ${event.items.length}');
+
       // Ensure IDs are loaded
       if (branchId.isEmpty) {
         branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
@@ -123,6 +128,7 @@ class PosOrderBloc extends Bloc<PosOrderEvent, PosOrderState> {
           await _printOrderToKitchen(order);
         },
         error: (error) async {
+          AppLogger.log('ERROR: $error');
           emit(PosOrderError(error: error.toString()));
         },
       );

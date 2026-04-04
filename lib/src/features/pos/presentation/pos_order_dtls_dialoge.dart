@@ -61,7 +61,7 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
 
   final List<Map<String, String>> _orderTypes = [
     {'value': 'DINE_IN', 'label': 'Dine In'},
-    {'value': 'TAKEAWAY', 'label': 'Take Out'},
+    {'value': 'TAKEAWAY', 'label': 'Take Away'},
     {'value': 'DELIVERY', 'label': 'Delivery'},
     {'value': 'ONLINE', 'label': 'Online'},
   ];

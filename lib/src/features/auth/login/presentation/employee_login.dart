@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
@@ -109,6 +110,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
   }
 
   void _handleLogin() async {
+    HapticFeedback.selectionClick();
     // Clear any existing errors
     FocusScope.of(context).unfocus();
 

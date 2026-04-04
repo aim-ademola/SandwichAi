@@ -80,7 +80,8 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
 
   String _formatDate(String dt) {
     try {
-      return DateFormat('MMM dd, yyyy • hh:mm a').format(DateTime.parse(dt));
+      final wat = DateTime.parse(dt).toUtc().add(const Duration(hours: 1));
+      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
     } catch (_) {
       return dt;
     }

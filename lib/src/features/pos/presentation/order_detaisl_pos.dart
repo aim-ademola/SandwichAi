@@ -78,7 +78,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
   String _selectedOrderType = 'DINE_IN';
   int _currentPage = 0;
 
-  final List<String> _orderTypes = ['DINE_IN', 'TAKE_AWAY', 'DELIVERY'];
+  final List<String> _orderTypes = ['DINE_IN', 'TAKE_OUT', 'DELIVERY'];
 
   @override
   void dispose() {

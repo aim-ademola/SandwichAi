@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -126,7 +127,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 value: cubit,
                 child: OnlinePaymentQrScreen(
                   initData: saved.onlinePaymentInitData!,
-                  orderType: widget.orderType,
+                  orderType: _normalizeOrderType(widget.orderType),
+
                   tableNumber: widget.tableNumber,
                   customerName: widget.customerName ?? 'Guest',
                   sessionId: _sessionId,
@@ -146,7 +148,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 child: CashApprovalWaitingScreen(
                   transaction: saved.cashTransaction!,
                   branchId: _branchId,
-                  orderType: widget.orderType,
+                  orderType: _normalizeOrderType(widget.orderType),
+
                   tableNumber: widget.tableNumber,
                   sessionId: _sessionId,
                 ),
@@ -599,6 +602,25 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
+  String _normalizeOrderType(String orderType) {
+    switch (orderType.toLowerCase().trim().replaceAll(' ', '_')) {
+      case 'dine_in':
+      case 'dinein':
+      case 'dine-in':
+        return 'DINE_IN';
+      case 'take_out':
+      case 'takeout':
+      case 'take-out':
+      case 'to_go':
+      case 'togo':
+        return 'TAKE_OUT';
+      case 'delivery':
+        return 'DELIVERY';
+      default:
+        return orderType.toUpperCase().replaceAll(' ', '_');
+    }
+  }
+
   void _createOrderAndPay() {
     _showLoading('Creating order…');
 
@@ -615,10 +637,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         specialRequest: widget.specialRequests[e.key.id],
       );
     }).toList();
-
+    AppLogger.log(widget.orderType);
     context.read<PosOrderBloc>().add(
       CreatePosOrder(
-        orderType: widget.orderType,
+        orderType: _normalizeOrderType(widget.orderType),
         tableNumber: widget.tableNumber,
         customerName: widget.customerName,
         customerPhone: widget.customerPhone,
@@ -632,7 +654,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   Future<void> _processPayment() async {
     _dismissLoading();
     _showLoading('Processing payment…');
-
+    AppLogger.log('=== PROCESS PAYMENT ===');
+    AppLogger.log('orderType: ${widget.orderType}');
+    AppLogger.log('createdOrderId: $_createdOrderId');
+    AppLogger.log('selectedMethod: $_selectedMethod');
     if (_branchId.isEmpty) {
       _branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
     }

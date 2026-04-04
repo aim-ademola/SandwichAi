@@ -3,12 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
+import 'package:sandwich_ai/src/core/globals/chat/chat_screen_loader.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/chat_models.dart';
 
-import 'package:sandwich_ai/src/features/pos/presentation/pos_internal_chat.dart';
+import 'package:sandwich_ai/src/core/globals/chat/chat.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_dasboard.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/recipe_calc.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/ai_wastage_analysis.dart';
+
+import '../chat/data/model/cht_model.dart';
 
 final GlobalKey<ProcessingBottomNavBarState> stockControlNavBarKey =
     GlobalKey<ProcessingBottomNavBarState>();
@@ -244,10 +248,9 @@ class ProcessingControlMainScreen extends StatelessWidget {
         ProcessingDashboardScreen(),
         RecipeCalculatorScreen(),
         WastageAnalysisScreen(isFromStock: false),
-        DepartmentChatScreen(
-          department: Department.inventory,
+        ChatRoomsScreen(
           showNavBarCallback: () {
-            stockControlNavBarKey.currentState?.showNavBarTemporarily();
+            // optional navbar callback
           },
         ),
       ],

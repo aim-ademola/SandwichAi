@@ -1,14 +1,15 @@
 class ApiConstants {
-  static const String baseUrl = 'https://sandwichai-m7yo5.ondigitalocean.app/';
+  static const String baseUrl =
+      'https://sandwichai-api-3wcql.ondigitalocean.app/';
   static const String aiBaseUrl =
-      'https://sandwich-ai-backend-fyn2f.ondigitalocean.app/api/ai/';
+      'https://lionfish-app-o5cz2.ondigitalocean.app/api/ai/';
 
   // Timeout configurations
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
   static const Duration sendTimeout = Duration(seconds: 30);
 
-  // Retry configurations
+  // Retry configurationss
   static const int maxRetries = 3;
   static const Duration retryDelay = Duration(seconds: 1);
 

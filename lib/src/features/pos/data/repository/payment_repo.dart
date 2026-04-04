@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
@@ -59,7 +60,14 @@ class PaymentRepository extends BaseRepository
       );
     } on FormatException catch (e) {
       return ApiResponse.errorMessage(e.message);
+    } on DioException catch (e) {
+      return ApiResponse.errorMessage(_parseDioError(e));
     } catch (e) {
+      if (e is TypeError) {
+        return ApiResponse.errorMessage(
+          'An error occurred while processing payment. Please try again.',
+        );
+      }
       return ApiResponse.errorMessage(_parseError(e.toString()));
     }
   }
@@ -93,7 +101,14 @@ class PaymentRepository extends BaseRepository
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
+    } on DioException catch (e) {
+      return ApiResponse.errorMessage(_parseDioError(e));
     } catch (e) {
+      if (e is TypeError) {
+        return ApiResponse.errorMessage(
+          'An error occurred while fetching transactions. Please try again.',
+        );
+      }
       return ApiResponse.errorMessage(_parseError(e.toString()));
     }
   }
@@ -131,7 +146,14 @@ class PaymentRepository extends BaseRepository
       );
     } on FormatException catch (e) {
       return ApiResponse.errorMessage(e.message);
+    } on DioException catch (e) {
+      return ApiResponse.errorMessage(_parseDioError(e));
     } catch (e) {
+      if (e is TypeError) {
+        return ApiResponse.errorMessage(
+          'An error occurred while processing payment. Please try again.',
+        );
+      }
       return ApiResponse.errorMessage(_parseError(e.toString()));
     }
   }
@@ -164,7 +186,14 @@ class PaymentRepository extends BaseRepository
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
+    } on DioException catch (e) {
+      return ApiResponse.errorMessage(_parseDioError(e));
     } catch (e) {
+      if (e is TypeError) {
+        return ApiResponse.errorMessage(
+          'An error occurred while checking payment status. Please try again.',
+        );
+      }
       return ApiResponse.errorMessage(_parseError(e.toString()));
     }
   }
@@ -190,6 +219,36 @@ class PaymentRepository extends BaseRepository
     }
     if (request.branchId.isEmpty) {
       throw FormatException('Branch ID is required');
+    }
+  }
+
+  String _parseDioError(DioException e) {
+    final statusCode = e.response?.statusCode;
+    final data = e.response?.data;
+
+    if (data != null && data is Map) {
+      final message = data['message'];
+      if (message is String && message.isNotEmpty) {
+        return message;
+      }
+      if (message is List && message.isNotEmpty) {
+        return message.map((m) => m.toString()).join(', ');
+      }
+    }
+
+    switch (statusCode) {
+      case 400:
+        return 'Invalid payment data. Please check your payment details.';
+      case 401:
+        return 'Unauthorized access. Please login again.';
+      case 403:
+        return 'Access denied. You do not have permission to process payments.';
+      case 404:
+        return 'Payment endpoint not found. Please contact support.';
+      case 500:
+        return 'Server error. Please try again later.';
+      default:
+        return 'An error occurred while processing payment. Please try again.';
     }
   }
 

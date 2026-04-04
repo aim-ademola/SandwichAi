@@ -948,14 +948,17 @@ class _OrderScreenState extends State<OrderScreen>
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: AnimateFrom(
-                  key: _animateToController.tag(item),
-                  child: Image.network(
-                    item.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.restaurant, size: 40),
+                child: KeyedSubtree(
+                  key: ValueKey(item.id),
+                  child: AnimateFrom(
+                    key: _animateToController.tag(item),
+                    child: Image.network(
+                      item.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.restaurant, size: 40),
+                      ),
                     ),
                   ),
                 ),

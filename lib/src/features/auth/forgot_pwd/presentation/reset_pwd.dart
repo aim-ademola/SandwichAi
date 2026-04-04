@@ -99,7 +99,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           Future.delayed(const Duration(seconds: 1), () {
             if (mounted) {
               // Pop until we get back to login
-              context.go('/employee-login');
+              context.go('/');
             }
           });
         }

@@ -1,7 +1,19 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+
+
+// Load keystore properties
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -20,34 +32,34 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.sandwich.ai"
+        applicationId = "com.sandwichai.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        
-        // Add multiDexEnabled if you have many dependencies
         multiDexEnabled = true
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
     }
 
     buildTypes {
         release {
-            // Enables code shrinking, obfuscation, and optimization
+            signingConfig = signingConfigs.getByName("release") // 👈 changed from "debug"
             isMinifyEnabled = true
-            
-            // Enables resource shrinking
             isShrinkResources = true
-            
-            // Include ProGuard rules
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            
-            signingConfig = signingConfigs.getByName("debug")
         }
-        
-        // Add a separate build type for testing release builds
+
         create("releaseTest") {
             initWith(getByName("release"))
             isMinifyEnabled = false
@@ -55,12 +67,11 @@ android {
             matchingFallbacks += listOf("release")
         }
     }
-    
-    // Prevent R8 from being too aggressive
+
     buildFeatures {
         buildConfig = true
     }
-    
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"

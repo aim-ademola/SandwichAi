@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_header.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/chnge_pwd.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/daily_stock_alerts.dart';
@@ -83,39 +84,8 @@ class _StockControlAppDrawerContentState
         child: Column(
           children: [
             // Drawer Header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              decoration: BoxDecoration(
-                color: kPrimary,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'SandwichAI',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Manager Dashboard',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            buildDrawerHeader(),
+
             const SizedBox(height: 20),
 
             // Menu Items

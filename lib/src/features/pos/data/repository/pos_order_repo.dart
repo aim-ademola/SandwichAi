@@ -131,13 +131,18 @@ class PosOrderRepository extends BaseRepository
   }
 
   void _validateOrderType(String orderType) {
-    const validTypes = ['DINE_IN', 'TAKE_OUT', 'DELIVERY'];
+    const validTypes = [
+      'DINE_IN',
+      'TAKEAWAY',
+      'DELIVERY',
+      'ONLINE',
+    ]; // ← fix this
     if (orderType.isEmpty) {
       throw FormatException('Order type cannot be empty');
     }
     if (!validTypes.contains(orderType)) {
       throw FormatException(
-        'Invalid order type. Must be DINE_IN, TAKE_OUT, or DELIVERY',
+        'Invalid order type. Must be one of: ${validTypes.join(', ')}',
       );
     }
   }
@@ -185,10 +190,6 @@ class PosOrderRepository extends BaseRepository
         lowercaseError.contains('not found')) {
       return 'Order endpoint not found. Please contact support.';
     }
-    if (lowercaseError.contains('400') ||
-        lowercaseError.contains('bad request')) {
-      return 'Invalid order data. Please check your order details.';
-    }
     if (lowercaseError.contains('500') ||
         lowercaseError.contains('internal server')) {
       return 'Server error. Please try again later.';
@@ -201,6 +202,8 @@ class PosOrderRepository extends BaseRepository
       return 'Request timeout. Please try again.';
     }
 
-    return 'An error occurred while creating the order. Please try again.';
+    // Don't swallow 400 errors — return the raw error so API validation
+    // messages like "orderType must be one of..." surface to the user
+    return error;
   }
 }

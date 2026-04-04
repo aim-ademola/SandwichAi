@@ -506,6 +506,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               final maxContentWidth = _getMaxContentWidth(screenWidth);
 
               return Scaffold(
+                resizeToAvoidBottomInset: true,
                 backgroundColor: const Color(0xFFF8F6F6),
                 // appBar: _buildAppBar(screenWidth),
                 body: Center(
@@ -521,10 +522,16 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                           )
                         : SingleChildScrollView(
                             padding: EdgeInsets.zero,
+                            // ADD THIS:
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
                             child: Padding(
                               padding: EdgeInsets.only(
                                 left: horizontalPadding,
                                 right: horizontalPadding,
+                                top: _getVerticalPadding(
+                                  screenWidth,
+                                ), // ← ADD TOP PADDING
                                 bottom: _getVerticalPadding(screenWidth),
                               ),
                               child: Form(
@@ -798,7 +805,9 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
   Widget _buildSearchDropdown(double screenWidth) {
     return Container(
-      constraints: BoxConstraints(maxHeight: 300),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.35,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),

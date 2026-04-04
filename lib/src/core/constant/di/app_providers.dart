@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/globals/chat/chatroom_bloc/bloc.dart';
+import 'package:sandwich_ai/src/core/globals/chat/data/repo/chat_repo.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/chnage_pwd_repo.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/forgot_pwd_repo.dart';
@@ -177,6 +179,9 @@ class AppBlocProviders extends StatelessWidget {
         RepositoryProvider<ChangePasswordRepositoryInterface>(
           create: (context) => ChangePasswordRepository(),
         ),
+        RepositoryProvider<ChatRepositoryInterface>(
+          create: (context) => ChatRepository(),
+        ),
       ],
 
       child: MultiBlocProvider(
@@ -346,6 +351,10 @@ class AppBlocProviders extends StatelessWidget {
             create: (context) => ChangePasswordBloc(
               repository: context.read<ChangePasswordRepositoryInterface>(),
             ),
+          ),
+          BlocProvider<ChatBloc>(
+            create: (context) =>
+                ChatBloc(repository: context.read<ChatRepositoryInterface>()),
           ),
         ],
         child: child,

@@ -2,33 +2,64 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Microphone - record package -->
 	<key>NSMicrophoneUsageDescription</key>
-<string>This app requires microphone access to record audio messages.</string>
-<key>NSPhotoLibraryUsageDescription</key>
-<string>This app needs access to your photo library to pick images.</string>
-<key>NSPhotoLibraryAddUsageDescription</key>
-<string>This app needs permission to save images and videos to your gallery.</string>
-<key>UIBackgroundModes</key>
-<array>
-    <string>fetch</string>
-    <string>remote-notification</string>
-</array>
- <key>NSBluetoothAlwaysUsageDescription</key>
-    <string>This app needs Bluetooth to connect to printers</string>
-    
-    <key>NSBluetoothPeripheralUsageDescription</key>
-    <string>This app needs Bluetooth to connect to printers</string>
-    
-    <!-- Local Network -->
-    <key>NSLocalNetworkUsageDescription</key>
-    <string>This app needs local network access to discover printers</string>
-    
-    <key>NSBonjourServices</key>
-    <array>
-        <string>_pdl-datastream._tcp</string>
-        <string>_printer._tcp</string>
-        <string>_ipp._tcp</string>
-    </array>
+	<string>This app requires microphone access to record audio messages.</string>
+
+	<!-- Camera - image_picker, mobile_scanner -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to take photos and scan QR codes.</string>
+
+	<!-- Photo Library - image_picker, share_plus -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to pick images.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs permission to save images and videos to your gallery.</string>
+
+	<!-- File Picker / open_file / path_provider -->
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>This app needs access to your documents to select files.</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+
+	<!-- Location - permission_handler -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs your location to provide relevant services.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs your location in the background to provide relevant services.</string>
+
+	<!-- Bluetooth - flutter_blue_plus, permission_handler -->
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>This app needs Bluetooth to connect to printers</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>This app needs Bluetooth to connect to printers</string>
+
+	<!-- Local Network - printing -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs local network access to discover printers</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_pdl-datastream._tcp</string>
+		<string>_printer._tcp</string>
+		<string>_ipp._tcp</string>
+	</array>
+
+	<!-- Background Modes - flutter_local_notifications, connectivity_plus -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+		<string>bluetooth-central</string>
+		<string>bluetooth-peripheral</string>
+	</array>
+
+	<!-- AirPrint - printing package -->
+	<key>UIPrintInteractionControllerShowsPageRange</key>
+	<true/>
+
+	<!-- Bundle Info -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -49,12 +80,16 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+	<!-- iOS Requirements -->
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+
+	<!-- Orientation -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -68,6 +103,8 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	<!-- Performance -->
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

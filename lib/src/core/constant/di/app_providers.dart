@@ -19,6 +19,7 @@ import 'package:sandwich_ai/src/features/pos/bloc/order_status_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/payment_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_dashboard_state_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/pos/bloc/tax-config-bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/api_menu_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/customer_repo.dart';
@@ -26,6 +27,7 @@ import 'package:sandwich_ai/src/features/pos/data/repository/order_statua_repo.d
 import 'package:sandwich_ai/src/features/pos/data/repository/payment_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/pos_dashboradd_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/pos_order_repo.dart';
+import 'package:sandwich_ai/src/features/pos/data/repository/tax-config_repo.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/get_recipe_compl.dart/bloc.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/processing_dash_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/processing_task_bloc/bloc.dart';
@@ -181,6 +183,9 @@ class AppBlocProviders extends StatelessWidget {
         ),
         RepositoryProvider<ChatRepositoryInterface>(
           create: (context) => ChatRepository(),
+        ),
+        RepositoryProvider<TaxConfigRepositoryInterface>(
+          create: (context) => TaxConfigRepository(),
         ),
       ],
 
@@ -355,6 +360,11 @@ class AppBlocProviders extends StatelessWidget {
           BlocProvider<ChatBloc>(
             create: (context) =>
                 ChatBloc(repository: context.read<ChatRepositoryInterface>()),
+          ),
+          BlocProvider<TaxConfigBloc>(
+            create: (context) => TaxConfigBloc(
+              repository: context.read<TaxConfigRepositoryInterface>(),
+            ),
           ),
         ],
         child: child,

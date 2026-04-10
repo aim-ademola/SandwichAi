@@ -4,46 +4,23 @@ import 'dart:io';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
-import 'package:sandwich_ai/src/features/pos/data/model/oder_status_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/tax_config_model.dart';
 
-abstract class KitchenOrdersRepositoryInterface {
-  Future<ApiResponse<List<KitchenOrder>>> getKitchenOrders({
-    required String branchId,
-    String? startDate,
-    String? endDate,
-    String? status,
-  });
+abstract class TaxConfigRepositoryInterface {
+  Future<ApiResponse<List<TaxConfiguration>>> getActiveTaxConfigurations();
 }
 
-class KitchenOrdersRepository extends BaseRepository
-    implements KitchenOrdersRepositoryInterface {
+class TaxConfigRepository extends BaseRepository
+    implements TaxConfigRepositoryInterface {
   final ApiClient _apiClient = ApiClient.instance;
 
   @override
-  Future<ApiResponse<List<KitchenOrder>>> getKitchenOrders({
-    required String branchId,
-    String? startDate,
-    String? endDate,
-    String? status,
-  }) async {
+  Future<ApiResponse<List<TaxConfiguration>>>
+  getActiveTaxConfigurations() async {
     try {
-      _validateBranchId(branchId);
-
-      final queryParams = <String, dynamic>{'branchId': branchId};
-
-      if (startDate != null && startDate.isNotEmpty) {
-        queryParams['startDate'] = startDate;
-      }
-      if (endDate != null && endDate.isNotEmpty) {
-        queryParams['endDate'] = endDate;
-      }
-      if (status != null && status.isNotEmpty) {
-        queryParams['status'] = status;
-      }
-
-      final listResponse = await handleListResponse<KitchenOrder>(
+      final listResponse = await handleListResponse<TaxConfiguration>(
         _apiClient
-            .get('kitchen/orders', queryParameters: queryParams)
+            .get('accounting/tax-configuration/active')
             .timeout(
               const Duration(seconds: 30),
               onTimeout: () {
@@ -51,15 +28,10 @@ class KitchenOrdersRepository extends BaseRepository
               },
             )
             .then((response) => ApiResponse.success(response.data)),
-        (json) => KitchenOrder.fromJson(json),
+        (json) => TaxConfiguration.fromJson(json),
       );
 
       return listResponse;
-    } on FormatException catch (e) {
-      // Validation errors thrown by _validateBranchId or JSON parsing.
-      return ApiResponse.errorMessage(
-        e.message.isNotEmpty ? e.message : 'Invalid data format received.',
-      );
     } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
@@ -68,14 +40,12 @@ class KitchenOrdersRepository extends BaseRepository
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
+    } on FormatException catch (e) {
+      return ApiResponse.errorMessage(
+        e.message.isNotEmpty ? e.message : 'Invalid data format received.',
+      );
     } catch (e) {
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
-    }
-  }
-
-  void _validateBranchId(String branchId) {
-    if (branchId.isEmpty) {
-      throw const FormatException('Branch ID cannot be empty.');
     }
   }
 
@@ -89,7 +59,7 @@ class KitchenOrdersRepository extends BaseRepository
       return 'Access denied. Please contact support.';
     }
     if (lower.contains('404') || lower.contains('not found')) {
-      return 'No orders found for this branch.';
+      return 'Tax configuration not found.';
     }
     if (lower.contains('500') || lower.contains('internal server')) {
       return 'Server error. Please try again later.';
@@ -104,6 +74,6 @@ class KitchenOrdersRepository extends BaseRepository
       return 'Request timeout. Please try again.';
     }
 
-    return 'Failed to load orders. Please try again later.';
+    return 'Failed to load tax configuration. Please try again later.';
   }
 }

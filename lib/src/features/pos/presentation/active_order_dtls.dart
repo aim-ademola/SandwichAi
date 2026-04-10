@@ -547,7 +547,7 @@ class OrderDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _formatDateTime(time),
+                  _formatDate(time),
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: textSize - 2,
                     color: kprimaryTextColor1.withOpacity(0.6),
@@ -733,6 +733,8 @@ class OrderDetailScreen extends StatelessWidget {
     double textSize,
     bool isBold,
   ) {
+    final amount = double.tryParse(order.totalAmount.toString()) ?? 0;
+    final formattedAmount = NumberFormat('#,##0.##').format(amount);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -745,7 +747,7 @@ class OrderDetailScreen extends StatelessWidget {
           ),
         ),
         Text(
-          '₦$amount',
+          '₦$formattedAmount',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: textSize,
             fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
@@ -760,10 +762,32 @@ class OrderDetailScreen extends StatelessWidget {
     switch (type) {
       case OrderType.dineIn:
         return 'Dine In';
+
       case OrderType.takeaway:
         return 'Takeaway';
+      case OrderType.online:
+        return 'Online';
       case OrderType.delivery:
         return 'Delivery';
+    }
+  }
+
+  String _formatDate(dynamic dt) {
+    try {
+      DateTime dateTime;
+
+      if (dt is DateTime) {
+        dateTime = dt;
+      } else if (dt is String) {
+        dateTime = DateTime.parse(dt);
+      } else {
+        return dt.toString();
+      }
+
+      final wat = dateTime.toUtc().add(const Duration(hours: 1));
+      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
+    } catch (_) {
+      return dt.toString();
     }
   }
 

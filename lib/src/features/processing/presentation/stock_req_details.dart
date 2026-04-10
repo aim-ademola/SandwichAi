@@ -252,7 +252,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
           _buildInfoRow(
             icon: Icons.calendar_today_outlined,
             label: 'Created Date',
-            value: DateFormat('MMM dd, yyyy • HH:mm').format(request.createdAt),
+            value: _formatDate(request.createdAt),
             screenWidth: screenWidth,
           ),
           if (request.notes.isNotEmpty) ...[
@@ -268,6 +268,25 @@ class StockRequestDetailsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatDate(dynamic dt) {
+    try {
+      DateTime dateTime;
+
+      if (dt is DateTime) {
+        dateTime = dt;
+      } else if (dt is String) {
+        dateTime = DateTime.parse(dt);
+      } else {
+        return dt.toString();
+      }
+
+      final wat = dateTime.toUtc().add(const Duration(hours: 1));
+      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
+    } catch (_) {
+      return dt.toString();
+    }
   }
 
   Widget _buildItemsSection(double screenWidth) {

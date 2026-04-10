@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/order_status_bloc/bloc.dart';
@@ -243,6 +244,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
   }
 
   Widget _buildOrderCard(KitchenOrder order, double textSize) {
+    final amount = double.tryParse(order.totalAmount.toString()) ?? 0;
+    final formattedAmount = NumberFormat('#,##0.##').format(amount);
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -353,7 +356,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              '${order.items.length} item${order.items.length > 1 ? 's' : ''} • ₦${order.totalAmount}',
+              '${order.items.length} item${order.items.length > 1 ? 's' : ''} • ₦$formattedAmount',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize - 2,
                 fontWeight: FontWeight.w500,

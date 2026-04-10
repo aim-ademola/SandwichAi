@@ -530,12 +530,13 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                       ),
                     ],
                   ),
+
                   SizedBox(height: _getSpacing(screenWidth)),
                   ..._selectedItems.asMap().entries.map((entry) {
                     return _buildItemCard(entry.key, entry.value, screenWidth);
                   }).toList(),
                   SizedBox(height: _getSpacing(screenWidth)),
-                  _buildAddItemButton(screenWidth),
+                  _buildAddItemButton(screenWidth, _selectedItems),
                   SizedBox(height: _getSectionSpacing(screenWidth)),
 
                   Row(
@@ -1556,7 +1557,10 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     );
   }
 
-  Widget _buildAddItemButton(double screenWidth) {
+  Widget _buildAddItemButton(
+    double screenWidth,
+    List<SelectedItem> _selectedItems,
+  ) {
     return SizedBox(
       height: _getButtonHeight(screenWidth),
       child: OutlinedButton.icon(
@@ -1575,7 +1579,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
         ),
         icon: const Icon(Icons.add_circle_outline, size: 20),
         label: Text(
-          'Add Another Item',
+          _selectedItems.length == 0 ? 'Add an Item' : ' Add Another Item',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w600,

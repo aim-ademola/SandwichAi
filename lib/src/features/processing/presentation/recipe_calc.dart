@@ -10,6 +10,7 @@ import 'package:sandwich_ai/src/features/processing/bloc/recipe_forecast_bloc/bl
 import 'package:sandwich_ai/src/features/processing/bloc/recipe_forecast_bloc/event.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/recipe_forecast_bloc/state.dart';
 import 'package:sandwich_ai/src/features/processing/data/model/recipe_forecast_model.dart';
+import 'package:sandwich_ai/src/features/processing/presentation/moduleinfo.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_drawer.dart';
 
 class RecipeCalculatorScreen extends StatefulWidget {
@@ -70,6 +71,10 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 color: Colors.white,
               ),
             ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadiusGeometry.circular(12),
+            ),
+            behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.orange,
           ),
         );
@@ -120,6 +125,10 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                       color: Colors.white,
                     ),
                   ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.circular(12),
+                  ),
+                  behavior: SnackBarBehavior.floating,
                   backgroundColor: Colors.red,
                   duration: const Duration(seconds: 4),
                 ),
@@ -154,7 +163,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
       backgroundColor: Colors.white,
       elevation: 0,
       title: Text(
-        'Recipe Calculator',
+        'AI Recipe Calculator',
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 20,
           fontWeight: FontWeight.w700,
@@ -222,7 +231,34 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                     color: Colors.black,
                   ),
                 ),
+                const SizedBox(width: 10),
+
+                InfoIconButton(
+                  onPressed: () {
+                    showModuleInfoBottomSheet(
+                      context: context,
+                      title: "About This Module",
+                      description:
+                          "This module scales recipe ingredients based on the desired servings, providing precise quantity predictions for procurement and preparation.",
+                      useCases: [
+                        "Scale recipes for events or large orders",
+                        "Calculate ingredients for custom serving sizes",
+                        "Estimate procurement needs",
+                      ],
+                    );
+                  },
+                  size: 20,
+                ),
               ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Calculate ingredient quantities for a target number of servings.',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w400,
+                color: Colors.black,
+              ),
             ),
             const SizedBox(height: 24),
             _buildMenuItemSelector(),

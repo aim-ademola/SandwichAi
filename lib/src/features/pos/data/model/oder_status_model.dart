@@ -477,6 +477,7 @@ class Branch {
 enum OrderType {
   dineIn('DINE_IN'),
   takeaway('TAKEAWAY'),
+  online('ONLINE'),
   delivery('DELIVERY');
 
   final String value;

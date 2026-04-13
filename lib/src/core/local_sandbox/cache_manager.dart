@@ -29,6 +29,7 @@ class AuthCacheHelper {
   static const String _keyEmpId = 'employee_id';
   static const String _keyBranchName = 'branch_name';
   static const String _keyRememberMe = 'remember_me';
+  static const String _userId = 'user_id';
 
   // Secure storage keys (sensitive data)
   static const String _secureKeyEmail = 'secure_email';
@@ -116,6 +117,7 @@ class AuthCacheHelper {
       await _box.put(_keyUserData, jsonEncode(response.user.toJson()));
       await _box.put(_keyDptName, response.user.department ?? '');
       await _box.put(_keyLoginTimestamp, DateTime.now().toIso8601String());
+      await _box.put(_userId, response.user.id);
     } catch (e) {
       throw Exception('Failed to store authentication data: $e');
     }
@@ -134,6 +136,10 @@ class AuthCacheHelper {
   /// Get branch name
   Future<String?> getBranchName() async {
     return _box.get(_keyBranchName);
+  }
+
+  Future<String?> userID() async {
+    return _box.get(_userId);
   }
 
   /// Get employee id

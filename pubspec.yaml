@@ -63,6 +63,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  rename: ^3.0.2
 
 
 flutter_launcher_icons:

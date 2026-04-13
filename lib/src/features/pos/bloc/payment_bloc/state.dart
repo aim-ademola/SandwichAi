@@ -16,7 +16,7 @@ class PaymentProcessing extends PaymentState {
   const PaymentProcessing();
 }
 
-// ─── Cash States ──────────────────────────────────────────────────────────────
+//  Cash States ──
 
 /// Cash payment recorded — awaiting manager approval
 class CashPaymentPendingApproval extends PaymentState {
@@ -38,7 +38,7 @@ class CashPaymentStillPending extends PaymentState {
   const CashPaymentStillPending();
 }
 
-// ─── Online Payment States ────────────────────────────────────────────────────
+//  Online Payment States ─
 
 /// Online payment initialized — show QR / link
 class OnlinePaymentInitialized extends PaymentState {
@@ -75,7 +75,7 @@ class OnlinePaymentFailed extends PaymentState {
   List<Object?> get props => [reason];
 }
 
-// ─── Shared Error ─────────────────────────────────────────────────────────────
+//  Shared Error ─
 
 class PaymentError extends PaymentState {
   final String error;

@@ -522,7 +522,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       case OrderStatus.inQueue:
         return const Color(0xFFFFB347);
       case OrderStatus.preparing:
-        return const Color(0xFFFFE770);
+        return const Color.fromARGB(255, 255, 155, 6);
       case OrderStatus.ready:
         return const Color(0xFF30A46C);
       case OrderStatus.served:

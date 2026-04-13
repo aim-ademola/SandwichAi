@@ -274,12 +274,12 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
             ),
           ),
           centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.filter_list, color: kprimaryTextColor1),
-              onPressed: _showFilterBottomSheet,
-            ),
-          ],
+          // actions: [
+          //   IconButton(
+          //     icon: const Icon(Icons.filter_list, color: kprimaryTextColor1),
+          //     onPressed: _showFilterBottomSheet,
+          //   ),
+          // ],
         ),
         body: BlocConsumer<StockMovementBloc, StockMovementState>(
           listener: (context, state) {

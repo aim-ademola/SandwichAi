@@ -38,7 +38,7 @@ class _ProcurementAppDrawerContent extends StatefulWidget {
 class _ProcurementAppDrawerContentState
     extends State<_ProcurementAppDrawerContent> {
   final GlobalKey _goodsReceivedKey = GlobalKey();
-  final GlobalKey _stockRequisitionKey = GlobalKey();
+  // final GlobalKey _stockRequisitionKey = GlobalKey();
 
   @override
   void initState() {
@@ -54,9 +54,7 @@ class _ProcurementAppDrawerContentState
       // Wait for drawer to build, then show showcase
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          ShowCaseWidget.of(
-            context,
-          ).startShowCase([_goodsReceivedKey, _stockRequisitionKey]);
+          ShowCaseWidget.of(context).startShowCase([_goodsReceivedKey]);
         }
       });
     }
@@ -107,31 +105,31 @@ class _ProcurementAppDrawerContentState
                   ),
                   const SizedBox(height: 8),
 
-                  Showcase(
-                    key: _stockRequisitionKey,
-                    description:
-                        'Create and manage stock requisition requests for procurement. View pending and completed requisitions.',
-                    targetBorderRadius: BorderRadius.circular(12),
-                    tooltipBackgroundColor: kPrimary,
-                    textColor: Colors.white,
-                    targetPadding: const EdgeInsets.all(8),
-                    child: _buildDrawerItem(
-                      context,
-                      icon: Icons.call_made,
-                      title: 'Stock Requisition',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (_) =>
-                                ProcesssingToStockRequisitionTabScreen(
-                                  dpt: 'PROCUREMENT',
-                                ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  // Showcase(
+                  //   key: _stockRequisitionKey,
+                  //   description:
+                  //       'Create and manage stock requisition requests for procurement. View pending and completed requisitions.',
+                  //   targetBorderRadius: BorderRadius.circular(12),
+                  //   tooltipBackgroundColor: kPrimary,
+                  //   textColor: Colors.white,
+                  //   targetPadding: const EdgeInsets.all(8),
+                  //   child: _buildDrawerItem(
+                  //     context,
+                  //     icon: Icons.call_made,
+                  //     title: 'Stock Requisition',
+                  //     onTap: () {
+                  //       Navigator.push(
+                  //         context,
+                  //         CupertinoPageRoute(
+                  //           builder: (_) =>
+                  //               ProcesssingToStockRequisitionTabScreen(
+                  //                 dpt: 'PROCUREMENT',
+                  //               ),
+                  //         ),
+                  //       );
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
             ),

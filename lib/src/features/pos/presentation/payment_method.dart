@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/globals/notifications/local_notification.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/payment_bloc/bloc.dart';
@@ -187,6 +188,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             if (state is CashPaymentPendingApproval) {
               cubit.markCashPendingApproval(transaction: state.transaction);
               _dismissLoading();
+              NotificationService().showNotification(
+                id: state.transaction.hashCode + 9999,
+                title: 'Order Placed',
+                body: 'Cash order is awaiting manager approval',
+                payload: 'cash_approval|$_createdOrderId',
+                importance: NotificationImportance.high,
+                priority: NotificationPriority.high,
+              );
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (_) => BlocProvider.value(
@@ -204,6 +213,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             } else if (state is OnlinePaymentInitialized) {
               cubit.markOnlinePaymentInitialized(initData: state.initData);
               _dismissLoading();
+              NotificationService().showNotification(
+                id: state.initData.hashCode + 9999,
+                title: 'Payment Ready',
+                body: 'QR code is ready for Order #$_createdOrderId',
+                payload: 'online_payment|$_createdOrderId',
+                importance: NotificationImportance.high,
+                priority: NotificationPriority.high,
+              );
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (_) => BlocProvider.value(

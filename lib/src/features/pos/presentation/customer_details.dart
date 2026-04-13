@@ -167,7 +167,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
             city: _cityController.text.trim().isEmpty
                 ? null
                 : _cityController.text.trim(),
-            dateOfBirth: _selectedDate?.toIso8601String(),
+            dateOfBirth: _selectedDate?.toUtc().toIso8601String(),
             dietaryRestrictions:
                 _dietaryRestrictionsController.text.trim().isEmpty
                 ? null

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/features/auth/data/models/login_model.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/purchase_order_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/state.dart';
@@ -11,6 +12,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final OrderRepositoryInterface _repository;
   String branchId = '';
   String empId = '';
+  String orgId = '';
 
   OrderBloc({required OrderRepositoryInterface repository})
     : _repository = repository,
@@ -35,13 +37,16 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     try {
       emit(const OrderCreating());
 
-      String buyerId = empId;
-      String buyerBranchId = branchId;
+      String buyerId = '';
+      String buyerBranchId = '';
+      String orgID = '';
 
       // If not loaded yet, try to get them again
       if (buyerId.isEmpty || buyerBranchId.isEmpty) {
-        buyerId = await AuthCacheHelper.instance.getEmpID() ?? '';
+        buyerId = await AuthCacheHelper.instance.userID() ?? '';
         buyerBranchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+        orgID = await AuthCacheHelper.instance.getOrgId() ?? '';
+        final UserModel? userid = await AuthCacheHelper.instance.getUserData();
       }
 
       AppLogger.log(
@@ -63,6 +68,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         buyerId: buyerId,
         buyerBranchId: buyerBranchId,
         priority: event.priority,
+        orgId: orgID,
         expectedDeliveryDate: event.expectedDeliveryDate,
         paymentTerm: event.paymentTerm,
         deliveryAddress: event.deliveryAddress,

@@ -423,7 +423,7 @@ class KitchenDashboardBloc
       NotificationService().showNotification(
         id: event.orderId.hashCode + 9999,
         title: 'Order Marked Ready',
-        body: 'Order ${event.orderId} is ready for pickup',
+        body: 'Order is ready for pickup',
         payload: 'order_ready|${event.orderId}',
         importance: NotificationImportance.high,
         priority: NotificationPriority.high,

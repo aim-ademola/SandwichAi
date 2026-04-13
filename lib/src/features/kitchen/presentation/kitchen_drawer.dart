@@ -53,6 +53,16 @@ class KitchenAppDrawer extends StatelessWidget {
                       );
                     },
                   ),
+
+                  const SizedBox(height: 8),
+                  _buildDrawerItem(
+                    context,
+                    icon: Icons.fact_check_outlined,
+                    title: 'Recipe Compliance',
+                    onTap: () {
+                      context.push('/recipe-compl');
+                    },
+                  ),
                   const SizedBox(height: 8),
                 ],
               ),

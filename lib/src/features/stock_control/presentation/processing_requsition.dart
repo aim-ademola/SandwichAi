@@ -14,6 +14,7 @@ import 'package:sandwich_ai/src/features/stock_control/bloc/processing_transfrer
 import 'package:sandwich_ai/src/features/stock_control/data/model/branch_stock_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/processing_transfer_model.dart';
 import 'package:intl/intl.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/repo/inventory_items_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/processing_transfer_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/shimmer_card.dart';
 
@@ -56,8 +57,8 @@ class _StockTransferToProcessingOrKItchenScreenState
   bool _isInitialized = false;
 
   final List<RequisitionItem> _requisitionItems = [];
-  List<CatalogItem> _filteredItems = [];
-  List<CatalogItem> _allItems = [];
+  List<InventoryItem> _filteredItems = [];
+  List<InventoryItem> _allItems = [];
 
   @override
   void initState() {
@@ -81,8 +82,9 @@ class _StockTransferToProcessingOrKItchenScreenState
         context.read<ProcessingTransferBloc>().add(
           LoadProcessingTransfers(branchId: branchId),
         );
-        context.read<BranchStockBloc>().add(
-          LoadBranchStock(branchId: branchId),
+        final orgID = await AuthCacheHelper.instance.getOrgId() ?? '';
+        context.read<InventoryItemsBloc>().add(
+          LoadInventoryItems(organizationId: orgID), // pass your orgId here
         );
       } else {
         _showSnackBar(
@@ -477,11 +479,11 @@ class _StockTransferToProcessingOrKItchenScreenState
           },
         ),
       ],
-      child: BlocBuilder<BranchStockBloc, BranchStockState>(
+      child: BlocBuilder<InventoryItemsBloc, InventoryItemsState>(
         builder: (context, stockState) {
-          if (stockState is BranchStockLoaded && _allItems.isEmpty) {
-            _allItems = stockState.filteredItems;
-            _filteredItems = stockState.filteredItems;
+          if (stockState is InventoryItemsLoaded && _allItems.isEmpty) {
+            _allItems = stockState.items;
+            _filteredItems = stockState.items;
           }
 
           return DefaultTextStyle.merge(
@@ -496,7 +498,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: Text(
-                  'Transfer To Processing Department',
+                  'Send Items to Processing',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,

@@ -70,6 +70,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   String? _createdOrderId;
   String _branchId = '';
   String? _customerEmail;
+  String? _mainOrderId;
 
   /// Prefer the sessionId passed from the parent. Falls back to the
   /// cubit's active session — covers both fresh navigation and resume paths.
@@ -129,7 +130,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 child: OnlinePaymentQrScreen(
                   initData: saved.onlinePaymentInitData!,
                   orderType: _normalizeOrderType(widget.orderType),
-
+                  orderId: _mainOrderId ?? '',
                   tableNumber: widget.tableNumber,
                   customerName: widget.customerName ?? 'Guest',
                   sessionId: _sessionId,
@@ -150,7 +151,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   transaction: saved.cashTransaction!,
                   branchId: _branchId,
                   orderType: _normalizeOrderType(widget.orderType),
-
+                  orderId: _mainOrderId ?? '',
                   tableNumber: widget.tableNumber,
                   sessionId: _sessionId,
                 ),
@@ -169,7 +170,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         BlocListener<PosOrderBloc, PosOrderState>(
           listener: (context, state) {
             if (state is PosOrderCreated) {
-              setState(() => _createdOrderId = state.order.orderId);
+              setState(() {
+                _createdOrderId = state.order.orderId;
+                _mainOrderId = state.order.id;
+              });
               context.read<OrderSessionCubit>().markOrderCreated(
                 state.order.orderId,
               );
@@ -206,6 +210,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                       orderType: widget.orderType,
                       tableNumber: widget.tableNumber,
                       sessionId: _sessionId,
+                      orderId: _mainOrderId,
                     ),
                   ),
                 ),
@@ -226,6 +231,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   builder: (_) => BlocProvider.value(
                     value: cubit,
                     child: OnlinePaymentQrScreen(
+                      orderId: _mainOrderId ?? '',
                       initData: state.initData,
                       orderType: widget.orderType,
                       tableNumber: widget.tableNumber,
@@ -687,7 +693,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             customerName: widget.customerName ?? 'Guest',
             branchId: _branchId,
             customerPhone: widget.customerPhone,
-            orderId: _createdOrderId,
+            orderId: _mainOrderId,
             description: 'Cash payment for Order #$_createdOrderId',
             sessionId: '',
           ),
@@ -702,7 +708,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             email: _customerEmail ?? 'customer@gmail.com',
             branchId: _branchId,
             customerPhone: widget.customerPhone,
-            orderId: _createdOrderId,
+            orderId: _mainOrderId,
             description: 'Payment for Order #$_createdOrderId',
             sessionId: '',
           ),

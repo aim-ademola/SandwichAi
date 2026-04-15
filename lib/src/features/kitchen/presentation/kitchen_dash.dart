@@ -19,6 +19,37 @@ class KitchenDashboardScreen extends StatefulWidget {
 
 class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  void _dispatch(dynamic event) {
+    setState(() => _updatingOrderId = null); // will be set by bloc response
+    context.read<KitchenDashboardBloc>().add(event);
+  }
+
+  Future<void> _confirmCancel(KitchenOrder order) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel Order'),
+        content: Text(
+          'Cancel order ${order.orderId} for ${order.customerName}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Yes, Cancel'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      setState(() => _updatingOrderId = order.id);
+      context.read<KitchenDashboardBloc>().add(CancelOrder(order.id));
+    }
+  }
 
   // Track which order is currently being updated
   String? _updatingOrderId;
@@ -288,6 +319,10 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     OrderFilter currentFilter, {
     bool isRefreshing = false,
   }) {
+    // Inside _buildLoadedState, replace the filteredOrders reference:
+    final visibleOrders = filteredOrders
+        .where((o) => o.status.toUpperCase() != 'PENDING')
+        .toList();
     return LayoutBuilder(
       builder: (context, constraints) {
         final horizontalPadding = _getHorizontalPadding(constraints.maxWidth);
@@ -320,10 +355,10 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                       SizedBox(
                         height: _getSectionSpacing(constraints.maxWidth),
                       ),
-                      if (filteredOrders.isEmpty)
+                      if (visibleOrders.isEmpty)
                         _buildNoOrdersForFilter(currentFilter)
                       else
-                        ...filteredOrders.map(
+                        ...visibleOrders.map(
                           (order) => Padding(
                             padding: EdgeInsets.only(
                               bottom: _getOrderSpacing(constraints.maxWidth),
@@ -591,76 +626,119 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     final statusFontSize = _getOrderStatusFontSize(screenWidth);
     final timeAgoFontSize = _getTimeAgoFontSize(screenWidth);
 
-    // Check if this order is being updated
     final isUpdating = _updatingOrderId == order.id;
 
+    //  Status config
     Color borderColor;
     Color statusColor;
     String statusText;
-    String? buttonText;
-    Color? buttonColor;
-    VoidCallback? onButtonPressed;
+    List<_OrderAction> actions = [];
 
     switch (order.status.toUpperCase()) {
       case 'PENDING':
+        // Hidden from kitchen — should never reach here after filtering
+        return const SizedBox.shrink();
+
+      case 'IN_QUEUE':
         borderColor = const Color(0xFF2196F3);
         statusColor = const Color(0xFF2196F3);
-        statusText = 'NEW ORDER';
-        buttonText = 'Start Preparation';
-        buttonColor = kPrimary;
-        onButtonPressed = isUpdating
-            ? null
-            : () {
-                setState(() {
-                  _updatingOrderId = order.id;
-                });
-                context.read<KitchenDashboardBloc>().add(
-                  StartOrderPreparation(order.id),
-                );
-              };
+        statusText = 'IN QUEUE';
+        actions = [
+          _OrderAction(
+            label: 'Confirm Order',
+            color: kPrimary,
+            onPressed: () => _dispatch(MarkOrderAsComfirmed(order.id)),
+          ),
+          _OrderAction(
+            label: 'Cancel',
+            color: const Color(0xFFE57373),
+            onPressed: () => _confirmCancel(order),
+          ),
+        ];
         break;
+
+      case 'CONFIRMED':
+        borderColor = const Color(0xFF9C27B0);
+        statusColor = const Color(0xFF9C27B0);
+        statusText = 'CONFIRMED';
+        actions = [
+          _OrderAction(
+            label: 'Start Preparation',
+            color: kPrimary,
+            onPressed: () => _dispatch(StartOrderPreparation(order.id)),
+          ),
+          _OrderAction(
+            label: 'Cancel',
+            color: const Color(0xFFE57373),
+            onPressed: () => _confirmCancel(order),
+          ),
+        ];
+        break;
+
       case 'PREPARING':
         borderColor = const Color(0xFFFFA726);
         statusColor = const Color(0xFFFFA726);
-        statusText = 'IN PROGRESS';
-        buttonText = 'Mark as Ready';
-        buttonColor = kPrimary;
-        onButtonPressed = isUpdating
-            ? null
-            : () {
-                setState(() {
-                  _updatingOrderId = order.id;
-                });
-                context.read<KitchenDashboardBloc>().add(
-                  MarkOrderAsReady(order.id),
-                );
-              };
+        statusText = 'PREPARING';
+        actions = [
+          _OrderAction(
+            label: 'Mark as Ready',
+            color: kPrimary,
+            onPressed: () => _dispatch(MarkOrderAsReady(order.id)),
+          ),
+          _OrderAction(
+            label: 'Cancel',
+            color: const Color(0xFFE57373),
+            onPressed: () => _confirmCancel(order),
+          ),
+        ];
         break;
+
       case 'READY':
-      case 'COMPLETED':
+        borderColor = const Color(0xFF26C6DA);
+        statusColor = const Color(0xFF26C6DA);
+        statusText = 'READY';
+        actions = [
+          _OrderAction(
+            label: 'Mark as Served',
+            color: kPrimary,
+            onPressed: () => _dispatch(MarkOrderAsServed(order.id)),
+          ),
+        ];
+        break;
+
+      case 'SERVED':
         borderColor = const Color(0xFF4CAF50);
         statusColor = const Color(0xFF4CAF50);
-        statusText = 'READY';
-        buttonText = null;
-        buttonColor = null;
-        onButtonPressed = null;
+        statusText = 'SERVED';
+        actions = [
+          _OrderAction(
+            label: 'Mark as Completed',
+            color: const Color(0xFF4CAF50),
+            onPressed: () => _dispatch(MarkOrderAsCompleted(order.id)),
+          ),
+        ];
         break;
+
+      case 'COMPLETED':
+        borderColor = const Color(0xFF388E3C);
+        statusColor = const Color(0xFF388E3C);
+        statusText = 'COMPLETED';
+        // No actions — terminal state
+        break;
+
       case 'CANCELLED':
         borderColor = const Color(0xFFE57373);
         statusColor = const Color(0xFFE57373);
         statusText = 'CANCELLED';
-        buttonText = null;
-        buttonColor = null;
-        onButtonPressed = null;
+        // No actions — terminal state
         break;
+
       default:
         borderColor = Colors.grey;
         statusColor = Colors.grey;
-        statusText = order.status;
-        buttonText = null;
-        buttonColor = null;
-        onButtonPressed = null;
+        statusText = order.status.toUpperCase();
     }
+    //  End status config
 
     return GestureDetector(
       onTap: () {
@@ -687,6 +765,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //  Header row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -755,7 +834,6 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                         order.getTimeAgo(),
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: timeAgoFontSize,
-                          fontWeight: FontWeight.w400,
                           color: const Color(0xFF9E9E9E),
                         ),
                       ),
@@ -763,7 +841,10 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   ),
                 ],
               ),
+
               SizedBox(height: _getOrderContentSpacing(screenWidth)),
+
+              //  Customer & items
               Text(
                 order.customerName,
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -777,12 +858,13 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                 order.getItemsSummary(),
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: itemsFontSize,
-                  fontWeight: FontWeight.w400,
                   color: Colors.grey[700],
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+
+              //  Special instructions
               if (order.specialInstructions != null) ...[
                 SizedBox(height: _getOrderContentSpacing(screenWidth) / 2),
                 Container(
@@ -814,76 +896,79 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   ),
                 ),
               ],
+
               SizedBox(height: _getOrderContentSpacing(screenWidth)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      statusText,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: statusFontSize,
-                        fontWeight: FontWeight.w700,
-                        color: statusColor,
-                      ),
-                    ),
-                  ),
-                  // Text(
-                  //   '₦${order.totalAmount}',
-                  //   style: WorkSansAppTextStyles.medium.copyWith(
-                  //     fontSize: orderNumberFontSize,
-                  //     fontWeight: FontWeight.w700,
-                  //     color: Colors.black,
-                  //   ),
-                  // ),
-                ],
-              ),
-              if (buttonText != null) ...[
-                SizedBox(height: _getOrderButtonSpacing(screenWidth)),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onButtonPressed,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: buttonColor,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(
-                        vertical: _getButtonPaddingVertical(screenWidth),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: isUpdating
-                        ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            buttonText,
-                            style: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: _getButtonFontSize(screenWidth),
-                              fontWeight: FontWeight.w600,
-                              color: kWhite,
-                            ),
-                          ),
+
+              //  Status badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  statusText,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: statusFontSize,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
                   ),
                 ),
+              ),
+
+              //  Action buttons
+              if (actions.isNotEmpty) ...[
+                SizedBox(height: _getOrderButtonSpacing(screenWidth)),
+                if (isUpdating)
+                  Center(
+                    child: SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
+                      ),
+                    ),
+                  )
+                else
+                  Column(
+                    children: actions.map((action) {
+                      final isFirst = action == actions.first;
+                      return Padding(
+                        padding: EdgeInsets.only(top: isFirst ? 0 : 8),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: action.onPressed,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: action.color,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                vertical: _getButtonPaddingVertical(
+                                  screenWidth,
+                                ),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              action.label,
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: _getButtonFontSize(screenWidth),
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
               ],
             ],
           ),
@@ -1024,4 +1109,15 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     if (width < 600) return 10;
     return 12;
   }
+}
+
+class _OrderAction {
+  const _OrderAction({
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
 }

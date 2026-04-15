@@ -66,7 +66,7 @@ class GoodsReceivedRepository extends BaseRepository
       _validateGoodsReceivedData(request);
 
       final response = await _apiClient
-          .post('goods-received', data: request.toJson())
+          .post('procurement/goods-received', data: request.toJson())
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -103,7 +103,10 @@ class GoodsReceivedRepository extends BaseRepository
 
       final listResponse = await handleListResponse<GoodsReceived>(
         _apiClient
-            .get('goods-received', queryParameters: {'branchId': branchId})
+            .get(
+              'procurement/goods-received',
+              queryParameters: {'branchId': branchId},
+            )
             .timeout(
               const Duration(seconds: 30),
               onTimeout: () {

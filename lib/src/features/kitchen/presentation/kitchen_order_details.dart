@@ -550,16 +550,35 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         statusBgColor = const Color(0xFFE3F2FD);
         statusTextColor = const Color(0xFF2196F3);
         break;
+      case 'IN_QUEUE':
+        statusText = 'In Queue';
+        statusBgColor = const Color(0xFFE3F2FD);
+        statusTextColor = const Color(0xFF2196F3);
+        break;
+      case 'CONFIRMED':
+        statusText = 'Confirmed';
+        statusBgColor = const Color(0xFFF3E5F5);
+        statusTextColor = const Color(0xFF9C27B0);
+        break;
       case 'PREPARING':
         statusText = 'In Progress';
         statusBgColor = const Color(0xFFFFF3E0);
         statusTextColor = kPrimary;
         break;
       case 'READY':
-      case 'COMPLETED':
         statusText = 'Ready';
+        statusBgColor = const Color(0xFFE0F7FA);
+        statusTextColor = const Color(0xFF26C6DA);
+        break;
+      case 'SERVED':
+        statusText = 'Served';
         statusBgColor = const Color(0xFFE8F5E9);
         statusTextColor = const Color(0xFF4CAF50);
+        break;
+      case 'COMPLETED':
+        statusText = 'Completed';
+        statusBgColor = const Color(0xFFE8F5E9);
+        statusTextColor = const Color(0xFF388E3C);
         break;
       case 'CANCELLED':
         statusText = 'Cancelled';
@@ -635,8 +654,11 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
     bool showCheckboxes;
     Color progressColor;
 
+    // REPLACE the switch in _buildItemsToPrepareCard:
     switch (order.status.toUpperCase()) {
       case 'PENDING':
+      case 'IN_QUEUE':
+      case 'CONFIRMED':
         itemsTitle = 'Items to Prepare';
         showProgress = false;
         showCheckboxes = false;
@@ -649,12 +671,12 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         progressColor = const Color(0xFFFFA726);
         break;
       case 'READY':
+      case 'SERVED':
       case 'COMPLETED':
         itemsTitle = 'Items Prepared';
         showProgress = true;
         showCheckboxes = false;
         progressColor = const Color(0xFF4CAF50);
-        // Mark all items as complete for display
         progress = 1.0;
         completedCount = totalCount;
         break;
@@ -670,7 +692,6 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         showCheckboxes = false;
         progressColor = Colors.grey;
     }
-
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
@@ -909,7 +930,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
 
     final isCompleted =
         order.status.toUpperCase() == 'COMPLETED' ||
-        order.status.toUpperCase() == 'READY';
+        order.status.toUpperCase() == 'SERVED';
     final isCancelled = order.status.toUpperCase() == 'CANCELLED';
 
     // Check if this specific order is being updated
@@ -938,15 +959,24 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                 onPressed: isUpdating
                     ? null
                     : () {
-                        setState(() {
-                          _updatingOrderId = order.id;
-                        });
-
+                        setState(() => _updatingOrderId = order.id);
                         final bloc = context.read<KitchenDashboardBloc>();
-                        if (order.status.toUpperCase() == 'PENDING') {
-                          bloc.add(StartOrderPreparation(order.id));
-                        } else if (order.status.toUpperCase() == 'PREPARING') {
-                          bloc.add(MarkOrderAsReady(order.id));
+                        switch (order.status.toUpperCase()) {
+                          case 'IN_QUEUE':
+                            bloc.add(MarkOrderAsComfirmed(order.id));
+                            break;
+                          case 'CONFIRMED':
+                            bloc.add(StartOrderPreparation(order.id));
+                            break;
+                          case 'PREPARING':
+                            bloc.add(MarkOrderAsReady(order.id));
+                            break;
+                          case 'READY':
+                            bloc.add(MarkOrderAsServed(order.id));
+                            break;
+                          case 'SERVED':
+                            bloc.add(MarkOrderAsCompleted(order.id));
+                            break;
                         }
                       },
                 style: ElevatedButton.styleFrom(
@@ -978,31 +1008,31 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               ),
             ),
           if (!isCancelled) ...[
-            SizedBox(height: _getButtonSpacing(screenWidth)),
-            SizedBox(
-              width: double.infinity,
-              height: buttonHeight,
-              child: ElevatedButton(
-                onPressed: () {
-                  _showFlagForHelpDialog(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE0E0E0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Flag for Help',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: buttonFontSize,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF757575),
-                  ),
-                ),
-              ),
-            ),
+            // SizedBox(height: _getButtonSpacing(screenWidth)),
+            // SizedBox(
+            //   width: double.infinity,
+            //   height: buttonHeight,
+            //   child: ElevatedButton(
+            //     onPressed: () {
+            //       _showFlagForHelpDialog(context);
+            //     },
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: const Color(0xFFE0E0E0),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //       elevation: 0,
+            //     ),
+            //     child: Text(
+            //       'Flag for Help',
+            //       style: WorkSansAppTextStyles.medium.copyWith(
+            //         fontSize: buttonFontSize,
+            //         fontWeight: FontWeight.w600,
+            //         color: const Color(0xFF757575),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ],
       ),
@@ -1018,6 +1048,14 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
       case 'READY':
       case 'COMPLETED':
         return 'Ready for Pickup';
+      case 'IN_QUEUE':
+        return 'Confirm Order';
+      case 'CONFIRMED':
+        return 'Start Preparation';
+
+      case 'SERVED':
+        return 'Mark as Completed';
+
       default:
         return 'Update Status';
     }

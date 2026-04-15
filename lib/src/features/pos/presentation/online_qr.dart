@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen-dash_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen-dash_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/payment_bloc/bloc.dart';
@@ -20,6 +22,7 @@ class OnlinePaymentQrScreen extends StatefulWidget {
   final String orderType;
   final String? tableNumber;
   final String customerName;
+  final String? orderId;
 
   /// The session this payment belongs to. Passed through to receipt screen.
   final String? sessionId;
@@ -31,6 +34,7 @@ class OnlinePaymentQrScreen extends StatefulWidget {
     this.tableNumber,
     required this.customerName,
     this.sessionId,
+    this.orderId,
   });
 
   @override
@@ -114,7 +118,9 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
         if (state is OnlinePaymentCompleted) {
           // Capture cubit before pushReplacement loses this context
           final sessionCubit = context.read<OrderSessionCubit>();
-
+          context.read<KitchenDashboardBloc>().add(
+            MarkOrderAsComfirmed(widget.orderId ?? ''),
+          );
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (_) => BlocProvider.value(

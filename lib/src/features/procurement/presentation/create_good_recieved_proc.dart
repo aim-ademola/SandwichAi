@@ -65,6 +65,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     _poNumberController.dispose();
     _receivedByController.dispose();
     _qualityNotesController.dispose();
+    for (var item in _selectedItems) {
+      item.dispose();
+    }
     super.dispose();
   }
 
@@ -353,20 +356,31 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
       }
     }
 
-    final items = _selectedItems
-        .map(
-          (item) => GoodsReceivedItem(
-            itemId: item.inventoryItem?.id ?? '',
-            itemName: item.inventoryItem?.name ?? '',
-            orderedQty: item.orderedQty!,
-            receivedQty: item.receivedQty!,
-            qualityCheck: item.qualityCheck ?? false,
-            qcStatus: item.qcStatus ?? '',
-            qcNote: item.qcNote,
-            expiryDate: item.expiryDate.toString(),
-          ),
-        )
-        .toList();
+    final items = _selectedItems.map((item) {
+      print(
+        'Item: ${item.inventoryItem?.name}, orderedQty: ${item.orderedQty}, receivedQty: ${item.receivedQty}',
+      );
+      print(
+        'Controller values: ${item.orderedQtyController.text}, ${item.receivedQtyController.text}',
+      );
+
+      return GoodsReceivedItem(
+        itemId: item.inventoryItem?.id ?? '',
+        itemName: item.inventoryItem?.name ?? '',
+        orderedQty: item.orderedQty ?? 0,
+        receivedQty: item.receivedQty ?? 0,
+        qualityCheck: item.qualityCheck ?? false,
+        qcStatus: item.qcStatus ?? '',
+        qcNote: item.qcNote,
+        expiryDate: item.expiryDate != null
+            ? DateTime.utc(
+                item.expiryDate!.year,
+                item.expiryDate!.month,
+                item.expiryDate!.day,
+              ).toIso8601String()
+            : null,
+      );
+    }).toList();
 
     final request = CreateGoodsReceivedRequest(
       branchId: _branchId,
@@ -394,7 +408,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
             fontSize: 14,
           ),
         ),
-        backgroundColor: isError ? const Color(0xFFE53935) : kPrimary,
+        backgroundColor: isError ? const Color(0xFFE53935) : kGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -1004,6 +1018,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   icon: const Icon(Icons.close, size: 20, color: Colors.red),
                   onPressed: () {
                     setState(() {
+                      _selectedItems[index].dispose(); // ADD THIS
                       _selectedItems.removeAt(index);
                     });
                   },
@@ -1019,6 +1034,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           const SizedBox(height: 16),
 
           // Quantity Row
+          // REPLACE the quantity Row in _buildItemCard:
           Row(
             children: [
               Expanded(
@@ -1026,6 +1042,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   label: 'Ordered Qty',
                   hint: '0',
                   screenWidth: screenWidth,
+                  controller: item.orderedQtyController, // ADD
                   onChanged: (value) {
                     setState(() {
                       item.orderedQty = int.tryParse(value);
@@ -1039,6 +1056,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   label: 'Received Qty',
                   hint: '0',
                   screenWidth: screenWidth,
+                  controller: item.receivedQtyController, // ADD
                   onChanged: (value) {
                     setState(() {
                       item.receivedQty = int.tryParse(value);
@@ -1375,6 +1393,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     required String label,
     required String hint,
     required double screenWidth,
+    required TextEditingController controller, // ADD
     required Function(String) onChanged,
   }) {
     return Column(
@@ -1390,7 +1409,11 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          controller: controller, // ADD
           keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+          ], // ADD - prevents non-numeric input
           onChanged: onChanged,
           cursorColor: kPrimary,
           style: WorkSansAppTextStyles.medium.copyWith(
@@ -1732,12 +1755,23 @@ class SelectedItem {
   String? qcNote;
   DateTime? expiryDate;
 
+  // Add these
+  final TextEditingController orderedQtyController = TextEditingController();
+  final TextEditingController receivedQtyController = TextEditingController();
+
+  void dispose() {
+    orderedQtyController.dispose();
+    receivedQtyController.dispose();
+  }
+
   bool validate() {
+    final ordered = int.tryParse(orderedQtyController.text.trim());
+    final received = int.tryParse(receivedQtyController.text.trim());
     return inventoryItem != null &&
-        orderedQty != null &&
-        orderedQty! > 0 &&
-        receivedQty != null &&
-        receivedQty! >= 0 &&
+        ordered != null &&
+        ordered > 0 &&
+        received != null &&
+        received >= 0 &&
         qualityCheck != null &&
         qcStatus != null;
   }

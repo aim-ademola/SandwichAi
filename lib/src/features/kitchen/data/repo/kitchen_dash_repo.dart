@@ -227,6 +227,9 @@ class KitchenDashboardRepository extends BaseRepository
       'PENDING',
       'PREPARING',
       'READY',
+      'CONFIRMED',
+      'SERVED',
+      'IN_QUEUE',
       'COMPLETED',
       'CANCELLED',
     ];

@@ -90,9 +90,13 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
 
                       if (state is KitchenOrdersLoaded ||
                           state is KitchenOrdersRefreshing) {
-                        final orders = state is KitchenOrdersLoaded
-                            ? state.filteredOrders
-                            : (state as KitchenOrdersRefreshing).currentData;
+                        final orders =
+                            (state is KitchenOrdersLoaded
+                                    ? state.filteredOrders
+                                    : (state as KitchenOrdersRefreshing)
+                                          .currentData)
+                                .where((o) => o.status != OrderStatus.pending)
+                                .toList();
 
                         if (orders.isEmpty) {
                           return _buildEmptyState(
@@ -196,8 +200,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               children: [
                 _buildFilterChip('All', null),
                 const SizedBox(width: 8),
-                _buildFilterChip('Pending', OrderStatus.pending.value),
-                const SizedBox(width: 8),
+                // _buildFilterChip('Pending', OrderStatus.pending.value),
+                // const SizedBox(width: 8),
                 _buildFilterChip('Confirmed', OrderStatus.confirmed.value),
                 const SizedBox(width: 8),
                 _buildFilterChip('Preparing', OrderStatus.preparing.value),

@@ -42,3 +42,27 @@ class MarkOrderAsReady extends KitchenDashboardEvent {
   @override
   List<Object?> get props => [orderId];
 }
+
+class MarkOrderAsComfirmed extends KitchenDashboardEvent {
+  final String orderId;
+
+  const MarkOrderAsComfirmed(this.orderId);
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
+class MarkOrderAsServed extends KitchenDashboardEvent {
+  const MarkOrderAsServed(this.orderId);
+  final String orderId;
+}
+
+class MarkOrderAsCompleted extends KitchenDashboardEvent {
+  const MarkOrderAsCompleted(this.orderId);
+  final String orderId;
+}
+
+class CancelOrder extends KitchenDashboardEvent {
+  const CancelOrder(this.orderId);
+  final String orderId;
+}

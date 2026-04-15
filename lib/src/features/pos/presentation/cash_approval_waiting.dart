@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen-dash_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen-dash_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/payment_bloc/bloc.dart';
@@ -18,6 +20,7 @@ class CashApprovalWaitingScreen extends StatefulWidget {
   final String branchId;
   final String orderType;
   final String? tableNumber;
+  final String? orderId;
 
   /// Pass the active sessionId so the success screen can mark it completed.
   final String? sessionId;
@@ -29,6 +32,7 @@ class CashApprovalWaitingScreen extends StatefulWidget {
     required this.orderType,
     this.tableNumber,
     this.sessionId,
+    this.orderId,
   });
 
   @override
@@ -130,7 +134,9 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
         if (state is CashPaymentApproved) {
           // Capture cubit before pushReplacement loses this context
           final sessionCubit = context.read<OrderSessionCubit>();
-
+          context.read<KitchenDashboardBloc>().add(
+            MarkOrderAsComfirmed(widget.orderId ?? ''),
+          );
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (_) => BlocProvider.value(

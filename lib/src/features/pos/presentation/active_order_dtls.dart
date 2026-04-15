@@ -516,7 +516,7 @@ class OrderDetailScreen extends StatelessWidget {
 
   Widget _buildTimelineItem(
     String title,
-    DateTime time,
+    dynamic time,
     double textSize,
     bool isSuccess,
   ) {
@@ -547,7 +547,7 @@ class OrderDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _formatDate(time),
+                  _formatDate(time), // already handles String and DateTime
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: textSize - 2,
                     color: kprimaryTextColor1.withOpacity(0.6),
@@ -733,8 +733,12 @@ class OrderDetailScreen extends StatelessWidget {
     double textSize,
     bool isBold,
   ) {
-    final amount = double.tryParse(order.totalAmount.toString()) ?? 0;
-    final formattedAmount = NumberFormat('#,##0.##').format(amount);
+    final parsedAmount = double.tryParse(amount.replaceAll('-', '')) ?? 0;
+    final formattedAmount = NumberFormat('#,##0.##').format(parsedAmount);
+    final displayAmount = amount.startsWith('-')
+        ? '-₦$formattedAmount'
+        : '₦$formattedAmount';
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -747,7 +751,7 @@ class OrderDetailScreen extends StatelessWidget {
           ),
         ),
         Text(
-          '₦$formattedAmount',
+          displayAmount,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: textSize,
             fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,

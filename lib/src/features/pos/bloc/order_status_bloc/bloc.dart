@@ -60,10 +60,8 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
             return;
           }
 
-          // Filter out completed and cancelled orders for active orders view
           final activeOrders = orders.where((order) {
-            return order.status != OrderStatus.completed &&
-                order.status != OrderStatus.cancelled;
+            return order.status != OrderStatus.pending;
           }).toList();
 
           // If no active orders but there are orders, show empty state
@@ -132,10 +130,8 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
         }
 
         final activeOrders = orders.where((order) {
-          return order.status != OrderStatus.completed &&
-              order.status != OrderStatus.cancelled;
+          return order.status != OrderStatus.pending;
         }).toList();
-
         emit(
           KitchenOrdersLoaded(
             orders: orders,
@@ -166,8 +162,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
     if (event.status == null || event.status!.isEmpty) {
       // Show active orders (excluding completed and cancelled)
       final activeOrders = orders.where((order) {
-        return order.status != OrderStatus.completed &&
-            order.status != OrderStatus.cancelled;
+        return order.status != OrderStatus.pending;
       }).toList();
 
       emit(
@@ -206,8 +201,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
     if (event.query.isEmpty) {
       // Show active orders (excluding completed and cancelled)
       final activeOrders = orders.where((order) {
-        return order.status != OrderStatus.completed &&
-            order.status != OrderStatus.cancelled;
+        return order.status != OrderStatus.pending;
       }).toList();
 
       emit(
@@ -276,8 +270,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
         }
 
         final activeOrders = orders.where((order) {
-          return order.status != OrderStatus.completed &&
-              order.status != OrderStatus.cancelled;
+          return order.status != OrderStatus.pending;
         }).toList();
 
         emit(

@@ -208,6 +208,12 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                 const SizedBox(width: 8),
                 _buildFilterChip('Ready', OrderStatus.ready.value),
                 const SizedBox(width: 8),
+                _buildFilterChip(
+                  'Completed',
+                  OrderStatus.completed.value,
+                ), // ADD
+                const SizedBox(width: 8),
+
                 _buildFilterChip('Served', OrderStatus.served.value),
                 const SizedBox(width: 8),
                 _buildFilterChip('Cancelled', OrderStatus.cancelled.value),

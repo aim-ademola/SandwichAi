@@ -1,5 +1,3 @@
-// data/model/waste_logs_model.dart
-
 class WasteLogRequest {
   final String branchId;
   final String itemName;

@@ -27,17 +27,23 @@ class WasteLogsLoaded extends WasteLogsState {
 
   WasteLogsLoaded copyWith({
     WasteLogsResponse? response,
-    String? selectedReason,
-    String? startDate,
-    String? endDate,
+    Object? selectedReason = const _Unset(),
+    Object? startDate = const _Unset(),
+    Object? endDate = const _Unset(),
   }) {
     return WasteLogsLoaded(
       response: response ?? this.response,
-      selectedReason: selectedReason ?? this.selectedReason,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
+      selectedReason: selectedReason is _Unset
+          ? this.selectedReason
+          : selectedReason as String?,
+      startDate: startDate is _Unset ? this.startDate : startDate as String?,
+      endDate: endDate is _Unset ? this.endDate : endDate as String?,
     );
   }
+}
+
+class _Unset {
+  const _Unset();
 }
 
 class WasteLogsEmpty extends WasteLogsState {

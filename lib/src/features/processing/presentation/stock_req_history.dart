@@ -131,7 +131,19 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               if (state is StockRequestEmpty) {
                 return _buildEmptyState(screenWidth);
               }
-
+              if (state is StockRequestEmpty) {
+                return Column(
+                  children: [
+                    _buildTabBar(screenWidth),
+                    Expanded(
+                      child: _buildTabEmptyState(
+                        screenWidth,
+                        'No stock requests yet',
+                      ),
+                    ),
+                  ],
+                );
+              }
               if (state is StockRequestListLoaded ||
                   state is StockRequestRefreshing) {
                 final requests = state is StockRequestListLoaded
@@ -161,23 +173,27 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                   children: [
                     _buildTabBar(screenWidth),
                     Expanded(
-                      child: TabBarView(
+                      child: // REPLACE the three _buildRequestsList calls inside TabBarView:
+                      TabBarView(
                         controller: _tabController,
                         children: [
                           _buildRequestsList(
                             requests,
                             screenWidth,
                             state is StockRequestRefreshing,
+                            emptyMessage: 'No stock requests yet',
                           ),
                           _buildRequestsList(
                             pending,
                             screenWidth,
                             state is StockRequestRefreshing,
+                            emptyMessage: 'No pending stock requests',
                           ),
                           _buildRequestsList(
                             completed,
                             screenWidth,
                             state is StockRequestRefreshing,
+                            emptyMessage: 'No completed stock requests',
                           ),
                         ],
                       ),
@@ -275,10 +291,11 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
   Widget _buildRequestsList(
     List<StockRequest> requests,
     double screenWidth,
-    bool isRefreshing,
-  ) {
+    bool isRefreshing, {
+    String emptyMessage = 'No stock requests found',
+  }) {
     if (requests.isEmpty) {
-      return _buildEmptyState(screenWidth);
+      return _buildTabEmptyState(screenWidth, emptyMessage);
     }
 
     return RefreshIndicator(
@@ -290,6 +307,38 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
         itemBuilder: (context, index) {
           return _buildRequestCard(requests[index], screenWidth);
         },
+      ),
+    );
+  }
+
+  Widget _buildTabEmptyState(double screenWidth, String message) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(_getHorizontalPadding(screenWidth)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: kPrimary.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.inbox_outlined, size: 36, color: kPrimary),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: _getInputFontSize(screenWidth),
+                fontWeight: FontWeight.w600,
+                color: kprimaryTextColor1,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -68,13 +68,18 @@ class _ProcessingTaskHistoryScreenState
     String selectedStatus = task.status.toUpperCase().trim();
 
     // Ensure the status is one of the valid dropdown options
-    final validStatuses = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
+    final validStatuses = [
+      'PENDING_PROCESS',
+      'IN_PROCESS',
+      'COMPLETED',
+      'CANCELLED',
+    ];
     if (!validStatuses.contains(selectedStatus)) {
       AppLogger.log(
-        '⚠️ Status "$selectedStatus" not in valid list, defaulting to PENDING',
+        '⚠️ Status "$selectedStatus" not in valid list, defaulting to PENDING_PROCESS',
       );
       // Default to PENDING if status is not recognized
-      selectedStatus = 'PENDING';
+      selectedStatus = 'PENDING_PROCESS';
     } else {
       AppLogger.log(' Status "$selectedStatus" is valid');
     }

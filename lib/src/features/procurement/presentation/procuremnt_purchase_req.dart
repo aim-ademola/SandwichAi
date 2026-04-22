@@ -243,7 +243,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            'No procurement orders found',
+            'No procurement requests found',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 16,
               color: const Color(0xFF757575),
@@ -258,7 +258,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
     if (orders.isEmpty) {
       return Center(
         child: Text(
-          'No orders in this category',
+          'No requests in this category',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 16,
             color: const Color(0xFF757575),

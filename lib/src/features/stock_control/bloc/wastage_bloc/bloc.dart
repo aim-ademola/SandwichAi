@@ -12,19 +12,21 @@ class WasteLogsBloc extends Bloc<WasteLogsEvent, WasteLogsState> {
   WasteLogsBloc({required WasteLogsRepositoryInterface repository})
     : _repository = repository,
       super(const WasteLogsInitial()) {
-    _getBranchId();
     on<LoadWasteLogs>(_onLoadWasteLogs);
     on<CreateWasteLog>(_onCreateWasteLog);
     on<FilterByReason>(_onFilterByReason);
     on<FilterByDateRange>(_onFilterByDateRange);
     on<RefreshWasteLogs>(_onRefreshWasteLogs);
+    _init();
   }
 
-  void _getBranchId() async {
-    final id = await AuthCacheHelper.instance.getBranchID() ?? '';
-    branchId = id;
+  // ── Init: resolve branchId first, then load ──────────────────────────
+  Future<void> _init() async {
+    branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    add(LoadWasteLogs(branchId: branchId));
   }
 
+  // ── Load (core method everything delegates to) ────────────────────────
   Future<void> _onLoadWasteLogs(
     LoadWasteLogs event,
     Emitter<WasteLogsState> emit,
@@ -33,7 +35,7 @@ class WasteLogsBloc extends Bloc<WasteLogsEvent, WasteLogsState> {
       emit(const WasteLogsLoading());
 
       final response = await _repository.getWasteLogs(
-        branchId: branchId.isNotEmpty ? branchId : event.branchId,
+        branchId: branchId,
         reason: event.reason,
         startDate: event.startDate,
         endDate: event.endDate,
@@ -45,7 +47,6 @@ class WasteLogsBloc extends Bloc<WasteLogsEvent, WasteLogsState> {
             emit(const WasteLogsEmpty());
             return;
           }
-
           emit(
             WasteLogsLoaded(
               response: data,
@@ -60,12 +61,58 @@ class WasteLogsBloc extends Bloc<WasteLogsEvent, WasteLogsState> {
         },
       );
     } catch (e) {
-      emit(
-        WasteLogsError(error: 'An unexpected error occurred: ${e.toString()}'),
-      );
+      emit(WasteLogsError(error: 'Unexpected error: $e'));
     }
   }
 
+  // ── Filter by reason ──────────────────────────────────────────────────
+  Future<void> _onFilterByReason(
+    FilterByReason event,
+    Emitter<WasteLogsState> emit,
+  ) async {
+    final current = state is WasteLogsLoaded ? state as WasteLogsLoaded : null;
+
+    await _onLoadWasteLogs(
+      LoadWasteLogs(
+        branchId: branchId,
+        reason: event.reason, // null = clear reason filter
+        startDate: current?.startDate,
+        endDate: current?.endDate,
+      ),
+      emit,
+    );
+  }
+
+  // ── Filter by date range ──────────────────────────────────────────────
+  Future<void> _onFilterByDateRange(
+    FilterByDateRange event,
+    Emitter<WasteLogsState> emit,
+  ) async {
+    final current = state is WasteLogsLoaded ? state as WasteLogsLoaded : null;
+
+    await _onLoadWasteLogs(
+      LoadWasteLogs(
+        branchId: branchId,
+        reason: current?.selectedReason,
+        startDate: event.startDate, // null = clear date filter
+        endDate: event.endDate,
+      ),
+      emit,
+    );
+  }
+
+  // ── Refresh (clears all filters) ──────────────────────────────────────
+  Future<void> _onRefreshWasteLogs(
+    RefreshWasteLogs event,
+    Emitter<WasteLogsState> emit,
+  ) async {
+    await _onLoadWasteLogs(
+      LoadWasteLogs(branchId: branchId), // no filters = full reload
+      emit,
+    );
+  }
+
+  // ── Create ────────────────────────────────────────────────────────────
   Future<void> _onCreateWasteLog(
     CreateWasteLog event,
     Emitter<WasteLogsState> emit,
@@ -78,8 +125,6 @@ class WasteLogsBloc extends Bloc<WasteLogsEvent, WasteLogsState> {
       await response.when(
         success: (data) async {
           emit(WasteLogCreated(item: data));
-
-          // Reload waste logs
           add(LoadWasteLogs(branchId: branchId));
         },
         error: (error) async {
@@ -87,69 +132,7 @@ class WasteLogsBloc extends Bloc<WasteLogsEvent, WasteLogsState> {
         },
       );
     } catch (e) {
-      emit(
-        WasteLogCreateError(
-          error: 'Failed to create waste log: ${e.toString()}',
-        ),
-      );
+      emit(WasteLogCreateError(error: 'Failed to create: $e'));
     }
-  }
-
-  void _onFilterByReason(FilterByReason event, Emitter<WasteLogsState> emit) {
-    if (state is! WasteLogsLoaded) return;
-
-    final currentState = state as WasteLogsLoaded;
-
-    add(
-      LoadWasteLogs(
-        branchId: branchId,
-        reason: event.reason,
-        startDate: currentState.startDate,
-        endDate: currentState.endDate,
-      ),
-    );
-  }
-
-  void _onFilterByDateRange(
-    FilterByDateRange event,
-    Emitter<WasteLogsState> emit,
-  ) {
-    if (state is! WasteLogsLoaded) return;
-
-    final currentState = state as WasteLogsLoaded;
-
-    add(
-      LoadWasteLogs(
-        branchId: branchId,
-        reason: currentState.selectedReason,
-        startDate: event.startDate,
-        endDate: event.endDate,
-      ),
-    );
-  }
-
-  Future<void> _onRefreshWasteLogs(
-    RefreshWasteLogs event,
-    Emitter<WasteLogsState> emit,
-  ) async {
-    String? reason;
-    String? startDate;
-    String? endDate;
-
-    if (state is WasteLogsLoaded) {
-      final currentState = state as WasteLogsLoaded;
-      reason = currentState.selectedReason;
-      startDate = currentState.startDate;
-      endDate = currentState.endDate;
-    }
-
-    add(
-      LoadWasteLogs(
-        branchId: branchId,
-        reason: reason,
-        startDate: startDate,
-        endDate: endDate,
-      ),
-    );
   }
 }

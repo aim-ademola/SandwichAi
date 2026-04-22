@@ -180,11 +180,11 @@ class RecentVerification {
     if (qcStatus == 'APPROVED' || qcStatus == 'WITHIN_TOLERANCE') {
       return 'Verified';
     } else if (qcStatus == 'SLIGHT_OVERUSE') {
-      return 'Pending';
+      return 'Verified';
     } else if (qcStatus == 'REJECTED' || qcStatus == 'SIGNIFICANT_VARIANCE') {
-      return 'Failed';
+      return 'Verified';
     }
-    return 'Pending';
+    return 'Verified';
   }
 }
 

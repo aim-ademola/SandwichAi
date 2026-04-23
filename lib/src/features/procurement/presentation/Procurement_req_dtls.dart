@@ -103,7 +103,11 @@ class ProcurementDetailsScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _buildInfoRow('Requested By', order.requestedBy, screenWidth),
+          _buildInfoRow(
+            'Requested By',
+            order.requestingDepartment,
+            screenWidth,
+          ),
           const SizedBox(height: 8),
           _buildInfoRow(
             'Branch',

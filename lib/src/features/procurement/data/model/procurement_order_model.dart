@@ -44,6 +44,7 @@ class ProcurementRequest {
   final String? actualDelivery;
   final String totalAmount;
   final String? notes;
+  final dynamic requestingDepartment;
   final String createdAt;
   final String updatedAt;
   final List<ProcurementItem> items;
@@ -66,6 +67,7 @@ class ProcurementRequest {
     this.actualDelivery,
     required this.totalAmount,
     this.notes,
+    this.requestingDepartment,
     required this.createdAt,
     required this.updatedAt,
     required this.items,
@@ -104,6 +106,9 @@ class ProcurementRequest {
           : null,
       totalAmount: _parseToString(json['totalAmount']),
       notes: json['notes'] != null ? _parseToString(json['notes']) : null,
+      requestingDepartment: json['requestingDepartment'] != null
+          ? _parseToString(json['requestingDepartment'])
+          : null,
       createdAt: _parseToString(json['createdAt']),
       updatedAt: _parseToString(json['updatedAt']),
       items:

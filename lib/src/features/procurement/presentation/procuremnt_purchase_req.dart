@@ -325,7 +325,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.requestedBy,
+                        order.requestingDepartment ?? '',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: supplierFontSize,
                           fontWeight: FontWeight.bold,

@@ -795,7 +795,7 @@ class _CompleteStockRequestDetailsScreenState
                           ),
                           children: [
                             TextSpan(
-                              text: itemName,
+                              text: 'itemName',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                               ),

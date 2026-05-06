@@ -62,7 +62,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
       if (orgId.isNotEmpty) {
         AppLogger.log('Loading inventory items for org: $orgId'); // Debug
         context.read<InventoryItemsBloc>().add(
-          LoadInventoryItems(organizationId: orgId),
+          LoadInventoryItems(organizationId: orgId, page: 1, limit: 100),
         );
       }
     }
@@ -878,7 +878,11 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     TextButton(
                       onPressed: () {
                         context.read<InventoryItemsBloc>().add(
-                          LoadInventoryItems(organizationId: organizationId),
+                          LoadInventoryItems(
+                            organizationId: organizationId,
+                            page: 1,
+                            limit: 100,
+                          ),
                         );
                       },
                       child: Text('Retry', style: TextStyle(color: kPrimary)),

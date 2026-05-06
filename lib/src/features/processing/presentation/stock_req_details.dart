@@ -477,9 +477,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
               label: request.status == 'COMPLETED'
                   ? 'Approved Date'
                   : 'Rejected Date',
-              value: DateFormat(
-                'MMM dd, yyyy • HH:mm',
-              ).format(request.approvedAt!),
+              value: _formatDate(request.approvedAt!),
               screenWidth: screenWidth,
             ),
           ],
@@ -497,9 +495,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
             _buildInfoRow(
               icon: Icons.schedule_outlined,
               label: 'Completed Date',
-              value: DateFormat(
-                'MMM dd, yyyy • HH:mm',
-              ).format(request.completedAt!),
+              value: _formatDate(request.completedAt!),
               screenWidth: screenWidth,
             ),
           ],

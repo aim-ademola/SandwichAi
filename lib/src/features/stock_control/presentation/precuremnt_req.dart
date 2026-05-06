@@ -77,30 +77,41 @@ class _StockProcurementRequestScreenState
     'Quality issues with current stock',
   ];
 
+  // Add field:
+  String _orgId = '';
+
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
-    _loadUserData();
     _setDefaultDeliveryDate();
-
-    // Load inventory items
-    context.read<InventoryItemsBloc>().add(
-      LoadInventoryItems(organizationId: ''),
-    );
-    context.read<BranchStockBloc>().add(LoadBranchStock(branchId: ''));
+    _loadUserData();
   }
 
+  // Replace _loadUserData:
   Future<void> _loadUserData() async {
     final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    final orgId = await AuthCacheHelper.instance.getOrgId() ?? '';
     final userData = await AuthCacheHelper.instance.getUserData();
     final department = await AuthCacheHelper.instance.getDepartmentName() ?? '';
 
-    setState(() {
-      _branchId = branchId;
-      _employeeId = userData?.id ?? '';
-      _requestingDepartment = department.isNotEmpty ? department : 'KITCHEN';
-    });
+    if (mounted) {
+      setState(() {
+        _branchId = branchId;
+        _orgId = orgId;
+        _employeeId = userData?.id ?? '';
+        _requestingDepartment = department.isNotEmpty ? department : 'KITCHEN';
+      });
+
+      if (orgId.isNotEmpty) {
+        context.read<InventoryItemsBloc>().add(
+          LoadInventoryItems(organizationId: orgId, page: 1, limit: 100),
+        );
+        context.read<BranchStockBloc>().add(
+          LoadBranchStock(branchId: branchId),
+        );
+      }
+    }
   }
 
   void _setDefaultDeliveryDate() {
@@ -855,6 +866,25 @@ class _StockProcurementRequestScreenState
               setState(() {
                 _allItems = state.items;
                 _filteredItems = state.items;
+              });
+            } else if (state is InventoryItemsError) {
+              _showSnackBar(
+                'Failed to load inventory items: ${state.error}',
+                isError: true,
+              );
+            }
+            if (state is InventoryItemsLoaded && !state.isLoadingMore) {
+              setState(() {
+                _allItems = state.items;
+                _filteredItems = _searchController.text.isEmpty
+                    ? _allItems
+                    : _allItems
+                          .where(
+                            (item) => item.name.toLowerCase().contains(
+                              _searchController.text.toLowerCase(),
+                            ),
+                          )
+                          .toList();
               });
             } else if (state is InventoryItemsError) {
               _showSnackBar(
@@ -1761,8 +1791,31 @@ class _StockProcurementRequestScreenState
                     ),
                   )
                 : ListView.builder(
-                    itemCount: _filteredItems.length,
+                    itemCount: _filteredItems.length + 1,
                     itemBuilder: (context, index) {
+                      if (index == _filteredItems.length) {
+                        final s = context.read<InventoryItemsBloc>().state;
+                        if (s is InventoryItemsLoaded &&
+                            s.hasMore &&
+                            !s.isLoadingMore) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            context.read<InventoryItemsBloc>().add(
+                              LoadMoreInventoryItems(organizationId: _orgId),
+                            );
+                          });
+                        }
+                        final s2 = context.read<InventoryItemsBloc>().state;
+                        if (s2 is InventoryItemsLoaded && s2.isLoadingMore) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }
+
                       final item = _filteredItems[index];
                       return InkWell(
                         onTap: () => _onItemSelected(item),

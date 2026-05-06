@@ -41,6 +41,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
   String _branchId = '';
   String _department = '';
+  String _orgID = '';
 
   @override
   void initState() {
@@ -49,21 +50,32 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     _loadUserData();
 
     // Load inventory items and branch stock
-    context.read<InventoryItemsBloc>().add(
-      LoadInventoryItems(organizationId: ''),
-    );
-    context.read<BranchStockBloc>().add(LoadBranchStock(branchId: ''));
   }
 
+  // Replace _loadUserData with this:
   Future<void> _loadUserData() async {
     final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    final orgId = await AuthCacheHelper.instance.getOrgId() ?? '';
     final department =
         await AuthCacheHelper.instance.getDepartmentName() ?? 'Kitchen';
 
-    setState(() {
-      _branchId = branchId;
-      _department = department;
-    });
+    if (mounted) {
+      setState(() {
+        _branchId = branchId;
+        _department = department;
+        _orgID = orgId;
+      });
+
+      // Fire AFTER we have the real orgId, with a higher limit
+      if (orgId.isNotEmpty) {
+        context.read<InventoryItemsBloc>().add(
+          LoadInventoryItems(organizationId: orgId, page: 1, limit: 100),
+        );
+        context.read<BranchStockBloc>().add(
+          LoadBranchStock(branchId: branchId),
+        );
+      }
+    }
   }
 
   @override
@@ -472,6 +484,26 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         ),
         BlocListener<InventoryItemsBloc, InventoryItemsState>(
           listener: (context, state) {
+            if (state is InventoryItemsLoaded && !state.isLoadingMore) {
+              setState(() {
+                _allItems =
+                    state.items; // bloc already holds full appended list
+                _filteredItems = _searchController.text.isEmpty
+                    ? _allItems
+                    : _allItems
+                          .where(
+                            (item) => item.name.toLowerCase().contains(
+                              _searchController.text.toLowerCase(),
+                            ),
+                          )
+                          .toList();
+              });
+            } else if (state is InventoryItemsError) {
+              _showSnackBar(
+                'Failed to load inventory items: ${state.error}',
+                isError: true,
+              );
+            }
             if (state is InventoryItemsLoaded) {
               setState(() {
                 _allItems = state.items;
@@ -891,8 +923,31 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: _filteredItems.length,
+                    itemCount: _filteredItems.length + 1, // +1 for footer
                     itemBuilder: (context, index) {
+                      if (index == _filteredItems.length) {
+                        final s = context.read<InventoryItemsBloc>().state;
+                        if (s is InventoryItemsLoaded &&
+                            s.hasMore &&
+                            !s.isLoadingMore) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            context.read<InventoryItemsBloc>().add(
+                              LoadMoreInventoryItems(organizationId: _orgID),
+                            );
+                          });
+                        }
+                        final s2 = context.read<InventoryItemsBloc>().state;
+                        if (s2 is InventoryItemsLoaded && s2.isLoadingMore) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }
+
                       final item = _filteredItems[index];
                       return InkWell(
                         onTap: () => _onItemSelected(item),

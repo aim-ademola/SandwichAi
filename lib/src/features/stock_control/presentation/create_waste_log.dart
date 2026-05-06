@@ -34,16 +34,24 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
   bool _isOpened = false;
   List<InventoryItem> _filteredItems = [];
   List<InventoryItem> _allItems = [];
+  // Add field:
+  String _orgId = '';
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+    _loadOrgAndInventory();
+  }
 
-    // Load inventory items using InventoryItemsBloc
-    context.read<InventoryItemsBloc>().add(
-      LoadInventoryItems(organizationId: ''),
-    );
+  Future<void> _loadOrgAndInventory() async {
+    final orgId = await AuthCacheHelper.instance.getOrgId() ?? '';
+    if (mounted && orgId.isNotEmpty) {
+      setState(() => _orgId = orgId);
+      context.read<InventoryItemsBloc>().add(
+        LoadInventoryItems(organizationId: orgId, page: 1, limit: 100),
+      );
+    }
   }
 
   @override
@@ -318,6 +326,25 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               setState(() {
                 _allItems = state.items;
                 _filteredItems = state.items;
+              });
+            } else if (state is InventoryItemsError) {
+              _showSnackBar(
+                'Failed to load inventory items: ${state.error}',
+                isError: true,
+              );
+            }
+            if (state is InventoryItemsLoaded && !state.isLoadingMore) {
+              setState(() {
+                _allItems = state.items;
+                _filteredItems = _searchController.text.isEmpty
+                    ? _allItems
+                    : _allItems
+                          .where(
+                            (item) => item.name.toLowerCase().contains(
+                              _searchController.text.toLowerCase(),
+                            ),
+                          )
+                          .toList();
               });
             } else if (state is InventoryItemsError) {
               _showSnackBar(
@@ -626,8 +653,31 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: _filteredItems.length,
+                    itemCount: _filteredItems.length + 1,
                     itemBuilder: (context, index) {
+                      if (index == _filteredItems.length) {
+                        final s = context.read<InventoryItemsBloc>().state;
+                        if (s is InventoryItemsLoaded &&
+                            s.hasMore &&
+                            !s.isLoadingMore) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            context.read<InventoryItemsBloc>().add(
+                              LoadMoreInventoryItems(organizationId: _orgId),
+                            );
+                          });
+                        }
+                        final s2 = context.read<InventoryItemsBloc>().state;
+                        if (s2 is InventoryItemsLoaded && s2.isLoadingMore) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }
+
                       final item = _filteredItems[index];
                       return InkWell(
                         onTap: () {

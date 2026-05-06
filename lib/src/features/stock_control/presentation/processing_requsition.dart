@@ -52,6 +52,7 @@ class _StockTransferToProcessingOrKItchenScreenState
   String? _selectedItemName;
   String branchId = '';
   String employeeId = '';
+  String orgaID = '';
   bool _isSearching = false;
   bool _isOpened = false;
   bool _isInitialized = false;
@@ -84,7 +85,7 @@ class _StockTransferToProcessingOrKItchenScreenState
         );
         final orgID = await AuthCacheHelper.instance.getOrgId() ?? '';
         context.read<InventoryItemsBloc>().add(
-          LoadInventoryItems(organizationId: orgID), // pass your orgId here
+          LoadInventoryItems(organizationId: orgID, page: 1, limit: 20),
         );
       } else {
         _showSnackBar(
@@ -106,6 +107,7 @@ class _StockTransferToProcessingOrKItchenScreenState
   Future<void> _getBranchAndEmployeeData() async {
     final bId = await AuthCacheHelper.instance.getBranchID() ?? '';
     final empId = await AuthCacheHelper.instance.getEmpID() ?? '';
+    final organID = await AuthCacheHelper.instance.getOrgId() ?? '';
 
     AppLogger.log('=== BRANCH & EMPLOYEE DATA ===');
     AppLogger.log('Branch ID: $bId');
@@ -116,6 +118,7 @@ class _StockTransferToProcessingOrKItchenScreenState
       setState(() {
         branchId = bId;
         employeeId = empId;
+        orgaID = organID;
       });
     }
   }
@@ -478,14 +481,32 @@ class _StockTransferToProcessingOrKItchenScreenState
             }
           },
         ),
+        BlocListener<InventoryItemsBloc, InventoryItemsState>(
+          listener: (context, state) {
+            if (state is InventoryItemsLoaded && !state.isLoadingMore) {
+              setState(() {
+                _allItems = state.items;
+                _filteredItems = _searchController.text.isEmpty
+                    ? _allItems
+                    : _allItems
+                          .where(
+                            (item) => item.name.toLowerCase().contains(
+                              _searchController.text.toLowerCase(),
+                            ),
+                          )
+                          .toList();
+              });
+            } else if (state is InventoryItemsError) {
+              _showSnackBar(
+                'Failed to load inventory items: ${state.error}',
+                isError: true,
+              );
+            }
+          },
+        ),
       ],
       child: BlocBuilder<InventoryItemsBloc, InventoryItemsState>(
         builder: (context, stockState) {
-          if (stockState is InventoryItemsLoaded && _allItems.isEmpty) {
-            _allItems = stockState.items;
-            _filteredItems = stockState.items;
-          }
-
           return DefaultTextStyle.merge(
             style: WorkSansAppTextStyles.medium,
             child: Scaffold(
@@ -988,8 +1009,35 @@ class _StockTransferToProcessingOrKItchenScreenState
                     ),
                   )
                 : ListView.builder(
-                    itemCount: _filteredItems.length,
+                    itemCount: _filteredItems.length + 1, // +1 for footer
                     itemBuilder: (context, index) {
+                      // Load more trigger
+                      if (index == _filteredItems.length) {
+                        final s = context.read<InventoryItemsBloc>().state;
+                        if (s is InventoryItemsLoaded &&
+                            s.hasMore &&
+                            !s.isLoadingMore) {
+                          // Trigger next page when user scrolls to bottom of dropdown
+                          WidgetsBinding.instance.addPostFrameCallback((
+                            _,
+                          ) async {
+                            context.read<InventoryItemsBloc>().add(
+                              LoadMoreInventoryItems(organizationId: orgaID),
+                            );
+                          });
+                        }
+                        final s2 = context.read<InventoryItemsBloc>().state;
+                        if (s2 is InventoryItemsLoaded && s2.isLoadingMore) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }
+
                       final item = _filteredItems[index];
                       return InkWell(
                         onTap: () {

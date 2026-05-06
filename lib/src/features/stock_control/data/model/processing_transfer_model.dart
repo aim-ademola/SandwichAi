@@ -179,7 +179,7 @@ class ItemInfo {
       itemName: json['itemName'] as String,
       category: json['category'] as String,
       unit: json['unit'] as String,
-      description: json['description'] as String,
+      description: json['description'] as String? ?? '', // ← was crashing here
       sku: json['sku'] as String,
       organizationId: json['organizationId'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -215,13 +215,13 @@ class BranchInfo {
     return BranchInfo(
       id: json['id'] as String,
       name: json['name'] as String,
-      branchCode: json['branch_code'] as String,
-      address: json['address'] as String,
-      city: json['city'] as String,
-      state: json['state'] as String,
-      country: json['country'] as String,
-      zipCode: json['zipCode'] as String,
-      email: json['email'] as String,
+      branchCode: json['branch_code'] as String? ?? '',
+      address: json['address'] as String? ?? '',
+      city: json['city'] as String? ?? '',
+      state: json['state'] as String? ?? '',
+      country: json['country'] as String? ?? '',
+      zipCode: json['zipCode'] as String? ?? '',
+      email: json['email'] as String? ?? '',
     );
   }
 }

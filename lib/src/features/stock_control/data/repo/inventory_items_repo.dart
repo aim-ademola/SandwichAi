@@ -22,12 +22,18 @@ class InventoryItemsRepository extends BaseRepository
   @override
   Future<ApiResponse<List<InventoryItem>>> getInventoryItems({
     required String organizationId,
+    int page = 1,
+    int limit = 20,
   }) async {
     try {
       final response = await _apiClient
           .get(
             'inventory-items',
-            // queryParameters: {'organizationId': organizationId},
+            queryParameters: {
+              'page': page,
+              'limit': limit,
+              // 'organizationId': organizationId,
+            },
           )
           .timeout(
             const Duration(seconds: 30),
@@ -173,7 +179,21 @@ abstract class InventoryItemsEvent {}
 
 class LoadInventoryItems extends InventoryItemsEvent {
   final String organizationId;
-  LoadInventoryItems({required this.organizationId});
+  final int page;
+  final int limit;
+
+  LoadInventoryItems({
+    required this.organizationId,
+    this.page = 1,
+    this.limit = 20,
+  });
+}
+
+// Add a new event for loading more (infinite scroll)
+class LoadMoreInventoryItems extends InventoryItemsEvent {
+  final String organizationId;
+
+  LoadMoreInventoryItems({required this.organizationId});
 }
 
 abstract class InventoryItemsState {}
@@ -184,7 +204,30 @@ class InventoryItemsLoading extends InventoryItemsState {}
 
 class InventoryItemsLoaded extends InventoryItemsState {
   final List<InventoryItem> items;
-  InventoryItemsLoaded({required this.items});
+  final int currentPage;
+  final bool hasMore;
+  final bool isLoadingMore;
+
+  InventoryItemsLoaded({
+    required this.items,
+    this.currentPage = 1,
+    this.hasMore = true,
+    this.isLoadingMore = false,
+  });
+
+  InventoryItemsLoaded copyWith({
+    List<InventoryItem>? items,
+    int? currentPage,
+    bool? hasMore,
+    bool? isLoadingMore,
+  }) {
+    return InventoryItemsLoaded(
+      items: items ?? this.items,
+      currentPage: currentPage ?? this.currentPage,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 class InventoryItemsError extends InventoryItemsState {
@@ -195,11 +238,13 @@ class InventoryItemsError extends InventoryItemsState {
 class InventoryItemsBloc
     extends Bloc<InventoryItemsEvent, InventoryItemsState> {
   final InventoryItemsRepository _repository;
+  static const int _limit = 20;
 
   InventoryItemsBloc({required InventoryItemsRepository repository})
     : _repository = repository,
       super(InventoryItemsInitial()) {
     on<LoadInventoryItems>(_onLoadInventoryItems);
+    on<LoadMoreInventoryItems>(_onLoadMoreInventoryItems);
   }
 
   Future<void> _onLoadInventoryItems(
@@ -210,11 +255,54 @@ class InventoryItemsBloc
 
     final response = await _repository.getInventoryItems(
       organizationId: event.organizationId,
+      page: event.page,
+      limit: event.limit,
     );
 
     response.when(
-      success: (items) => emit(InventoryItemsLoaded(items: items)),
+      success: (items) => emit(
+        InventoryItemsLoaded(
+          items: items,
+          currentPage: event.page,
+          hasMore:
+              items.length >= event.limit, // if less than limit, no more pages
+        ),
+      ),
       error: (error) => emit(InventoryItemsError(error: error.message)),
+    );
+  }
+
+  Future<void> _onLoadMoreInventoryItems(
+    LoadMoreInventoryItems event,
+    Emitter<InventoryItemsState> emit,
+  ) async {
+    // Only load more if currently in loaded state and has more pages
+    final currentState = state;
+    if (currentState is! InventoryItemsLoaded || !currentState.hasMore) return;
+
+    emit(currentState.copyWith(isLoadingMore: true));
+
+    final nextPage = currentState.currentPage + 1;
+
+    final response = await _repository.getInventoryItems(
+      organizationId: event.organizationId,
+      page: nextPage,
+      limit: _limit,
+    );
+
+    response.when(
+      success: (newItems) => emit(
+        currentState.copyWith(
+          items: [
+            ...currentState.items,
+            ...newItems,
+          ], // append to existing list
+          currentPage: nextPage,
+          hasMore: newItems.length >= _limit,
+          isLoadingMore: false,
+        ),
+      ),
+      error: (_) => emit(currentState.copyWith(isLoadingMore: false)),
     );
   }
 }

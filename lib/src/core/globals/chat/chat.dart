@@ -42,6 +42,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   final FocusNode _messageFocusNode = FocusNode();
   final ImagePicker _imagePicker = ImagePicker();
   final AudioRecorder _audioRecorder = AudioRecorder();
+  late ChatBloc _chatBloc;
 
   ChatMessageModel? _replyToMessage;
   bool _isTyping = false;
@@ -56,6 +57,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   @override
   void initState() {
     super.initState();
+    _chatBloc = context.read<ChatBloc>();
     _messageController.addListener(_onTextChanged);
     _checkMicrophonePermission();
     _loadInitialData();
@@ -113,14 +115,12 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     _searchController.dispose();
     _audioRecorder.dispose();
 
-    // Mark presence as offline on leave
-    context.read<ChatBloc>().add(
+    _chatBloc.add(
       const UpdatePresence(request: UpdatePresenceRequest(status: 'OFFLINE')),
     );
 
     super.dispose();
   }
-
   //  Send text ──
 
   void _sendMessage() {
@@ -203,25 +203,22 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   //  Mark read ──
 
+  // In _markRoomAsRead — use .id not .messageId
   void _markRoomAsRead(List<ChatMessageModel> messages) {
     if (messages.isEmpty) return;
 
-    // Find last REAL message — skip optimistic temp ones
     final lastReal = messages.lastWhere(
-      (m) => !m.id.startsWith('temp_') && !m.messageId.startsWith('temp_'),
+      (m) => !m.id.startsWith('temp_'),
       orElse: () => messages.last,
     );
 
-    // Don't mark read if only temp messages exist
-    if (lastReal.id.startsWith('temp_') ||
-        lastReal.messageId.startsWith('temp_'))
-      return;
+    if (lastReal.id.startsWith('temp_')) return;
 
     context.read<ChatBloc>().add(
       MarkRoomAsRead(
         request: MarkReadRequest(
           chatRoomId: widget.roomId,
-          lastReadMessageId: lastReal.messageId,
+          lastReadMessageId: lastReal.id,
         ),
       ),
     );
@@ -616,11 +613,11 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
           if (state is MessageSendError && state.chatRoomId == widget.roomId) {
             _showErrorSnackBar(state.error);
           }
-          // In listener
+
           if (state is ChatMessagesLoaded &&
               state.chatRoomId == widget.roomId) {
             if (!state.isLoadingMore && state.sendingMessage == null) {
-              _markRoomAsRead(state.messages); // only on real loads
+              _markRoomAsRead(state.messages);
             }
             _scrollToBottom();
           }
@@ -629,13 +626,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(const SnackBar(content: Text('Settings updated')));
-            // Reload to reflect changes
             context.read<ChatBloc>().add(LoadChatRoom(roomId: widget.roomId));
-          }
-          if (state is ChatMessagesLoaded &&
-              state.chatRoomId == widget.roomId) {
-            _markRoomAsRead(state.messages);
-            _scrollToBottom();
           }
         },
         builder: (context, state) {

@@ -98,14 +98,19 @@ class StockRequest {
   final String id;
   final String requestId;
   final String requestingBranchId;
-  final String requestedBy;
+  final StockRequestUser? requestedBy; // ← was String?
   final String department;
   final String organizationId;
   final String status;
-  final String? approvedBy;
+  final StockRequestUser? approvedBy; // ← was String?
   final DateTime? approvedAt;
-  final String? completedBy;
+  final StockRequestUser? completedBy; // ← was String?
   final DateTime? completedAt;
+  final StockRequestUser? rejectedBy; // ← new field from API
+  final DateTime? rejectedAt; // ← new field from API
+  final String? rejectionNote; // ← new field from API
+  final String? approvalNote; // ← new field from API
+  final String? cancellationNote; // ← new field from API
   final String notes;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -116,7 +121,7 @@ class StockRequest {
     required this.id,
     required this.requestId,
     required this.requestingBranchId,
-    required this.requestedBy,
+    this.requestedBy,
     required this.department,
     required this.organizationId,
     required this.status,
@@ -124,6 +129,11 @@ class StockRequest {
     this.approvedAt,
     this.completedBy,
     this.completedAt,
+    this.rejectedBy,
+    this.rejectedAt,
+    this.rejectionNote,
+    this.approvalNote,
+    this.cancellationNote,
     required this.notes,
     required this.createdAt,
     required this.updatedAt,
@@ -136,18 +146,25 @@ class StockRequest {
       id: json['id'] ?? '',
       requestId: json['requestId'] ?? '',
       requestingBranchId: json['requestingBranchId'] ?? '',
-      requestedBy: json['requestedBy'] ?? '',
+      requestedBy: _parseUser(json['requestedBy']),
       department: json['department'] ?? '',
       organizationId: json['organizationId'] ?? '',
       status: json['status'] ?? 'PENDING',
-      approvedBy: json['approvedBy'],
+      approvedBy: _parseUser(json['approvedBy']),
       approvedAt: json['approvedAt'] != null
           ? DateTime.parse(json['approvedAt'])
           : null,
-      completedBy: json['completedBy'],
+      completedBy: _parseUser(json['completedBy']),
       completedAt: json['completedAt'] != null
           ? DateTime.parse(json['completedAt'])
           : null,
+      rejectedBy: _parseUser(json['rejectedBy']),
+      rejectedAt: json['rejectedAt'] != null
+          ? DateTime.parse(json['rejectedAt'])
+          : null,
+      rejectionNote: json['rejectionNote'],
+      approvalNote: json['approvalNote'],
+      cancellationNote: json['cancellationNote'],
       notes: json['notes'] ?? '',
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
@@ -171,14 +188,19 @@ class StockRequest {
       'id': id,
       'requestId': requestId,
       'requestingBranchId': requestingBranchId,
-      'requestedBy': requestedBy,
+      'requestedBy': requestedBy?.toJson(),
       'department': department,
       'organizationId': organizationId,
       'status': status,
-      'approvedBy': approvedBy,
+      'approvedBy': approvedBy?.toJson(),
       'approvedAt': approvedAt?.toIso8601String(),
-      'completedBy': completedBy,
+      'completedBy': completedBy?.toJson(),
       'completedAt': completedAt?.toIso8601String(),
+      'rejectedBy': rejectedBy?.toJson(),
+      'rejectedAt': rejectedAt?.toIso8601String(),
+      'rejectionNote': rejectionNote,
+      'approvalNote': approvalNote,
+      'cancellationNote': cancellationNote,
       'notes': notes,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
@@ -251,6 +273,61 @@ class StockRequestResponse {
   }
 
   bool get isValid => data.isNotEmpty;
+}
+// lib/src/features/stock_control/data/model/stock_request.dart
+
+// Add this new class for user references
+class StockRequestUser {
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String role;
+  final String department;
+  final String employeeId;
+
+  StockRequestUser({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.role,
+    required this.department,
+    required this.employeeId,
+  });
+
+  String get fullName => '$firstName $lastName';
+
+  factory StockRequestUser.fromJson(Map<String, dynamic> json) {
+    return StockRequestUser(
+      id: json['id'] ?? '',
+      firstName: json['firstName'] ?? '',
+      lastName: json['lastName'] ?? '',
+      email: json['email'] ?? '',
+      role: json['role'] ?? '',
+      department: json['department'] ?? '',
+      employeeId: json['employeeId'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'role': role,
+      'department': department,
+      'employeeId': employeeId,
+    };
+  }
+}
+
+// Helper to safely parse a user field that could be null, a String, or a Map
+StockRequestUser? _parseUser(dynamic value) {
+  if (value == null) return null;
+  if (value is Map<String, dynamic>) return StockRequestUser.fromJson(value);
+  return null; // was a plain string ID — treat as unknown
 }
 
 class CreateStockRequestResponse {

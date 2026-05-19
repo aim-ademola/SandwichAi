@@ -238,7 +238,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
           _buildInfoRow(
             icon: Icons.person_outline,
             label: 'Requested By',
-            value: request.requestedBy,
+            value: request.requestedBy?.fullName ?? 'N/A',
             screenWidth: screenWidth,
           ),
           _buildDivider(),
@@ -467,7 +467,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
             label: request.status == 'COMPLETED'
                 ? 'Approved By'
                 : 'Rejected By',
-            value: request.approvedBy ?? 'N/A',
+            value: request.approvedBy?.fullName ?? 'N/A',
             screenWidth: screenWidth,
           ),
           if (request.approvedAt != null) ...[
@@ -486,7 +486,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
             _buildInfoRow(
               icon: Icons.done_all_outlined,
               label: 'Completed By',
-              value: request.completedBy!,
+              value: request.completedBy?.fullName ?? 'N/A',
               screenWidth: screenWidth,
             ),
           ],

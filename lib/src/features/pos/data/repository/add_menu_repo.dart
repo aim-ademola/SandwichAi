@@ -63,11 +63,11 @@ class MenuItemsRepository extends BaseRepository
       );
 
       return listResponse;
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
@@ -125,11 +125,11 @@ class MenuItemsRepository extends BaseRepository
 
       final menuItem = ApiMenuItem.fromJson(response.data);
       return ApiResponse.success(menuItem);
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
@@ -186,11 +186,11 @@ class MenuItemsRepository extends BaseRepository
 
       final menuItem = ApiMenuItem.fromJson(response.data);
       return ApiResponse.success(menuItem);
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
@@ -222,11 +222,11 @@ class MenuItemsRepository extends BaseRepository
       }
 
       return ApiResponse.success('Menu item deleted successfully');
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );

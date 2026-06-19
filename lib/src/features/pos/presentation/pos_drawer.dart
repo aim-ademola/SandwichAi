@@ -6,8 +6,6 @@ import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/drawer_header.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/chnge_pwd.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/compaints.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/pos_staff_screen.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/printer_settings_screen.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_to_stock_requisitin_tab.dart';
 

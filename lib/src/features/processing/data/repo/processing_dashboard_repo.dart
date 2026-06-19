@@ -36,15 +36,15 @@ class ProcessingDashboardRepository extends BaseRepository
         Future.value(response),
         (json) => _parseProcessingDashboard(json),
       );
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
-    } on FormatException catch (e) {
+    } on FormatException {
       return ApiResponse.errorMessage(
         'Invalid response from server. Please try again later.',
       );

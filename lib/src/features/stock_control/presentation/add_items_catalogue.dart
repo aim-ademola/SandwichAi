@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
-import 'package:sandwich_ai/src/features/stock_control/data/catalogue_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/branch_stock_model.dart';
-import 'package:sandwich_ai/src/features/stock_control/presentation/stock_catalogue.dart';
 
 enum InventoryMethod { fifo, lifo, fefo, manual }
 

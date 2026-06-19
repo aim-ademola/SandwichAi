@@ -354,7 +354,11 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.wifi_off_rounded, size: 56, color: Colors.grey),
+            const Icon(
+              Icons.error_outline_outlined,
+              size: 56,
+              color: Colors.red,
+            ),
             const SizedBox(height: 16),
             Text(
               error,

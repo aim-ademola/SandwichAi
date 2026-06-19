@@ -63,11 +63,11 @@ class RecipeForecastRepository extends BaseRepository
 
       final forecast = RecipeForecastResponse.fromJson(response.data);
       return ApiResponse.success(forecast);
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Request timeout. The AI service is taking longer than expected.',
       );

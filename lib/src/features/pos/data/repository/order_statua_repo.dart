@@ -30,33 +30,32 @@ class KitchenOrdersRepository extends BaseRepository
       _validateBranchId(branchId);
 
       final queryParams = <String, dynamic>{'branchId': branchId};
-
-      if (startDate != null && startDate.isNotEmpty) {
+      if (startDate != null && startDate.isNotEmpty)
         queryParams['startDate'] = startDate;
-      }
-      if (endDate != null && endDate.isNotEmpty) {
+      if (endDate != null && endDate.isNotEmpty)
         queryParams['endDate'] = endDate;
-      }
-      if (status != null && status.isNotEmpty) {
-        queryParams['status'] = status;
-      }
+      if (status != null && status.isNotEmpty) queryParams['status'] = status;
 
-      final listResponse = await handleListResponse<KitchenOrder>(
-        _apiClient
-            .get('kitchen/orders', queryParameters: queryParams)
-            .timeout(
-              const Duration(seconds: 30),
-              onTimeout: () {
-                throw TimeoutException('Request timed out. Please try again.');
-              },
-            )
-            .then((response) => ApiResponse.success(response.data)),
-        (json) => KitchenOrder.fromJson(json),
+      final response = await _apiClient
+          .get('kitchen/orders', queryParameters: queryParams)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () =>
+                throw TimeoutException('Request timed out. Please try again.'),
+          );
+
+      return response.when(
+        success: (data) {
+          if (data == null)
+            return ApiResponse.errorMessage('No orders data received.');
+          final list = (data as List<dynamic>)
+              .map((e) => KitchenOrder.fromJson(e as Map<String, dynamic>))
+              .toList();
+          return ApiResponse.success(list);
+        },
+        error: (error) => ApiResponse.errorMessage(error.toString()),
       );
-
-      return listResponse;
     } on FormatException catch (e) {
-      // Validation errors thrown by _validateBranchId or JSON parsing.
       return ApiResponse.errorMessage(
         e.message.isNotEmpty ? e.message : 'Invalid data format received.',
       );
@@ -79,31 +78,30 @@ class KitchenOrdersRepository extends BaseRepository
     }
   }
 
-  String _parseErrorMessage(String error) {
+  String _parseErrorMessage(String error, {int? statusCode}) {
+    const fallback = 'Failed to load orders. Please try again later.';
+    final code = statusCode ?? 0;
     final lower = error.toLowerCase();
 
-    if (lower.contains('401') || lower.contains('unauthorized')) {
+    if (code == 401 || lower.contains('unauthorized')) {
       return 'Unauthorized access. Please login again.';
     }
-    if (lower.contains('403') || lower.contains('forbidden')) {
+    if (code == 403 || lower.contains('forbidden')) {
+      if (lower.contains('missing permission'))
+        return 'Permission denied: $error';
       return 'Access denied. Please contact support.';
     }
-    if (lower.contains('404') || lower.contains('not found')) {
+    if (code == 404 || lower.contains('not found'))
       return 'No orders found for this branch.';
-    }
-    if (lower.contains('500') || lower.contains('internal server')) {
+    if (code >= 500 || lower.contains('internal server'))
       return 'Server error. Please try again later.';
-    }
     if (lower.contains('503') || lower.contains('service unavailable')) {
       return 'Service temporarily unavailable. Please try again later.';
     }
-    if (lower.contains('network') || lower.contains('connection')) {
+    if (lower.contains('network') || lower.contains('connection'))
       return 'Network error. Please check your connection.';
-    }
-    if (lower.contains('timeout')) {
-      return 'Request timeout. Please try again.';
-    }
+    if (lower.contains('timeout')) return 'Request timeout. Please try again.';
 
-    return 'Failed to load orders. Please try again later.';
+    return fallback;
   }
 }

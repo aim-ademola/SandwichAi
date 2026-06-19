@@ -13,7 +13,6 @@ import 'package:sandwich_ai/src/features/stock_control/data/model/branch_stock_m
 import 'package:sandwich_ai/src/features/stock_control/presentation/branch_stock_details.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/precuremnt_req.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/shimmer_card.dart';
-import 'package:shimmer/shimmer.dart';
 
 class InventoryBody extends StatefulWidget {
   final bool isTableView;

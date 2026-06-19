@@ -3,7 +3,6 @@ import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/staffmember_model.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/pos_staff_screen.dart';
 
 enum Priority { normal, high, urgent }
 

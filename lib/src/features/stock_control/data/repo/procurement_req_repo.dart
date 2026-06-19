@@ -46,11 +46,11 @@ class ProcurementRequestRepository extends BaseRepository
       return ApiResponse.success(
         ProcurementRequestResponse.fromJson(responseData),
       );
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );

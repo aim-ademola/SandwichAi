@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/bloc/state.dart';
-import 'package:sandwich_ai/src/features/auth/login_bloc/login_state.dart';
 
 void showErrorSnackBar(
   String message, {

@@ -11,7 +11,6 @@ import 'package:sandwich_ai/src/features/processing/data/model/processing_dash_m
 import 'package:sandwich_ai/src/features/processing/presentation/processing_drawer.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/recent_ver_dtls.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/shimmer_card.dart';
-import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_drawer.dart';
 
 class ProcessingDashboardScreen extends StatefulWidget {
   const ProcessingDashboardScreen({super.key});

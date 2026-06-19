@@ -83,11 +83,11 @@ class CustomerRepository extends BaseRepository
       return ApiResponse.success(customersResponse);
     } on DioException catch (e) {
       return ApiResponse.errorMessage(_handleDioError(e));
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
@@ -121,11 +121,11 @@ class CustomerRepository extends BaseRepository
       return ApiResponse.success(customer);
     } on DioException catch (e) {
       return ApiResponse.errorMessage(_handleDioError(e));
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
@@ -202,11 +202,11 @@ class CustomerRepository extends BaseRepository
     } on DioException catch (e) {
       AppLogger.log('DioException in createCustomer: ${e.response?.data}');
       return ApiResponse.errorMessage(_handleDioError(e));
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
@@ -285,11 +285,11 @@ class CustomerRepository extends BaseRepository
       return ApiResponse.success(customer);
     } on DioException catch (e) {
       return ApiResponse.errorMessage(_handleDioError(e));
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );
@@ -317,11 +317,11 @@ class CustomerRepository extends BaseRepository
       return ApiResponse.success(true);
     } on DioException catch (e) {
       return ApiResponse.errorMessage(_handleDioError(e));
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );

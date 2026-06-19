@@ -7,7 +7,6 @@ import 'package:sandwich_ai/src/core/network/api_engine_private/network_exceptio
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sandwich_ai/src/features/stock_control/data/repo/inventory_items_repo.dart';
 
 abstract class InventoryItemsRepositoryInterface {
   Future<ApiResponse<List<InventoryItem>>> getInventoryItems({

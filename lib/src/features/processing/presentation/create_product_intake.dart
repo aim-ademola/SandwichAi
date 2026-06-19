@@ -10,7 +10,6 @@ import 'package:sandwich_ai/src/features/processing/bloc/product_intake_bloc/eve
 import 'package:sandwich_ai/src/features/processing/bloc/product_intake_bloc/state.dart';
 import 'package:sandwich_ai/src/features/processing/data/model/product_intake_model.dart'
     hide InventoryItem;
-import 'package:sandwich_ai/src/features/processing/data/repo/employee_repo.dart';
 
 import 'package:sandwich_ai/src/features/stock_control/data/repo/inventory_items_repo.dart';
 
@@ -1214,7 +1213,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
           context.read<EmployeeBloc>().add(
             LoadEmployeesByDepartment(
               branchId: branchId,
-              department: 'PROCUREMENT',
+              department: 'PROCESSING',
               status: 'ACTIVE',
             ),
           );

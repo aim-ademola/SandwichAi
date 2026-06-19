@@ -70,7 +70,6 @@ class KitchenDashboardRepository extends BaseRepository
       );
     } on DioException catch (e) {
       AppLogger.log('DEBUG REPO: DioException - ${e.message}');
-      AppLogger.log('DEBUG REPO: Response data - ${e.response?.data}');
 
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
@@ -85,10 +84,8 @@ class KitchenDashboardRepository extends BaseRepository
         );
       }
 
-      final errorMessage =
-          e.response?.data?['message']?.toString() ??
-          e.message ??
-          'Failed to fetch dashboard data';
+      // ✅ Extract message from response body FIRST, before falling back to e.message
+      final errorMessage = _extractDioErrorMessage(e);
       return ApiResponse.errorMessage(errorMessage);
     } on SocketException catch (e) {
       AppLogger.log('DEBUG REPO: SocketException - $e');
@@ -246,38 +243,61 @@ class KitchenDashboardRepository extends BaseRepository
     }
   }
 
-  String _parseErrorMessage(String error) {
-    final lowercaseError = error.toLowerCase();
+  String _extractDioErrorMessage(
+    DioException e, [
+    String fallback = 'An error occurred. Please try again later.',
+  ]) {
+    final data = e.response?.data;
+    final statusCode = e.response?.statusCode;
 
-    if (lowercaseError.contains('401') ||
-        lowercaseError.contains('unauthorized')) {
+    String? rawMessage;
+
+    if (data is Map) {
+      rawMessage = data['message']?.toString() ?? data['error']?.toString();
+    } else if (data is String && data.isNotEmpty) {
+      rawMessage = data;
+    }
+
+    rawMessage ??= e.message;
+
+    if (rawMessage == null) return fallback;
+
+    return _parseErrorMessage(rawMessage, statusCode: statusCode);
+  }
+
+  String _parseErrorMessage(String error, {int? statusCode}) {
+    const fallback =
+        'An error occurred. Please try again later.'; // ✅ define it here
+    final code = statusCode ?? 0;
+    final lower = error.toLowerCase();
+
+    if (code == 401 || lower.contains('unauthorized')) {
       return 'Unauthorized access. Please login again.';
     }
 
-    if (lowercaseError.contains('403') ||
-        lowercaseError.contains('forbidden')) {
+    if (code == 403 || lower.contains('forbidden')) {
+      if (lower.contains('missing permission')) {
+        return 'Permission denied: $error';
+      }
       return 'Access denied. Please contact support.';
     }
 
-    if (lowercaseError.contains('404') ||
-        lowercaseError.contains('not found')) {
+    if (code == 404 || lower.contains('not found')) {
       return 'Order not found.';
     }
 
-    if (lowercaseError.contains('500') ||
-        lowercaseError.contains('internal server')) {
+    if (code >= 500 || lower.contains('internal server')) {
       return 'Server error. Please try again later.';
     }
 
-    if (lowercaseError.contains('network') ||
-        lowercaseError.contains('connection')) {
+    if (lower.contains('network') || lower.contains('connection')) {
       return 'Network error. Please check your connection.';
     }
 
-    if (lowercaseError.contains('timeout')) {
+    if (lower.contains('timeout')) {
       return 'Request timeout. Please try again.';
     }
 
-    return 'An error occurred. Please try again later.';
+    return fallback;
   }
 }

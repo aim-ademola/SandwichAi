@@ -15,20 +15,16 @@ import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/reset_pwd.
 
 import 'package:sandwich_ai/src/features/auth/login/presentation/employee_login.dart';
 import 'package:sandwich_ai/src/features/auth/login_bloc/login_bloc.dart';
-import 'package:sandwich_ai/src/features/kitchen/data/model/kitchen_shift_model.dart';
 import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_order_details.dart';
 import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_shift_tab.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
-import 'package:sandwich_ai/src/features/pos/data/model/menu_items.dart'
-    show MenuItem;
 import 'package:sandwich_ai/src/features/pos/presentation/compaints.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/customer_base.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/customer_details.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/my_task.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/order_screen.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/order_summary.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/payment_method.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_dashboard.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_requisition.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_staff_screen.dart';
@@ -37,14 +33,12 @@ import 'package:sandwich_ai/src/features/processing/presentation/output_ver_tabs
 import 'package:sandwich_ai/src/features/processing/presentation/processing_vaidate_stock_trf.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/order_list.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/processing_requsition.dart';
-import 'package:sandwich_ai/src/features/processing/presentation/recipe_compliance.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/recipe_compliance_tabs.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/order_form.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_dash.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_request.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procuremnt_purchase_req.dart';
 import 'package:sandwich_ai/src/features/splash/splash.dart';
-import 'package:sandwich_ai/src/features/stock_control/presentation/stock_requisition.dart';
 
 class AppRouter {
   static final GoRouter _router = GoRouter(

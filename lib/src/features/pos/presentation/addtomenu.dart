@@ -6,7 +6,6 @@ import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/event.dart';
-import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/bloc.dart';
 
 class AddMenuItemDialog extends StatefulWidget {

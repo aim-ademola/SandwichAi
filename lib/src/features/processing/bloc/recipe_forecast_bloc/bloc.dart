@@ -3,7 +3,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/recipe_forecast_bloc/event.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/recipe_forecast_bloc/state.dart';
-import 'package:sandwich_ai/src/features/processing/data/model/recipe_forecast_model.dart';
 import 'package:sandwich_ai/src/features/processing/data/repo/recipe_forecast_repo.dart';
 
 class RecipeForecastBloc

@@ -40,11 +40,11 @@ class MenuItemsRepository extends BaseRepository
       );
 
       return listResponse;
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
       );
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',
       );

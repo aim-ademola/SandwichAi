@@ -85,15 +85,17 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
             },
           );
 
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to fetch chat rooms');
-      }
-
-      final List<dynamic> data = response.data as List<dynamic>;
-      return ApiResponse.success(
-        data
-            .map((e) => ChatRoomModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
+      // ✅ Use .when() like KitchenDashboardRepository does
+      return response.when(
+        success: (data) {
+          if (data == null)
+            return ApiResponse.errorMessage('Failed to fetch chat rooms');
+          final list = (data as List<dynamic>)
+              .map((e) => ChatRoomModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+          return ApiResponse.success(list);
+        },
+        error: (error) => ApiResponse.errorMessage(error.toString()),
       );
     } on SocketException {
       return ApiResponse.errorMessage(
@@ -124,12 +126,193 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
             },
           );
 
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to fetch chat room');
-      }
+      return response.when(
+        success: (data) {
+          if (data == null)
+            return ApiResponse.errorMessage('Failed to fetch chat room');
+          return ApiResponse.success(
+            ChatRoomModel.fromJson(data as Map<String, dynamic>),
+          );
+        },
+        error: (error) => ApiResponse.errorMessage(error.toString()),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } on DioException catch (e) {
+      return ApiResponse.errorMessage(_parseDioError(e));
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseError(e.toString()));
+    }
+  }
 
-      return ApiResponse.success(
-        ChatRoomModel.fromJson(response.data as Map<String, dynamic>),
+  @override
+  Future<ApiResponse<List<UnreadCountModel>>> getUnreadCounts() async {
+    try {
+      final response = await _apiClient
+          .get('chat/unread')
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      return response.when(
+        success: (data) {
+          if (data == null)
+            return ApiResponse.errorMessage('Failed to fetch unread counts');
+          final list = (data as List<dynamic>)
+              .map((e) => UnreadCountModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+          return ApiResponse.success(list);
+        },
+        error: (error) => ApiResponse.errorMessage(error.toString()),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } on DioException catch (e) {
+      return ApiResponse.errorMessage(_parseDioError(e));
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseError(e.toString()));
+    }
+  }
+
+  @override
+  Future<ApiResponse<List<ChatMessageModel>>> searchMessages({
+    required String query,
+    String? chatRoomId,
+    String? senderId,
+    int limit = 20,
+  }) async {
+    try {
+      final response = await _apiClient
+          .get(
+            'chat/messages/search',
+            queryParameters: {
+              'query': query,
+              if (chatRoomId != null) 'chatRoomId': chatRoomId,
+              if (senderId != null) 'senderId': senderId,
+              'limit': limit,
+            },
+          )
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      return response.when(
+        success: (data) {
+          if (data == null) return ApiResponse.errorMessage('No results found');
+          final list = (data as List<dynamic>)
+              .map((e) => ChatMessageModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+          return ApiResponse.success(list);
+        },
+        error: (error) => ApiResponse.errorMessage(error.toString()),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } on DioException catch (e) {
+      return ApiResponse.errorMessage(_parseDioError(e));
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseError(e.toString()));
+    }
+  }
+
+  @override
+  Future<ApiResponse<List<ChatMessageModel>>> getMessages({
+    required String chatRoomId,
+    int limit = 50,
+    String? cursor,
+    String? parentMessageId,
+  }) async {
+    try {
+      final response = await _apiClient
+          .get(
+            'chat/messages',
+            queryParameters: {
+              'chatRoomId': chatRoomId,
+              'limit': limit,
+              if (cursor != null) 'cursor': cursor,
+              if (parentMessageId != null) 'parentMessageId': parentMessageId,
+            },
+          )
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      return response.when(
+        success: (data) {
+          if (data == null)
+            return ApiResponse.errorMessage('Failed to load messages');
+          final list = (data as List<dynamic>)
+              .map((e) => ChatMessageModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+          return ApiResponse.success(list);
+        },
+        error: (error) => ApiResponse.errorMessage(error.toString()),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } on DioException catch (e) {
+      return ApiResponse.errorMessage(_parseDioError(e));
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseError(e.toString()));
+    }
+  }
+
+  @override
+  Future<ApiResponse<ChatMessageModel>> sendMessage({
+    required SendMessageRequest request,
+  }) async {
+    try {
+      final response = await _apiClient
+          .post('chat/messages', data: request.toJson())
+          .timeout(
+            const Duration(seconds: 20),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      return response.when(
+        success: (data) {
+          if (data == null)
+            return ApiResponse.errorMessage('Failed to send message');
+          return ApiResponse.success(
+            ChatMessageModel.fromJson(data as Map<String, dynamic>),
+          );
+        },
+        error: (error) => ApiResponse.errorMessage(error.toString()),
       );
     } on SocketException {
       return ApiResponse.errorMessage(
@@ -162,43 +345,6 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
           );
 
       return ApiResponse.success(null);
-    } on SocketException {
-      return ApiResponse.errorMessage(
-        'No internet connection. Please check your network settings.',
-      );
-    } on TimeoutException {
-      return ApiResponse.errorMessage(
-        'Connection timeout. Please check your internet and try again.',
-      );
-    } on DioException catch (e) {
-      return ApiResponse.errorMessage(_parseDioError(e));
-    } catch (e) {
-      return ApiResponse.errorMessage(_parseError(e.toString()));
-    }
-  }
-
-  @override
-  Future<ApiResponse<List<UnreadCountModel>>> getUnreadCounts() async {
-    try {
-      final response = await _apiClient
-          .get('chat/unread')
-          .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              throw TimeoutException('Request timed out. Please try again.');
-            },
-          );
-
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to fetch unread counts');
-      }
-
-      final List<dynamic> data = response.data as List<dynamic>;
-      return ApiResponse.success(
-        data
-            .map((e) => UnreadCountModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
     } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
@@ -266,189 +412,81 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
     }
   }
 
-  @override
-  Future<ApiResponse<List<ChatMessageModel>>> searchMessages({
-    required String query,
-    String? chatRoomId,
-    String? senderId,
-    int limit = 20,
-  }) async {
-    try {
-      final response = await _apiClient
-          .get(
-            'chat/messages/search',
-            queryParameters: {
-              'query': query,
-              if (chatRoomId != null) 'chatRoomId': chatRoomId,
-              if (senderId != null) 'senderId': senderId,
-              'limit': limit,
-            },
-          )
-          .timeout(
-            const Duration(seconds: 15),
-            onTimeout: () {
-              throw TimeoutException('Request timed out. Please try again.');
-            },
-          );
-
-      if (response.data == null) {
-        return ApiResponse.errorMessage('No results found');
-      }
-
-      final List<dynamic> data = response.data as List<dynamic>;
-      return ApiResponse.success(
-        data
-            .map((e) => ChatMessageModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
-    } on SocketException {
-      return ApiResponse.errorMessage(
-        'No internet connection. Please check your network settings.',
-      );
-    } on TimeoutException {
-      return ApiResponse.errorMessage(
-        'Connection timeout. Please check your internet and try again.',
-      );
-    } on DioException catch (e) {
-      return ApiResponse.errorMessage(_parseDioError(e));
-    } catch (e) {
-      return ApiResponse.errorMessage(_parseError(e.toString()));
-    }
-  }
-
-  @override
-  Future<ApiResponse<List<ChatMessageModel>>> getMessages({
-    required String chatRoomId,
-    int limit = 50,
-    String? cursor,
-    String? parentMessageId,
-  }) async {
-    try {
-      final response = await _apiClient
-          .get(
-            'chat/messages',
-            queryParameters: {
-              'chatRoomId': chatRoomId,
-              'limit': limit,
-              if (cursor != null) 'cursor': cursor,
-              if (parentMessageId != null) 'parentMessageId': parentMessageId,
-            },
-          )
-          .timeout(
-            const Duration(seconds: 15),
-            onTimeout: () {
-              throw TimeoutException('Request timed out. Please try again.');
-            },
-          );
-
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to load messages');
-      }
-
-      final List<dynamic> data = response.data as List<dynamic>;
-      return ApiResponse.success(
-        data
-            .map((e) => ChatMessageModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
-    } on SocketException {
-      return ApiResponse.errorMessage(
-        'No internet connection. Please check your network settings.',
-      );
-    } on TimeoutException {
-      return ApiResponse.errorMessage(
-        'Connection timeout. Please check your internet and try again.',
-      );
-    } on DioException catch (e) {
-      return ApiResponse.errorMessage(_parseDioError(e));
-    } catch (e) {
-      return ApiResponse.errorMessage(_parseError(e.toString()));
-    }
-  }
-
-  @override
-  Future<ApiResponse<ChatMessageModel>> sendMessage({
-    required SendMessageRequest request,
-  }) async {
-    try {
-      final response = await _apiClient
-          .post('chat/messages', data: request.toJson())
-          .timeout(
-            const Duration(seconds: 20),
-            onTimeout: () {
-              throw TimeoutException('Request timed out. Please try again.');
-            },
-          );
-
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to send message');
-      }
-
-      return ApiResponse.success(
-        ChatMessageModel.fromJson(response.data as Map<String, dynamic>),
-      );
-    } on SocketException {
-      return ApiResponse.errorMessage(
-        'No internet connection. Please check your network settings.',
-      );
-    } on TimeoutException {
-      return ApiResponse.errorMessage(
-        'Connection timeout. Please check your internet and try again.',
-      );
-    } on DioException catch (e) {
-      return ApiResponse.errorMessage(_parseDioError(e));
-    } catch (e) {
-      return ApiResponse.errorMessage(_parseError(e.toString()));
-    }
-  }
-
   // ─── Error helpers ──────────────────────────────────────────────────────────
 
   String _parseDioError(DioException e) {
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return 'Connection timeout. Please check your internet and try again.';
+    }
+
+    if (e.type == DioExceptionType.connectionError) {
+      return 'No internet connection. Please check your network settings.';
+    }
+
     final statusCode = e.response?.statusCode;
     final data = e.response?.data;
 
-    if (data != null && data is Map) {
+    //  Extract raw message from body first
+    String? rawMessage;
+    if (data is Map) {
       final message = data['message'];
-      if (message is String && message.isNotEmpty) return message;
-      if (message is List && message.isNotEmpty) {
-        return message.map((m) => m.toString()).join(', ');
+      if (message is String && message.isNotEmpty) {
+        rawMessage = message;
+      } else if (message is List && message.isNotEmpty) {
+        rawMessage = message.map((m) => m.toString()).join(', ');
       }
+      // fallback to 'error' field if 'message' is absent
+      rawMessage ??= data['error']?.toString();
+    } else if (data is String && data.isNotEmpty) {
+      rawMessage = data;
     }
 
-    switch (statusCode) {
-      case 400:
-        return 'Invalid request. Please check your input.';
-      case 401:
-        return 'Unauthorized access. Please login again.';
-      case 403:
-        return 'Access denied. You do not have permission.';
-      case 404:
-        return 'Chat room not found.';
-      case 500:
-        return 'Server error. Please try again later.';
-      default:
-        return 'An error occurred. Please try again.';
-    }
+    rawMessage ??= e.message;
+
+    return _parseErrorMessage(rawMessage ?? '', statusCode: statusCode);
   }
 
-  String _parseError(String error) {
-    final e = error.toLowerCase();
-    if (e.contains('401') || e.contains('unauthorized')) {
+  String _parseErrorMessage(String error, {int? statusCode}) {
+    const fallback = 'An error occurred. Please try again.';
+    final code = statusCode ?? 0;
+    final lower = error.toLowerCase();
+
+    if (code == 400) return 'Invalid request. Please check your input.';
+
+    if (code == 401 || lower.contains('unauthorized')) {
       return 'Unauthorized access. Please login again.';
     }
-    if (e.contains('403') || e.contains('forbidden')) {
+
+    if (code == 403 || lower.contains('forbidden')) {
+      //  Surfaces exact permission e.g. "Missing permission: chat:read"
+      if (lower.contains('missing permission')) {
+        return 'Permission denied: $error';
+      }
       return 'Access denied. You do not have permission.';
     }
-    if (e.contains('404') || e.contains('not found')) {
+
+    if (code == 404 || lower.contains('not found')) {
       return 'Resource not found.';
     }
-    if (e.contains('network') || e.contains('connection')) {
+
+    if (code >= 500 || lower.contains('internal server')) {
+      return 'Server error. Please try again later.';
+    }
+
+    if (lower.contains('network') || lower.contains('connection')) {
       return 'Network error. Please check your connection.';
     }
-    if (e.contains('timeout')) {
+
+    if (lower.contains('timeout')) {
       return 'Request timeout. Please try again.';
     }
-    return 'An error occurred. Please try again.';
+
+    // If we got a raw message from the server but no status matched, surface it
+    if (error.isNotEmpty) return error;
+
+    return fallback;
   }
+
+  String _parseError(String error) => _parseErrorMessage(error);
 }

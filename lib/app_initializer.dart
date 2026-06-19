@@ -20,17 +20,17 @@ class _AppInitializerState extends State<AppInitializer> {
   void initState() {
     super.initState();
 
-    ConnectivityService.instance.listen((online) {
-      if (online) {
-        OfflineQueueManager.instance.retry(
-          onStart: () => showSyncStartSnackBar(context, "Syncing..."),
-          onSuccess: () =>
-              showSyncSuccessSnackBar(context, "Synced successfully"),
-          onFailure: () =>
-              showSyncFailureSnackBar(context, "Some failed items"),
-        );
-      }
-    });
+    // ConnectivityService.instance.listen((online) {
+    //   if (online) {
+    //     OfflineQueueManager.instance.retry(
+    //       onStart: () => showSyncStartSnackBar(context, "Syncing..."),
+    //       onSuccess: () =>
+    //           showSyncSuccessSnackBar(context, "Synced successfully"),
+    //       onFailure: () =>
+    //           showSyncFailureSnackBar(context, "Some failed items"),
+    //     );
+    //   }
+    // });
   }
 
   @override

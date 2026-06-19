@@ -59,9 +59,9 @@ class BranchStockSummaryRepository extends BaseRepository
         },
         error: (error) => ApiResponse.error(error),
       );
-    } on SocketException catch (e) {
+    } on SocketException {
       return ApiResponse.error(NetworkException.noInternetConnection());
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       return ApiResponse.error(NetworkException.requestTimeout());
     } on FormatException catch (e) {
       return ApiResponse.error(

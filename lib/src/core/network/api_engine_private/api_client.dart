@@ -7,7 +7,6 @@ import 'package:sandwich_ai/src/core/network/api_engine_private/api_interceptors
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/api_constants.dart';
-import 'package:sandwich_ai/src/core/network/api_engine_public/error_handler.dart';
 
 class ApiClient {
   static ApiClient? _instance;

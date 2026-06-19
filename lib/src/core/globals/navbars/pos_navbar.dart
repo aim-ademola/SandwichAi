@@ -4,14 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
-import 'package:sandwich_ai/src/core/globals/chat/chat_screen_loader.dart';
-import 'package:sandwich_ai/src/features/pos/data/model/chat_models.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/active_orders.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/order_screen.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_dashboard.dart';
-import 'package:sandwich_ai/src/core/globals/chat/chat.dart';
-
-import '../chat/data/model/cht_model.dart';
 
 class PosBottomNavBar extends StatefulWidget {
   final int initialIndex;

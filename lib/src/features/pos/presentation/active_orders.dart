@@ -359,7 +359,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize - 1,
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1.withOpacity(0.7),
+                color: kprimaryTextColor1.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 4),
@@ -368,7 +368,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize - 2,
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1.withOpacity(0.6),
+                color: kprimaryTextColor1.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -404,7 +404,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               'All orders have been completed or there are no pending orders.',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize - 1,
-                color: kprimaryTextColor1.withOpacity(0.6),
+                color: kprimaryTextColor1.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -463,7 +463,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               state.error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize - 1,
-                color: kprimaryTextColor1.withOpacity(0.6),
+                color: kprimaryTextColor1.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),

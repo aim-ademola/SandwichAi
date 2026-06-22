@@ -501,7 +501,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                     ),
                     hintStyle: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2.withOpacity(0.6),
+                      color: kprimaryTextColor2.withValues(alpha: 0.6),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),

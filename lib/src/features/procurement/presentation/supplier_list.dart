@@ -334,7 +334,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                                 decoration: BoxDecoration(
                                   color: const Color(
                                     0xFF4CAF50,
-                                  ).withOpacity(0.1),
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: const Icon(
@@ -410,10 +410,10 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: statusColor.withOpacity(0.3),
+                        color: statusColor.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -443,7 +443,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

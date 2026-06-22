@@ -348,7 +348,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
               border: Border.all(
                 color: _selectedMenuItem == null && !_isSearching
                     ? const Color(0xFFE0E0E0)
-                    : kPrimary.withOpacity(0.3),
+                    : kPrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -408,7 +408,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
         border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -555,8 +555,8 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                                 height:
                                                     _getIconSize(screenWidth) +
                                                     24,
-                                                color: kPrimary.withOpacity(
-                                                  0.1,
+                                                color: kPrimary.withValues(
+                                                  alpha: 0.1,
                                                 ),
                                                 child: Icon(
                                                   Icons.restaurant_menu,
@@ -572,7 +572,9 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                         width: _getIconSize(screenWidth) + 24,
                                         height: _getIconSize(screenWidth) + 24,
                                         decoration: BoxDecoration(
-                                          color: kPrimary.withOpacity(0.1),
+                                          color: kPrimary.withValues(
+                                            alpha: 0.1,
+                                          ),
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
@@ -621,7 +623,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: kPrimary.withOpacity(0.1),
+                                    color: kPrimary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -829,7 +831,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
             onPressed: isLoading ? null : _submitForm,
             style: ElevatedButton.styleFrom(
               backgroundColor: kPrimary,
-              disabledBackgroundColor: kPrimary.withOpacity(0.6),
+              disabledBackgroundColor: kPrimary.withValues(alpha: 0.6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(
                   _getBorderRadius(screenWidth),

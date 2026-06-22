@@ -201,7 +201,7 @@ class _KitchenShiftManagementScreenState
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -330,7 +330,7 @@ class _KitchenShiftManagementScreenState
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -540,7 +540,7 @@ class _KitchenShiftManagementScreenState
             Icon(
               Icons.calendar_today_outlined,
               size: 80,
-              color: kprimaryTextColor2.withOpacity(0.5),
+              color: kprimaryTextColor2.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -579,7 +579,7 @@ class _KitchenShiftManagementScreenState
             Icon(
               Icons.error_outline,
               size: 80,
-              color: const Color(0xFFE53935).withOpacity(0.5),
+              color: const Color(0xFFE53935).withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

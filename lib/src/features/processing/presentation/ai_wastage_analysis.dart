@@ -11,6 +11,7 @@ import 'package:sandwich_ai/src/features/processing/data/model/wastage_analysis_
 import 'package:sandwich_ai/src/features/processing/presentation/processing_drawer.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/shimmer_card.dart';
 
+// ignore: must_be_immutable
 class WastageAnalysisScreen extends StatefulWidget {
   bool isFromStock;
   WastageAnalysisScreen({super.key, required this.isFromStock});
@@ -144,7 +145,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: kPrimary.withOpacity(0.1),
+              color: kPrimary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -358,12 +359,12 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [color, color.withOpacity(0.7)],
+          colors: [color, color.withValues(alpha: 0.7)],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -378,7 +379,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
           const SizedBox(height: 4),
@@ -407,7 +408,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: kPrimary.withOpacity(0.3),
+            color: kPrimary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -421,7 +422,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -447,7 +448,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                       'Total value lost to wastage',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -459,7 +460,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -477,7 +478,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                   'Total Loss',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -490,7 +491,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -514,7 +515,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                         'Avg Daily Loss',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 11,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -527,7 +528,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -551,7 +552,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                         'Peak Items',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 11,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -566,7 +567,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -577,7 +578,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -592,7 +593,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
@@ -706,9 +707,9 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withOpacity(0.3)),
+                border: Border.all(color: color.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -879,9 +880,11 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               return Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: riskLevel.color.withOpacity(0.05),
+                  color: riskLevel.color.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: riskLevel.color.withOpacity(0.2)),
+                  border: Border.all(
+                    color: riskLevel.color.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -892,7 +895,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: riskLevel.color.withOpacity(0.2),
+                            color: riskLevel.color.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
@@ -928,7 +931,9 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: riskLevel.color.withOpacity(0.2),
+                                      color: riskLevel.color.withValues(
+                                        alpha: 0.2,
+                                      ),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -1201,12 +1206,14 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.orange.shade700.withOpacity(0.1),
-            Colors.orange.shade700.withOpacity(0.05),
+            Colors.orange.shade700.withValues(alpha: 0.1),
+            Colors.orange.shade700.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.shade700.withOpacity(0.3)),
+        border: Border.all(
+          color: Colors.orange.shade700.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -191,7 +191,7 @@ class _TableManagementScreenState extends State<TableManagementScreen>
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -219,7 +219,10 @@ class _TableManagementScreenState extends State<TableManagementScreen>
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.7),
+                    ],
                     stops: const [0.5, 1.0],
                   ),
                 ),
@@ -273,11 +276,11 @@ class _TableManagementScreenState extends State<TableManagementScreen>
   Color _getStatusColor(TableStatus status) {
     switch (status) {
       case TableStatus.available:
-        return const Color(0xFF30A46C).withOpacity(0.73);
+        return const Color(0xFF30A46C).withValues(alpha: 0.73);
       case TableStatus.occupied:
-        return const Color(0xFFFFE770).withOpacity(0.73);
+        return const Color(0xFFFFE770).withValues(alpha: 0.73);
       case TableStatus.needsCleaning:
-        return const Color(0xFFC2E5FF).withOpacity(0.73);
+        return const Color(0xFFC2E5FF).withValues(alpha: 0.73);
     }
   }
 

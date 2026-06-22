@@ -233,9 +233,6 @@ class PrinterService {
 
       await device.disconnect();
       return true;
-
-      AppLogger.log('Bluetooth printing not yet implemented');
-      return false;
     } catch (e) {
       AppLogger.log('Error in _printToBluetoothPrinter: $e');
       return false;
@@ -354,9 +351,6 @@ class PrinterService {
       await targetPort.close();
 
       return true;
-
-      AppLogger.log('USB printing not yet implemented');
-      return false;
     } catch (e) {
       AppLogger.log('Error in _printToUSBPrinter: $e');
       return false;

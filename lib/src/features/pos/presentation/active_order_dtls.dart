@@ -86,7 +86,7 @@ class OrderDetailScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -149,7 +149,7 @@ class OrderDetailScreen extends StatelessWidget {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: textSize - 1,
                         fontWeight: FontWeight.w500,
-                        color: kprimaryTextColor1.withOpacity(0.6),
+                        color: kprimaryTextColor1.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -182,7 +182,7 @@ class OrderDetailScreen extends StatelessWidget {
                 Icon(
                   Icons.table_restaurant,
                   size: 18,
-                  color: kprimaryTextColor1.withOpacity(0.6),
+                  color: kprimaryTextColor1.withValues(alpha: 0.6),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -209,7 +209,7 @@ class OrderDetailScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -253,7 +253,7 @@ class OrderDetailScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -319,7 +319,7 @@ class OrderDetailScreen extends StatelessWidget {
                 item.menuItem.category,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: textSize - 2,
-                  color: kprimaryTextColor1.withOpacity(0.6),
+                  color: kprimaryTextColor1.withValues(alpha: 0.6),
                 ),
               ),
               if (item.specialRequest != null) ...[
@@ -381,7 +381,7 @@ class OrderDetailScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -420,7 +420,7 @@ class OrderDetailScreen extends StatelessWidget {
                   'Payment Method',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: textSize,
-                    color: kprimaryTextColor1.withOpacity(0.7),
+                    color: kprimaryTextColor1.withValues(alpha: 0.7),
                   ),
                 ),
                 Container(
@@ -457,7 +457,7 @@ class OrderDetailScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -549,7 +549,7 @@ class OrderDetailScreen extends StatelessWidget {
                   _formatDate(time), // already handles String and DateTime
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: textSize - 2,
-                    color: kprimaryTextColor1.withOpacity(0.6),
+                    color: kprimaryTextColor1.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -652,7 +652,7 @@ class OrderDetailScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -697,7 +697,7 @@ class OrderDetailScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: kprimaryTextColor1.withOpacity(0.6)),
+        Icon(icon, size: 20, color: kprimaryTextColor1.withValues(alpha: 0.6)),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -707,7 +707,7 @@ class OrderDetailScreen extends StatelessWidget {
                 label,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: textSize - 2,
-                  color: kprimaryTextColor1.withOpacity(0.6),
+                  color: kprimaryTextColor1.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 2),
@@ -791,19 +791,6 @@ class OrderDetailScreen extends StatelessWidget {
       return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
     } catch (_) {
       return dt.toString();
-    }
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays == 0) {
-      return 'Today at ${DateFormat('HH:mm').format(dateTime)}';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday at ${DateFormat('HH:mm').format(dateTime)}';
-    } else {
-      return DateFormat('MMM dd, yyyy at HH:mm').format(dateTime);
     }
   }
 

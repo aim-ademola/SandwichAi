@@ -221,7 +221,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: kPrimary.withOpacity(0.1),
+                  color: kPrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(Icons.search, color: kPrimary, size: 22),
@@ -439,7 +439,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: connectionColor.withOpacity(0.1),
+                color: connectionColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(connectionIcon, color: connectionColor, size: 22),
@@ -466,7 +466,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: connectionColor.withOpacity(0.1),
+                          color: connectionColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -533,7 +533,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: kPrimary.withOpacity(0.1),
+                  color: kPrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -616,7 +616,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
+                color: statusColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(connectionIcon, color: statusColor, size: 22),
@@ -643,7 +643,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: connectionColor.withOpacity(0.1),
+                          color: connectionColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -684,7 +684,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

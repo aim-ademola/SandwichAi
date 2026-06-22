@@ -94,7 +94,7 @@ class _DeleteMenuItemDialogState extends State<DeleteMenuItemDialog> {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -171,7 +171,9 @@ class _DeleteMenuItemDialogState extends State<DeleteMenuItemDialog> {
                         onPressed: _isDeleting ? null : _handleDelete,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
-                          disabledBackgroundColor: Colors.red.withOpacity(0.5),
+                          disabledBackgroundColor: Colors.red.withValues(
+                            alpha: 0.5,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),

@@ -217,9 +217,11 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
+                      color: kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: kPrimary.withOpacity(0.3)),
+                      border: Border.all(
+                        color: kPrimary.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -267,7 +269,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: kPrimary.withOpacity(0.1),
+                color: kPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: kPrimary, size: 20),
@@ -640,7 +642,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: kPrimary.withOpacity(0.1),
+                                      color: kPrimary.withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -695,8 +697,8 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                                             child: Container(
                                               padding: const EdgeInsets.all(4),
                                               decoration: BoxDecoration(
-                                                color: kPrimary.withOpacity(
-                                                  0.1,
+                                                color: kPrimary.withValues(
+                                                  alpha: 0.1,
                                                 ),
                                                 shape: BoxShape.circle,
                                               ),
@@ -735,7 +737,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: kPrimary.withOpacity(0.1),
+                                      color: kPrimary.withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -1427,7 +1429,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
           backgroundColor: kPrimary,
           foregroundColor: Colors.white,
           elevation: 2,
-          shadowColor: kPrimary.withOpacity(0.4),
+          shadowColor: kPrimary.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

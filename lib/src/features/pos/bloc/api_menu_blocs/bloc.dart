@@ -91,7 +91,6 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
   void _onSearchMenuItems(SearchMenuItems event, Emitter<MenuItemsState> emit) {
     if (state is! MenuItemsLoaded) return;
 
-    final currentState = state;
     final menuItems = (state as MenuItemsLoaded).menuItems;
 
     if (event.query.isEmpty) {

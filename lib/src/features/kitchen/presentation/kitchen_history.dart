@@ -141,7 +141,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -269,7 +269,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -335,7 +335,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
     return Container(
       padding: EdgeInsets.all(_getInputPaddingHorizontal(screenWidth)),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
       ),
       child: Column(
@@ -373,7 +373,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -420,7 +420,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: _getShiftTypeColor(shift.shiftType).withOpacity(0.1),
+          color: _getShiftTypeColor(shift.shiftType).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
@@ -462,7 +462,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: shift.isActive
-              ? kGreen.withOpacity(0.1)
+              ? kGreen.withValues(alpha: 0.1)
               : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(6),
         ),
@@ -518,7 +518,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
             Icon(
               Icons.history,
               size: 80,
-              color: kprimaryTextColor2.withOpacity(0.5),
+              color: kprimaryTextColor2.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -557,7 +557,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
             Icon(
               Icons.error_outline,
               size: 80,
-              color: const Color(0xFFE53935).withOpacity(0.5),
+              color: const Color(0xFFE53935).withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

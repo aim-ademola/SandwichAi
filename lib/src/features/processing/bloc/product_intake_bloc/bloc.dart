@@ -60,7 +60,7 @@ class ProductIntakeBloc extends Bloc<ProductIntakeEvent, ProductIntakeState> {
           );
         },
         error: (error) async {
-          final errorMessage = error.message ?? 'An unexpected error occurred';
+          final errorMessage = error.message;
           final errorType = _determineErrorType(errorMessage);
 
           emit(ProductIntakeError(error: errorMessage, errorType: errorType));
@@ -106,7 +106,7 @@ class ProductIntakeBloc extends Bloc<ProductIntakeEvent, ProductIntakeState> {
         );
       },
       error: (error) async {
-        final errorMessage = error.message ?? 'An unexpected error occurred';
+        final errorMessage = error.message;
         final errorType = _determineErrorType(errorMessage);
 
         emit(ProductIntakeError(error: errorMessage, errorType: errorType));

@@ -620,7 +620,9 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                                     child: Container(
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.6),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.6,
+                                        ),
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
@@ -645,7 +647,9 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                       onPressed: _isSubmitting ? null : _handleDone,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimary,
-                        disabledBackgroundColor: kPrimary.withOpacity(0.5),
+                        disabledBackgroundColor: kPrimary.withValues(
+                          alpha: 0.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),

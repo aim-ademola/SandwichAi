@@ -73,7 +73,7 @@ class _DrawerOnboardingOverlayState extends State<DrawerOnboardingOverlay> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: kPrimary.withOpacity(0.3),
+                      color: kPrimary.withValues(alpha: 0.3),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),

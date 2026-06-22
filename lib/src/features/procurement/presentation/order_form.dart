@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
-import 'package:sandwich_ai/src/features/procurement/data/repository/purchase_order_repo.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_draft_model.dart'
+    show OrderItemRequest;
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/bloc.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/state.dart';

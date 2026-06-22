@@ -87,7 +87,7 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, -1),
           ),
@@ -156,7 +156,7 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
               _currentIndex = index;
             });
           },
-          splashColor: activeColor.withOpacity(0.1),
+          splashColor: activeColor.withValues(alpha: 0.1),
           highlightColor: Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           child: Container(

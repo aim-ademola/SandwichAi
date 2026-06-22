@@ -306,7 +306,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                   Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
+                      color: kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.help_outline, color: kPrimary, size: 24),
@@ -353,10 +353,10 @@ class _StockTransferToProcessingOrKItchenScreenState
                       Container(
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: kPrimary.withOpacity(0.05),
+                          color: kPrimary.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: kPrimary.withOpacity(0.1),
+                            color: kPrimary.withValues(alpha: 0.1),
                             width: 1,
                           ),
                         ),
@@ -680,7 +680,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: kPrimary.withOpacity(0.1),
+                        color: kPrimary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -727,7 +727,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: kPrimary.withOpacity(0.1),
+                            color: kPrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Center(
@@ -905,7 +905,7 @@ class _StockTransferToProcessingOrKItchenScreenState
               border: Border.all(
                 color: _selectedItemId == null && !_isSearching
                     ? Colors.grey.shade300
-                    : kPrimary.withOpacity(0.3),
+                    : kPrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -950,7 +950,7 @@ class _StockTransferToProcessingOrKItchenScreenState
         border: Border.all(color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1061,7 +1061,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                 width: 32,
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: kPrimary.withOpacity(0.1),
+                                  color: kPrimary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: const Icon(
@@ -1389,7 +1389,7 @@ class _StockTransferToProcessingOrKItchenScreenState
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1431,8 +1431,8 @@ class _StockTransferToProcessingOrKItchenScreenState
                 ),
                 decoration: BoxDecoration(
                   color: isPending
-                      ? Colors.orange.withOpacity(0.1)
-                      : Colors.green.withOpacity(0.1),
+                      ? Colors.orange.withValues(alpha: 0.1)
+                      : Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -1613,7 +1613,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: kPrimary.withOpacity(0.1),
+                                color: kPrimary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Center(

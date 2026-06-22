@@ -595,7 +595,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   fileName,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -1069,7 +1069,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: kPrimary.withOpacity(0.1),
+                    color: kPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(icon, color: kPrimary, size: 20),
@@ -1225,9 +1225,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

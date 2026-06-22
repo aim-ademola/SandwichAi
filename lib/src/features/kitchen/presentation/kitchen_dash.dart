@@ -250,7 +250,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           label: 'Ongoing',
           value: '${data.orderStats.ongoingOrders}',
           color: kPrimary,
-          bg: kPrimary.withOpacity(0.08),
+          bg: kPrimary.withValues(alpha: 0.08),
           icon: Icons.pending_actions_rounded,
         ),
         const SizedBox(width: 10),
@@ -291,7 +291,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color, size: 18),
@@ -314,7 +314,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   label,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 11,
-                    color: color.withOpacity(0.7),
+                    color: color.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -396,7 +396,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -422,7 +422,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                         order.getTimeAgo(),
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 10,
-                          color: Colors.white.withOpacity(0.85),
+                          color: Colors.white.withValues(alpha: 0.85),
                           fontWeight: FontWeight.w500,
                           letterSpacing: 0.4,
                         ),
@@ -490,7 +490,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: cfg.color.withOpacity(0.1),
+                              color: cfg.color.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -802,7 +802,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: kPrimary.withOpacity(0.08),
+                color: kPrimary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(

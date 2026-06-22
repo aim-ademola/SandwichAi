@@ -541,8 +541,8 @@ class StockAlertDialog extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    iconColor.withOpacity(0.1),
-                    iconColor.withOpacity(0.05),
+                    iconColor.withValues(alpha: 0.1),
+                    iconColor.withValues(alpha: 0.05),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -557,7 +557,7 @@ class StockAlertDialog extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: iconColor.withOpacity(0.15),
+                      color: iconColor.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(icon, size: 48, color: iconColor),
@@ -618,7 +618,9 @@ class StockAlertDialog extends StatelessWidget {
                           onPressed: () => Navigator.pop(context),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: BorderSide(color: iconColor.withOpacity(0.3)),
+                            side: BorderSide(
+                              color: iconColor.withValues(alpha: 0.3),
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -695,8 +697,8 @@ class DailyStockCheckDialog extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    kPrimary.withOpacity(0.1),
-                    kPrimary.withOpacity(0.05),
+                    kPrimary.withValues(alpha: 0.1),
+                    kPrimary.withValues(alpha: 0.05),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -711,7 +713,7 @@ class DailyStockCheckDialog extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.15),
+                      color: kPrimary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.schedule, size: 48, color: kPrimary),

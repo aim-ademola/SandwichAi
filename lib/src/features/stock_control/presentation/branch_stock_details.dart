@@ -423,13 +423,13 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      statusColor.withOpacity(0.1),
-                      statusColor.withOpacity(0.05),
+                      statusColor.withValues(alpha: 0.1),
+                      statusColor.withValues(alpha: 0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: statusColor.withOpacity(0.3),
+                    color: statusColor.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -469,7 +469,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: statusColor.withOpacity(0.3),
+                                color: statusColor.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -624,7 +624,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 12,
                       offset: const Offset(0, 2),
                     ),
@@ -683,7 +683,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 12,
                       offset: const Offset(0, 2),
                     ),
@@ -735,7 +735,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 12,
                       offset: const Offset(0, 2),
                     ),
@@ -804,7 +804,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: iconColor, size: 22),
@@ -855,7 +855,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
       ),
       decoration: isHighlighted
           ? BoxDecoration(
-              color: kPrimary.withOpacity(0.05),
+              color: kPrimary.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -868,7 +868,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: kPrimary.withOpacity(0.1),
+              color: kPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: kPrimary, size: 22),

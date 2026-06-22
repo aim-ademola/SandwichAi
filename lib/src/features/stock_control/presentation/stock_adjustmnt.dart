@@ -121,7 +121,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
+                      color: kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.tune_rounded, color: kPrimary, size: 24),
@@ -289,12 +289,12 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                   decoration: BoxDecoration(
                     color: _calculatedStock < 0
                         ? const Color(0xFFFFEBEE)
-                        : kPrimary.withOpacity(0.1),
+                        : kPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _calculatedStock < 0
                           ? const Color(0xFFEF4444)
-                          : kPrimary.withOpacity(0.3),
+                          : kPrimary.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -450,7 +450,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.2),
+                    color: color.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),

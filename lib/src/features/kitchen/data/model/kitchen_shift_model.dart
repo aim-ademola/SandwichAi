@@ -122,7 +122,6 @@ class Employee {
         case Department.MANAGEMENT:
           return 'MANAGEMENT';
         case Department.KITCHEN:
-        default:
           return 'KITCHEN';
       }
     }
@@ -134,7 +133,6 @@ class Employee {
         case EmployeeStatus.ON_LEAVE:
           return 'ON_LEAVE';
         case EmployeeStatus.ACTIVE:
-        default:
           return 'ACTIVE';
       }
     }

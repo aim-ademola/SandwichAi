@@ -67,7 +67,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [kPrimary, kPrimary.withOpacity(0.7)],
+              colors: [kPrimary, kPrimary.withValues(alpha: 0.7)],
             ),
           ),
           child: SafeArea(
@@ -131,7 +131,9 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                     margin: const EdgeInsets.only(left: 8),
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.2,
+                                      ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: const Icon(
@@ -151,7 +153,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                   '',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 13,
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                               ),
                             ),
                           ],
@@ -239,7 +241,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 16, color: color),
@@ -308,7 +310,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: value != null
-              ? const Color(0xFF2196F3).withOpacity(0.1)
+              ? const Color(0xFF2196F3).withValues(alpha: 0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -797,7 +799,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                               label: Text(cert ?? ''),
                               backgroundColor: const Color(
                                 0xFF4CAF50,
-                              ).withOpacity(0.1),
+                              ).withValues(alpha: 0.1),
                             ),
                           )
                           .toList(),

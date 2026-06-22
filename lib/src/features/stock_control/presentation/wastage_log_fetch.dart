@@ -179,7 +179,9 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
         decoration: BoxDecoration(
           border: Border.all(color: Color(0xFFE0E0E0)),
           borderRadius: BorderRadius.circular(8),
-          color: _startDate != null ? kPrimary.withOpacity(0.1) : Colors.white,
+          color: _startDate != null
+              ? kPrimary.withValues(alpha: 0.1)
+              : Colors.white,
         ),
         child: Icon(
           Icons.date_range,
@@ -234,7 +236,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: kPrimary.withOpacity(0.1),
+        color: kPrimary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -299,7 +301,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -313,7 +315,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
               Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -366,7 +368,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -410,7 +412,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: reasonColor.withOpacity(0.1),
+                        color: reasonColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -507,7 +509,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -566,7 +568,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
           Icon(
             Icons.delete_outline,
             size: 80,
-            color: kprimaryTextColor2.withOpacity(0.5),
+            color: kprimaryTextColor2.withValues(alpha: 0.5),
           ),
           SizedBox(height: 16),
           Text(
@@ -600,7 +602,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
             Icon(
               Icons.error_outline,
               size: 80,
-              color: Colors.red.withOpacity(0.5),
+              color: Colors.red.withValues(alpha: 0.5),
             ),
             SizedBox(height: 16),
             Text(

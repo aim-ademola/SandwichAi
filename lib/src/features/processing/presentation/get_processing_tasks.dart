@@ -631,7 +631,7 @@ class _ProcessingTaskHistoryScreenState
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        kPrimary.withOpacity(0.5),
+                                        kPrimary.withValues(alpha: 0.5),
                                       ),
                                     ),
                                   )
@@ -671,7 +671,7 @@ class _ProcessingTaskHistoryScreenState
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                         const Color(
                                           0xFFE53935,
-                                        ).withOpacity(0.5),
+                                        ).withValues(alpha: 0.5),
                                       ),
                                     ),
                                   )
@@ -705,10 +705,10 @@ class _ProcessingTaskHistoryScreenState
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: kGreen.withOpacity(0.1),
+                    color: kGreen.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: kGreen.withOpacity(0.3),
+                      color: kGreen.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -876,23 +876,23 @@ class _ProcessingTaskHistoryScreenState
 
     switch (status) {
       case 'COMPLETED':
-        backgroundColor = kGreen.withOpacity(0.1);
+        backgroundColor = kGreen.withValues(alpha: 0.1);
         textColor = kGreen;
         break;
       case 'IN_PROGRESS':
-        backgroundColor = const Color(0xFFFFA726).withOpacity(0.1);
+        backgroundColor = const Color(0xFFFFA726).withValues(alpha: 0.1);
         textColor = const Color(0xFFFFA726);
         break;
       case 'PENDING':
-        backgroundColor = kPrimary.withOpacity(0.1);
+        backgroundColor = kPrimary.withValues(alpha: 0.1);
         textColor = kPrimary;
         break;
       case 'CANCELLED':
-        backgroundColor = const Color(0xFFE53935).withOpacity(0.1);
+        backgroundColor = const Color(0xFFE53935).withValues(alpha: 0.1);
         textColor = const Color(0xFFE53935);
         break;
       default:
-        backgroundColor = Colors.grey.withOpacity(0.1);
+        backgroundColor = Colors.grey.withValues(alpha: 0.1);
         textColor = Colors.grey;
     }
 
@@ -921,7 +921,7 @@ class _ProcessingTaskHistoryScreenState
           Icon(
             Icons.inbox_outlined,
             size: 64,
-            color: kprimaryTextColor2.withOpacity(0.5),
+            color: kprimaryTextColor2.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -955,7 +955,7 @@ class _ProcessingTaskHistoryScreenState
             Icon(
               Icons.error_outline,
               size: 64,
-              color: const Color(0xFFE53935).withOpacity(0.5),
+              color: const Color(0xFFE53935).withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

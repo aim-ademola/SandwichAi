@@ -120,7 +120,7 @@ class _GoodsReceivedHistoryScreenState
             Icon(
               Icons.inventory_2_outlined,
               size: 80,
-              color: kprimaryTextColor2.withOpacity(0.3),
+              color: kprimaryTextColor2.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
@@ -179,7 +179,7 @@ class _GoodsReceivedHistoryScreenState
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -200,7 +200,7 @@ class _GoodsReceivedHistoryScreenState
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: kPrimary.withOpacity(0.1),
+                        color: kPrimary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
@@ -531,7 +531,7 @@ class _GoodsReceivedHistoryScreenState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

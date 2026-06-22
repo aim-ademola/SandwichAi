@@ -195,7 +195,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                           '${widget.orderItems.length} items • ₦${widget.totalAmount.toStringAsFixed(2)}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
@@ -334,7 +334,9 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isSelected ? kPrimary.withOpacity(0.1) : Colors.white,
+                  color: isSelected
+                      ? kPrimary.withValues(alpha: 0.1)
+                      : Colors.white,
                   border: Border.all(
                     color: isSelected ? kPrimary : Colors.grey[300]!,
                     width: isSelected ? 2 : 1,
@@ -623,9 +625,9 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: kPrimary.withOpacity(0.05),
+              color: kPrimary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: kPrimary.withOpacity(0.2)),
+              border: Border.all(color: kPrimary.withValues(alpha: 0.2)),
             ),
             child: Column(
               children: [

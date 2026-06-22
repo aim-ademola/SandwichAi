@@ -217,7 +217,6 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
   Widget _buildOverviewCards(ProcessingDashboardData data) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 600 ? 2 : 2;
         final spacing = 16.0;
         final cardWidth = (constraints.maxWidth - spacing) / 2;
 
@@ -491,7 +490,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(Icons.check_circle, color: statusColor, size: 22),
@@ -526,7 +525,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

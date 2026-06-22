@@ -363,7 +363,7 @@
 //                         vertical: 4,
 //                       ),
 //                       decoration: BoxDecoration(
-//                         color: kPrimary.withOpacity(0.1),
+//                         color: kPrimary.withValues(alpha: 0.1),
 //                         borderRadius: BorderRadius.circular(12),
 //                       ),
 //                       child: Text(
@@ -410,7 +410,7 @@
 //                           width: 32,
 //                           height: 32,
 //                           decoration: BoxDecoration(
-//                             color: kPrimary.withOpacity(0.1),
+//                             color: kPrimary.withValues(alpha: 0.1),
 //                             borderRadius: BorderRadius.circular(6),
 //                           ),
 //                           child: Center(
@@ -567,7 +567,7 @@
 //               border: Border.all(
 //                 color: _selectedItemId == null && !_isSearching
 //                     ? Colors.grey.shade300
-//                     : kPrimary.withOpacity(0.3),
+//                     : kPrimary.withValues(alpha: 0.3),
 //                 width: 1.5,
 //               ),
 //             ),
@@ -612,7 +612,7 @@
 //         border: Border.all(color: Colors.grey.shade300),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.08),
+//             color: Colors.black.withValues(alpha: 0.08),
 //             blurRadius: 12,
 //             offset: const Offset(0, 4),
 //           ),
@@ -696,7 +696,7 @@
 //                                 width: 32,
 //                                 height: 32,
 //                                 decoration: BoxDecoration(
-//                                   color: kPrimary.withOpacity(0.1),
+//                                   color: kPrimary.withValues(alpha: 0.1),
 //                                   borderRadius: BorderRadius.circular(6),
 //                                 ),
 //                                 child: const Icon(
@@ -1004,7 +1004,7 @@
 //         border: Border.all(color: Colors.grey.shade200),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.04),
+//             color: Colors.black.withValues(alpha: 0.04),
 //             blurRadius: 8,
 //             offset: const Offset(0, 2),
 //           ),
@@ -1046,8 +1046,8 @@
 //                 ),
 //                 decoration: BoxDecoration(
 //                   color: isPending
-//                       ? Colors.orange.withOpacity(0.1)
-//                       : Colors.green.withOpacity(0.1),
+//                       ? Colors.orange.withValues(alpha: 0.1)
+//                       : Colors.green.withValues(alpha: 0.1),
 //                   borderRadius: BorderRadius.circular(20),
 //                 ),
 //                 child: Text(
@@ -1228,7 +1228,7 @@
 //                               width: 32,
 //                               height: 32,
 //                               decoration: BoxDecoration(
-//                                 color: kPrimary.withOpacity(0.1),
+//                                 color: kPrimary.withValues(alpha: 0.1),
 //                                 borderRadius: BorderRadius.circular(6),
 //                               ),
 //                               child: Center(

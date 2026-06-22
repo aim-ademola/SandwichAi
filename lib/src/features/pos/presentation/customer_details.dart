@@ -53,8 +53,8 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
     _cityController.text = customer.city ?? '';
     _dietaryRestrictionsController.text = customer.dietaryRestrictions ?? '';
     _allowsMarketing = customer.allowsMarketing ?? false;
-    _allowsSMS = customer.allowsSMS ?? false;
-    _allowsEmail = customer.allowsEmail ?? false;
+    _allowsSMS = customer.allowsSMS;
+    _allowsEmail = customer.allowsEmail;
 
     if (customer.dateOfBirth != null) {
       try {
@@ -285,10 +285,10 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: kPrimary.withOpacity(0.05),
+                                color: kPrimary.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: kPrimary.withOpacity(0.1),
+                                  color: kPrimary.withValues(alpha: 0.1),
                                   width: 1,
                                 ),
                               ),
@@ -298,7 +298,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                     width: 48,
                                     height: 48,
                                     decoration: BoxDecoration(
-                                      color: kPrimary.withOpacity(0.1),
+                                      color: kPrimary.withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
@@ -355,7 +355,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -419,7 +419,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -455,7 +455,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -482,7 +482,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),

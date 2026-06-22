@@ -331,7 +331,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                   : () => Navigator.pop(context, selectedIds.toList()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: kPrimary,
-                disabledBackgroundColor: kPrimary.withOpacity(0.3),
+                disabledBackgroundColor: kPrimary.withValues(alpha: 0.3),
                 foregroundColor: Colors.white,
               ),
               child: Text('Add Selected (${selectedIds.length})'),
@@ -701,12 +701,15 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [kPrimary.withOpacity(0.1), kPrimary.withOpacity(0.05)],
+          colors: [
+            kPrimary.withValues(alpha: 0.1),
+            kPrimary.withValues(alpha: 0.05),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: kPrimary.withOpacity(0.2)),
+        border: Border.all(color: kPrimary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -794,7 +797,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               border: Border.all(
                 color: _selectedItemId == null && _isSearching == false
                     ? const Color(0xFFE0E0E0)
-                    : kPrimary.withOpacity(0.3),
+                    : kPrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -846,7 +849,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -970,7 +973,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                 width: _getIconSize(screenWidth) + 8,
                                 height: _getIconSize(screenWidth) + 8,
                                 decoration: BoxDecoration(
-                                  color: kPrimary.withOpacity(0.1),
+                                  color: kPrimary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
@@ -1025,9 +1028,9 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: kPrimary.withOpacity(0.05),
+        color: kPrimary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: kPrimary.withOpacity(0.2)),
+        border: Border.all(color: kPrimary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1205,7 +1208,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1289,7 +1292,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     width: _getIconSize(screenWidth) + 8,
                     height: _getIconSize(screenWidth) + 8,
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
+                      color: kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -1415,7 +1418,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
             onPressed: isLoading ? null : _submitForm,
             style: ElevatedButton.styleFrom(
               backgroundColor: kPrimary,
-              disabledBackgroundColor: kPrimary.withOpacity(0.6),
+              disabledBackgroundColor: kPrimary.withValues(alpha: 0.6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(
                   _getBorderRadius(screenWidth),

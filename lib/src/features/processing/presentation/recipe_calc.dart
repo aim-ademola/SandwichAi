@@ -387,7 +387,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
         border: Border.all(color: const Color(0xFFE0E0E0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -435,7 +435,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                         Icon(
                           Icons.search_off,
                           size: 48,
-                          color: const Color(0xFF9E9E9E).withOpacity(0.5),
+                          color: const Color(0xFF9E9E9E).withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 12),
                         Text(
@@ -623,7 +623,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
               Icon(
                 Icons.restaurant_menu,
                 size: 48,
-                color: const Color(0xFF9E9E9E).withOpacity(0.5),
+                color: const Color(0xFF9E9E9E).withValues(alpha: 0.5),
               ),
               const SizedBox(height: 12),
               Text(
@@ -857,7 +857,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: kPrimary.withOpacity(0.3),
+            color: kPrimary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -871,7 +871,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -890,7 +890,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -933,7 +933,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -945,7 +945,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                       'Scaling Factor',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -955,7 +955,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -977,7 +977,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -995,7 +995,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                         'Estimated Cost',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                       ),
                     ],
@@ -1025,7 +1025,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -1037,7 +1037,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
           const SizedBox(height: 4),
@@ -1201,7 +1201,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                           Icon(
                             Icons.trending_up,
                             size: 14,
-                            color: kPrimary.withOpacity(0.7),
+                            color: kPrimary.withValues(alpha: 0.7),
                           ),
                         ],
                       ),
@@ -1224,12 +1224,12 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: hasScaling
-                  ? kPrimary.withOpacity(0.1)
+                  ? kPrimary.withValues(alpha: 0.1)
                   : const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: hasScaling
-                    ? kPrimary.withOpacity(0.3)
+                    ? kPrimary.withValues(alpha: 0.3)
                     : Colors.transparent,
               ),
             ),

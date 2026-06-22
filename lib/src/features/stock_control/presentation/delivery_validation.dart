@@ -134,7 +134,7 @@ class TransferService {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: kPrimary.withOpacity(0.1),
+                  color: kPrimary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.local_shipping, color: kPrimary, size: 32),
@@ -420,7 +420,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                   child: Icon(
                     Icons.inventory_2_outlined,
                     size: 64,
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
               ),
@@ -471,7 +471,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                           'All items have been reviewed',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 13,
-                            color: kprimaryTextColor2.withOpacity(0.6),
+                            color: kprimaryTextColor2.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -626,7 +626,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                       hintText: 'e.g., 49.5',
                       hintStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: kprimaryTextColor2.withOpacity(0.5),
+                        color: kprimaryTextColor2.withValues(alpha: 0.5),
                       ),
                       filled: true,
                       fillColor: Colors.white,
@@ -696,7 +696,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                   hintText: 'Packaging Intact, Freshness ok.',
                   hintStyle: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: kprimaryTextColor2.withOpacity(0.5),
+                    color: kprimaryTextColor2.withValues(alpha: 0.5),
                   ),
                   border: InputBorder.none,
                   isDense: true,
@@ -773,8 +773,8 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isAccepted
-              ? const Color(0xFFC8E6C9).withOpacity(0.5)
-              : const Color(0xFFFFCDD2).withOpacity(0.5),
+              ? const Color(0xFFC8E6C9).withValues(alpha: 0.5)
+              : const Color(0xFFFFCDD2).withValues(alpha: 0.5),
           width: 1,
         ),
       ),

@@ -292,8 +292,8 @@ class _SessionCard extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isActive
-                  ? kPrimary.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.04),
+                  ? kPrimary.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.04),
               blurRadius: isActive ? 12 : 6,
               offset: const Offset(0, 2),
             ),
@@ -308,7 +308,7 @@ class _SessionCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: statusInfo.color.withOpacity(0.12),
+                  color: statusInfo.color.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(statusInfo.icon, color: statusInfo.color, size: 22),
@@ -364,7 +364,7 @@ class _SessionCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.deepOrange.withOpacity(0.12),
+                              color: Colors.deepOrange.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -544,7 +544,7 @@ class _SummaryChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

@@ -215,7 +215,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: kPrimary.withOpacity(0.08),
+        color: kPrimary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -250,7 +250,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -280,7 +280,10 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                border: Border.all(color: kPrimary.withOpacity(0.2), width: 2),
+                border: Border.all(
+                  color: kPrimary.withValues(alpha: 0.2),
+                  width: 2,
+                ),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: QrImageView(
@@ -314,7 +317,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -360,7 +363,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
                 child: Icon(
                   Icons.copy_rounded,
                   size: 16,
-                  color: kPrimary.withOpacity(0.7),
+                  color: kPrimary.withValues(alpha: 0.7),
                 ),
               ),
             ],

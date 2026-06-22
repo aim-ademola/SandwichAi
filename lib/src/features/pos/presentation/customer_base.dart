@@ -260,7 +260,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                         Icon(
                           Icons.people_outline,
                           size: 64,
-                          color: kprimaryTextColor2.withOpacity(0.5),
+                          color: kprimaryTextColor2.withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -335,7 +335,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -351,7 +351,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: kPrimary.withOpacity(0.1),
+                    color: kPrimary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -403,7 +403,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   decoration: BoxDecoration(
                     color: _getMembershipColor(
                       customer.membershipTier,
-                    ).withOpacity(0.15),
+                    ).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -426,7 +426,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   child: _buildStatItem(
                     icon: Icons.shopping_bag_outlined,
                     label: 'Orders',
-                    value: '${customer.totalOrders ?? 0}',
+                    value: '${customer.totalOrders}',
                   ),
                 ),
                 Expanded(
@@ -440,7 +440,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   child: _buildStatItem(
                     icon: Icons.stars_outlined,
                     label: 'Points',
-                    value: '${customer.loyaltyPoints ?? 0}',
+                    value: '${customer.loyaltyPoints}',
                   ),
                 ),
               ],

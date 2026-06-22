@@ -21,7 +21,7 @@ class MinimizeButton extends StatelessWidget {
       icon: Container(
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: kPrimary.withOpacity(0.10),
+          color: kPrimary.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Icon(Icons.minimize_rounded, color: kPrimary, size: 18),

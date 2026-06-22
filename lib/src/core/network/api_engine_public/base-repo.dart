@@ -2,11 +2,7 @@ import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 
-import '../api_engine_private/api_client.dart';
-
 abstract class BaseRepository {
-  final ApiClient _apiClient = ApiClient.instance;
-
   // Generic method for handling API responses with error handling
   Future<ApiResponse<T>> handleApiCall<T>(
     Future<ApiResponse<T>> apiCall, {

@@ -357,7 +357,7 @@
 //                 width: 80,
 //                 height: 80,
 //                 decoration: BoxDecoration(
-//                   color: Colors.green.withOpacity(0.1),
+//                   color: Colors.green.withValues(alpha: 0.1),
 //                   shape: BoxShape.circle,
 //                 ),
 //                 child: const Icon(
@@ -396,7 +396,7 @@
 //                   borderRadius: BorderRadius.circular(16),
 //                   boxShadow: [
 //                     BoxShadow(
-//                       color: Colors.black.withOpacity(0.05),
+//                       color: Colors.black.withValues(alpha: 0.05),
 //                       blurRadius: 10,
 //                       offset: const Offset(0, 4),
 //                     ),
@@ -448,7 +448,7 @@
 //                     Container(
 //                       padding: const EdgeInsets.all(16),
 //                       decoration: BoxDecoration(
-//                         color: kPrimary.withOpacity(0.1),
+//                         color: kPrimary.withValues(alpha: 0.1),
 //                         borderRadius: BorderRadius.circular(12),
 //                       ),
 //                       child: Row(

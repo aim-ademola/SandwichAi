@@ -19,13 +19,7 @@ class ProcessingAppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ShowCaseWidget(
-      onFinish: () async {
-        await DrawerOnboardingCache.instance.markDrawerOnboardingSeen();
-      },
-      blurValue: 1,
-      builder: (context) => _ProcessingAppDrawerContent(),
-    );
+    return const _ProcessingAppDrawerContent();
   }
 }
 
@@ -39,6 +33,7 @@ class _ProcessingAppDrawerContent extends StatefulWidget {
 
 class _ProcessingAppDrawerContentState
     extends State<_ProcessingAppDrawerContent> {
+  late final ShowcaseView _showcaseView;
   final GlobalKey _assignTaskKey = GlobalKey();
   final GlobalKey _validateStockKey = GlobalKey();
   final GlobalKey _stockRequisitionKey = GlobalKey();
@@ -50,7 +45,17 @@ class _ProcessingAppDrawerContentState
   @override
   void initState() {
     super.initState();
+    _showcaseView = ShowcaseView.register(
+      onFinish: _markOnboardingComplete,
+      blurValue: 1,
+    );
     _checkOnboarding();
+  }
+
+  @override
+  void dispose() {
+    _showcaseView.unregister();
+    super.dispose();
   }
 
   Future<void> _checkOnboarding() async {
@@ -61,7 +66,7 @@ class _ProcessingAppDrawerContentState
       // Wait for drawer to build, then show showcase
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          ShowCaseWidget.of(context).startShowCase([
+          _showcaseView.startShowCase([
             _assignTaskKey,
             _validateStockKey,
             _stockRequisitionKey,

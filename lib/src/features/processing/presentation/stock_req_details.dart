@@ -81,14 +81,14 @@ class StockRequestDetailsScreen extends StatelessWidget {
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [kPrimary, kPrimary.withOpacity(0.8)],
+          colors: [kPrimary, kPrimary.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: kPrimary.withOpacity(0.3),
+            color: kPrimary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -102,7 +102,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -129,7 +129,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
                       'Stock Request',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getCaptionFontSize(screenWidth),
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -139,7 +139,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: _getFieldSpacing(screenWidth)),
-          Divider(color: Colors.white.withOpacity(0.3), height: 1),
+          Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),
           SizedBox(height: _getFieldSpacing(screenWidth)),
           Row(
             children: [
@@ -154,7 +154,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
               Container(
                 width: 1,
                 height: 40,
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
               ),
               Expanded(
                 child: _buildHeaderStat(
@@ -194,7 +194,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
           label,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getCaptionFontSize(screenWidth),
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
           ),
         ),
       ],
@@ -209,7 +209,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -297,7 +297,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -340,7 +340,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
           width: _getIconSize(screenWidth) + 12,
           height: _getIconSize(screenWidth) + 12,
           decoration: BoxDecoration(
-            color: kPrimary.withOpacity(0.1),
+            color: kPrimary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
@@ -397,7 +397,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -418,12 +418,12 @@ class StockRequestDetailsScreen extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         border: Border.all(
-          color: _getStatusColor(request.status).withOpacity(0.3),
+          color: _getStatusColor(request.status).withValues(alpha: 0.3),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -437,7 +437,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(request.status).withOpacity(0.1),
+                  color: _getStatusColor(request.status).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -578,8 +578,8 @@ class StockRequestDetailsScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: isWhiteBg
-            ? Colors.white.withOpacity(0.9)
-            : _getStatusColor(status).withOpacity(0.1),
+            ? Colors.white.withValues(alpha: 0.9)
+            : _getStatusColor(status).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

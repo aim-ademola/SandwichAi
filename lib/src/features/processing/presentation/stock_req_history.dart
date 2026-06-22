@@ -255,7 +255,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               width: _getEmptyIconSize(screenWidth),
               height: _getEmptyIconSize(screenWidth),
               decoration: BoxDecoration(
-                color: kPrimary.withOpacity(0.1),
+                color: kPrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -322,7 +322,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: kPrimary.withOpacity(0.08),
+                color: kPrimary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.inbox_outlined, size: 36, color: kPrimary),
@@ -351,7 +351,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -370,7 +370,9 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(request.status).withOpacity(0.1),
+                      color: _getStatusColor(
+                        request.status,
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -537,7 +539,9 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                             TextSpan(
                               text: ' - ',
                               style: TextStyle(
-                                color: kprimaryTextColor2.withOpacity(0.6),
+                                color: kprimaryTextColor2.withValues(
+                                  alpha: 0.6,
+                                ),
                               ),
                             ),
                             TextSpan(
@@ -599,7 +603,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _getStatusColor(status).withOpacity(0.1),
+        color: _getStatusColor(status).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -621,7 +625,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: kPrimary.withOpacity(0.08),
+        color: kPrimary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(

@@ -232,7 +232,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFFFA000).withOpacity(0.12),
+              color: const Color(0xFFFFA000).withValues(alpha: 0.12),
             ),
           ),
         ),
@@ -293,7 +293,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -310,7 +310,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFA000).withOpacity(0.12),
+                  color: const Color(0xFFFFA000).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(

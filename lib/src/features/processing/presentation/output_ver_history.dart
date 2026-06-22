@@ -101,7 +101,7 @@ class _OutputVerificationHistoryScreenState
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: kPrimary.withOpacity(0.1),
+                color: kPrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.fact_check_outlined, size: 50, color: kPrimary),
@@ -209,7 +209,7 @@ class _OutputVerificationHistoryScreenState
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -222,7 +222,7 @@ class _OutputVerificationHistoryScreenState
           Container(
             padding: EdgeInsets.all(_getCardPadding(screenWidth)),
             decoration: BoxDecoration(
-              color: kPrimary.withOpacity(0.05),
+              color: kPrimary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(_getBorderRadius(screenWidth)),
                 topRight: Radius.circular(_getBorderRadius(screenWidth)),
@@ -242,7 +242,7 @@ class _OutputVerificationHistoryScreenState
                         return Container(
                           width: 60,
                           height: 60,
-                          color: kPrimary.withOpacity(0.2),
+                          color: kPrimary.withValues(alpha: 0.2),
                           child: Icon(Icons.restaurant, color: kPrimary),
                         );
                       },
@@ -253,7 +253,7 @@ class _OutputVerificationHistoryScreenState
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.2),
+                      color: kPrimary.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(Icons.restaurant, color: kPrimary),
@@ -288,7 +288,7 @@ class _OutputVerificationHistoryScreenState
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(

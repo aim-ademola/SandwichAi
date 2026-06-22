@@ -9,6 +9,8 @@ import 'package:sandwich_ai/src/features/auth/forgot_pwd/bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/cnage_pwd_blocs/bloc.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/auth/login_bloc/login_bloc.dart';
+import 'package:sandwich_ai/src/features/dashboard/bloc/dashboard_contract_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/dashboard/data/repo/dashboard_contract_repo.dart';
 import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen-dash_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/kitchen/data/repo/kitchen_dash_repo.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/api_menu_blocs/bloc.dart';
@@ -51,6 +53,7 @@ import 'package:sandwich_ai/src/features/procurement/procurement_blocs/supplier_
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/branch_details_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/branch_stock_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/stock_control/bloc/bulk_inventory_upload_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/processing_transfrer_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/procurement_req_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock-movement_bloc/bloc.dart';
@@ -60,6 +63,7 @@ import 'package:sandwich_ai/src/features/pos/data/repository/add_menu_repo.dart'
 import 'package:sandwich_ai/src/features/stock_control/data/repo/add_branch_stock.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/branch_details_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/branch_stock_repo.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/repo/bulk_inventory_upload_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/inventory_items_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/processing_transfer_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/procurement_req_repo.dart';
@@ -100,6 +104,12 @@ class AppBlocProviders extends StatelessWidget {
         ),
         RepositoryProvider<BranchStockDetailsRepositoryInterface>(
           create: (context) => BranchStockDetailsRepository(),
+        ),
+        RepositoryProvider<BulkInventoryUploadRepositoryInterface>(
+          create: (context) => BulkInventoryUploadRepository(),
+        ),
+        RepositoryProvider<DashboardContractRepositoryInterface>(
+          create: (context) => DashboardContractRepository(),
         ),
         RepositoryProvider<ProcessingDashboardRepositoryInterface>(
           create: (context) => ProcessingDashboardRepository(),
@@ -215,6 +225,17 @@ class AppBlocProviders extends StatelessWidget {
           BlocProvider<BranchStockDetailsBloc>(
             create: (context) => BranchStockDetailsBloc(
               repository: context.read<BranchStockDetailsRepositoryInterface>(),
+            ),
+          ),
+          BlocProvider<BulkInventoryUploadBloc>(
+            create: (context) => BulkInventoryUploadBloc(
+              repository: context
+                  .read<BulkInventoryUploadRepositoryInterface>(),
+            ),
+          ),
+          BlocProvider<DashboardContractBloc>(
+            create: (context) => DashboardContractBloc(
+              repository: context.read<DashboardContractRepositoryInterface>(),
             ),
           ),
           BlocProvider<ProcessingDashboardBloc>(

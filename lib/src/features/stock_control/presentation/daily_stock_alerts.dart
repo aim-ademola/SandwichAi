@@ -224,7 +224,7 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
                   Container(
                     padding: EdgeInsets.all(_getIconPadding(screenWidth)),
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
+                      color: kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -347,7 +347,7 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
         Container(
           padding: EdgeInsets.all(_getInfoIconPadding(screenWidth)),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -615,7 +615,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                   Container(
                     padding: EdgeInsets.all(_getIconPadding(screenWidth)),
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
+                      color: kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(

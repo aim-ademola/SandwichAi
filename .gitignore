@@ -33,6 +33,13 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+key.properties
+
 # Symbolication related
 app.*.symbols
 
@@ -40,7 +47,20 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
+/android/.gradle/
+/android/local.properties
 /android/app/debug
 /android/app/profile
 /android/app/release
 android/key.properties
+*.jks
+*.keystore
+
+# Local reports and temporary files
+/reports/
+/tmp/
+/temp/
+*.tmp
+*.temp
+DAY_ONE_TASK.MD
+DAY_ONE_NOTES.MD

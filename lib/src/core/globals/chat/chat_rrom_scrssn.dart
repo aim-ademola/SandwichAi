@@ -155,7 +155,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: kPrimary.withOpacity(0.2),
+                    color: kPrimary.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(dept.icon, color: kPrimary, size: 22),

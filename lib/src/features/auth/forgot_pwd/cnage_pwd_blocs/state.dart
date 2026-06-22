@@ -64,13 +64,13 @@ class ChangePasswordInitial extends ChangePasswordState {
 
   @override
   List<Object?> get props => [
-        obscureCurrentPassword,
-        obscureNewPassword,
-        obscureConfirmPassword,
-        currentPasswordError,
-        newPasswordError,
-        confirmPasswordError,
-      ];
+    obscureCurrentPassword,
+    obscureNewPassword,
+    obscureConfirmPassword,
+    currentPasswordError,
+    newPasswordError,
+    confirmPasswordError,
+  ];
 }
 
 class ChangePasswordLoading extends ChangePasswordState {
@@ -86,10 +86,10 @@ class ChangePasswordLoading extends ChangePasswordState {
 
   @override
   List<Object?> get props => [
-        obscureCurrentPassword,
-        obscureNewPassword,
-        obscureConfirmPassword,
-      ];
+    obscureCurrentPassword,
+    obscureNewPassword,
+    obscureConfirmPassword,
+  ];
 }
 
 class ChangePasswordValidation extends ChangePasswordState {
@@ -111,13 +111,13 @@ class ChangePasswordValidation extends ChangePasswordState {
 
   @override
   List<Object?> get props => [
-        currentPasswordError,
-        newPasswordError,
-        confirmPasswordError,
-        obscureCurrentPassword,
-        obscureNewPassword,
-        obscureConfirmPassword,
-      ];
+    currentPasswordError,
+    newPasswordError,
+    confirmPasswordError,
+    obscureCurrentPassword,
+    obscureNewPassword,
+    obscureConfirmPassword,
+  ];
 }
 
 class ChangePasswordSuccess extends ChangePasswordState {
@@ -164,10 +164,10 @@ class ChangePasswordError extends ChangePasswordState {
 
   @override
   List<Object?> get props => [
-        error,
-        errorType,
-        obscureCurrentPassword,
-        obscureNewPassword,
-        obscureConfirmPassword,
-      ];
+    error,
+    errorType,
+    obscureCurrentPassword,
+    obscureNewPassword,
+    obscureConfirmPassword,
+  ];
 }

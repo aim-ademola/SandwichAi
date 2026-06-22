@@ -344,8 +344,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   backgroundColor: kPrimary,
                                   foregroundColor: Colors.white,
                                   elevation: 0,
-                                  disabledBackgroundColor: kPrimary.withOpacity(
-                                    0.6,
+                                  disabledBackgroundColor: kPrimary.withValues(
+                                    alpha: 0.6,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(

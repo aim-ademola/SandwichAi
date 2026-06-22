@@ -371,8 +371,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           boxShadow: [
             BoxShadow(
               color: selected
-                  ? kPrimary.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.04),
+                  ? kPrimary.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.04),
               blurRadius: selected ? 12 : 8,
               offset: const Offset(0, 3),
             ),
@@ -383,7 +383,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: selected ? kPrimary : kPrimary.withOpacity(0.08),
+                color: selected ? kPrimary : kPrimary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
@@ -446,7 +446,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -517,112 +517,6 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     } else {
       _createOrderAndPay();
     }
-  }
-
-  void _showEmailDialog() {
-    final emailController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Customer Email',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
-          ),
-        ),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'An email address is required for card/bank transfer payments.',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 13,
-                  color: kprimaryTextColor2,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 14),
-              TextFormField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: 'Email Address',
-                  hintText: 'customer@example.com',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: kPrimary, width: 2),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Email is required';
-                  }
-                  final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-                  if (!emailRegex.hasMatch(v.trim())) {
-                    return 'Enter a valid email address';
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Cancel',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: kprimaryTextColor2,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState?.validate() == true) {
-                _customerEmail = emailController.text.trim();
-                Navigator.of(ctx).pop();
-                _createOrderAndPay();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              'Continue',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   String _normalizeOrderType(String orderType) {

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_draft_model.dart';
 
 enum OrderErrorType { network, timeout, server, validation, general }
 
@@ -25,6 +26,32 @@ class OrderCreated extends OrderState {
 
   @override
   List<Object?> get props => [orderData, orderNumber];
+}
+
+class OrderDraftSaving extends OrderState {
+  const OrderDraftSaving();
+}
+
+class OrderDraftSaved extends OrderState {
+  final PurchaseOrderDraft draft;
+
+  const OrderDraftSaved({required this.draft});
+
+  @override
+  List<Object?> get props => [draft.id, draft.status];
+}
+
+class OrderDraftLoading extends OrderState {
+  const OrderDraftLoading();
+}
+
+class OrderDraftLoaded extends OrderState {
+  final PurchaseOrderDraft draft;
+
+  const OrderDraftLoaded({required this.draft});
+
+  @override
+  List<Object?> get props => [draft.id, draft.status];
 }
 
 class OrderError extends OrderState {

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
-import 'package:sandwich_ai/src/features/auth/data/models/login_model.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_draft_model.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/purchase_order_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/state.dart';
@@ -18,6 +18,10 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     : _repository = repository,
       super(const OrderInitial()) {
     on<CreateOrder>(_onCreateOrder);
+    on<SaveOrderDraft>(_onSaveOrderDraft);
+    on<UpdateOrderDraft>(_onUpdateOrderDraft);
+    on<LoadOrderDraft>(_onLoadOrderDraft);
+    on<SubmitDraftForApproval>(_onSubmitDraftForApproval);
     on<ResetOrderState>(_onResetOrderState);
     _getBranchId();
   }
@@ -46,7 +50,6 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         buyerId = await AuthCacheHelper.instance.userID() ?? '';
         buyerBranchId = await AuthCacheHelper.instance.getBranchID() ?? '';
         orgID = await AuthCacheHelper.instance.getOrgId() ?? '';
-        final UserModel? userid = await AuthCacheHelper.instance.getUserData();
       }
 
       AppLogger.log(
@@ -129,6 +132,152 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
 
   void _onResetOrderState(ResetOrderState event, Emitter<OrderState> emit) {
     emit(const OrderInitial());
+  }
+
+  Future<void> _onSaveOrderDraft(
+    SaveOrderDraft event,
+    Emitter<OrderState> emit,
+  ) async {
+    emit(const OrderDraftSaving());
+
+    final request = await _buildDraftRequest(event);
+    if (request == null) {
+      emit(
+        const OrderError(
+          error: 'User session expired. Please log in again.',
+          errorType: OrderErrorType.validation,
+        ),
+      );
+      return;
+    }
+
+    final response = await _repository.createDraftOrder(request);
+    response.when(
+      success: (draft) => emit(OrderDraftSaved(draft: draft)),
+      error: (error) => emit(
+        OrderError(
+          error: error.message,
+          errorType: _determineErrorType(error.message),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onUpdateOrderDraft(
+    UpdateOrderDraft event,
+    Emitter<OrderState> emit,
+  ) async {
+    emit(const OrderDraftSaving());
+
+    final request = await _buildDraftRequest(event);
+    if (request == null) {
+      emit(
+        const OrderError(
+          error: 'User session expired. Please log in again.',
+          errorType: OrderErrorType.validation,
+        ),
+      );
+      return;
+    }
+
+    final response = await _repository.updateDraftOrder(
+      draftId: event.draftId,
+      request: request,
+    );
+    response.when(
+      success: (draft) => emit(OrderDraftSaved(draft: draft)),
+      error: (error) => emit(
+        OrderError(
+          error: error.message,
+          errorType: _determineErrorType(error.message),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onLoadOrderDraft(
+    LoadOrderDraft event,
+    Emitter<OrderState> emit,
+  ) async {
+    emit(const OrderDraftLoading());
+
+    final response = await _repository.getDraftOrder(event.draftId);
+    response.when(
+      success: (draft) => emit(OrderDraftLoaded(draft: draft)),
+      error: (error) => emit(
+        OrderError(
+          error: error.message,
+          errorType: _determineErrorType(error.message),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onSubmitDraftForApproval(
+    SubmitDraftForApproval event,
+    Emitter<OrderState> emit,
+  ) async {
+    emit(const OrderCreating());
+
+    final draft = event.draft;
+    final response = await _repository.createOrder(
+      supplierId: draft.supplierId,
+      buyerId: draft.buyerId,
+      buyerBranchId: draft.buyerBranchId,
+      priority: draft.priority,
+      orgId: draft.organizationId,
+      expectedDeliveryDate: draft.expectedDeliveryDate ?? '',
+      paymentTerm: draft.paymentTerm ?? '',
+      deliveryAddress: draft.deliveryAddress ?? '',
+      deliveryCity: draft.deliveryCity ?? '',
+      deliveryState: draft.deliveryState ?? '',
+      deliveryInstructions: draft.deliveryInstructions,
+      buyerNotes: draft.buyerNotes,
+      items: draft.items,
+    );
+
+    response.when(
+      success: (data) => emit(
+        OrderCreated(
+          orderData: data,
+          orderNumber: data['orderNumber'] ?? data['id'] ?? 'N/A',
+        ),
+      ),
+      error: (error) => emit(
+        OrderError(
+          error: error.message,
+          errorType: _determineErrorType(error.message),
+        ),
+      ),
+    );
+  }
+
+  Future<PurchaseOrderDraftRequest?> _buildDraftRequest(
+    SaveOrderDraft event,
+  ) async {
+    final buyerId = await AuthCacheHelper.instance.userID() ?? '';
+    final buyerBranchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    final organizationId = await AuthCacheHelper.instance.getOrgId() ?? '';
+
+    if (buyerId.isEmpty || buyerBranchId.isEmpty || organizationId.isEmpty) {
+      return null;
+    }
+
+    return PurchaseOrderDraftRequest(
+      supplierId: event.supplierId,
+      buyerId: buyerId,
+      buyerBranchId: buyerBranchId,
+      organizationId: organizationId,
+      priority: event.priority,
+      expectedDeliveryDate: event.expectedDeliveryDate,
+      paymentTerm: event.paymentTerm,
+      deliveryAddress: event.deliveryAddress,
+      deliveryCity: event.deliveryCity,
+      deliveryState: event.deliveryState,
+      deliveryInstructions: event.deliveryInstructions,
+      buyerNotes: event.buyerNotes,
+      items: event.items,
+    );
   }
 
   OrderErrorType _determineErrorType(String error) {

@@ -205,7 +205,7 @@ class _RecipeComplianceHistoryScreenState
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? kPrimary.withOpacity(0.1)
+              ? kPrimary.withValues(alpha: 0.1)
               : const Color(0xFFF8F6F6),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -442,7 +442,9 @@ class _RecipeComplianceHistoryScreenState
                                   child: _buildSummaryCard(
                                     icon: Icons.assessment,
                                     iconColor: kPrimary,
-                                    iconBgColor: kPrimary.withOpacity(0.1),
+                                    iconBgColor: kPrimary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     title: 'Total Checks',
                                     value: state.allRecords.length.toString(),
                                   ),
@@ -454,7 +456,7 @@ class _RecipeComplianceHistoryScreenState
                                     iconColor: const Color(0xFFFB8C00),
                                     iconBgColor: const Color(
                                       0xFFFB8C00,
-                                    ).withOpacity(0.1),
+                                    ).withValues(alpha: 0.1),
                                     title: 'Avg Variance',
                                     value:
                                         '${state.averageVariance.toStringAsFixed(1)}%',
@@ -475,7 +477,7 @@ class _RecipeComplianceHistoryScreenState
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
+                                    color: Colors.black.withValues(alpha: 0.04),
                                     blurRadius: 12,
                                     offset: const Offset(0, 2),
                                   ),
@@ -537,7 +539,7 @@ class _RecipeComplianceHistoryScreenState
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: kPrimary.withOpacity(0.1),
+                                    color: kPrimary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
@@ -614,7 +616,7 @@ class _RecipeComplianceHistoryScreenState
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -693,7 +695,7 @@ class _RecipeComplianceHistoryScreenState
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

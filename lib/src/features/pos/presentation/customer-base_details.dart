@@ -231,7 +231,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -243,7 +243,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: kPrimary.withOpacity(0.1),
+                          color: kPrimary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -287,7 +287,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                           decoration: BoxDecoration(
                             color: _getMembershipColor(
                               customer.membershipTier,
-                            ).withOpacity(0.15),
+                            ).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -344,7 +344,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: kPrimary,
                                 side: BorderSide(
-                                  color: kPrimary.withOpacity(0.3),
+                                  color: kPrimary.withValues(alpha: 0.3),
                                   width: 1.5,
                                 ),
                                 shape: RoundedRectangleBorder(
@@ -371,7 +371,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.red,
                                 side: BorderSide(
-                                  color: Colors.red.withOpacity(0.3),
+                                  color: Colors.red.withValues(alpha: 0.3),
                                   width: 1.5,
                                 ),
                                 shape: RoundedRectangleBorder(
@@ -410,7 +410,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             child: _buildStatCard(
                               icon: Icons.shopping_bag_outlined,
                               label: 'Total Orders',
-                              value: '${customer.totalOrders ?? 0}',
+                              value: '${customer.totalOrders}',
                               color: const Color(0xFF4CAF50),
                             ),
                           ),
@@ -432,7 +432,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             child: _buildStatCard(
                               icon: Icons.stars,
                               label: 'Loyalty Points',
-                              value: '${customer.loyaltyPoints ?? 0}',
+                              value: '${customer.loyaltyPoints}',
                               color: const Color(0xFFFF9800),
                             ),
                           ),
@@ -508,17 +508,17 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                     _buildPreferenceRow(
                       icon: Icons.campaign_outlined,
                       label: 'Marketing Communications',
-                      value: customer.allowsMarketing ?? false,
+                      value: customer.allowsMarketing,
                     ),
                     _buildPreferenceRow(
                       icon: Icons.sms_outlined,
                       label: 'SMS Notifications',
-                      value: customer.allowsSMS ?? false,
+                      value: customer.allowsSMS,
                     ),
                     _buildPreferenceRow(
                       icon: Icons.email_outlined,
                       label: 'Email Notifications',
-                      value: customer.allowsEmail ?? false,
+                      value: customer.allowsEmail,
                     ),
                   ],
                 ),
@@ -577,7 +577,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -589,7 +589,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -631,7 +631,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -720,8 +720,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
               color: value
-                  ? const Color(0xFF4CAF50).withOpacity(0.1)
-                  : Colors.grey.withOpacity(0.1),
+                  ? const Color(0xFF4CAF50).withValues(alpha: 0.1)
+                  : Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

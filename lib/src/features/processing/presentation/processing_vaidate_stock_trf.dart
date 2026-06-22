@@ -463,7 +463,7 @@ class _ValidateStockTransferToProcessingcreenState
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -505,8 +505,8 @@ class _ValidateStockTransferToProcessingcreenState
                 ),
                 decoration: BoxDecoration(
                   color: isPending
-                      ? Colors.orange.withOpacity(0.1)
-                      : Colors.green.withOpacity(0.1),
+                      ? Colors.orange.withValues(alpha: 0.1)
+                      : Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -734,7 +734,7 @@ class _ValidateStockTransferToProcessingcreenState
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: kPrimary.withOpacity(0.1),
+                                color: kPrimary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Center(
@@ -1154,7 +1154,7 @@ class __ValidateTransferBottomSheetState
                                 width: 32,
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: kPrimary.withOpacity(0.1),
+                                  color: kPrimary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Center(

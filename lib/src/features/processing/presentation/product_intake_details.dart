@@ -222,7 +222,10 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [kPrimary.withOpacity(0.1), kPrimary.withOpacity(0.05)],
+            colors: [
+              kPrimary.withValues(alpha: 0.1),
+              kPrimary.withValues(alpha: 0.05),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -236,7 +239,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: kPrimary.withOpacity(0.2),
+                    color: kPrimary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(Icons.inventory_2, color: kPrimary, size: 28),

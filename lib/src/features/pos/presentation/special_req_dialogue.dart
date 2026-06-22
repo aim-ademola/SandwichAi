@@ -143,7 +143,7 @@ class _SpecialRequestDialogState extends State<SpecialRequestDialog> {
                           widget.item.dishName,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -185,7 +185,7 @@ class _SpecialRequestDialogState extends State<SpecialRequestDialog> {
                           label: Text(request),
                           selected: isSelected,
                           onSelected: (selected) => _toggleRequest(request),
-                          selectedColor: kPrimary.withOpacity(0.2),
+                          selectedColor: kPrimary.withValues(alpha: 0.2),
                           checkmarkColor: kPrimary,
                           labelStyle: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 13,

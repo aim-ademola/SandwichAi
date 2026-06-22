@@ -1,11 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sandwich_ai/src/core/network/connectivity_service.dart';
-import 'package:sandwich_ai/src/core/offline/connectivity_snack.dart'
-    show
-        showSyncStartSnackBar,
-        showSyncSuccessSnackBar,
-        showSyncFailureSnackBar;
-import 'package:sandwich_ai/src/core/offline/offline_queue_manager.dart';
 
 class AppInitializer extends StatefulWidget {
   final Widget child;

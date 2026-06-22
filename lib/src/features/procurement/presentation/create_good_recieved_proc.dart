@@ -248,9 +248,11 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
+                      color: kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: kPrimary.withOpacity(0.3)),
+                      border: Border.all(
+                        color: kPrimary.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -298,7 +300,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: kPrimary.withOpacity(0.1),
+                color: kPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: kPrimary, size: 20),
@@ -453,7 +455,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: kPrimary.withOpacity(0.1),
+                            color: kPrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -477,7 +479,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: kPrimary.withOpacity(0.1),
+                            color: kPrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -532,7 +534,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: kPrimary.withOpacity(0.1),
+                            color: kPrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -562,7 +564,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: kPrimary.withOpacity(0.1),
+                            color: kPrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -866,7 +868,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                 leading: Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: kPrimary.withOpacity(0.1),
+                                    color: kPrimary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
@@ -889,7 +891,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                     ? Icon(Icons.check_circle, color: kPrimary)
                                     : null,
                                 selected: isSelected,
-                                selectedTileColor: kPrimary.withOpacity(0.05),
+                                selectedTileColor: kPrimary.withValues(
+                                  alpha: 0.05,
+                                ),
                                 onTap: () {
                                   this.setState(() {
                                     _selectedSupplierId = supplier.id;
@@ -997,7 +1001,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kPrimary.withOpacity(0.3)),
+        border: Border.all(color: kPrimary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1335,7 +1339,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                 leading: Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: kPrimary.withOpacity(0.1),
+                                    color: kPrimary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Icon(
@@ -1369,7 +1373,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                       )
                                     : null,
                                 selected: isSelected,
-                                selectedTileColor: kPrimary.withOpacity(0.05),
+                                selectedTileColor: kPrimary.withValues(
+                                  alpha: 0.05,
+                                ),
                                 onTap: () {
                                   this.setState(() {
                                     item.inventoryItem = invItem;
@@ -1594,7 +1600,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
         },
         style: OutlinedButton.styleFrom(
           foregroundColor: kPrimary,
-          backgroundColor: kPrimary.withOpacity(0.1),
+          backgroundColor: kPrimary.withValues(alpha: 0.1),
           side: BorderSide(color: kPrimary, width: 1.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -1627,7 +1633,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
               foregroundColor: Colors.white,
               disabledBackgroundColor: Colors.grey.shade300,
               elevation: 2,
-              shadowColor: kPrimary.withOpacity(0.4),
+              shadowColor: kPrimary.withValues(alpha: 0.4),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

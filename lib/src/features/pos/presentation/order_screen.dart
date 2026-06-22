@@ -666,7 +666,7 @@ class _OrderScreenState extends State<OrderScreen>
                     color: kPrimary,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, -2),
                       ),
@@ -859,6 +859,7 @@ class _OrderScreenState extends State<OrderScreen>
               ListTile(
                 leading: SvgPicture.asset(
                   'assets/svg/delete.svg',
+                  // ignore: deprecated_member_use
                   color: kPrimary,
                 ),
                 title: const Text(
@@ -940,7 +941,7 @@ class _OrderScreenState extends State<OrderScreen>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -994,7 +995,7 @@ class _OrderScreenState extends State<OrderScreen>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: kPrimary.withOpacity(0.1),
+                            color: kPrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Icon(
@@ -1205,7 +1206,7 @@ class _BottomSheetAction extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(
             color: isDestructive
-                ? Colors.red.withOpacity(0.2)
+                ? Colors.red.withValues(alpha: 0.2)
                 : Colors.grey.shade200,
           ),
           borderRadius: BorderRadius.circular(12),

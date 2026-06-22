@@ -170,7 +170,7 @@ class _MyTaskScreenState extends State<MyTaskScreen>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -186,7 +186,9 @@ class _MyTaskScreenState extends State<MyTaskScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _getPriorityColor(task.priority).withOpacity(0.1),
+                  color: _getPriorityColor(
+                    task.priority,
+                  ).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(

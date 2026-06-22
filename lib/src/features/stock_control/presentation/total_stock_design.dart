@@ -10,8 +10,8 @@ class StockCardPainter extends CustomPainter {
     // Gradient circles in top right
     final gradient = RadialGradient(
       colors: [
-        Colors.blue.withOpacity(0.3),
-        Colors.purple.withOpacity(0.1),
+        Colors.blue.withValues(alpha: 0.3),
+        Colors.purple.withValues(alpha: 0.1),
         Colors.transparent,
       ],
     );
@@ -32,7 +32,7 @@ class StockCardPainter extends CustomPainter {
     // Decorative lines
     paint.shader = null;
     paint.style = PaintingStyle.stroke;
-    paint.color = Colors.blue.withOpacity(0.2);
+    paint.color = Colors.blue.withValues(alpha: 0.2);
     paint.strokeWidth = 2;
 
     final path = Path();
@@ -46,7 +46,7 @@ class StockCardPainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     // Bottom accent line
-    paint.color = Colors.purple.withOpacity(0.15);
+    paint.color = Colors.purple.withValues(alpha: 0.15);
     paint.strokeWidth = 3;
     canvas.drawLine(
       Offset(0, size.height),

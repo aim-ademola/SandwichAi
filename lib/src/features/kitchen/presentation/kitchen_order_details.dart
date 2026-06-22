@@ -362,7 +362,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -388,7 +388,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: kPrimary.withOpacity(0.1),
+                  color: kPrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -433,7 +433,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -453,11 +453,17 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
           const SizedBox(height: 16),
           _buildInfoRow(
             'Name',
-            order.customerName ?? 'Walk-in Customer',
+            order.customerName.isEmpty
+                ? 'Walk-in Customer'
+                : order.customerName,
             textFontSize,
           ),
           const SizedBox(height: 12),
-          _buildInfoRow('Phone', order.customerPhone ?? 'N/A', textFontSize),
+          _buildInfoRow(
+            'Phone',
+            order.customerPhone.isEmpty ? 'N/A' : order.customerPhone,
+            textFontSize,
+          ),
           if (order.specialInstructions != null) ...[
             const SizedBox(height: 16),
             Container(
@@ -598,7 +604,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -699,7 +705,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -942,7 +948,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, -4),
           ),
@@ -1061,64 +1067,6 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
     }
   }
 
-  void _showFlagForHelpDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Flag Order for Help',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
-        content: Text(
-          'This order will be flagged for manager assistance. Continue?',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF757575),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancel',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF757575),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Order flagged for help'),
-                  backgroundColor: Colors.orange,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-            child: Text(
-              'Flag Order',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: kPrimary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // Responsive sizing functions
   double _getHorizontalPadding(double width) {
     if (width < 360) return 16;
@@ -1221,11 +1169,5 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
     if (width < 360) return 15;
     if (width < 600) return 16;
     return 17;
-  }
-
-  double _getButtonSpacing(double width) {
-    if (width < 360) return 12;
-    if (width < 600) return 14;
-    return 16;
   }
 }

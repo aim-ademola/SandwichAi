@@ -570,7 +570,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
       child: Container(
         padding: EdgeInsets.all(_getMethodPadding(screenWidth)),
         decoration: BoxDecoration(
-          color: isSelected ? kPrimary.withOpacity(0.1) : Colors.white,
+          color: isSelected ? kPrimary.withValues(alpha: 0.1) : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected ? kPrimary : const Color(0xFFE0E0E0),

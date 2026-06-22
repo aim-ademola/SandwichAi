@@ -355,7 +355,7 @@ class _OnlineReceiptScreenState extends State<OnlineReceiptScreen>
                       width: 90,
                       height: 90,
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.green.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -397,7 +397,7 @@ class _OnlineReceiptScreenState extends State<OnlineReceiptScreen>
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -445,7 +445,7 @@ class _OnlineReceiptScreenState extends State<OnlineReceiptScreen>
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: kPrimary.withOpacity(0.08),
+                            color: kPrimary.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(

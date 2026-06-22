@@ -159,7 +159,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                   Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
+                      color: kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.help_outline, color: kPrimary, size: 24),
@@ -213,10 +213,10 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                       Container(
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: kPrimary.withOpacity(0.05),
+                          color: kPrimary.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: kPrimary.withOpacity(0.1),
+                            color: kPrimary.withValues(alpha: 0.1),
                             width: 1,
                           ),
                         ),
@@ -551,7 +551,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               border: Border.all(
                 color: _selectedItemId == null && _isSearching == false
                     ? const Color(0xFFE0E0E0)
-                    : kPrimary.withOpacity(0.3),
+                    : kPrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -597,7 +597,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
         border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -706,7 +706,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                 width: 32,
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: kPrimary.withOpacity(0.1),
+                                  color: kPrimary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
@@ -947,7 +947,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
             onPressed: isLoading ? null : _submitForm,
             style: ElevatedButton.styleFrom(
               backgroundColor: kPrimary,
-              disabledBackgroundColor: kPrimary.withOpacity(0.6),
+              disabledBackgroundColor: kPrimary.withValues(alpha: 0.6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),

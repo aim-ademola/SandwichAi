@@ -592,7 +592,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: kPrimary.withOpacity(0.1),
+          color: kPrimary.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: kPrimary),
@@ -814,7 +814,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: widget.department.color.withOpacity(0.1),
+              color: widget.department.color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -941,7 +941,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
           return ListTile(
             dense: true,
             leading: CircleAvatar(
-              backgroundColor: widget.department.color.withOpacity(0.2),
+              backgroundColor: widget.department.color.withValues(alpha: 0.2),
               child: Text(
                 msg.senderName.isNotEmpty
                     ? msg.senderName[0].toUpperCase()
@@ -1081,13 +1081,13 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                     decoration: BoxDecoration(
                       color: isMe
                           ? (message.id.startsWith('temp_')
-                                ? kPrimary.withOpacity(0.6)
+                                ? kPrimary.withValues(alpha: 0.6)
                                 : kPrimary)
                           : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 5,
                           offset: const Offset(0, 2),
                         ),
@@ -1165,7 +1165,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: widget.department.color.withOpacity(0.2),
+        color: widget.department.color.withValues(alpha: 0.2),
         shape: BoxShape.circle,
       ),
       child: Center(
@@ -1192,8 +1192,8 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isMe
-              ? kPrimary.withOpacity(0.3)
-              : Colors.grey.withOpacity(0.3),
+              ? kPrimary.withValues(alpha: 0.3)
+              : Colors.grey.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -1206,7 +1206,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 Icons.reply,
                 size: 14,
                 color: isMe
-                    ? Colors.black.withOpacity(0.7)
+                    ? Colors.black.withValues(alpha: 0.7)
                     : kprimaryTextColor2,
               ),
               const SizedBox(width: 4),
@@ -1215,7 +1215,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: isMe ? Colors.black.withOpacity(0.9) : kPrimary,
+                  color: isMe ? Colors.black.withValues(alpha: 0.9) : kPrimary,
                 ),
               ),
             ],
@@ -1225,7 +1225,9 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             parent.content,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: isMe ? Colors.black.withOpacity(0.7) : kprimaryTextColor2,
+              color: isMe
+                  ? Colors.black.withValues(alpha: 0.7)
+                  : kprimaryTextColor2,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -1301,7 +1303,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     return Container(
       width: 180,
       height: 180,
-      color: isMe ? Colors.white.withOpacity(0.2) : Colors.grey[200],
+      color: isMe ? Colors.white.withValues(alpha: 0.2) : Colors.grey[200],
       child: Icon(
         Icons.image,
         size: 60,
@@ -1329,7 +1331,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 width: 100,
                 decoration: BoxDecoration(
                   color: isMe
-                      ? Colors.white.withOpacity(0.3)
+                      ? Colors.white.withValues(alpha: 0.3)
                       : Colors.grey[300],
                   borderRadius: BorderRadius.circular(2),
                 ),
@@ -1349,7 +1351,9 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 content,
                 style: TextStyle(
                   fontSize: 12,
-                  color: isMe ? Colors.white.withOpacity(0.8) : Colors.black54,
+                  color: isMe
+                      ? Colors.white.withValues(alpha: 0.8)
+                      : Colors.black54,
                 ),
               ),
             ],
@@ -1430,7 +1434,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Center(

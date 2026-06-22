@@ -31,7 +31,6 @@ class StockControlBottomNavBarState extends State<StockControlBottomNavBar> {
   late int _currentIndex;
   late List<Widget> _pages;
 
-  bool _isNavBarVisible = true;
   Timer? _hideTimer;
 
   @override
@@ -41,22 +40,18 @@ class StockControlBottomNavBarState extends State<StockControlBottomNavBar> {
     _pages = widget.pages.map((page) => KeepAliveWrapper(child: page)).toList();
 
     // Hide navbar if starting on chat screen
-    if (_isChatScreen) _isNavBarVisible = false;
+    if (_isChatScreen) ;
   }
 
   bool get _isChatScreen => _currentIndex == 4; // Chat screen index
 
   void showNavBarTemporarily({int durationSeconds = 3}) {
-    setState(() {
-      _isNavBarVisible = true;
-    });
+    setState(() {});
 
     _hideTimer?.cancel();
     _hideTimer = Timer(Duration(seconds: durationSeconds), () {
       if (_isChatScreen) {
-        setState(() {
-          _isNavBarVisible = false;
-        });
+        setState(() {});
       }
     });
   }
@@ -77,7 +72,7 @@ class StockControlBottomNavBarState extends State<StockControlBottomNavBar> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, -1),
             ),
@@ -143,7 +138,7 @@ class StockControlBottomNavBarState extends State<StockControlBottomNavBar> {
             });
             // TransferService().initialize(context);
           },
-          splashColor: activeColor.withOpacity(0.1),
+          splashColor: activeColor.withValues(alpha: 0.1),
           highlightColor: Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           child: Container(

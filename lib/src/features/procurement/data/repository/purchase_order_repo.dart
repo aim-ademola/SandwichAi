@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_draft_model.dart';
 
 abstract class OrderRepositoryInterface {
   Future<ApiResponse<Map<String, dynamic>>> createOrder({
@@ -19,6 +20,17 @@ abstract class OrderRepositoryInterface {
     String? buyerNotes,
     required List<OrderItemRequest> items,
   });
+
+  Future<ApiResponse<PurchaseOrderDraft>> createDraftOrder(
+    PurchaseOrderDraftRequest request,
+  );
+
+  Future<ApiResponse<PurchaseOrderDraft>> updateDraftOrder({
+    required String draftId,
+    required PurchaseOrderDraftRequest request,
+  });
+
+  Future<ApiResponse<PurchaseOrderDraft>> getDraftOrder(String draftId);
 }
 
 class OrderRepository implements OrderRepositoryInterface {
@@ -99,6 +111,40 @@ class OrderRepository implements OrderRepositoryInterface {
     }
   }
 
+  @override
+  Future<ApiResponse<PurchaseOrderDraft>> createDraftOrder(
+    PurchaseOrderDraftRequest request,
+  ) async {
+    return _apiClient.post<PurchaseOrderDraft>(
+      '/procurement/orders/drafts',
+      data: request.toJson(),
+      fromJson: (json) =>
+          PurchaseOrderDraft.fromJson((json as Map).cast<String, dynamic>()),
+    );
+  }
+
+  @override
+  Future<ApiResponse<PurchaseOrderDraft>> updateDraftOrder({
+    required String draftId,
+    required PurchaseOrderDraftRequest request,
+  }) async {
+    return _apiClient.patch<PurchaseOrderDraft>(
+      '/procurement/orders/drafts/$draftId',
+      data: request.toJson(),
+      fromJson: (json) =>
+          PurchaseOrderDraft.fromJson((json as Map).cast<String, dynamic>()),
+    );
+  }
+
+  @override
+  Future<ApiResponse<PurchaseOrderDraft>> getDraftOrder(String draftId) async {
+    return _apiClient.get<PurchaseOrderDraft>(
+      '/procurement/orders/drafts/$draftId',
+      fromJson: (json) =>
+          PurchaseOrderDraft.fromJson((json as Map).cast<String, dynamic>()),
+    );
+  }
+
   String _parseErrorFromResponse(Map<String, dynamic> data) {
     final statusCode = data['statusCode'];
     final message = data['message'] ?? 'An error occurred';
@@ -156,22 +202,4 @@ class OrderRepository implements OrderRepositoryInterface {
 
     return 'Failed to create order. Please try again later.';
   }
-}
-
-class OrderItemRequest {
-  final String productId;
-  final int quantityOrdered;
-  final String? notes;
-
-  OrderItemRequest({
-    required this.productId,
-    required this.quantityOrdered,
-    this.notes,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'productId': productId,
-    'quantityOrdered': quantityOrdered,
-    if (notes != null) 'notes': notes,
-  };
 }

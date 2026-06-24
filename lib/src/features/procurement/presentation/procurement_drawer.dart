@@ -4,7 +4,7 @@ import 'package:sandwich_ai/src/core/globals/drawer_header.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/chnge_pwd.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_good_reveived_tab.dart';
@@ -58,14 +58,10 @@ class _ProcurementAppDrawerContentState
     }
   }
 
-  Future<void> _markOnboardingComplete() async {
-    await DrawerOnboardingCache.instance.markProcurementDrawerOnboardingSeen();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       child: SafeArea(
         child: Column(
           children: [
@@ -173,35 +169,34 @@ class _ProcurementAppDrawerContentState
     required VoidCallback onTap,
     bool isLogout = false,
   }) {
+    final colors = context.appColors;
+    final foreground = isLogout ? colors.error : colors.textPrimary;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: isLogout ? Colors.red.shade50 : const Color(0xFFF8F6F6),
+          color: isLogout ? colors.logoutSurface : colors.drawerItem,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: isLogout ? Colors.red : kprimaryTextColor1,
-              size: 24,
-            ),
+            Icon(icon, color: foreground, size: 24),
             const SizedBox(width: 16),
             Text(
               title,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: isLogout ? Colors.red : kprimaryTextColor1,
+                color: foreground,
               ),
             ),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              color: isLogout ? Colors.red : kprimaryTextColor2,
+              color: isLogout ? colors.error : colors.textSecondary,
               size: 20,
             ),
           ],

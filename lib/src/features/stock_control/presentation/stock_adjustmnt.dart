@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/event.dart';
@@ -96,7 +96,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: context.modeError,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -111,6 +111,10 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
         padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -121,10 +125,14 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: kPrimary.withValues(alpha: 0.1),
+                      color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.tune_rounded, color: kPrimary, size: 24),
+                    child: Icon(
+                      Icons.tune_rounded,
+                      color: context.modePrimary,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -136,7 +144,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -144,7 +152,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                           widget.itemName,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
@@ -159,9 +167,9 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8F6F6),
+                  color: context.modeSurfaceAlt,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+                  border: Border.all(color: context.modeBorder, width: 1),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,7 +178,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                       'Current Stock',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -179,7 +187,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ],
@@ -193,7 +201,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -216,7 +224,11 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildTypeButton('SET', Icons.edit, kPrimary),
+                    child: _buildTypeButton(
+                      'SET',
+                      Icons.edit,
+                      context.modePrimary,
+                    ),
                   ),
                 ],
               ),
@@ -228,7 +240,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -237,7 +249,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                 keyboardType: TextInputType.number,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 16,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
                 decoration: InputDecoration(
                   hintText: _selectedType == 'SET'
@@ -245,33 +257,30 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                       : 'Enter quantity',
                   hintStyle: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                   suffixText: widget.unit,
                   suffixStyle: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                   filled: true,
-                  fillColor: const Color(0xFFF8F6F6),
+                  fillColor: context.modeSurfaceAlt,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: context.modeBorder, width: 1),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: context.modeBorder, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: kPrimary, width: 2),
+                    borderSide: BorderSide(
+                      color: context.modePrimary,
+                      width: 2,
+                    ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -289,12 +298,12 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                   decoration: BoxDecoration(
                     color: _calculatedStock < 0
                         ? const Color(0xFFFFEBEE)
-                        : kPrimary.withValues(alpha: 0.1),
+                        : context.modePrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _calculatedStock < 0
                           ? const Color(0xFFEF4444)
-                          : kPrimary.withValues(alpha: 0.3),
+                          : context.modePrimary.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -308,7 +317,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                           fontWeight: FontWeight.w600,
                           color: _calculatedStock < 0
                               ? const Color(0xFFEF4444)
-                              : kPrimary,
+                              : context.modePrimary,
                         ),
                       ),
                       Text(
@@ -318,7 +327,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                           fontWeight: FontWeight.w700,
                           color: _calculatedStock < 0
                               ? const Color(0xFFEF4444)
-                              : kPrimary,
+                              : context.modePrimary,
                         ),
                       ),
                     ],
@@ -333,7 +342,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -342,33 +351,30 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                 maxLines: 3,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Add a note about this adjustment...',
                   hintStyle: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                   filled: true,
-                  fillColor: const Color(0xFFF8F6F6),
+                  fillColor: context.modeSurfaceAlt,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: context.modeBorder, width: 1),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: context.modeBorder, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: kPrimary, width: 2),
+                    borderSide: BorderSide(
+                      color: context.modePrimary,
+                      width: 2,
+                    ),
                   ),
                   contentPadding: const EdgeInsets.all(16),
                 ),
@@ -383,7 +389,10 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                       onPressed: () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: kprimaryTextColor2, width: 1.5),
+                        side: BorderSide(
+                          color: context.modeTextSecondary,
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -393,7 +402,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                     ),
@@ -403,7 +412,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                     child: ElevatedButton(
                       onPressed: _handleAdjustment,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimary,
+                        backgroundColor: context.modePrimary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -415,7 +424,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
                     ),
@@ -441,10 +450,10 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? color : Colors.white,
+          color: isSelected ? color : context.modeSurfaceAlt,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? color : const Color(0xFFE0E0E0),
+            color: isSelected ? color : context.modeBorder,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -460,14 +469,18 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isSelected ? Colors.white : color, size: 24),
+            Icon(
+              icon,
+              color: isSelected ? context.modeTextInverse : color,
+              size: 24,
+            ),
             const SizedBox(height: 4),
             Text(
               type,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : color,
+                color: isSelected ? context.modeTextInverse : color,
               ),
             ),
           ],

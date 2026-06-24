@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/config/responsive_config.dart';
-import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
 Widget buildTextField({

@@ -1,16 +1,40 @@
 // lib/core/network/network_exceptions.dart
+import 'package:sandwich_ai/src/core/network/api_engine_private/backend_error_parser.dart';
 
 class NetworkException implements Exception {
   final String message;
   final int? statusCode;
-  dynamic data;
+  final dynamic data;
+  final String? code;
+  final List<FieldError> fieldErrors;
   final NetworkExceptionType type;
 
   NetworkException._({
     required this.message,
     this.statusCode,
+    this.data,
+    this.code,
+    this.fieldErrors = const [],
     required this.type,
   });
+
+  factory NetworkException.fromBackend(
+    ApiErrorDetails details, {
+    required NetworkExceptionType type,
+    String fallbackMessage = 'Something went wrong. Please try again.',
+  }) {
+    final message = details.message.trim().isEmpty
+        ? fallbackMessage
+        : details.message;
+    return NetworkException._(
+      message: message,
+      statusCode: details.statusCode,
+      data: details.raw,
+      code: details.code,
+      fieldErrors: details.fieldErrors,
+      type: type,
+    );
+  }
 
   // Timeout errors
   static NetworkException requestTimeout() => NetworkException._(
@@ -47,59 +71,111 @@ class NetworkException implements Exception {
   );
 
   // Client errors (4xx)
-  static NetworkException badRequest(String message) => NetworkException._(
+  static NetworkException badRequest(
+    String message, {
+    dynamic data,
+    List<FieldError> fieldErrors = const [],
+    String? code,
+  }) => NetworkException._(
     message: message.isEmpty
         ? 'Bad request. Please check your input.'
         : message,
     statusCode: 400,
+    data: data,
+    code: code,
+    fieldErrors: fieldErrors,
     type: NetworkExceptionType.badRequest,
   );
 
-  static NetworkException unauthorizedRequest(String message) =>
-      NetworkException._(
-        message: message.isEmpty
-            ? 'Unauthorized. Please login again.'
-            : message,
-        statusCode: 401,
-        type: NetworkExceptionType.unauthorizedRequest,
-      );
+  static NetworkException unauthorizedRequest(
+    String message, {
+    dynamic data,
+    List<FieldError> fieldErrors = const [],
+    String? code,
+  }) => NetworkException._(
+    message: message.isEmpty ? 'Unauthorized. Please login again.' : message,
+    statusCode: 401,
+    data: data,
+    code: code,
+    fieldErrors: fieldErrors,
+    type: NetworkExceptionType.unauthorizedRequest,
+  );
 
-  static NetworkException forbidden(String message) => NetworkException._(
+  static NetworkException forbidden(
+    String message, {
+    dynamic data,
+    List<FieldError> fieldErrors = const [],
+    String? code,
+  }) => NetworkException._(
     message: message.isEmpty
         ? 'Forbidden. You don\'t have permission to access this resource.'
         : message,
     statusCode: 403,
+    data: data,
+    code: code,
+    fieldErrors: fieldErrors,
     type: NetworkExceptionType.forbidden,
   );
 
-  static NetworkException notFound(String message) => NetworkException._(
+  static NetworkException notFound(
+    String message, {
+    dynamic data,
+    List<FieldError> fieldErrors = const [],
+    String? code,
+  }) => NetworkException._(
     message: message.isEmpty ? 'Resource not found.' : message,
     statusCode: 404,
+    data: data,
+    code: code,
+    fieldErrors: fieldErrors,
     type: NetworkExceptionType.notFound,
   );
 
-  static NetworkException conflict(String message) => NetworkException._(
+  static NetworkException conflict(
+    String message, {
+    dynamic data,
+    List<FieldError> fieldErrors = const [],
+    String? code,
+  }) => NetworkException._(
     message: message.isEmpty
         ? 'Conflict. The request conflicts with the current state.'
         : message,
     statusCode: 409,
+    data: data,
+    code: code,
+    fieldErrors: fieldErrors,
     type: NetworkExceptionType.conflict,
   );
 
-  static NetworkException unprocessableEntity(String message) =>
-      NetworkException._(
-        message: message.isEmpty
-            ? 'Validation failed. Please check your input.'
-            : message,
-        statusCode: 422,
-        type: NetworkExceptionType.unprocessableEntity,
-      );
+  static NetworkException unprocessableEntity(
+    String message, {
+    dynamic data,
+    List<FieldError> fieldErrors = const [],
+    String? code,
+  }) => NetworkException._(
+    message: message.isEmpty
+        ? 'Validation failed. Please check your input.'
+        : message,
+    statusCode: 422,
+    data: data,
+    code: code,
+    fieldErrors: fieldErrors,
+    type: NetworkExceptionType.unprocessableEntity,
+  );
 
-  static NetworkException tooManyRequests(String message) => NetworkException._(
+  static NetworkException tooManyRequests(
+    String message, {
+    dynamic data,
+    List<FieldError> fieldErrors = const [],
+    String? code,
+  }) => NetworkException._(
     message: message.isEmpty
         ? 'Too many requests. Please try again later.'
         : message,
     statusCode: 429,
+    data: data,
+    code: code,
+    fieldErrors: fieldErrors,
     type: NetworkExceptionType.tooManyRequests,
   );
 

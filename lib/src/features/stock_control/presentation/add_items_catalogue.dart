@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/branch_stock_model.dart';
 
@@ -52,13 +52,6 @@ class _AddItemDialogState extends State<AddItemDialog> {
     }
   }
 
-  ItemStatus? _determineItemStatus(int expiryDays, int quantity) {
-    if (expiryDays <= 0) return ItemStatus.expired;
-    if (expiryDays <= 3) return ItemStatus.useSoon;
-    if (quantity <= 5) return ItemStatus.lowStock;
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -68,7 +61,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
         final isSmallScreen = screenWidth < 600;
 
         return Dialog(
-          backgroundColor: Colors.white,
+          backgroundColor: context.modeSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -159,8 +152,8 @@ class _AddItemDialogState extends State<AddItemDialog> {
   Widget _buildDialogHeader(double screenWidth) {
     return Container(
       padding: EdgeInsets.all(_getDialogPadding(screenWidth)),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF8F6F6),
+      decoration: BoxDecoration(
+        color: context.modeSurfaceAlt,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
@@ -173,7 +166,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getHeaderFontSize(screenWidth),
               fontWeight: FontWeight.w700,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           const Spacer(),
@@ -181,7 +174,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
             icon: Icon(
               Icons.close,
               size: _getIconSize(screenWidth),
-              color: const Color(0xFF757575),
+              color: context.modeTextMuted,
             ),
             onPressed: () => Navigator.of(context).pop(),
             padding: EdgeInsets.zero,
@@ -373,7 +366,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         SizedBox(height: _getLabelSpacing(screenWidth)),
@@ -382,21 +375,21 @@ class _AddItemDialogState extends State<AddItemDialog> {
           keyboardType: keyboardType,
           maxLines: maxLines,
           validator: validator,
-          cursorColor: kPrimary,
+          cursorColor: context.modePrimary,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: Colors.black,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF9E9E9E),
+              color: context.modeTextMuted,
             ),
             filled: true,
-            fillColor: const Color(0xFFF5F5F5),
+            fillColor: context.modeSurfaceAlt,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
@@ -407,7 +400,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: kPrimary, width: 1.5),
+              borderSide: BorderSide(color: context.modePrimary, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -450,13 +443,13 @@ class _AddItemDialogState extends State<AddItemDialog> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         SizedBox(height: _getLabelSpacing(screenWidth)),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
+            color: context.modeSurfaceAlt,
             borderRadius: BorderRadius.circular(8),
           ),
           child: DropdownButtonFormField<String>(
@@ -469,7 +462,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getInputFontSize(screenWidth),
                     fontWeight: FontWeight.w400,
-                    color: Colors.black,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               );
@@ -484,14 +477,14 @@ class _AddItemDialogState extends State<AddItemDialog> {
             ),
             icon: Icon(
               Icons.arrow_drop_down,
-              color: const Color(0xFF757575),
+              color: context.modeTextMuted,
               size: _getIconSize(screenWidth),
             ),
-            dropdownColor: Colors.white,
+            dropdownColor: context.modeSurface,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
         ),
@@ -508,14 +501,14 @@ class _AddItemDialogState extends State<AddItemDialog> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         SizedBox(height: _getLabelSpacing(screenWidth)),
         Container(
           padding: EdgeInsets.all(_getInputPadding(screenWidth)),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
+            color: context.modeSurfaceAlt,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
@@ -570,10 +563,12 @@ class _AddItemDialogState extends State<AddItemDialog> {
       child: Container(
         padding: EdgeInsets.all(_getMethodPadding(screenWidth)),
         decoration: BoxDecoration(
-          color: isSelected ? kPrimary.withValues(alpha: 0.1) : Colors.white,
+          color: isSelected
+              ? context.modePrimary.withValues(alpha: 0.1)
+              : context.modeSurface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? kPrimary : const Color(0xFFE0E0E0),
+            color: isSelected ? context.modePrimary : context.modeBorder,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -585,7 +580,9 @@ class _AddItemDialogState extends State<AddItemDialog> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? kPrimary : const Color(0xFF757575),
+                  color: isSelected
+                      ? context.modePrimary
+                      : context.modeTextMuted,
                   width: 2,
                 ),
               ),
@@ -594,9 +591,9 @@ class _AddItemDialogState extends State<AddItemDialog> {
                       child: Container(
                         width: _getRadioSize(screenWidth) * 0.5,
                         height: _getRadioSize(screenWidth) * 0.5,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: kPrimary,
+                          color: context.modePrimary,
                         ),
                       ),
                     )
@@ -612,7 +609,9 @@ class _AddItemDialogState extends State<AddItemDialog> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getMethodTitleFontSize(screenWidth),
                       fontWeight: FontWeight.w600,
-                      color: isSelected ? kPrimary : kprimaryTextColor1,
+                      color: isSelected
+                          ? context.modePrimary
+                          : context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -621,7 +620,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getMethodDescFontSize(screenWidth),
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF757575),
+                      color: context.modeTextMuted,
                     ),
                   ),
                 ],
@@ -644,7 +643,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
             child: ElevatedButton(
               onPressed: _handleSubmit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
+                backgroundColor: context.modePrimary,
                 padding: EdgeInsets.symmetric(
                   vertical: _getButtonPadding(screenWidth),
                 ),
@@ -658,7 +657,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getButtonFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                 ),
               ),
             ),
@@ -675,14 +674,14 @@ class _AddItemDialogState extends State<AddItemDialog> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                side: const BorderSide(color: Color(0xFFE0E0E0)),
+                side: BorderSide(color: context.modeBorder),
               ),
               child: Text(
                 'Cancel',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getButtonFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextMuted,
                 ),
               ),
             ),
@@ -704,14 +703,14 @@ class _AddItemDialogState extends State<AddItemDialog> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              side: const BorderSide(color: Color(0xFFE0E0E0)),
+              side: BorderSide(color: context.modeBorder),
             ),
             child: Text(
               'Cancel',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getButtonFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF757575),
+                color: context.modeTextMuted,
               ),
             ),
           ),
@@ -721,7 +720,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
           child: ElevatedButton(
             onPressed: _handleSubmit,
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
+              backgroundColor: context.modePrimary,
               padding: EdgeInsets.symmetric(
                 vertical: _getButtonPadding(screenWidth),
               ),
@@ -735,7 +734,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getButtonFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: context.modeTextInverse,
               ),
             ),
           ),

@@ -3,12 +3,14 @@ import 'package:sandwich_ai/src/features/dashboard/bloc/dashboard_contract_bloc/
 import 'package:sandwich_ai/src/features/dashboard/bloc/dashboard_contract_bloc/state.dart';
 import 'package:sandwich_ai/src/features/dashboard/data/repo/dashboard_contract_repo.dart';
 
-class DashboardContractBloc extends Bloc<DashboardContractEvent, DashboardContractState> {
+class DashboardContractBloc
+    extends Bloc<DashboardContractEvent, DashboardContractState> {
   final DashboardContractRepositoryInterface _repository;
 
-  DashboardContractBloc({required DashboardContractRepositoryInterface repository})
-    : _repository = repository,
-      super(const DashboardContractInitial()) {
+  DashboardContractBloc({
+    required DashboardContractRepositoryInterface repository,
+  }) : _repository = repository,
+       super(const DashboardContractInitial()) {
     on<LoadDashboardContract>(_onLoadDashboardContract);
     on<RefreshDashboardContract>(_onRefreshDashboardContract);
     on<ResetDashboardContract>(_onResetDashboardContract);

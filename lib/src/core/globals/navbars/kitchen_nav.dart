@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 
 import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_dash.dart';
@@ -36,13 +36,18 @@ class _KitchenBottomNavBarState extends State<KitchenBottomNavBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeBackground,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
+          border: Border(top: BorderSide(color: context.modeBorder)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: Colors.black.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.25
+                    : 0.08,
+              ),
               blurRadius: 8,
               offset: const Offset(0, -1),
             ),
@@ -95,8 +100,8 @@ class _KitchenBottomNavBarState extends State<KitchenBottomNavBar> {
     required int index,
   }) {
     final bool isActive = _currentIndex == index;
-    final Color activeColor = kPrimary;
-    final Color inactiveColor = const Color(0xFF9E9E9E); // Grey color
+    final Color activeColor = context.modePrimary;
+    final Color inactiveColor = context.modeTextMuted;
 
     return Expanded(
       child: Material(
@@ -112,13 +117,22 @@ class _KitchenBottomNavBarState extends State<KitchenBottomNavBar> {
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4),
+            decoration: BoxDecoration(
+              color: isActive
+                  ? activeColor.withValues(alpha: 0.1)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SvgPicture.asset(
                   isActive ? activeIcon : icon,
-                  color: isActive ? activeColor : null,
+                  colorFilter: ColorFilter.mode(
+                    isActive ? activeColor : inactiveColor,
+                    BlendMode.srcIn,
+                  ),
                   fit: BoxFit.scaleDown,
                 ),
                 const SizedBox(height: 4),

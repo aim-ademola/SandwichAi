@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
-import 'package:sandwich_ai/src/core/constant/appcolors.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_summary_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_summary_bloc/event.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_summary_bloc/state.dart';
@@ -56,7 +56,7 @@ class _StockControlDashboardBodyScreenState
       child: Scaffold(
         drawer: StockControlAppDrawer(),
         key: _scaffoldKey,
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
 
         body: BlocConsumer<BranchStockSummaryBloc, BranchStockSummaryState>(
           listener: (context, state) {
@@ -72,14 +72,14 @@ class _StockControlDashboardBodyScreenState
                     Icon(
                       Icons.inventory_2_outlined,
                       size: 48,
-                      color: Colors.grey,
+                      color: context.modeTextMuted,
                     ),
                     SizedBox(height: 12),
                     Text(
                       "No stock data found",
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: context.modeTextMuted,
                       ),
                     ),
                   ],
@@ -109,14 +109,14 @@ class _StockControlDashboardBodyScreenState
                     Icon(
                       Icons.inventory_2_outlined,
                       size: 48,
-                      color: Colors.grey,
+                      color: context.modeTextMuted,
                     ),
                     SizedBox(height: 12),
                     Text(
                       "No stock data found",
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: context.modeTextMuted,
                       ),
                     ),
                   ],
@@ -136,7 +136,7 @@ class _StockControlDashboardBodyScreenState
                     const RefreshBranchStockSummary(),
                   );
                 },
-                color: kPrimary,
+                color: context.modePrimary,
                 child: _buildBody(
                   context,
                   state is BranchStockSummaryLoaded
@@ -163,14 +163,18 @@ class _StockControlDashboardBodyScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(_getErrorIcon(state.errorType), size: 64, color: Colors.red),
+            Icon(
+              _getErrorIcon(state.errorType),
+              size: 64,
+              color: context.modeError,
+            ),
             const SizedBox(height: 16),
             Text(
               _getErrorTitle(state.errorType),
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -179,7 +183,7 @@ class _StockControlDashboardBodyScreenState
               state.error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: const Color(0xFF757575),
+                color: context.modeTextMuted,
               ),
               textAlign: TextAlign.center,
             ),
@@ -193,7 +197,7 @@ class _StockControlDashboardBodyScreenState
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
+                backgroundColor: context.modePrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 12,
@@ -204,7 +208,7 @@ class _StockControlDashboardBodyScreenState
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                 ),
               ),
             ),
@@ -310,28 +314,28 @@ class _StockControlDashboardBodyScreenState
             _buildStatCard(
               'Total Items',
               overview.totalItems,
-              kPrimary,
+              context.modePrimary,
               screenWidth,
             ),
             SizedBox(width: _getCardSpacing(screenWidth)),
             _buildStatCard(
               'Total Stock Quantity',
               overview.totalStockQuantity,
-              kPrimary,
+              context.modePrimary,
               screenWidth,
             ),
             SizedBox(width: _getCardSpacing(screenWidth)),
             _buildStatCard(
               'In Stock',
               overview.statusBreakdown.inStock,
-              kPrimary,
+              context.modePrimary,
               screenWidth,
             ),
             SizedBox(width: _getCardSpacing(screenWidth)),
             _buildStatCard(
               'Expired Stock',
               overview.statusBreakdown.expired,
-              Colors.red,
+              context.modeError,
               screenWidth,
             ),
           ],
@@ -354,9 +358,9 @@ class _StockControlDashboardBodyScreenState
     return Container(
       padding: EdgeInsets.all(_getStatCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kPrimary, width: 1.5),
+        border: Border.all(color: context.modePrimary, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,7 +370,7 @@ class _StockControlDashboardBodyScreenState
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: labelFontSize,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF757575),
+              color: context.modeTextMuted,
             ),
           ),
           SizedBox(height: _getStatValueSpacing(screenWidth)),
@@ -395,7 +399,7 @@ class _StockControlDashboardBodyScreenState
     return Container(
       padding: EdgeInsets.all(_getTotalStockPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C),
+        color: context.modeSurfaceAlt,
         borderRadius: BorderRadius.circular(12),
       ),
       child: CustomPaint(
@@ -412,7 +416,7 @@ class _StockControlDashboardBodyScreenState
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: labelFontSize,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF9E9E9E),
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
@@ -438,7 +442,7 @@ class _StockControlDashboardBodyScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: valueFontSize,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -458,21 +462,21 @@ class _StockControlDashboardBodyScreenState
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Row(
         children: [
           Icon(
             Icons.search,
-            color: const Color(0xFF9E9E9E),
+            color: context.modeTextMuted,
             size: _getSearchIconSize(screenWidth),
           ),
           SizedBox(width: _getSearchIconSpacing(screenWidth)),
           Expanded(
             child: TextField(
-              cursorColor: kPrimary,
+              cursorColor: context.modePrimary,
               controller: _searchController,
               onChanged: (value) {
                 context.read<BranchStockSummaryBloc>().add(
@@ -482,14 +486,14 @@ class _StockControlDashboardBodyScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: fontSize,
                 fontWeight: FontWeight.w400,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Search Categories',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: fontSize,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF9E9E9E),
+                  color: context.modeTextMuted,
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -507,7 +511,7 @@ class _StockControlDashboardBodyScreenState
               },
               child: Icon(
                 Icons.clear,
-                color: const Color(0xFF9E9E9E),
+                color: context.modeTextMuted,
                 size: _getSearchIconSize(screenWidth),
               ),
             ),
@@ -528,7 +532,7 @@ class _StockControlDashboardBodyScreenState
             'No stock categories found',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 16,
-              color: const Color(0xFF757575),
+              color: context.modeTextMuted,
             ),
           ),
         ),
@@ -543,7 +547,7 @@ class _StockControlDashboardBodyScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getSectionTitleFontSize(screenWidth),
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: context.modeTextPrimary,
           ),
         ),
         SizedBox(height: _getStockLevelSpacing(screenWidth)),
@@ -566,9 +570,9 @@ class _StockControlDashboardBodyScreenState
     return Container(
       padding: EdgeInsets.all(_getItemCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kPrimary, width: 1.5),
+        border: Border.all(color: context.modePrimary, width: 1.5),
       ),
       child: Row(
         children: [
@@ -578,7 +582,7 @@ class _StockControlDashboardBodyScreenState
             height: imageSize,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: const Color(0xFFF5F5F5),
+              color: context.modeSurfaceMuted,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
@@ -596,7 +600,7 @@ class _StockControlDashboardBodyScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: nameFontSize,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -605,7 +609,7 @@ class _StockControlDashboardBodyScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: detailsFontSize,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF757575),
+                    color: context.modeTextMuted,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -614,7 +618,7 @@ class _StockControlDashboardBodyScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: detailsFontSize - 1,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF9E9E9E),
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ],
@@ -662,17 +666,17 @@ class _StockControlDashboardBodyScreenState
     }
 
     return Container(
-      color: const Color(0xFFF5F5F5),
+      color: context.modeSurfaceMuted,
       child: Center(
         child: Image.asset(
           assetPath,
           width: 45,
           height: 45,
           errorBuilder: (context, error, stackTrace) {
-            return const Icon(
+            return Icon(
               Icons.inventory_2,
               size: 45,
-              color: Color(0xFF9E9E9E),
+              color: context.modeTextMuted,
             );
           },
         ),
@@ -690,20 +694,20 @@ class _StockControlDashboardBodyScreenState
 
     switch (level.toLowerCase()) {
       case 'low':
-        bgColor = const Color(0xFFFFF3E0);
-        textColor = kPrimary;
+        bgColor = context.modePrimary.withValues(alpha: 0.12);
+        textColor = context.modePrimary;
         break;
       case 'medium':
-        bgColor = const Color(0xFFFFF9C4);
-        textColor = const Color(0xFFF57C00);
+        bgColor = context.modeWarning.withValues(alpha: 0.16);
+        textColor = context.modeWarning;
         break;
       case 'high':
-        bgColor = const Color(0xFFE8F5E9);
-        textColor = const Color(0xFF4CAF50);
+        bgColor = context.modeSuccess.withValues(alpha: 0.16);
+        textColor = context.modeSuccess;
         break;
       default:
-        bgColor = const Color(0xFFF5F5F5);
-        textColor = const Color(0xFF757575);
+        bgColor = context.modeSurfaceMuted;
+        textColor = context.modeTextMuted;
     }
 
     return Container(
@@ -888,17 +892,5 @@ class _StockControlDashboardBodyScreenState
     if (width < 360) return 4;
     if (width < 600) return 5;
     return 6;
-  }
-
-  double _getFABSize(double width) {
-    if (width < 360) return 56;
-    if (width < 600) return 60;
-    return 64;
-  }
-
-  double _getFABIconSize(double width) {
-    if (width < 360) return 24;
-    if (width < 600) return 28;
-    return 32;
   }
 }

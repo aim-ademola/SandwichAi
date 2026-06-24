@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_interceptors.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_private/backend_error_parser.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/api_constants.dart';
@@ -220,12 +221,12 @@ class ApiClient {
         queryParameters: queryParameters,
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 300) {
         return ApiResponse.success(savePath);
       } else {
-        return ApiResponse.error(
-          NetworkException.defaultError('Download failed'),
-        );
+        return ApiResponse.error(_handleHttpError(response));
       }
     } catch (e) {
       return ApiResponse.error(_handleError(e));
@@ -237,7 +238,8 @@ class ApiClient {
     Response response,
     T Function(dynamic)? fromJson,
   ) {
-    if (response.statusCode! >= 200 && response.statusCode! < 300) {
+    final statusCode = response.statusCode ?? 0;
+    if (statusCode >= 200 && statusCode < 300) {
       try {
         if (fromJson != null) {
           final data = fromJson(response.data);
@@ -257,7 +259,9 @@ class ApiClient {
 
   // Handle different types of errors
   NetworkException _handleError(dynamic error) {
-    if (error is DioException) {
+    if (error is NetworkException) {
+      return error;
+    } else if (error is DioException) {
       return _handleDioError(error);
     } else if (error is SocketException) {
       return NetworkException.noInternetConnection();
@@ -278,7 +282,13 @@ class ApiClient {
       case DioExceptionType.receiveTimeout:
         return NetworkException.receiveTimeout();
       case DioExceptionType.badResponse:
-        return _handleHttpError(error.response!);
+        final response = error.response;
+        if (response == null) {
+          return NetworkException.defaultError(
+            error.message ?? 'The server returned an error.',
+          );
+        }
+        return _handleHttpError(response);
       case DioExceptionType.cancel:
         return NetworkException.requestCancelled();
       case DioExceptionType.connectionError:
@@ -295,51 +305,121 @@ class ApiClient {
 
   // Handle HTTP status code errors
   NetworkException _handleHttpError(Response response) {
+    final details = BackendErrorParser.parse(
+      response.data,
+      statusCode: response.statusCode,
+      fallbackMessage: _fallbackForStatus(response.statusCode),
+    );
+
     switch (response.statusCode) {
       case 400:
-        return NetworkException.badRequest(_extractErrorMessage(response.data));
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.badRequest,
+          fallbackMessage: 'Bad request. Please check your input.',
+        );
       case 401:
-        return NetworkException.unauthorizedRequest(
-          _extractErrorMessage(response.data),
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.unauthorizedRequest,
+          fallbackMessage: 'Unauthorized. Please login again.',
         );
       case 403:
-        return NetworkException.forbidden(_extractErrorMessage(response.data));
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.forbidden,
+          fallbackMessage:
+              'Forbidden. You don\'t have permission to access this resource.',
+        );
       case 404:
-        return NetworkException.notFound(_extractErrorMessage(response.data));
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.notFound,
+          fallbackMessage: 'Resource not found.',
+        );
       case 409:
-        return NetworkException.conflict(_extractErrorMessage(response.data));
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.conflict,
+          fallbackMessage:
+              'Conflict. The request conflicts with the current state.',
+        );
       case 422:
-        return NetworkException.unprocessableEntity(
-          _extractErrorMessage(response.data),
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.unprocessableEntity,
+          fallbackMessage: 'Validation failed. Please check your input.',
         );
       case 429:
-        return NetworkException.tooManyRequests(
-          _extractErrorMessage(response.data),
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.tooManyRequests,
+          fallbackMessage: 'Too many requests. Please try again later.',
         );
       case 500:
-        return NetworkException.internalServerError();
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.internalServerError,
+          fallbackMessage: 'Internal server error. Please try again later.',
+        );
       case 502:
-        return NetworkException.badGateway();
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.badGateway,
+          fallbackMessage:
+              'Bad gateway. The server is temporarily unavailable.',
+        );
       case 503:
-        return NetworkException.serviceUnavailable();
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.serviceUnavailable,
+          fallbackMessage:
+              'Service unavailable. The server is temporarily down.',
+        );
       case 504:
-        return NetworkException.gatewayTimeout();
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.gatewayTimeout,
+          fallbackMessage:
+              'Gateway timeout. The server took too long to respond.',
+        );
       default:
-        return NetworkException.defaultError(
-          'HTTP ${response.statusCode}: ${_extractErrorMessage(response.data)}',
+        return NetworkException.fromBackend(
+          details,
+          type: NetworkExceptionType.defaultError,
+          fallbackMessage:
+              'HTTP ${response.statusCode}: ${_fallbackForStatus(response.statusCode)}',
         );
     }
   }
 
-  // Extract error message from response
-  String _extractErrorMessage(dynamic data) {
-    if (data is Map<String, dynamic>) {
-      return data['message'] ??
-          data['error'] ??
-          data['detail'] ??
-          'An error occurred';
+  String _fallbackForStatus(int? statusCode) {
+    switch (statusCode) {
+      case 400:
+        return 'Bad request. Please check your input.';
+      case 401:
+        return 'Unauthorized. Please login again.';
+      case 403:
+        return 'Forbidden. You don\'t have permission to access this resource.';
+      case 404:
+        return 'Resource not found.';
+      case 409:
+        return 'Conflict. The request conflicts with the current state.';
+      case 422:
+        return 'Validation failed. Please check your input.';
+      case 429:
+        return 'Too many requests. Please try again later.';
+      case 500:
+        return 'Internal server error. Please try again later.';
+      case 502:
+        return 'Bad gateway. The server is temporarily unavailable.';
+      case 503:
+        return 'Service unavailable. The server is temporarily down.';
+      case 504:
+        return 'Gateway timeout. The server took too long to respond.';
+      default:
+        return 'Something went wrong. Please try again.';
     }
-    return data?.toString() ?? 'An error occurred';
   }
 
   // Check network connectivity

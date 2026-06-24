@@ -43,6 +43,10 @@ class PaymentRepository extends BaseRepository
             },
           );
 
+      if (response.hasError) {
+        return ApiResponse.error(response.error!);
+      }
+
       if (response.data == null) {
         return ApiResponse.errorMessage('Failed to record cash payment');
       }
@@ -85,6 +89,10 @@ class PaymentRepository extends BaseRepository
               throw TimeoutException('Request timed out. Please try again.');
             },
           );
+
+      if (response.hasError) {
+        return ApiResponse.error(response.error!);
+      }
 
       if (response.data == null) {
         return ApiResponse.errorMessage('Failed to fetch pending transactions');
@@ -129,6 +137,10 @@ class PaymentRepository extends BaseRepository
             },
           );
 
+      if (response.hasError) {
+        return ApiResponse.error(response.error!);
+      }
+
       if (response.data == null) {
         return ApiResponse.errorMessage('Failed to initialize payment');
       }
@@ -170,6 +182,10 @@ class PaymentRepository extends BaseRepository
               throw TimeoutException('Request timed out. Please try again.');
             },
           );
+
+      if (response.hasError) {
+        return ApiResponse.error(response.error!);
+      }
 
       if (response.data == null) {
         return ApiResponse.errorMessage('Failed to check payment status');

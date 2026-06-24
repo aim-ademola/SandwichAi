@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/compliance_history.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/recipe_compliance.dart';

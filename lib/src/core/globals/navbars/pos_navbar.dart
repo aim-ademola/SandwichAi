@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/active_orders.dart';
@@ -76,7 +76,7 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeBackground,
       bottomNavigationBar: _isNavBarVisible ? _buildBottomNavBar() : null,
     );
   }
@@ -84,10 +84,15 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
   Widget _buildBottomNavBar() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border(top: BorderSide(color: context.modeBorder)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.25
+                  : 0.08,
+            ),
             blurRadius: 8,
             offset: const Offset(0, -1),
           ),
@@ -144,8 +149,8 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
     required int index,
   }) {
     final bool isActive = _currentIndex == index;
-    final Color activeColor = kPrimary;
-    final Color inactiveColor = const Color(0xFF9E9E9E);
+    final Color activeColor = context.modePrimary;
+    final Color inactiveColor = context.modeTextMuted;
 
     return Expanded(
       child: Material(
@@ -161,13 +166,22 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4),
+            decoration: BoxDecoration(
+              color: isActive
+                  ? activeColor.withValues(alpha: 0.1)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SvgPicture.asset(
                   isActive ? activeIcon : icon,
-                  color: isActive ? activeColor : inactiveColor,
+                  colorFilter: ColorFilter.mode(
+                    isActive ? activeColor : inactiveColor,
+                    BlendMode.srcIn,
+                  ),
                   width: 24,
                   height: 24,
                 ),

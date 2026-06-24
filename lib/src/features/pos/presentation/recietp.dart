@@ -7,7 +7,7 @@
 // import 'package:sandwich_ai/src/features/pos/data/model/payment_model.dart';
 // import 'package:share_plus/share_plus.dart';
 // import 'package:intl/intl.dart';
-// import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+// import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 // import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
 // class ReceiptScreen extends StatefulWidget {

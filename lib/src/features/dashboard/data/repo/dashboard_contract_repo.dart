@@ -11,7 +11,8 @@ abstract class DashboardContractRepositoryInterface {
   );
 }
 
-class DashboardContractRepository implements DashboardContractRepositoryInterface {
+class DashboardContractRepository
+    implements DashboardContractRepositoryInterface {
   final ApiClient _apiClient = ApiClient.instance;
 
   static const Map<DashboardDomain, String> _endpointPlaceholders = {

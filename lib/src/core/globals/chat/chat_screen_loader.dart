@@ -2,7 +2,7 @@
 
 // import 'package:flutter/material.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:sandwich_ai/src/core/constant/appcolors.dart';
+// import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 // import 'package:sandwich_ai/src/core/globals/chat/chatroom_bloc/bloc.dart';
 // import 'package:sandwich_ai/src/core/globals/chat/chatroom_bloc/event.dart';
 // import 'package:sandwich_ai/src/core/globals/chat/chatroom_bloc/state.dart';

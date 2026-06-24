@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/recipe_compliance_bloc.dart/bloc.dart';
@@ -55,6 +54,36 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
   void _onSearchChanged() {
     final query = _searchController.text;
     context.read<RecipeComplianceBloc>().add(SearchMenuItems(query: query));
+  }
+
+  void _applyRecipeFromMenuItem(MenuItem item) {
+    final ingredients = item.recipe?.ingredients ?? [];
+
+    if (ingredients.isEmpty) {
+      _itemNameController.text = item.dishName;
+      return;
+    }
+
+    final recipeItems = ingredients
+        .map((ingredient) {
+          final name = ingredient.item?.itemName.trim();
+          if (name == null || name.isEmpty) return null;
+
+          final quantity = ingredient.expectedQuantity.trim();
+          final unit = ingredient.unit.trim();
+          final measurement = [
+            if (quantity.isNotEmpty && quantity != '0') quantity,
+            if (unit.isNotEmpty) unit,
+          ].join(' ');
+
+          return measurement.isEmpty ? name : '$name ($measurement)';
+        })
+        .whereType<String>()
+        .toList();
+
+    _itemNameController.text = recipeItems.isEmpty
+        ? item.dishName
+        : recipeItems.join(', ');
   }
 
   void _submitForm() {
@@ -226,8 +255,11 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                             _buildTextField(
                               controller: _itemNameController,
                               label: 'Item Name',
-                              hint: 'e.g., Chicken, Rice, Tomatoes',
+                              hint: _selectedMenuItem?.recipe != null
+                                  ? 'Auto-generated from selected menu recipe'
+                                  : 'e.g., Chicken, Rice, Tomatoes',
                               screenWidth: screenWidth,
+                              readOnly: _selectedMenuItem?.recipe != null,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter item name';
@@ -510,11 +542,9 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                       final item = _filteredMenuItems[index];
                       return InkWell(
                         onTap: () {
-                          AppLogger.log(
-                            '${_selectedMenuItem?.recipe?.id} ${_selectedMenuItem?.recipe?.menuItemId} }',
-                          );
                           setState(() {
                             _selectedMenuItem = item;
+                            _applyRecipeFromMenuItem(item);
                             _isSearching = false;
                             _isOpened = false;
                             _searchController.clear();
@@ -657,6 +687,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
     required double screenWidth,
     TextInputType? keyboardType,
     String? prefixText,
+    bool readOnly = false,
     String? Function(String?)? validator,
   }) {
     return Column(
@@ -674,6 +705,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          readOnly: readOnly,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w400,
@@ -693,7 +725,9 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
               color: kprimaryTextColor1,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: readOnly
+                ? context.modePrimary.withValues(alpha: 0.06)
+                : Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
@@ -892,12 +926,6 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
     if (width < 360) return 16;
     if (width < 600) return 18;
     return 20;
-  }
-
-  double _getAppBarTitleFontSize(double width) {
-    if (width < 360) return 17;
-    if (width < 600) return 18;
-    return 19;
   }
 
   double _getSectionTitleFontSize(double width) {

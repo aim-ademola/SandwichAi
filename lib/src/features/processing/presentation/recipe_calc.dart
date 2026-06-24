@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/bloc.dart';
@@ -57,37 +58,27 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
     });
   }
 
-  void _calculateRecipe() {
+  Future<void> _calculateRecipe() async {
     if (_formKey.currentState!.validate() && _selectedMenuItem != null) {
       final recipeId = _selectedMenuItem!.recipe?.id ?? '';
+      final cachedOrgId = await AuthCacheHelper.instance.getOrgId();
+      final cachedBranchId = await AuthCacheHelper.instance.getBranchID();
+      final organizationId = _selectedMenuItem!.organizationId.trim().isNotEmpty
+          ? _selectedMenuItem!.organizationId
+          : cachedOrgId ?? '';
+      final branchId = _selectedMenuItem!.branchId.trim().isNotEmpty
+          ? _selectedMenuItem!.branchId
+          : cachedBranchId ?? '';
 
-      if (recipeId.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'This menu item does not have a recipe configured',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                color: Colors.white,
-              ),
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadiusGeometry.circular(12),
-            ),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.orange,
-          ),
-        );
-        return;
-      }
+      if (!mounted) return;
 
       context.read<RecipeForecastBloc>().add(
         CalculateRecipeForecast(
           recipeId: recipeId,
           dishName: _selectedMenuItem!.dishName,
           targetServings: int.parse(_servingsController.text),
-          organizationId: _selectedMenuItem!.organizationId,
-          branchId: _selectedMenuItem!.branchId,
+          organizationId: organizationId,
+          branchId: branchId,
         ),
       );
     }
@@ -288,14 +279,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
         }
 
         if (state is MenuItemsLoaded) {
-          // Filter only items with recipes
-          final newMenuItems = state.menuItems
-              .where((item) => item.recipe != null)
-              .toList();
-
-          // Check if there are menu items but none have recipes
-          final hasMenuItemsWithoutRecipes =
-              state.menuItems.isNotEmpty && newMenuItems.isEmpty;
+          final newMenuItems = state.menuItems;
 
           // Update menu items if they're different
           if (_menuItems.isEmpty || _menuItems.length != newMenuItems.length) {
@@ -311,11 +295,6 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 });
               }
             });
-          }
-
-          // Show special message if menu items exist but have no recipes
-          if (hasMenuItemsWithoutRecipes) {
-            return _buildNoRecipesSelector(state.menuItems.length);
           }
 
           return Column(
@@ -640,69 +619,6 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 12,
                   color: const Color(0xFF9E9E9E),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNoRecipesSelector(int totalMenuItems) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Select Menu Item',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF757575),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.orange.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange.shade200),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                Icons.receipt_long_outlined,
-                size: 48,
-                color: Colors.orange.shade400,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'No recipes configured',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.orange.shade900,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'You have $totalMenuItems menu item${totalMenuItems != 1 ? 's' : ''}, but none have recipes attached.',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 13,
-                  color: Colors.orange.shade800,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Please contact your admin to add recipes to menu items.',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 12,
-                  color: Colors.orange.shade700,
-                  fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -1236,7 +1152,9 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
             child: Column(
               children: [
                 Text(
-                  '${ingredient.scaledQuantity.toStringAsFixed(ingredient.scaledQuantity % 1 == 0 ? 0 : 1)}',
+                  ingredient.scaledQuantity.toStringAsFixed(
+                    ingredient.scaledQuantity % 1 == 0 ? 0 : 1,
+                  ),
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/procurement_order_model.dart';
@@ -489,10 +490,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
   }
 
   String _formatAmount(double amount) {
-    if (amount >= 1000) {
-      return (amount / 1000).toStringAsFixed(amount % 1000 == 0 ? 0 : 1);
-    }
-    return amount.toStringAsFixed(2);
+    return NumberFormat('#,##0.00').format(amount);
   }
 
   IconData _getErrorIcon(ProcurementErrorType errorType) {

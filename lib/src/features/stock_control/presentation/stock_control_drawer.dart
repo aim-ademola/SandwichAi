@@ -1,15 +1,16 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sandwich_ai/src/core/globals/drawer_header.dart';
+import 'package:sandwich_ai/src/core/globals/app_drawer.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/chnge_pwd.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/daily_stock_alerts.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
-import 'package:sandwich_ai/src/core/theme/theme_controller.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/complete_stock_reqs.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/precuremnt_req.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/wastage_log_tabs.dart';
@@ -74,172 +75,143 @@ class _StockControlAppDrawerContentState
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      backgroundColor: context.modeSurface,
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Drawer Header
-            buildDrawerHeader(),
-
-            const SizedBox(height: 14),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _buildThemeModeTile(context),
-            ),
-            const SizedBox(height: 14),
-
-            // Menu Items
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  Showcase(
-                    key: _stockTransferKey,
-                    description:
-                        'Initiate stock transfers to other departments. Track and manage all outgoing stock movements.',
-                    targetBorderRadius: BorderRadius.circular(12),
-                    tooltipBackgroundColor: context.modePrimary,
-                    textColor: context.modeTextInverse,
-                    targetPadding: const EdgeInsets.all(8),
-                    child: _buildDrawerItem(
-                      context,
-                      icon: Icons.call_made,
-                      title: 'Stock Transfer',
-                      onTap: () {
-                        context.push('/stock-req');
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Showcase(
-                    key: _requisitionKey,
-                    description:
-                        'Raise Requisitions to Procurement for items needed in stock',
-                    targetBorderRadius: BorderRadius.circular(12),
-                    tooltipBackgroundColor: context.modePrimary,
-                    textColor: context.modeTextInverse,
-                    targetPadding: const EdgeInsets.all(8),
-                    child: _buildDrawerItem(
-                      context,
-                      icon: Icons.receipt_long,
-                      title: 'Requisition',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (_) => StockProcurementRequestScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Showcase(
-                    key: _settleRequestsKey,
-                    description:
-                        'View and fulfill incoming stock requests from other departments. Mark requests as complete.',
-                    targetBorderRadius: BorderRadius.circular(12),
-                    tooltipBackgroundColor: context.modePrimary,
-                    textColor: context.modeTextInverse,
-                    targetPadding: const EdgeInsets.all(8),
-                    child: _buildDrawerItem(
-                      context,
-                      icon: Icons.done_all_outlined,
-                      title: 'Settle Requests',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            // ✅ No branchId needed — bloc fetches it from cache
-                            builder: (_) =>
-                                const CompleteStockRequestDetailsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Showcase(
-                    key: _wastageLogsKey,
-                    description:
-                        'Record and monitor wastage across your stock. Identify patterns and reduce losses.',
-                    targetBorderRadius: BorderRadius.circular(12),
-                    tooltipBackgroundColor: context.modePrimary,
-                    textColor: context.modeTextInverse,
-                    targetPadding: const EdgeInsets.all(8),
-                    child: _buildDrawerItem(
-                      context,
-                      icon: Icons.warning_amber,
-                      title: 'Wastage Logs',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (_) => WasteLogsTabScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Showcase(
-                    key: _notificationSettingsKey,
-                    description:
-                        'Configure daily stock check reminders and manage notification preferences. Get alerts for low stock, expiring items, and more.',
-                    targetBorderRadius: BorderRadius.circular(12),
-                    tooltipBackgroundColor: context.modePrimary,
-                    textColor: context.modeTextInverse,
-                    targetPadding: const EdgeInsets.all(8),
-                    child: _buildDrawerItem(
-                      context,
-                      icon: Icons.notifications_outlined,
-                      title: 'Notification Settings',
-                      badge: _buildNewBadge(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (_) =>
-                                const StockNotificationSettingsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: _buildDrawerItem(
-                context,
-                icon: Icons.lock_outline_rounded,
-                title: 'Change Password',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    CupertinoPageRoute(builder: (_) => ChangePasswordScreen()),
-                  );
-                },
-              ),
-            ),
-            // Logout Button
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: _buildDrawerItem(
-                context,
-                icon: Icons.logout,
-                title: 'Logout',
-                isLogout: true,
-                onTap: () {
-                  LogoutService.instance.showLogoutDialog(context);
-                },
-              ),
-            ),
-          ],
+    return AppDrawerShell(
+      moduleTitle: 'Stock Control',
+      moduleSubtitle: 'Inventory movement and branch stock visibility',
+      footerChildren: [
+        _buildDrawerItem(
+          context,
+          icon: Icons.lock_outline_rounded,
+          title: 'Change Password',
+          onTap: () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (_) => ChangePasswordScreen()),
+            );
+          },
         ),
-      ),
+        const SizedBox(height: 8),
+        _buildDrawerItem(
+          context,
+          icon: Icons.logout,
+          title: 'Logout',
+          isLogout: true,
+          onTap: () {
+            LogoutService.instance.showLogoutDialog(context);
+          },
+        ),
+      ],
+      children: [
+        Showcase(
+          key: _stockTransferKey,
+          description:
+              'Initiate stock transfers to other departments. Track and manage all outgoing stock movements.',
+          targetBorderRadius: BorderRadius.circular(12),
+          tooltipBackgroundColor: kPrimary,
+          textColor: Colors.white,
+          targetPadding: const EdgeInsets.all(8),
+          child: _buildDrawerItem(
+            context,
+            icon: Icons.call_made,
+            title: 'Stock Transfer',
+            onTap: () {
+              context.push('/stock-req');
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Showcase(
+          key: _requisitionKey,
+          description:
+              'Raise Requisitions to Procurement for items needed in stock',
+          targetBorderRadius: BorderRadius.circular(12),
+          tooltipBackgroundColor: kPrimary,
+          textColor: Colors.white,
+          targetPadding: const EdgeInsets.all(8),
+          child: _buildDrawerItem(
+            context,
+            icon: Icons.receipt_long,
+            title: 'Requisition',
+            onTap: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (_) => StockProcurementRequestScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Showcase(
+          key: _settleRequestsKey,
+          description:
+              'View and fulfill incoming stock requests from other departments. Mark requests as complete.',
+          targetBorderRadius: BorderRadius.circular(12),
+          tooltipBackgroundColor: kPrimary,
+          textColor: Colors.white,
+          targetPadding: const EdgeInsets.all(8),
+          child: _buildDrawerItem(
+            context,
+            icon: Icons.done_all_outlined,
+            title: 'Settle Requests',
+            onTap: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  // ✅ No branchId needed — bloc fetches it from cache
+                  builder: (_) => const CompleteStockRequestDetailsScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Showcase(
+          key: _wastageLogsKey,
+          description:
+              'Record and monitor wastage across your stock. Identify patterns and reduce losses.',
+          targetBorderRadius: BorderRadius.circular(12),
+          tooltipBackgroundColor: kPrimary,
+          textColor: Colors.white,
+          targetPadding: const EdgeInsets.all(8),
+          child: _buildDrawerItem(
+            context,
+            icon: Icons.warning_amber,
+            title: 'Wastage Logs',
+            onTap: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(builder: (_) => WasteLogsTabScreen()),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Showcase(
+          key: _notificationSettingsKey,
+          description:
+              'Configure daily stock check reminders and manage notification preferences. Get alerts for low stock, expiring items, and more.',
+          targetBorderRadius: BorderRadius.circular(12),
+          tooltipBackgroundColor: kPrimary,
+          textColor: Colors.white,
+          targetPadding: const EdgeInsets.all(8),
+          child: _buildDrawerItem(
+            context,
+            icon: Icons.notifications_outlined,
+            title: 'Notification Settings',
+            badge: _buildNewBadge(),
+            onTap: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (_) => const StockNotificationSettingsScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -251,57 +223,12 @@ class _StockControlAppDrawerContentState
     bool isLogout = false,
     Widget? badge,
   }) {
-    final colors = context.appColors;
-    final foreground = isLogout ? colors.error : colors.textPrimary;
-    final iconBackground = isLogout
-        ? colors.error.withValues(alpha: 0.12)
-        : colors.primary.withValues(alpha: 0.1);
-
-    return InkWell(
+    return AppDrawerItem(
+      icon: icon,
+      title: title,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        decoration: BoxDecoration(
-          color: isLogout ? colors.logoutSurface : colors.drawerItem,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isLogout
-                ? colors.error.withValues(alpha: 0.22)
-                : colors.border.withValues(alpha: 0.55),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: iconBackground,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: foreground, size: 21),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: foreground,
-                ),
-              ),
-            ),
-            if (badge != null) ...[badge, const SizedBox(width: 8)],
-            Icon(
-              Icons.chevron_right,
-              color: isLogout ? colors.error : colors.textSecondary,
-              size: 20,
-            ),
-          ],
-        ),
-      ),
+      isLogout: isLogout,
+      badge: badge,
     );
   }
 
@@ -309,7 +236,7 @@ class _StockControlAppDrawerContentState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: context.modePrimary,
+        color: kPrimary,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -317,80 +244,9 @@ class _StockControlAppDrawerContentState
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 10,
           fontWeight: FontWeight.w700,
-          color: context.modeTextInverse,
+          color: Colors.white,
         ),
       ),
-    );
-  }
-
-  Widget _buildThemeModeTile(BuildContext context) {
-    return AnimatedBuilder(
-      animation: ThemeController.instance,
-      builder: (context, _) {
-        final isDarkMode = ThemeController.instance.isDarkMode;
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: context.modeSurfaceAlt,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: context.modeBorder),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: context.modePrimary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                  color: context.modePrimary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Appearance',
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: context.modeTextPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      isDarkMode ? 'Dark mode active' : 'Light mode active',
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 12,
-                        color: context.modeTextSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Switch(
-                value: isDarkMode,
-                activeThumbColor: context.modePrimary,
-                activeTrackColor: context.modePrimary.withValues(alpha: 0.35),
-                inactiveThumbColor: context.modePrimary,
-                inactiveTrackColor: context.modePrimary.withValues(alpha: 0.18),
-                onChanged: (value) {
-                  ThemeController.instance.setThemeMode(
-                    value ? ThemeMode.dark : ThemeMode.light,
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

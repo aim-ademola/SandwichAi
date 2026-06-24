@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/procurement_order_model.dart';
@@ -587,10 +588,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
   }
 
   String _formatAmount(double amount) {
-    if (amount >= 1000) {
-      return (amount / 1000).toStringAsFixed(amount % 1000 == 0 ? 0 : 1);
-    }
-    return amount.toStringAsFixed(2);
+    return NumberFormat('#,##0.00').format(amount);
   }
 
   String _formatDate(String dateStr) {

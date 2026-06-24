@@ -56,10 +56,39 @@ class ApiMenuItem {
       branch: json['branch'] != null
           ? Branch.fromJson(json['branch'] as Map<String, dynamic>)
           : null,
-      recipe: json['recipe'] != null
-          ? Recipe.fromJson(json['recipe'] as Map<String, dynamic>)
-          : null,
+      recipe: _parseRecipe(json),
     );
+  }
+
+  static Recipe? _parseRecipe(Map<String, dynamic> json) {
+    final recipeJson =
+        json['recipe'] ??
+        json['menuItemRecipe'] ??
+        json['menu_item_recipe'] ??
+        json['configuredRecipe'];
+
+    if (recipeJson is Map<String, dynamic>) {
+      return Recipe.fromJson(recipeJson);
+    }
+
+    final recipesJson = json['recipes'] ?? json['menuItemRecipes'];
+    if (recipesJson is List && recipesJson.isNotEmpty) {
+      final firstRecipe = recipesJson.first;
+      if (firstRecipe is Map<String, dynamic>) {
+        return Recipe.fromJson(firstRecipe);
+      }
+    }
+
+    final recipeId = json['recipeId'] ?? json['recipe_id'];
+    if (recipeId != null && recipeId.toString().isNotEmpty) {
+      return Recipe.fromJson({
+        'id': recipeId,
+        'menuItemId': json['id'],
+        'servingSize': json['servingSize'] ?? json['serving_size'] ?? 1,
+      });
+    }
+
+    return null;
   }
 
   /// Helper method to safely parse values to String
@@ -319,25 +348,45 @@ class Recipe {
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
-      id: json['id'] as String? ?? '',
-      menuItemId: json['menuItemId'] as String? ?? '',
-      servingSize: (json['servingSize'] is int)
-          ? json['servingSize'] as int
-          : int.tryParse(json['servingSize'].toString()) ?? 0,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : DateTime.now(),
-      ingredients: json['ingredients'] != null
-          ? (json['ingredients'] as List)
-                .map(
-                  (i) => RecipeIngredient.fromJson(i as Map<String, dynamic>),
-                )
-                .toList()
-          : null,
+      id: _parseString(json['id'] ?? json['recipeId'] ?? json['recipe_id']),
+      menuItemId: _parseString(json['menuItemId'] ?? json['menu_item_id']),
+      servingSize: _parseInt(json['servingSize'] ?? json['serving_size']),
+      createdAt: _parseDateTime(json['createdAt'] ?? json['created_at']),
+      updatedAt: _parseDateTime(json['updatedAt'] ?? json['updated_at']),
+      ingredients: _parseIngredients(json),
     );
+  }
+
+  static List<RecipeIngredient>? _parseIngredients(Map<String, dynamic> json) {
+    final ingredientsJson =
+        json['ingredients'] ??
+        json['recipeIngredients'] ??
+        json['recipe_ingredients'];
+
+    if (ingredientsJson is! List) return null;
+
+    return ingredientsJson
+        .whereType<Map<String, dynamic>>()
+        .map(RecipeIngredient.fromJson)
+        .toList();
+  }
+
+  static String _parseString(dynamic value) {
+    if (value == null) return '';
+    return value.toString();
+  }
+
+  static int _parseInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString()) ?? 0;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString()) ?? DateTime.now();
   }
 
   Map<String, dynamic> toJson() {
@@ -452,12 +501,14 @@ class RecipeIngredient {
     try {
       return RecipeIngredient(
         id: _parseString(json['id']),
-        recipeId: _parseString(json['recipeId']),
-        itemId: _parseString(json['itemId']),
-        expectedQuantity: _parseString(json['expectedQuantity']),
+        recipeId: _parseString(json['recipeId'] ?? json['recipe_id']),
+        itemId: _parseString(json['itemId'] ?? json['item_id']),
+        expectedQuantity: _parseString(
+          json['expectedQuantity'] ?? json['expected_quantity'],
+        ),
         unit: _parseString(json['unit']),
-        createdAt: _parseDateTime(json['createdAt']),
-        updatedAt: _parseDateTime(json['updatedAt']),
+        createdAt: _parseDateTime(json['createdAt'] ?? json['created_at']),
+        updatedAt: _parseDateTime(json['updatedAt'] ?? json['updated_at']),
         item: json['item'] != null
             ? InventoryItem.fromJson(json['item'] as Map<String, dynamic>)
             : null,

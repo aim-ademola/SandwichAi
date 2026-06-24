@@ -39,11 +39,11 @@ class RecipeForecastRepository extends BaseRepository
       );
 
       final requestBody = {
-        'recipe_id': recipeId,
+        if (recipeId.trim().isNotEmpty) 'recipe_id': recipeId,
         'dish_name': dishName,
         'target_servings': targetServings,
         'organization_id': organizationId,
-        'branch_id': branchId,
+        if (branchId.trim().isNotEmpty) 'branch_id': branchId,
       };
 
       final response = await _apiClient
@@ -85,20 +85,17 @@ class RecipeForecastRepository extends BaseRepository
     String organizationId,
     String branchId,
   ) {
-    if (recipeId.trim().isEmpty) {
-      throw FormatException('Recipe ID cannot be empty');
-    }
     if (dishName.trim().isEmpty) {
       throw FormatException('Dish name cannot be empty');
+    }
+    if (recipeId.trim().isEmpty && dishName.trim().isEmpty) {
+      throw FormatException('Select a menu item before calculating');
     }
     if (targetServings <= 0) {
       throw FormatException('Target servings must be greater than zero');
     }
     if (organizationId.trim().isEmpty) {
       throw FormatException('Organization ID cannot be empty');
-    }
-    if (branchId.trim().isEmpty) {
-      throw FormatException('Branch ID cannot be empty');
     }
   }
 

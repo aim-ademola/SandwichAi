@@ -24,6 +24,10 @@ class EmployeeLoginScreen extends StatefulWidget {
 }
 
 class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
+  static const _defaultLoginEmail = 'adewuyieniola00@gmail.com';
+  static const _defaultLoginPassword = 'Eniola@Onboarding';
+  static const _defaultLoginOrgCode = 'ORG-003';
+
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _orgCodeController = TextEditingController();
@@ -32,6 +36,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
   @override
   void initState() {
     super.initState();
+    _applyDefaultLoginCredentials();
     _loadSavedCredentials();
   }
 
@@ -72,6 +77,12 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
     } catch (e) {
       AppLogger.log('Error loading saved credentials: $e');
     }
+  }
+
+  void _applyDefaultLoginCredentials() {
+    _usernameController.text = _defaultLoginEmail;
+    _passwordController.text = _defaultLoginPassword;
+    _orgCodeController.text = _defaultLoginOrgCode;
   }
 
   Future<void> _saveCredentials(
@@ -123,6 +134,8 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
 
     // Save or clear credentials based on remember me checkbox
     await _saveCredentials(email, password, orgCode, rememberMe);
+
+    if (!mounted) return;
 
     final request = LoginRequest(
       email: email,

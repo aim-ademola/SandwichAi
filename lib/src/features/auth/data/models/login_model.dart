@@ -84,7 +84,11 @@ class BranchModel {
     return BranchModel(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      code: json['code']?.toString() ?? '',
+      code:
+          json['code']?.toString() ??
+          json['branchCode']?.toString() ??
+          json['branch_code']?.toString() ??
+          '',
       city: json['city']?.toString() ?? '',
     );
   }

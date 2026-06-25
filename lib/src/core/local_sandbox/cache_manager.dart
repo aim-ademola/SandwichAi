@@ -138,6 +138,35 @@ class AuthCacheHelper {
     return _box.get(_keyBranchName);
   }
 
+  /// Switch the locally active branch used by branch-scoped modules.
+  Future<void> switchActiveBranch({
+    required String branchId,
+    required String branchName,
+    String? branchCode,
+    String? city,
+  }) async {
+    await _box.put(_keyBranchId, branchId);
+    await _box.put(_keyBranchName, branchName);
+
+    final encoded = _box.get(_keyUserData);
+    if (encoded == null) return;
+
+    try {
+      final jsonData = jsonDecode(encoded) as Map<String, dynamic>;
+      jsonData['branchId'] = branchId;
+      jsonData['branch'] = {
+        'id': branchId,
+        'name': branchName,
+        if (branchCode != null) 'branch_code': branchCode,
+        if (branchCode != null) 'branchCode': branchCode,
+        if (city != null) 'city': city,
+      };
+      await _box.put(_keyUserData, jsonEncode(jsonData));
+    } catch (_) {
+      // Keep the direct branch cache update even if legacy user JSON is invalid.
+    }
+  }
+
   Future<String?> userID() async {
     return _box.get(_userId);
   }

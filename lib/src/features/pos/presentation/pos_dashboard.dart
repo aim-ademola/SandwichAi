@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_dashboard_state_bloc/bloc.dart';
@@ -53,6 +54,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             ),
           ),
           actions: [
+            const NotificationBellAction(margin: EdgeInsets.zero),
             BlocBuilder<DashboardBloc, DashboardState>(
               builder: (context, state) {
                 return IconButton(

@@ -5,6 +5,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -285,6 +286,7 @@ class NotificationService {
       );
 
       await _notifications.show(id, title, body, details, payload: payload);
+      await NotificationBadgeController.instance.increment();
 
       AppLogger.log(' Notification sent: $title');
     } catch (e) {
@@ -445,7 +447,7 @@ class NotificationService {
         return _StockAlertNotification(
           title: '📊 Approaching Reorder Level',
           body:
-              '$itemName is approaching reorder level${quantity != null && reorderLevel != null ? ' ($quantity/${reorderLevel})' : ''}',
+              '$itemName is approaching reorder level${quantity != null && reorderLevel != null ? ' ($quantity/$reorderLevel)' : ''}',
           payload: 'stock_alert|near_reorder|$itemName',
           priority: NotificationPriority.high,
           importance: NotificationImportance.high,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
+import 'package:sandwich_ai/src/core/config/dev_login_config.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/config/responsive_config.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -24,10 +25,6 @@ class EmployeeLoginScreen extends StatefulWidget {
 }
 
 class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
-  static const _defaultLoginEmail = 'adewuyieniola00@gmail.com';
-  static const _defaultLoginPassword = 'Eniola@Onboarding';
-  static const _defaultLoginOrgCode = 'ORG-003';
-
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _orgCodeController = TextEditingController();
@@ -36,7 +33,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
   @override
   void initState() {
     super.initState();
-    _applyDefaultLoginCredentials();
+    _applyDefaultLoginCredentialsIfEnabled();
     _loadSavedCredentials();
   }
 
@@ -79,10 +76,32 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
     }
   }
 
-  void _applyDefaultLoginCredentials() {
-    _usernameController.text = _defaultLoginEmail;
-    _passwordController.text = _defaultLoginPassword;
-    _orgCodeController.text = _defaultLoginOrgCode;
+  void _applyDefaultLoginCredentialsIfEnabled() {
+    if (!DevLoginConfig.enabled || DevLoginConfig.users.isEmpty) return;
+
+    _setDevLoginFields(DevLoginConfig.users.first, validate: false);
+  }
+
+  void _applyDevLoginUser(DevLoginUser user, {required bool submit}) {
+    _setDevLoginFields(user, validate: true);
+
+    if (submit) {
+      _handleLogin();
+    }
+  }
+
+  void _setDevLoginFields(DevLoginUser user, {required bool validate}) {
+    _usernameController.text = user.email;
+    _passwordController.text = user.password;
+    _orgCodeController.text = DevLoginConfig.organizationCode;
+
+    if (!validate) return;
+
+    context.read<LoginBloc>().add(ValidateEmail(email: user.email));
+    context.read<LoginBloc>().add(ValidatePassword(password: user.password));
+    context.read<LoginBloc>().add(
+      const ValidateOrgCode(orgCode: DevLoginConfig.organizationCode),
+    );
   }
 
   Future<void> _saveCredentials(
@@ -260,8 +279,25 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                         ),
                         SizedBox(
                           height:
-                              responsive.getVerticalSpacing(screenHeight) * 1.5,
+                              responsive.getVerticalSpacing(screenHeight) *
+                              (DevLoginConfig.enabled ? 0.9 : 1.5),
                         ),
+
+                        if (DevLoginConfig.enabled) ...[
+                          BlocBuilder<LoginBloc, LoginState>(
+                            builder: (context, state) {
+                              return _buildDevLoginPanel(
+                                screenWidth: screenWidth,
+                                isLoading: state is LoginLoading,
+                              );
+                            },
+                          ),
+                          SizedBox(
+                            height:
+                                responsive.getVerticalSpacing(screenHeight) *
+                                0.9,
+                          ),
+                        ],
 
                         // Username/Email Field
                         BlocBuilder<LoginBloc, LoginState>(
@@ -607,6 +643,100 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDevLoginPanel({
+    required double screenWidth,
+    required bool isLoading,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: kPrimary.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: kPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.science_outlined, color: kPrimary, size: 19),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Test users',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: screenWidth < 360 ? 13 : 14,
+                        fontWeight: FontWeight.w700,
+                        color: kprimaryTextColor1,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'Tap a department to login with its token',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: screenWidth < 360 ? 11 : 12,
+                        fontWeight: FontWeight.w500,
+                        color: kprimaryTextColor2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: DevLoginConfig.users.map((user) {
+              return SizedBox(
+                width: screenWidth < 390 ? double.infinity : null,
+                child: OutlinedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () => _applyDevLoginUser(user, submit: true),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: kPrimary,
+                    side: BorderSide(color: kPrimary.withValues(alpha: 0.28)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 9,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    user.department,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: screenWidth < 360 ? 11 : 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }

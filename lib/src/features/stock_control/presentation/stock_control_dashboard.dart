@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_dashboard_body.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_drawer.dart';
 
@@ -49,6 +50,7 @@ class _StockControlDashboardScreenState
         ),
       ),
       centerTitle: true,
+      actions: const [NotificationBellAction()],
     );
   }
 }

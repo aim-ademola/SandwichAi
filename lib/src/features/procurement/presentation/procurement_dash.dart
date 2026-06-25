@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/supplier_stat_model.dart';
@@ -75,6 +76,7 @@ class _ProcurementDashboardScreenState
         ),
       ),
       centerTitle: true,
+      actions: const [NotificationBellAction()],
     );
   }
 
@@ -528,15 +530,19 @@ class _ProcurementDashboardScreenState
               color: valueColor ?? kprimaryTextColor1,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: labelSize,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF757575),
+          const SizedBox(height: 6),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: labelSize,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF757575),
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -774,9 +780,9 @@ class _ProcurementDashboardScreenState
   }
 
   double _getSupplierCardHeight(double width) {
-    if (width < 360) return 100;
-    if (width < 600) return 110;
-    return 120;
+    if (width < 360) return 112;
+    if (width < 600) return 122;
+    return 132;
   }
 
   double _getSupplierNumberSize(double width) {

@@ -32,67 +32,71 @@ class _KitchenShiftTabScreenState extends State<KitchenShiftTabScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          KitchenShiftBloc(repository: KitchenShiftRepository()),
-      child: DefaultTextStyle.merge(
-        style: WorkSansAppTextStyles.medium,
-        child: Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(
-              'Kitchen Shift Management',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
-              ),
-            ),
-            centerTitle: true,
+    return DefaultTextStyle.merge(
+      style: WorkSansAppTextStyles.medium,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F6F6),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
           ),
-          body: Column(
-            children: [
-              // Tab bar
-              Container(
-                color: Colors.white,
-                child: TabBar(
-                  controller: _tabController,
-                  labelColor: kPrimary,
-                  unselectedLabelColor: kprimaryTextColor2,
-                  indicatorColor: kPrimary,
-                  indicatorWeight: 3,
-                  labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  unselectedLabelStyle: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  tabs: const [
-                    Tab(text: 'Schedule'),
-                    Tab(text: 'History'),
-                  ],
-                ),
-              ),
-              // Content
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: const [
-                    KitchenShiftManagementScreen(),
-                    KitchenShiftHistoryScreen(),
-                  ],
-                ),
-              ),
-            ],
+          title: Text(
+            'Kitchen Shift Management',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: kprimaryTextColor1,
+            ),
           ),
+          centerTitle: true,
+        ),
+        body: Column(
+          children: [
+            // Tab bar
+            Container(
+              color: Colors.white,
+              child: TabBar(
+                controller: _tabController,
+                labelColor: kPrimary,
+                unselectedLabelColor: kprimaryTextColor2,
+                indicatorColor: kPrimary,
+                indicatorWeight: 3,
+                labelStyle: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+                tabs: const [
+                  Tab(text: 'Schedule'),
+                  Tab(text: 'History'),
+                ],
+              ),
+            ),
+            // Content
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  BlocProvider(
+                    create: (context) =>
+                        KitchenShiftBloc(repository: KitchenShiftRepository()),
+                    child: const KitchenShiftManagementScreen(),
+                  ),
+                  BlocProvider(
+                    create: (context) =>
+                        KitchenShiftBloc(repository: KitchenShiftRepository()),
+                    child: const KitchenShiftHistoryScreen(),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

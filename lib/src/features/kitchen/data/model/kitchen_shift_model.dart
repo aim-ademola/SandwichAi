@@ -5,6 +5,35 @@ enum EmployeeStatus { ACTIVE, INACTIVE, ON_LEAVE }
 
 enum Department { KITCHEN, SERVICE, MANAGEMENT }
 
+String _parseString(dynamic value) {
+  if (value == null) return '';
+  if (value is String) return value;
+  if (value is num || value is bool) return value.toString();
+  return '';
+}
+
+String? _parseStringOrNull(dynamic value) {
+  final parsed = _parseString(value).trim();
+  return parsed.isEmpty ? null : parsed;
+}
+
+bool _parseBool(dynamic value) {
+  if (value == null) return false;
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    final normalized = value.toLowerCase();
+    return normalized == 'true' || normalized == '1';
+  }
+  return false;
+}
+
+Map<String, dynamic> _parseMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return const {};
+}
+
 class Employee {
   final String id;
   final String employeeId;
@@ -57,7 +86,8 @@ class Employee {
   String get fullName => '$firstName $lastName';
 
   factory Employee.fromJson(Map<String, dynamic> json) {
-    Department parseDepartment(String? val) {
+    Department parseDepartment(dynamic value) {
+      final val = _parseStringOrNull(value);
       if (val == null) return Department.KITCHEN;
       switch (val.toUpperCase()) {
         case 'SERVICE':
@@ -70,7 +100,8 @@ class Employee {
       }
     }
 
-    EmployeeStatus parseStatus(String? val) {
+    EmployeeStatus parseStatus(dynamic value) {
+      final val = _parseStringOrNull(value);
       if (val == null) return EmployeeStatus.ACTIVE;
       switch (val.toUpperCase()) {
         case 'INACTIVE':
@@ -84,33 +115,34 @@ class Employee {
     }
 
     return Employee(
-      id: (json['id'] ?? '') as String,
-      employeeId: (json['employeeId'] ?? json['employee_id'] ?? '') as String,
-      firstName: (json['firstName'] ?? json['first_name'] ?? '') as String,
-      lastName: (json['lastName'] ?? json['last_name'] ?? '') as String,
-      email: (json['email'] ?? '') as String,
-      phone: (json['phone'] ?? '') as String,
-      address: json['address'] as String?,
-      dateOfBirth: json['dateOfBirth'] as String?,
-      role: (json['role'] ?? '') as String,
-      department: parseDepartment(json['department'] as String?),
-      isDepartmentManager:
-          (json['isDepartmentManager'] ??
-                  json['is_department_manager'] ??
-                  false)
-              as bool,
-      status: parseStatus(json['status'] as String?),
-      hireDate: json['hireDate'] as String?,
-      terminationDate: json['terminationDate'] as String?,
-      lastLogin: json['lastLogin'] as String?,
-      emergencyContactName: json['emergencyContactName'] as String?,
-      emergencyContactPhone: json['emergencyContactPhone'] as String?,
-      emergencyContactRelation: json['emergencyContactRelation'] as String?,
-      organizationId:
-          (json['organizationId'] ?? json['organization_id'] ?? '') as String,
-      branchId: (json['branchId'] ?? json['branch_id'] ?? '') as String,
-      createdAt: (json['createdAt'] ?? json['created_at'] ?? '') as String,
-      updatedAt: (json['updatedAt'] ?? json['updated_at'] ?? '') as String,
+      id: _parseString(json['id']),
+      employeeId: _parseString(json['employeeId'] ?? json['employee_id']),
+      firstName: _parseString(json['firstName'] ?? json['first_name']),
+      lastName: _parseString(json['lastName'] ?? json['last_name']),
+      email: _parseString(json['email']),
+      phone: _parseString(json['phone']),
+      address: _parseStringOrNull(json['address']),
+      dateOfBirth: _parseStringOrNull(json['dateOfBirth']),
+      role: _parseString(json['role']),
+      department: parseDepartment(json['department']),
+      isDepartmentManager: _parseBool(
+        json['isDepartmentManager'] ?? json['is_department_manager'],
+      ),
+      status: parseStatus(json['status']),
+      hireDate: _parseStringOrNull(json['hireDate']),
+      terminationDate: _parseStringOrNull(json['terminationDate']),
+      lastLogin: _parseStringOrNull(json['lastLogin']),
+      emergencyContactName: _parseStringOrNull(json['emergencyContactName']),
+      emergencyContactPhone: _parseStringOrNull(json['emergencyContactPhone']),
+      emergencyContactRelation: _parseStringOrNull(
+        json['emergencyContactRelation'],
+      ),
+      organizationId: _parseString(
+        json['organizationId'] ?? json['organization_id'],
+      ),
+      branchId: _parseString(json['branchId'] ?? json['branch_id']),
+      createdAt: _parseString(json['createdAt'] ?? json['created_at']),
+      updatedAt: _parseString(json['updatedAt'] ?? json['updated_at']),
     );
   }
 
@@ -230,32 +262,6 @@ class Branch {
     }
   }
 
-  static String _parseString(dynamic value) {
-    if (value == null) return '';
-    if (value is String) return value;
-    if (value is Map) return '';
-    if (value is num) return value.toString();
-    return value.toString();
-  }
-
-  static String? _parseStringOrNull(dynamic value) {
-    if (value == null) return null;
-    if (value is String) return value.isEmpty ? null : value;
-    if (value is Map) return null;
-    if (value is num) return value.toString();
-    return value.toString();
-  }
-
-  static bool _parseBool(dynamic value) {
-    if (value == null) return false;
-    if (value is bool) return value;
-    if (value is String) {
-      return value.toLowerCase() == 'true' || value == '1';
-    }
-    if (value is num) return value != 0;
-    return false;
-  }
-
   static DateTime _parseDateTime(dynamic value) {
     if (value == null) return DateTime.now();
     if (value is String) {
@@ -294,7 +300,7 @@ class Branch {
     if (openingHours == null) return null;
     final dayHours = openingHours![day.toLowerCase()];
     if (dayHours is Map) {
-      return dayHours['open'] as String?;
+      return _parseStringOrNull(dayHours['open']);
     }
     return null;
   }
@@ -303,7 +309,7 @@ class Branch {
     if (openingHours == null) return null;
     final dayHours = openingHours![day.toLowerCase()];
     if (dayHours is Map) {
-      return dayHours['close'] as String?;
+      return _parseStringOrNull(dayHours['close']);
     }
     return null;
   }
@@ -353,25 +359,38 @@ class KitchenShift {
   });
 
   factory KitchenShift.fromJson(Map<String, dynamic> json) {
-    return KitchenShift(
-      id: json['id'],
-      employeeId: json['employeeId'],
-      branchId: json['branchId'],
-      date: json['date'],
-      shiftType: ShiftType.values.firstWhere(
-        (s) => s.name == (json['shiftType'] ?? 'MORNING'),
+    ShiftType parseShiftType(dynamic value) {
+      final name = _parseStringOrNull(value) ?? ShiftType.MORNING.name;
+      return ShiftType.values.firstWhere(
+        (s) => s.name == name,
         orElse: () => ShiftType.MORNING,
+      );
+    }
+
+    return KitchenShift(
+      id: _parseString(json['id']),
+      employeeId: _parseString(json['employeeId'] ?? json['employee_id']),
+      branchId: _parseString(json['branchId'] ?? json['branch_id']),
+      date: _parseString(json['date']),
+      shiftType: parseShiftType(json['shiftType']),
+      startTime: _parseString(
+        json['scheduledStart'] ?? json['startTime'] ?? json['start_time'],
       ),
-      startTime: json['startTime'],
-      endTime: json['endTime'],
-      isActive: json['isActive'] ?? false,
-      clockInTime: json['clockInTime'],
-      clockOutTime: json['clockOutTime'],
-      notes: json['notes'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
-      employee: Employee.fromJson(json['employee']),
-      branch: Branch.fromJson(json['branch']),
+      endTime: _parseString(
+        json['scheduledEnd'] ?? json['endTime'] ?? json['end_time'],
+      ),
+      isActive: _parseBool(json['isActive'] ?? json['is_active']),
+      clockInTime: _parseStringOrNull(
+        json['clockInTime'] ?? json['clock_in_time'],
+      ),
+      clockOutTime: _parseStringOrNull(
+        json['clockOutTime'] ?? json['clock_out_time'],
+      ),
+      notes: _parseStringOrNull(json['notes']),
+      createdAt: _parseString(json['createdAt'] ?? json['created_at']),
+      updatedAt: _parseString(json['updatedAt'] ?? json['updated_at']),
+      employee: Employee.fromJson(_parseMap(json['employee'])),
+      branch: Branch.fromJson(_parseMap(json['branch'])),
     );
   }
 
@@ -384,6 +403,8 @@ class KitchenShift {
       'shiftType': shiftType.name,
       'startTime': startTime,
       'endTime': endTime,
+      'scheduledStart': startTime,
+      'scheduledEnd': endTime,
       'isActive': isActive,
       'clockInTime': clockInTime,
       'clockOutTime': clockOutTime,
@@ -405,11 +426,17 @@ class KitchenShift {
   }
 
   String get formattedTimeRange {
+    if (startTime.isEmpty && endTime.isEmpty) {
+      return shiftType == ShiftType.FULL_DAY ? 'Full Day' : 'Time not set';
+    }
+
     try {
       final start = DateTime.parse(startTime);
       final end = DateTime.parse(endTime);
       return '${_format(start)} - ${_format(end)}';
     } catch (_) {
+      if (startTime.isEmpty) return endTime;
+      if (endTime.isEmpty) return startTime;
       return '$startTime - $endTime';
     }
   }
@@ -461,6 +488,8 @@ class CreateKitchenShiftRequest {
       'shiftType': shiftType.name,
       'startTime': startTime,
       'endTime': endTime,
+      'scheduledStart': startTime,
+      'scheduledEnd': endTime,
       'notes': notes,
     };
   }
@@ -493,6 +522,8 @@ class UpdateKitchenShiftRequest {
       'shiftType': shiftType?.name,
       'startTime': startTime,
       'endTime': endTime,
+      'scheduledStart': startTime,
+      'scheduledEnd': endTime,
       'isActive': isActive,
       'notes': notes,
     };

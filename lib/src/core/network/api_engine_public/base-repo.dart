@@ -31,18 +31,21 @@ abstract class BaseRepository {
       success: (data) {
         try {
           if (data is List) {
-            final items = data
-                .cast<Map<String, dynamic>>()
-                .map((item) => fromJson(item))
-                .toList();
-            return ApiResponse.success(items);
+            return ApiResponse.success(_parseItems(data, fromJson));
           } else if (data is Map<String, dynamic> && data.containsKey('data')) {
-            final List<dynamic> dataList = data['data'] as List<dynamic>;
-            final items = dataList
-                .cast<Map<String, dynamic>>()
-                .map((item) => fromJson(item))
-                .toList();
-            return ApiResponse.success(items);
+            if (data['data'] == null) {
+              return ApiResponse.success(<T>[]);
+            }
+            if (data['data'] is! List) {
+              return ApiResponse.error(
+                NetworkException.formatException(
+                  'Expected data list but got ${data['data'].runtimeType}',
+                ),
+              );
+            }
+            return ApiResponse.success(
+              _parseItems(data['data'] as List<dynamic>, fromJson),
+            );
           } else {
             return ApiResponse.error(
               NetworkException.formatException(
@@ -58,6 +61,32 @@ abstract class BaseRepository {
       },
       error: (error) => ApiResponse.error(error),
     );
+  }
+
+  List<T> _parseItems<T>(
+    List<dynamic> data,
+    T Function(Map<String, dynamic>) fromJson,
+  ) {
+    final items = <T>[];
+    for (var index = 0; index < data.length; index++) {
+      final rawItem = data[index];
+      try {
+        if (rawItem is Map<String, dynamic>) {
+          items.add(fromJson(rawItem));
+        } else if (rawItem is Map) {
+          items.add(fromJson(Map<String, dynamic>.from(rawItem)));
+        } else {
+          throw FormatException(
+            'Expected item object but got ${rawItem.runtimeType}',
+          );
+        }
+      } catch (e) {
+        throw FormatException(
+          'item $index could not be parsed: $e. item=$rawItem',
+        );
+      }
+    }
+    return items;
   }
 
   Future<ApiResponse<T>> handleObjectResponse<T>(

@@ -84,8 +84,8 @@ class ProcessingBottomNavBarState extends State<ProcessingBottomNavBar> {
         child: SafeArea(
           top: false,
           child: Container(
-            height: 65,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            height: 72,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -145,7 +145,7 @@ class ProcessingBottomNavBarState extends State<ProcessingBottomNavBar> {
           highlightColor: Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
             decoration: BoxDecoration(
               color: isActive
                   ? activeColor.withValues(alpha: 0.1)
@@ -158,19 +158,23 @@ class ProcessingBottomNavBarState extends State<ProcessingBottomNavBar> {
               children: [
                 SvgPicture.asset(
                   isActive ? activeIcon : icon,
+                  width: 22,
+                  height: 22,
                   colorFilter: ColorFilter.mode(
                     isActive ? activeColor : inactiveColor,
                     BlendMode.srcIn,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10.5,
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                     color: isActive ? activeColor : inactiveColor,
-                    letterSpacing: 0.1,
                   ),
                 ),
               ],

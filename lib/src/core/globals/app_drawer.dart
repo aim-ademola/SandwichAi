@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/mobile_drawer_controls.dart';
+import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/theme/theme_controller.dart';
 
@@ -137,6 +138,13 @@ class _PremiumDrawerHeader extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              NotificationBellAction(
+                iconColor: Colors.white,
+                backgroundColor: Colors.white.withValues(alpha: 0.16),
+                badgeColor: Colors.white,
+                badgeTextColor: context.modePrimary,
+                margin: EdgeInsets.zero,
               ),
             ],
           ),

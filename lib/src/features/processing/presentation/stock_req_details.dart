@@ -18,7 +18,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
         final maxContentWidth = _getMaxContentWidth(screenWidth);
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           appBar: _buildAppBar(context, screenWidth),
           body: Center(
             child: ConstrainedBox(
@@ -31,14 +31,14 @@ class StockRequestDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeaderCard(screenWidth),
+                    _buildHeaderCard(context, screenWidth),
                     SizedBox(height: _getSectionSpacing(screenWidth)),
-                    _buildRequestInfoCard(screenWidth),
+                    _buildRequestInfoCard(context, screenWidth),
                     SizedBox(height: _getSectionSpacing(screenWidth)),
-                    _buildItemsSection(screenWidth),
+                    _buildItemsSection(context, screenWidth),
                     if (request.approvedBy != null) ...[
                       SizedBox(height: _getSectionSpacing(screenWidth)),
-                      _buildApprovalInfoCard(screenWidth),
+                      _buildApprovalInfoCard(context, screenWidth),
                     ],
                     SizedBox(height: _getVerticalPadding(screenWidth)),
                   ],
@@ -53,12 +53,13 @@ class StockRequestDetailsScreen extends StatelessWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context, double screenWidth) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
         icon: Icon(
           Icons.arrow_back,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
           size: _getIconSize(screenWidth),
         ),
         onPressed: () => Navigator.pop(context),
@@ -68,27 +69,30 @@ class StockRequestDetailsScreen extends StatelessWidget {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getAppBarTitleFontSize(screenWidth),
           fontWeight: FontWeight.w600,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
     );
   }
 
-  Widget _buildHeaderCard(double screenWidth) {
+  Widget _buildHeaderCard(BuildContext context, double screenWidth) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [kPrimary, kPrimary.withValues(alpha: 0.8)],
+          colors: [
+            context.modePrimary,
+            context.modePrimary.withValues(alpha: 0.8),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: kPrimary.withValues(alpha: 0.3),
+            color: context.modePrimary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -102,12 +106,12 @@ class StockRequestDetailsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: context.modeTextInverse.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   Icons.receipt_long,
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                   size: _getIconSize(screenWidth) + 4,
                 ),
               ),
@@ -121,7 +125,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getSectionTitleFontSize(screenWidth),
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: context.modeTextInverse,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -129,22 +133,31 @@ class StockRequestDetailsScreen extends StatelessWidget {
                       'Stock Request',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getCaptionFontSize(screenWidth),
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: context.modeTextInverse.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
                 ),
               ),
-              _buildStatusBadge(request.status, screenWidth, isWhiteBg: true),
+              _buildStatusBadge(
+                context,
+                request.status,
+                screenWidth,
+                isWhiteBg: true,
+              ),
             ],
           ),
           SizedBox(height: _getFieldSpacing(screenWidth)),
-          Divider(color: Colors.white.withValues(alpha: 0.3), height: 1),
+          Divider(
+            color: context.modeTextInverse.withValues(alpha: 0.3),
+            height: 1,
+          ),
           SizedBox(height: _getFieldSpacing(screenWidth)),
           Row(
             children: [
               Expanded(
                 child: _buildHeaderStat(
+                  context: context,
                   icon: Icons.inventory_2_outlined,
                   label: 'Items',
                   value: '${request.totalItemsCount}',
@@ -154,13 +167,14 @@ class StockRequestDetailsScreen extends StatelessWidget {
               Container(
                 width: 1,
                 height: 40,
-                color: Colors.white.withValues(alpha: 0.3),
+                color: context.modeTextInverse.withValues(alpha: 0.3),
               ),
               Expanded(
                 child: _buildHeaderStat(
                   icon: Icons.shopping_cart_outlined,
                   label: 'Total Qty',
                   value: '${request.totalQuantityRequested}',
+                  context: context,
                   screenWidth: screenWidth,
                 ),
               ),
@@ -172,6 +186,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildHeaderStat({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -179,14 +194,18 @@ class StockRequestDetailsScreen extends StatelessWidget {
   }) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: _getIconSize(screenWidth)),
+        Icon(
+          icon,
+          color: context.modeTextInverse,
+          size: _getIconSize(screenWidth),
+        ),
         const SizedBox(height: 6),
         Text(
           value,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getSectionTitleFontSize(screenWidth),
             fontWeight: FontWeight.w700,
-            color: Colors.white,
+            color: context.modeTextInverse,
           ),
         ),
         const SizedBox(height: 2),
@@ -194,22 +213,23 @@ class StockRequestDetailsScreen extends StatelessWidget {
           label,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getCaptionFontSize(screenWidth),
-            color: Colors.white.withValues(alpha: 0.9),
+            color: context.modeTextInverse.withValues(alpha: 0.9),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildRequestInfoCard(double screenWidth) {
+  Widget _buildRequestInfoCard(BuildContext context, double screenWidth) {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -223,41 +243,46 @@ class StockRequestDetailsScreen extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getSectionTitleFontSize(screenWidth),
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           SizedBox(height: _getFieldSpacing(screenWidth)),
           _buildInfoRow(
+            context: context,
             icon: Icons.business_outlined,
             label: 'Requesting Branch',
             value: request.requestingBranch?.name ?? 'Unknown',
             sublabel: request.requestingBranch?.branchCode,
             screenWidth: screenWidth,
           ),
-          _buildDivider(),
+          _buildDivider(context),
           _buildInfoRow(
+            context: context,
             icon: Icons.person_outline,
             label: 'Requested By',
             value: request.requestedBy?.fullName ?? 'N/A',
             screenWidth: screenWidth,
           ),
-          _buildDivider(),
+          _buildDivider(context),
           _buildInfoRow(
+            context: context,
             icon: Icons.category_outlined,
             label: 'Department',
             value: request.department,
             screenWidth: screenWidth,
           ),
-          _buildDivider(),
+          _buildDivider(context),
           _buildInfoRow(
+            context: context,
             icon: Icons.calendar_today_outlined,
             label: 'Created Date',
             value: _formatDate(request.createdAt),
             screenWidth: screenWidth,
           ),
           if (request.notes.isNotEmpty) ...[
-            _buildDivider(),
+            _buildDivider(context),
             _buildInfoRow(
+              context: context,
               icon: Icons.note_outlined,
               label: 'Notes',
               value: request.notes,
@@ -289,15 +314,16 @@ class StockRequestDetailsScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildItemsSection(double screenWidth) {
+  Widget _buildItemsSection(BuildContext context, double screenWidth) {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -311,7 +337,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getSectionTitleFontSize(screenWidth),
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           SizedBox(height: _getFieldSpacing(screenWidth)),
@@ -321,11 +347,11 @@ class StockRequestDetailsScreen extends StatelessWidget {
             itemCount: request.items.length,
             separatorBuilder: (context, index) => Divider(
               height: _getFieldSpacing(screenWidth) * 2,
-              color: Colors.grey.shade200,
+              color: context.modeDivider,
             ),
             itemBuilder: (context, index) {
               final item = request.items[index];
-              return _buildItemCard(item, screenWidth);
+              return _buildItemCard(context, item, screenWidth);
             },
           ),
         ],
@@ -333,19 +359,23 @@ class StockRequestDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildItemCard(StockRequestItem item, double screenWidth) {
+  Widget _buildItemCard(
+    BuildContext context,
+    StockRequestItem item,
+    double screenWidth,
+  ) {
     return Row(
       children: [
         Container(
           width: _getIconSize(screenWidth) + 12,
           height: _getIconSize(screenWidth) + 12,
           decoration: BoxDecoration(
-            color: kPrimary.withValues(alpha: 0.1),
+            color: context.modePrimary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
             Icons.inventory_2_outlined,
-            color: kPrimary,
+            color: context.modePrimary,
             size: _getIconSize(screenWidth) - 2,
           ),
         ),
@@ -359,7 +389,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getInputFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -368,14 +398,14 @@ class StockRequestDetailsScreen extends StatelessWidget {
                   _buildItemBadge(
                     label:
                         'Requested: ${item.qtyRequested} ${item.item?.unit ?? ''}',
-                    color: const Color(0xFF42A5F5),
+                    color: context.modeInfo,
                     screenWidth: screenWidth,
                   ),
                   if (item.qtySent != null) ...[
                     const SizedBox(width: 8),
                     _buildItemBadge(
                       label: 'Sent: ${item.qtySent} ${item.item?.unit ?? ''}',
-                      color: const Color(0xFF66BB6A),
+                      color: context.modeSuccess,
                       screenWidth: screenWidth,
                     ),
                   ],
@@ -384,7 +414,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
             ],
           ),
         ),
-        _buildStatusBadge(item.status, screenWidth),
+        _buildStatusBadge(context, item.status, screenWidth),
       ],
     );
   }
@@ -411,19 +441,22 @@ class StockRequestDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildApprovalInfoCard(double screenWidth) {
+  Widget _buildApprovalInfoCard(BuildContext context, double screenWidth) {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         border: Border.all(
-          color: _getStatusColor(request.status).withValues(alpha: 0.3),
+          color: _getStatusColor(
+            context,
+            request.status,
+          ).withValues(alpha: 0.3),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -437,14 +470,17 @@ class StockRequestDetailsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(request.status).withValues(alpha: 0.1),
+                  color: _getStatusColor(
+                    context,
+                    request.status,
+                  ).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   request.status == 'COMPLETED'
                       ? Icons.check_circle_outline
                       : Icons.cancel_outlined,
-                  color: _getStatusColor(request.status),
+                  color: _getStatusColor(context, request.status),
                   size: _getIconSize(screenWidth),
                 ),
               ),
@@ -456,13 +492,14 @@ class StockRequestDetailsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getSectionTitleFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
           ),
           SizedBox(height: _getFieldSpacing(screenWidth)),
           _buildInfoRow(
+            context: context,
             icon: Icons.person_outline,
             label: request.status == 'COMPLETED'
                 ? 'Approved By'
@@ -471,8 +508,9 @@ class StockRequestDetailsScreen extends StatelessWidget {
             screenWidth: screenWidth,
           ),
           if (request.approvedAt != null) ...[
-            _buildDivider(),
+            _buildDivider(context),
             _buildInfoRow(
+              context: context,
               icon: Icons.calendar_today_outlined,
               label: request.status == 'COMPLETED'
                   ? 'Approved Date'
@@ -482,8 +520,9 @@ class StockRequestDetailsScreen extends StatelessWidget {
             ),
           ],
           if (request.completedBy != null) ...[
-            _buildDivider(),
+            _buildDivider(context),
             _buildInfoRow(
+              context: context,
               icon: Icons.done_all_outlined,
               label: 'Completed By',
               value: request.completedBy?.fullName ?? 'N/A',
@@ -491,8 +530,9 @@ class StockRequestDetailsScreen extends StatelessWidget {
             ),
           ],
           if (request.completedAt != null) ...[
-            _buildDivider(),
+            _buildDivider(context),
             _buildInfoRow(
+              context: context,
               icon: Icons.schedule_outlined,
               label: 'Completed Date',
               value: _formatDate(request.completedAt!),
@@ -505,6 +545,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -524,7 +565,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
           Icon(
             icon,
             size: _getIconSize(screenWidth) - 2,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -535,7 +576,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
                   label,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getCaptionFontSize(screenWidth),
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -544,7 +585,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getInputFontSize(screenWidth),
                     fontWeight: FontWeight.w500,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 if (sublabel != null) ...[
@@ -553,7 +594,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
                     sublabel,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getCaptionFontSize(screenWidth),
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
@@ -565,11 +606,12 @@ class StockRequestDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider() {
-    return Divider(height: _getFieldSpacing(600), color: Colors.grey.shade200);
+  Widget _buildDivider(BuildContext context) {
+    return Divider(height: _getFieldSpacing(600), color: context.modeDivider);
   }
 
   Widget _buildStatusBadge(
+    BuildContext context,
     String status,
     double screenWidth, {
     bool isWhiteBg = false,
@@ -578,8 +620,8 @@ class StockRequestDetailsScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: isWhiteBg
-            ? Colors.white.withValues(alpha: 0.9)
-            : _getStatusColor(status).withValues(alpha: 0.1),
+            ? context.modeTextInverse.withValues(alpha: 0.9)
+            : _getStatusColor(context, status).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -587,24 +629,24 @@ class StockRequestDetailsScreen extends StatelessWidget {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getCaptionFontSize(screenWidth),
           fontWeight: FontWeight.w600,
-          color: _getStatusColor(status),
+          color: _getStatusColor(context, status),
         ),
       ),
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return const Color(0xFFFFA726);
+        return context.modeWarning;
       case 'APPROVED':
-        return const Color(0xFF42A5F5);
+        return context.modeInfo;
       case 'COMPLETED':
-        return const Color(0xFF66BB6A);
+        return context.modeSuccess;
       case 'REJECTED':
-        return const Color(0xFFEF5350);
+        return context.modeError;
       default:
-        return kprimaryTextColor2;
+        return context.modeTextSecondary;
     }
   }
 

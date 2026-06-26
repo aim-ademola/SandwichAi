@@ -18,7 +18,7 @@ class KitchenOrderDetailScreen extends StatefulWidget {
 }
 
 class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
-  Map<String, bool> _itemCompletionStatus = {};
+  final Map<String, bool> _itemCompletionStatus = {};
 
   // Track which order is being updated
   String? _updatingOrderId;
@@ -31,7 +31,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: BlocConsumer<KitchenDashboardBloc, KitchenDashboardState>(
           listener: (context, state) {
@@ -44,7 +44,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: Colors.green,
+                  backgroundColor: context.modeSuccess,
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(seconds: 2),
                 ),
@@ -58,7 +58,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.error),
-                  backgroundColor: Colors.red,
+                  backgroundColor: context.modeError,
                   behavior: SnackBarBehavior.floating,
                   duration: const Duration(seconds: 3),
                 ),
@@ -131,10 +131,11 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -142,13 +143,13 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.refresh, color: Colors.black),
+          icon: Icon(Icons.refresh, color: context.modeTextPrimary),
           onPressed: () {
             context.read<KitchenDashboardBloc>().add(
               const RefreshDashboardData(),
@@ -164,13 +165,13 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: kPrimary),
+          CircularProgressIndicator(color: context.modePrimary),
           const SizedBox(height: 16),
           Text(
             'Loading order details...',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 16,
-              color: Colors.grey[600],
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -185,14 +186,18 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 80, color: Colors.grey[400]),
+            Icon(
+              Icons.search_off,
+              size: 80,
+              color: context.modeTextMuted.withValues(alpha: 0.6),
+            ),
             const SizedBox(height: 16),
             Text(
               'Order Not Found',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -200,7 +205,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               'Order ${widget.orderNumber} could not be found',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.grey[500],
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -210,8 +215,8 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               icon: const Icon(Icons.arrow_back),
               label: const Text('Go Back'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -231,14 +236,14 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
+            Icon(Icons.error_outline, size: 80, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               'Error Loading Order',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -246,7 +251,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               state.error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -260,8 +265,8 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -291,7 +296,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
             );
             await Future.delayed(const Duration(seconds: 1));
           },
-          color: kPrimary,
+          color: context.modePrimary,
           child: Stack(
             children: [
               Center(
@@ -341,7 +346,9 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                   right: 0,
                   child: LinearProgressIndicator(
                     backgroundColor: Colors.transparent,
-                    valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      context.modePrimary,
+                    ),
                   ),
                 ),
             ],
@@ -358,11 +365,12 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -379,7 +387,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
               Container(
@@ -388,7 +396,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: kPrimary.withValues(alpha: 0.1),
+                  color: context.modePrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -396,7 +404,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: kPrimary,
+                    color: context.modePrimary,
                   ),
                 ),
               ),
@@ -429,11 +437,12 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -447,7 +456,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: titleFontSize,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -469,14 +478,20 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.amber[50],
+                color: context.modeWarning.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber[200]!),
+                border: Border.all(
+                  color: context.modeWarning.withValues(alpha: 0.35),
+                ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline, size: 20, color: Colors.amber[800]),
+                  Icon(
+                    Icons.info_outline,
+                    size: 20,
+                    color: context.modeWarning,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -487,7 +502,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: Colors.amber[900],
+                            color: context.modeWarning,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -496,7 +511,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: textFontSize,
                             fontWeight: FontWeight.w500,
-                            color: Colors.amber[900],
+                            color: context.modeWarning,
                           ),
                         ),
                       ],
@@ -525,7 +540,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: fontSize,
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF757575),
+            color: context.modeTextSecondary,
           ),
         ),
         Flexible(
@@ -534,7 +549,9 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: fontSize,
               fontWeight: isHighlight ? FontWeight.w700 : FontWeight.w500,
-              color: isHighlight ? kPrimary : Colors.black87,
+              color: isHighlight
+                  ? context.modePrimary
+                  : context.modeTextPrimary,
             ),
             textAlign: TextAlign.end,
           ),
@@ -563,13 +580,13 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         break;
       case 'CONFIRMED':
         statusText = 'Confirmed';
-        statusBgColor = const Color(0xFFF3E5F5);
-        statusTextColor = const Color(0xFF9C27B0);
+        statusBgColor = context.modePrimaryAlt.withValues(alpha: 0.12);
+        statusTextColor = context.modePrimaryAlt;
         break;
       case 'PREPARING':
         statusText = 'In Progress';
-        statusBgColor = const Color(0xFFFFF3E0);
-        statusTextColor = kPrimary;
+        statusBgColor = context.modePrimary.withValues(alpha: 0.12);
+        statusTextColor = context.modePrimary;
         break;
       case 'READY':
         statusText = 'Ready';
@@ -588,23 +605,24 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         break;
       case 'CANCELLED':
         statusText = 'Cancelled';
-        statusBgColor = const Color(0xFFFFEBEE);
-        statusTextColor = const Color(0xFFE57373);
+        statusBgColor = context.modeError.withValues(alpha: 0.12);
+        statusTextColor = context.modeError;
         break;
       default:
         statusText = order.status;
-        statusBgColor = Colors.grey[200]!;
-        statusTextColor = Colors.grey[700]!;
+        statusBgColor = context.modeSurfaceMuted;
+        statusTextColor = context.modeTextSecondary;
     }
 
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -618,7 +636,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: titleFontSize,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           Container(
@@ -668,13 +686,13 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         itemsTitle = 'Items to Prepare';
         showProgress = false;
         showCheckboxes = false;
-        progressColor = kPrimary;
+        progressColor = context.modePrimary;
         break;
       case 'PREPARING':
         itemsTitle = 'Items Being Prepared';
         showProgress = true;
         showCheckboxes = true;
-        progressColor = const Color(0xFFFFA726);
+        progressColor = context.modeWarning;
         break;
       case 'READY':
       case 'SERVED':
@@ -701,11 +719,12 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -722,7 +741,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
               if (showProgress)
@@ -742,7 +761,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: context.modeSurfaceMuted,
                 valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                 minHeight: 6,
               ),
@@ -772,8 +791,8 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                     padding: EdgeInsets.symmetric(
                       vertical: _getItemDividerSpacing(screenWidth),
                     ),
-                    child: const Divider(
-                      color: Color(0xFFE0E0E0),
+                    child: Divider(
+                      color: context.modeDivider,
                       thickness: 1,
                       height: 1,
                     ),
@@ -821,7 +840,9 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                     _itemCompletionStatus[item.id] = value ?? false;
                   });
                 },
-                activeColor: const Color(0xFFFFA726),
+                activeColor: context.modeWarning,
+                checkColor: context.modeTextInverse,
+                side: BorderSide(color: context.modeBorder),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -835,7 +856,11 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                 color: const Color(0xFF4CAF50),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Icon(Icons.check, color: Colors.white, size: 16),
+              child: Icon(
+                Icons.check,
+                color: context.modeTextInverse,
+                size: 16,
+              ),
             )
           else if (shouldShowAsCancelled)
             Container(
@@ -845,7 +870,11 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                 color: const Color(0xFFE57373),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Icon(Icons.close, color: Colors.white, size: 16),
+              child: Icon(
+                Icons.close,
+                color: context.modeTextInverse,
+                size: 16,
+              ),
             )
           else
             SizedBox(
@@ -853,7 +882,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               height: 24,
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[400]!, width: 2),
+                  border: Border.all(color: context.modeBorder, width: 2),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -869,8 +898,8 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                     fontSize: nameFontSize,
                     fontWeight: FontWeight.w600,
                     color: (shouldShowAsChecked || shouldShowAsCancelled)
-                        ? const Color(0xFF9E9E9E)
-                        : Colors.black,
+                        ? context.modeTextMuted
+                        : context.modeTextPrimary,
                     decoration: (shouldShowAsChecked || shouldShowAsCancelled)
                         ? TextDecoration.lineThrough
                         : TextDecoration.none,
@@ -885,7 +914,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.orange[50],
+                      color: context.modeWarning.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -894,8 +923,8 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                         fontSize: notesFontSize,
                         fontWeight: FontWeight.w500,
                         color: (shouldShowAsChecked || shouldShowAsCancelled)
-                            ? const Color(0xFFBDBDBD)
-                            : Colors.orange[900],
+                            ? context.modeTextMuted
+                            : context.modeWarning,
                         decoration:
                             (shouldShowAsChecked || shouldShowAsCancelled)
                             ? TextDecoration.lineThrough
@@ -911,8 +940,8 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                     fontSize: notesFontSize,
                     fontWeight: FontWeight.w600,
                     color: (shouldShowAsChecked || shouldShowAsCancelled)
-                        ? const Color(0xFFBDBDBD)
-                        : const Color(0xFF757575),
+                        ? context.modeTextMuted
+                        : context.modeTextSecondary,
                     decoration: (shouldShowAsChecked || shouldShowAsCancelled)
                         ? TextDecoration.lineThrough
                         : TextDecoration.none,
@@ -945,10 +974,13 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
     return Container(
       padding: EdgeInsets.all(horizontalPadding),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border(
+          top: BorderSide(color: context.modeBorder.withValues(alpha: 0.45)),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: context.modeTextPrimary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, -4),
           ),
@@ -986,7 +1018,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kPrimary,
+                  backgroundColor: context.modePrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -998,8 +1030,8 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            context.modeTextInverse,
                           ),
                         ),
                       )
@@ -1008,7 +1040,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: buttonFontSize,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
               ),

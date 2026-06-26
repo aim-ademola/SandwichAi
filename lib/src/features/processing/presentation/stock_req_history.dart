@@ -110,15 +110,17 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
         final screenWidth = constraints.maxWidth;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
-          // appBar: _buildAppBar(screenWidth),
+          backgroundColor: context.modeBackground,
           body: BlocConsumer<StockRequestBloc, StockRequestState>(
             listener: (context, state) {
               if (state is StockRequestError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(state.error),
-                    backgroundColor: const Color(0xFFE53935),
+                    content: Text(
+                      state.error,
+                      style: TextStyle(color: context.modeTextInverse),
+                    ),
+                    backgroundColor: context.modeError,
                   ),
                 );
               }
@@ -212,12 +214,12 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
 
   Widget _buildTabBar(double screenWidth) {
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       child: TabBar(
         controller: _tabController,
-        labelColor: kPrimary,
-        unselectedLabelColor: kprimaryTextColor2,
-        indicatorColor: kPrimary,
+        labelColor: context.modePrimary,
+        unselectedLabelColor: context.modeTextSecondary,
+        indicatorColor: context.modePrimary,
         indicatorWeight: 3,
         labelStyle: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getTabFontSize(screenWidth),
@@ -255,13 +257,13 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               width: _getEmptyIconSize(screenWidth),
               height: _getEmptyIconSize(screenWidth),
               decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.1),
+                color: context.modePrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.inbox_outlined,
                 size: _getEmptyIconSize(screenWidth) * 0.5,
-                color: kPrimary,
+                color: context.modePrimary,
               ),
             ),
             SizedBox(height: _getSectionSpacing(screenWidth)),
@@ -270,7 +272,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getSectionTitleFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             SizedBox(height: 8),
@@ -278,7 +280,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               'Create your first stock request to get started',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -300,7 +302,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      color: kPrimary,
+      color: context.modePrimary,
       child: ListView.builder(
         padding: EdgeInsets.all(_getHorizontalPadding(screenWidth)),
         itemCount: requests.length,
@@ -322,10 +324,14 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.08),
+                color: context.modePrimary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.inbox_outlined, size: 36, color: kPrimary),
+              child: Icon(
+                Icons.inbox_outlined,
+                size: 36,
+                color: context.modePrimary,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -333,7 +339,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -347,11 +353,12 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
     return Container(
       margin: EdgeInsets.only(bottom: _getFieldSpacing(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -401,7 +408,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                     Icon(
                       Icons.note_outlined,
                       size: _getIconSize(screenWidth) - 2,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -409,7 +416,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                         request.notes,
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getCaptionFontSize(screenWidth),
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -419,7 +426,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                 ),
               ],
               SizedBox(height: _getFieldSpacing(screenWidth)),
-              Divider(height: 1, color: Colors.grey.shade200),
+              Divider(height: 1, color: context.modeDivider),
               SizedBox(height: _getFieldSpacing(screenWidth)),
               Row(
                 children: [
@@ -439,7 +446,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                     _formatDate(request.createdAt),
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getCaptionFontSize(screenWidth),
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
@@ -461,14 +468,14 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
           Icon(
             Icons.inventory_outlined,
             size: _getIconSize(screenWidth) - 2,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
           const SizedBox(width: 8),
           Text(
             'No items requested',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getCaptionFontSize(screenWidth),
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -476,9 +483,9 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
       );
     }
 
+    var showAll = false;
     return StatefulBuilder(
       builder: (context, setState) {
-        bool showAll = false;
         final displayItems = showAll ? items : items.take(3).toList();
 
         return Column(
@@ -489,7 +496,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                 Icon(
                   Icons.inventory_outlined,
                   size: _getIconSize(screenWidth) - 2,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -497,7 +504,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getInputFontSize(screenWidth),
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ],
@@ -517,7 +524,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                       height: 6,
                       margin: const EdgeInsets.only(left: 8),
                       decoration: BoxDecoration(
-                        color: kPrimary,
+                        color: context.modePrimary,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -527,7 +534,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                         text: TextSpan(
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getCaptionFontSize(screenWidth),
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                           children: [
                             TextSpan(
@@ -539,7 +546,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                             TextSpan(
                               text: ' - ',
                               style: TextStyle(
-                                color: kprimaryTextColor2.withValues(
+                                color: context.modeTextSecondary.withValues(
                                   alpha: 0.6,
                                 ),
                               ),
@@ -547,7 +554,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                             TextSpan(
                               text: '$qty ${unit.toLowerCase()}',
                               style: TextStyle(
-                                color: kPrimary,
+                                color: context.modePrimary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -578,7 +585,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getCaptionFontSize(screenWidth),
                           fontWeight: FontWeight.w600,
-                          color: kPrimary,
+                          color: context.modePrimary,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -587,7 +594,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
                         size: _getIconSize(screenWidth) - 4,
-                        color: kPrimary,
+                        color: context.modePrimary,
                       ),
                     ],
                   ),
@@ -625,20 +632,24 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: kPrimary.withValues(alpha: 0.08),
+        color: context.modePrimary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: _getIconSize(screenWidth) - 6, color: kPrimary),
+          Icon(
+            icon,
+            size: _getIconSize(screenWidth) - 6,
+            color: context.modePrimary,
+          ),
           const SizedBox(width: 4),
           Text(
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getCaptionFontSize(screenWidth),
               fontWeight: FontWeight.w500,
-              color: kPrimary,
+              color: context.modePrimary,
             ),
           ),
         ],
@@ -646,21 +657,22 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
     );
   }
 
+  // ignore: unused_element
   Widget _buildFAB(double screenWidth) {
     return FloatingActionButton.extended(
       onPressed: _navigateToCreateRequest,
-      backgroundColor: kPrimary,
+      backgroundColor: context.modePrimary,
       icon: Icon(
         Icons.add,
         size: _getIconSize(screenWidth),
-        color: Colors.white,
+        color: context.modeTextInverse,
       ),
       label: Text(
         'New Request',
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getInputFontSize(screenWidth),
           fontWeight: FontWeight.w600,
-          color: Colors.white,
+          color: context.modeTextInverse,
         ),
       ),
     );
@@ -669,15 +681,15 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
   Color _getStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return const Color(0xFFFFA726);
+        return context.modeWarning;
       case 'APPROVED':
-        return const Color(0xFF42A5F5);
+        return context.modeInfo;
       case 'COMPLETED':
-        return const Color(0xFF66BB6A);
+        return context.modeSuccess;
       case 'REJECTED':
-        return const Color(0xFFEF5350);
+        return context.modeError;
       default:
-        return kprimaryTextColor2;
+        return context.modeTextSecondary;
     }
   }
 
@@ -732,6 +744,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
       : width < 600
       ? 12
       : 14;
+  // ignore: unused_element
   double _getAppBarTitleFontSize(double width) => width < 360
       ? 17
       : width < 600

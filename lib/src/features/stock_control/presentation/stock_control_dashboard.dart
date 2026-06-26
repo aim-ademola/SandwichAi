@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
+import 'package:sandwich_ai/src/core/globals/sandwich_app_bar.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_dashboard_body.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_drawer.dart';
 
@@ -24,7 +26,7 @@ class _StockControlDashboardScreenState
       child: Scaffold(
         drawer: StockControlAppDrawer(),
         key: _scaffoldKey,
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: StockControlDashboardBodyScreen(),
       ),
@@ -32,24 +34,9 @@ class _StockControlDashboardScreenState
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.menu, color: Colors.black),
-        onPressed: () {
-          _scaffoldKey.currentState?.openDrawer();
-        },
-      ),
-      title: Text(
-        'Inventory Overview',
-        style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: Colors.black,
-        ),
-      ),
-      centerTitle: true,
+    return SandwichAppBar(
+      title: 'Inventory Overview',
+      onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
       actions: const [NotificationBellAction()],
     );
   }

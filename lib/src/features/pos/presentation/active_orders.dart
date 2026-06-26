@@ -38,16 +38,17 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: context.modeSurface,
           elevation: 0,
+          surfaceTintColor: Colors.transparent,
           title: Text(
             'Active Orders',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           centerTitle: true,
@@ -66,8 +67,10 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                   child: BlocBuilder<KitchenOrdersBloc, KitchenOrdersState>(
                     builder: (context, state) {
                       if (state is KitchenOrdersLoading) {
-                        return const Center(
-                          child: CircularProgressIndicator(color: kPrimary),
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: context.modePrimary,
+                          ),
                         );
                       }
 
@@ -104,7 +107,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                         }
 
                         return RefreshIndicator(
-                          color: kPrimary,
+                          color: context.modePrimary,
                           onRefresh: () async {
                             context.read<KitchenOrdersBloc>().add(
                               const RefreshKitchenOrders(),
@@ -149,22 +152,22 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
         horizontal: horizontalPadding,
         vertical: verticalSpacing,
       ),
-      color: Colors.white,
+      color: context.modeSurface,
       child: Column(
         children: [
           TextField(
-            cursorColor: kPrimary,
+            cursorColor: context.modePrimary,
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search orders...',
               hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                color: Colors.grey,
+                color: context.modeTextMuted,
                 fontSize: 14,
               ),
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      icon: Icon(Icons.clear, color: context.modeTextMuted),
                       onPressed: () {
                         _searchController.clear();
                         context.read<KitchenOrdersBloc>().add(
@@ -174,7 +177,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                     )
                   : null,
               filled: true,
-              fillColor: const Color(0xFFF8F6F6),
+              fillColor: context.modeSurfaceAlt,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
@@ -231,7 +234,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: isSelected ? Colors.white : kprimaryTextColor1,
+          color: isSelected ? context.modeTextInverse : context.modeTextPrimary,
         ),
       ),
       selected: isSelected,
@@ -243,9 +246,9 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
           FilterKitchenOrdersByStatus(status: status),
         );
       },
-      backgroundColor: const Color(0xFFE8E8E8),
-      selectedColor: kPrimary,
-      checkmarkColor: Colors.white,
+      backgroundColor: context.modeSurfaceAlt,
+      selectedColor: context.modePrimary,
+      checkmarkColor: context.modeTextInverse,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       showCheckmark: false,
     );
@@ -267,8 +270,9 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFE8E8E8),
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,7 +289,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: textSize,
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -299,11 +303,11 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                               content: Text(
                                 'Order ID copied: ${order.orderId}',
                                 style: WorkSansAppTextStyles.medium.copyWith(
-                                  color: Colors.white,
+                                  color: context.modeTextInverse,
                                   fontSize: 14,
                                 ),
                               ),
-                              backgroundColor: kGreen,
+                              backgroundColor: context.modeSuccess,
                               duration: const Duration(seconds: 2),
                               behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(
@@ -312,7 +316,11 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                             ),
                           );
                         },
-                        child: Icon(Icons.copy, size: 16, color: kPrimary),
+                        child: Icon(
+                          Icons.copy,
+                          size: 16,
+                          color: context.modePrimary,
+                        ),
                       ),
                     ],
                   ),
@@ -324,7 +332,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: textSize,
                       fontWeight: FontWeight.w500,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -359,7 +367,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize - 1,
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1.withValues(alpha: 0.7),
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 4),
@@ -368,7 +376,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize - 2,
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1.withValues(alpha: 0.6),
+                color: context.modeTextMuted,
               ),
             ),
           ],
@@ -388,7 +396,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
             Icon(
               Icons.receipt_long_outlined,
               size: 80,
-              color: Colors.grey[400],
+              color: context.modeTextMuted.withValues(alpha: 0.6),
             ),
             const SizedBox(height: 16),
             Text(
@@ -396,7 +404,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize + 2,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -404,7 +412,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               'All orders have been completed or there are no pending orders.',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize - 1,
-                color: kprimaryTextColor1.withValues(alpha: 0.6),
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -418,8 +426,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text('Refresh'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -447,7 +455,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
             Icon(
               _getErrorIcon(state.errorType),
               size: 80,
-              color: Colors.red[400],
+              color: context.modeError,
             ),
             const SizedBox(height: 16),
             Text(
@@ -455,7 +463,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize + 2,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -463,7 +471,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               state.error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize - 1,
-                color: kprimaryTextColor1.withValues(alpha: 0.6),
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -477,8 +485,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -524,21 +532,21 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
   Color _getStatusColor(OrderStatus status) {
     switch (status) {
       case OrderStatus.pending:
-        return const Color(0xFFFFE770);
+        return context.modeWarning.withValues(alpha: 0.24);
       case OrderStatus.confirmed:
-        return const Color(0xFF87CEEB);
+        return context.modeInfo.withValues(alpha: 0.22);
       case OrderStatus.inQueue:
-        return const Color(0xFFFFB347);
+        return context.modeWarning.withValues(alpha: 0.22);
       case OrderStatus.preparing:
-        return const Color.fromARGB(255, 255, 155, 6);
+        return context.modePrimary.withValues(alpha: 0.18);
       case OrderStatus.ready:
-        return const Color(0xFF30A46C);
+        return context.modeSuccess;
       case OrderStatus.served:
-        return const Color(0xFF9E9E9E);
+        return context.modeSurfaceMuted;
       case OrderStatus.completed:
-        return const Color(0xFF4A5568);
+        return context.modeTextSecondary;
       case OrderStatus.cancelled:
-        return const Color(0xFFEF4444);
+        return context.modeError;
     }
   }
 
@@ -548,9 +556,9 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       case OrderStatus.confirmed:
       case OrderStatus.inQueue:
       case OrderStatus.preparing:
-        return kprimaryTextColor1;
+        return context.modeTextPrimary;
       default:
-        return Colors.white;
+        return context.modeTextInverse;
     }
   }
 

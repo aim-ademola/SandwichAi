@@ -203,7 +203,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
       child: DefaultTextStyle.merge(
         style: WorkSansAppTextStyles.medium,
         child: Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           body: SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -244,8 +244,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: responsive.getTitleFontSize(screenWidth),
                             fontWeight: FontWeight.bold,
-                            color: kprimaryTextColor1,
-                            letterSpacing: -0.5,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         SizedBox(
@@ -261,7 +260,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                             fontSize: responsive.getSubtitleFontSize(
                               screenWidth,
                             ),
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -374,7 +373,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                                   obscurePassword
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
-                                  color: const Color(0xFF9E9E9E),
+                                  color: context.modeTextMuted,
                                   size: responsive.getIconSize(screenWidth),
                                 ),
                                 onPressed: () {
@@ -479,7 +478,11 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                                               ),
                                             );
                                           },
-                                          activeColor: kPrimary,
+                                          activeColor: context.modePrimary,
+                                          checkColor: context.modeTextInverse,
+                                          side: BorderSide(
+                                            color: context.modeBorder,
+                                          ),
                                           materialTapTargetSize:
                                               MaterialTapTargetSize.shrinkWrap,
                                         ),
@@ -496,7 +499,8 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                                                           screenWidth,
                                                         ) *
                                                     0.9,
-                                                color: kprimaryTextColor2,
+                                                color:
+                                                    context.modeTextSecondary,
                                               ),
                                         ),
                                       ),
@@ -525,7 +529,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                                                 screenWidth,
                                               ) *
                                               0.9,
-                                          color: kPrimary,
+                                          color: context.modePrimary,
                                           fontWeight: FontWeight.w600,
                                         ),
                                   ),
@@ -549,12 +553,11 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                               child: ElevatedButton(
                                 onPressed: isLoading ? null : _handleLogin,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: kPrimary,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: context.modePrimary,
+                                  foregroundColor: context.modeTextInverse,
                                   elevation: 0,
-                                  disabledBackgroundColor: kPrimary.withValues(
-                                    alpha: 0.6,
-                                  ),
+                                  disabledBackgroundColor: context.modePrimary
+                                      .withValues(alpha: 0.6),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
                                       responsive.getButtonBorderRadius(
@@ -564,14 +567,14 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                                   ),
                                 ),
                                 child: isLoading
-                                    ? const SizedBox(
+                                    ? SizedBox(
                                         height: 20,
                                         width: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
+                                                context.modeTextInverse,
                                               ),
                                         ),
                                       )
@@ -585,7 +588,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                                                   ),
                                               fontWeight: FontWeight.w600,
                                               letterSpacing: 0.5,
-                                              color: kWhite,
+                                              color: context.modeTextInverse,
                                             ),
                                       ),
                               ),
@@ -617,7 +620,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                                       screenWidth,
                                     ) *
                                     0.85,
-                                color: kprimaryTextColor2,
+                                color: context.modeTextSecondary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -642,9 +645,9 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kPrimary.withValues(alpha: 0.18)),
+        border: Border.all(color: context.modePrimary.withValues(alpha: 0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -655,10 +658,14 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: kPrimary.withValues(alpha: 0.1),
+                  color: context.modePrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.science_outlined, color: kPrimary, size: 19),
+                child: Icon(
+                  Icons.science_outlined,
+                  color: context.modePrimary,
+                  size: 19,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -670,7 +677,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: screenWidth < 360 ? 13 : 14,
                         fontWeight: FontWeight.w700,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 1),
@@ -681,7 +688,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: screenWidth < 360 ? 11 : 12,
                         fontWeight: FontWeight.w500,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -701,8 +708,10 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                       ? null
                       : () => _applyDevLoginUser(user, submit: true),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: kPrimary,
-                    side: BorderSide(color: kPrimary.withValues(alpha: 0.28)),
+                    foregroundColor: context.modePrimary,
+                    side: BorderSide(
+                      color: context.modePrimary.withValues(alpha: 0.28),
+                    ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 9,

@@ -2,7 +2,7 @@ class DevLoginConfig {
   const DevLoginConfig._();
 
   // Turn this off before production builds.
-  static const bool enabled = false;
+  static const bool enabled = true;
   static const String organizationCode = 'ORG-003';
 
   static const users = <DevLoginUser>[

@@ -40,9 +40,9 @@ class _RecipeComplianceHistoryScreenState
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -58,7 +58,7 @@ class _RecipeComplianceHistoryScreenState
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: context.modeDivider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -76,7 +76,7 @@ class _RecipeComplianceHistoryScreenState
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                       ),
@@ -121,7 +121,7 @@ class _RecipeComplianceHistoryScreenState
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       decoration: BoxDecoration(
-                        color: kPrimary,
+                        color: context.modePrimary,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -130,7 +130,7 @@ class _RecipeComplianceHistoryScreenState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
                     ),
@@ -145,15 +145,16 @@ class _RecipeComplianceHistoryScreenState
     );
   }
 
+  // ignore: unused_element
   void _showFilterBottomSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (bottomSheetContext) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -168,7 +169,7 @@ class _RecipeComplianceHistoryScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 20),
@@ -205,11 +206,11 @@ class _RecipeComplianceHistoryScreenState
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? kPrimary.withValues(alpha: 0.1)
-              : const Color(0xFFF8F6F6),
+              ? context.modePrimary.withValues(alpha: 0.1)
+              : context.modeSurfaceAlt,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? kPrimary : Colors.transparent,
+            color: isSelected ? context.modePrimary : Colors.transparent,
             width: 2,
           ),
         ),
@@ -218,7 +219,7 @@ class _RecipeComplianceHistoryScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 15,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? kPrimary : kprimaryTextColor1,
+            color: isSelected ? context.modePrimary : context.modeTextPrimary,
           ),
         ),
       ),
@@ -236,7 +237,7 @@ class _RecipeComplianceHistoryScreenState
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
           const SizedBox(width: 16),
@@ -247,7 +248,7 @@ class _RecipeComplianceHistoryScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: valueColor ?? kprimaryTextColor1,
+                color: valueColor ?? context.modeTextPrimary,
               ),
             ),
           ),
@@ -262,20 +263,20 @@ class _RecipeComplianceHistoryScreenState
 
     switch (status.toUpperCase()) {
       case 'CRITICAL':
-        backgroundColor = const Color(0xFFFFEBEE);
-        textColor = const Color(0xFFE53935);
+        backgroundColor = context.modeError.withValues(alpha: 0.12);
+        textColor = context.modeError;
         break;
       case 'LOW':
-        backgroundColor = const Color(0xFFFFF3E0);
-        textColor = const Color(0xFFFB8C00);
+        backgroundColor = context.modeWarning.withValues(alpha: 0.12);
+        textColor = context.modeWarning;
         break;
       case 'OPTIMAL':
-        backgroundColor = const Color(0xFFE8F5E9);
-        textColor = const Color(0xFF43A047);
+        backgroundColor = context.modeSuccess.withValues(alpha: 0.12);
+        textColor = context.modeSuccess;
         break;
       default:
-        backgroundColor = const Color(0xFFF5F5F5);
-        textColor = kprimaryTextColor2;
+        backgroundColor = context.modeSurfaceAlt;
+        textColor = context.modeTextSecondary;
     }
 
     return Container(
@@ -298,11 +299,11 @@ class _RecipeComplianceHistoryScreenState
   Color _getVarianceColor(String variancePercent) {
     final variance = double.tryParse(variancePercent) ?? 0;
     if (variance.abs() > 20) {
-      return const Color(0xFFE53935);
+      return context.modeError;
     } else if (variance.abs() > 10) {
-      return const Color(0xFFFB8C00);
+      return context.modeWarning;
     } else {
-      return const Color(0xFF43A047);
+      return context.modeSuccess;
     }
   }
 
@@ -320,7 +321,7 @@ class _RecipeComplianceHistoryScreenState
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
 
         body:
             BlocConsumer<
@@ -331,8 +332,11 @@ class _RecipeComplianceHistoryScreenState
                 if (state is RecipeComplianceHistoryError) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(state.error),
-                      backgroundColor: const Color(0xFFE53935),
+                      content: Text(
+                        state.error,
+                        style: TextStyle(color: context.modeTextInverse),
+                      ),
+                      backgroundColor: context.modeError,
                     ),
                   );
                 }
@@ -355,14 +359,14 @@ class _RecipeComplianceHistoryScreenState
                         Icon(
                           Icons.assessment_outlined,
                           size: 64,
-                          color: Colors.grey.shade400,
+                          color: context.modeTextMuted,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No compliance records found',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 16,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
@@ -378,7 +382,7 @@ class _RecipeComplianceHistoryScreenState
                         Icon(
                           Icons.error_outline,
                           size: 64,
-                          color: Colors.grey.shade400,
+                          color: context.modeTextMuted,
                         ),
                         const SizedBox(height: 16),
                         Padding(
@@ -388,7 +392,7 @@ class _RecipeComplianceHistoryScreenState
                             textAlign: TextAlign.center,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 16,
-                              color: kprimaryTextColor2,
+                              color: context.modeTextSecondary,
                             ),
                           ),
                         ),
@@ -400,7 +404,7 @@ class _RecipeComplianceHistoryScreenState
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: kPrimary,
+                            backgroundColor: context.modePrimary,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 32,
                               vertical: 16,
@@ -409,7 +413,7 @@ class _RecipeComplianceHistoryScreenState
                           child: Text(
                             'Retry',
                             style: WorkSansAppTextStyles.medium.copyWith(
-                              color: Colors.white,
+                              color: context.modeTextInverse,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -441,8 +445,8 @@ class _RecipeComplianceHistoryScreenState
                                 Expanded(
                                   child: _buildSummaryCard(
                                     icon: Icons.assessment,
-                                    iconColor: kPrimary,
-                                    iconBgColor: kPrimary.withValues(
+                                    iconColor: context.modePrimary,
+                                    iconBgColor: context.modePrimary.withValues(
                                       alpha: 0.1,
                                     ),
                                     title: 'Total Checks',
@@ -453,10 +457,10 @@ class _RecipeComplianceHistoryScreenState
                                 Expanded(
                                   child: _buildSummaryCard(
                                     icon: Icons.trending_up,
-                                    iconColor: const Color(0xFFFB8C00),
-                                    iconBgColor: const Color(
-                                      0xFFFB8C00,
-                                    ).withValues(alpha: 0.1),
+                                    iconColor: context.modeWarning,
+                                    iconBgColor: context.modeWarning.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     title: 'Avg Variance',
                                     value:
                                         '${state.averageVariance.toStringAsFixed(1)}%',
@@ -473,11 +477,18 @@ class _RecipeComplianceHistoryScreenState
                             child: Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: context.modeSurface,
+                                border: Border.all(
+                                  color: context.modeBorder.withValues(
+                                    alpha: 0.45,
+                                  ),
+                                ),
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.04),
+                                    color: context.modeTextPrimary.withValues(
+                                      alpha: 0.04,
+                                    ),
                                     blurRadius: 12,
                                     offset: const Offset(0, 2),
                                   ),
@@ -492,26 +503,26 @@ class _RecipeComplianceHistoryScreenState
                                         .copyWith(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
-                                          color: kprimaryTextColor1,
+                                          color: context.modeTextPrimary,
                                         ),
                                   ),
                                   const SizedBox(height: 16),
                                   _buildStatusRow(
                                     'Critical',
                                     state.statusCounts['CRITICAL'] ?? 0,
-                                    const Color(0xFFE53935),
+                                    context.modeError,
                                   ),
                                   const SizedBox(height: 12),
                                   _buildStatusRow(
                                     'Low',
                                     state.statusCounts['LOW'] ?? 0,
-                                    const Color(0xFFFB8C00),
+                                    context.modeWarning,
                                   ),
                                   const SizedBox(height: 12),
                                   _buildStatusRow(
                                     'Optimal',
                                     state.statusCounts['OPTIMAL'] ?? 0,
-                                    const Color(0xFF43A047),
+                                    context.modeSuccess,
                                   ),
                                 ],
                               ),
@@ -530,7 +541,7 @@ class _RecipeComplianceHistoryScreenState
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
-                                    color: kprimaryTextColor1,
+                                    color: context.modeTextPrimary,
                                   ),
                                 ),
                                 Container(
@@ -539,7 +550,9 @@ class _RecipeComplianceHistoryScreenState
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: kPrimary.withValues(alpha: 0.1),
+                                    color: context.modePrimary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
@@ -548,7 +561,7 @@ class _RecipeComplianceHistoryScreenState
                                         .copyWith(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
-                                          color: kPrimary,
+                                          color: context.modePrimary,
                                         ),
                                   ),
                                 ),
@@ -566,7 +579,7 @@ class _RecipeComplianceHistoryScreenState
                                   'No records match your filter',
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 16,
-                                    color: kprimaryTextColor2,
+                                    color: context.modeTextSecondary,
                                   ),
                                 ),
                               ),
@@ -612,11 +625,12 @@ class _RecipeComplianceHistoryScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -639,7 +653,7 @@ class _RecipeComplianceHistoryScreenState
             title,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
           const SizedBox(height: 4),
@@ -648,7 +662,7 @@ class _RecipeComplianceHistoryScreenState
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
         ],
@@ -670,7 +684,7 @@ class _RecipeComplianceHistoryScreenState
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
         ),
@@ -679,7 +693,7 @@ class _RecipeComplianceHistoryScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
       ],
@@ -691,11 +705,12 @@ class _RecipeComplianceHistoryScreenState
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -712,7 +727,7 @@ class _RecipeComplianceHistoryScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -734,7 +749,7 @@ class _RecipeComplianceHistoryScreenState
                 child: _buildInfoChip(
                   Icons.inventory_2,
                   '${record.batchesPrepared} batches',
-                  kprimaryTextColor2,
+                  context.modeTextSecondary,
                 ),
               ),
             ],
@@ -742,13 +757,17 @@ class _RecipeComplianceHistoryScreenState
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.calendar_today, size: 14, color: kprimaryTextColor2),
+              Icon(
+                Icons.calendar_today,
+                size: 14,
+                color: context.modeTextSecondary,
+              ),
               const SizedBox(width: 6),
               Text(
                 _formatDate(record.checkDate),
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 13,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
               ),
             ],
@@ -762,7 +781,7 @@ class _RecipeComplianceHistoryScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F6F6),
+        color: context.modeSurfaceAlt,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

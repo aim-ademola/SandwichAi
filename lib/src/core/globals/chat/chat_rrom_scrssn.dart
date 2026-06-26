@@ -65,27 +65,24 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F6F6),
+      backgroundColor: context.modeBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.modeSurface,
         elevation: 1,
+        surfaceTintColor: Colors.transparent,
 
-        // leading: IconButton(
-        //   icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
-        //   onPressed: widget.showNavBarCallback,
-        // ),
         centerTitle: true,
         title: Text(
           'Chat Rooms',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: kprimaryTextColor1),
+            icon: Icon(Icons.refresh, color: context.modeTextPrimary),
             onPressed: () =>
                 context.read<ChatBloc>().add(const LoadChatRooms()),
           ),
@@ -94,8 +91,8 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
       body: BlocBuilder<ChatBloc, ChatState>(
         builder: (context, state) {
           if (state is ChatRoomsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: kPrimary),
+            return Center(
+              child: CircularProgressIndicator(color: context.modePrimary),
             );
           }
 
@@ -108,8 +105,8 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
             return _buildRoomList(state.rooms);
           }
 
-          return const Center(
-            child: CircularProgressIndicator(color: kPrimary),
+          return Center(
+            child: CircularProgressIndicator(color: context.modePrimary),
           );
         },
       ),
@@ -132,8 +129,12 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: sorted.length,
-      separatorBuilder: (_, __) =>
-          const Divider(height: 0, indent: 72, endIndent: 16),
+      separatorBuilder: (_, _) => Divider(
+        height: 0,
+        indent: 72,
+        endIndent: 16,
+        color: context.modeDivider,
+      ),
       itemBuilder: (context, index) => _buildRoomTile(sorted[index]),
     );
   }
@@ -155,10 +156,10 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: kPrimary.withValues(alpha: 0.2),
+                    color: context.modePrimary.withValues(alpha: 0.18),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(dept.icon, color: kPrimary, size: 22),
+                  child: Icon(dept.icon, color: context.modePrimary, size: 22),
                 ),
                 if (room.isPinned)
                   Positioned(
@@ -167,14 +168,14 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                     child: Container(
                       width: 16,
                       height: 16,
-                      decoration: const BoxDecoration(
-                        color: kPrimary,
+                      decoration: BoxDecoration(
+                        color: context.modePrimary,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.push_pin,
                         size: 10,
-                        color: Colors.white,
+                        color: context.modeTextInverse,
                       ),
                     ),
                   ),
@@ -196,7 +197,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                             fontWeight: hasUnread
                                 ? FontWeight.w700
                                 : FontWeight.w500,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -207,7 +208,9 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                           _formatTime(room.lastMessageAt!),
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 11,
-                            color: hasUnread ? kPrimary : kprimaryTextColor2,
+                            color: hasUnread
+                                ? context.modePrimary
+                                : context.modeTextSecondary,
                             fontWeight: hasUnread
                                 ? FontWeight.w600
                                 : FontWeight.normal,
@@ -224,8 +227,8 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 13,
                             color: hasUnread
-                                ? kprimaryTextColor1
-                                : kprimaryTextColor2,
+                                ? context.modeTextPrimary
+                                : context.modeTextSecondary,
                             fontWeight: hasUnread
                                 ? FontWeight.w500
                                 : FontWeight.normal,
@@ -239,16 +242,16 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (room.isStarred)
-                            const Icon(
+                            Icon(
                               Icons.star,
                               size: 14,
-                              color: Colors.amber,
+                              color: context.modeWarning,
                             ),
                           if (room.isMuted)
-                            const Icon(
+                            Icon(
                               Icons.notifications_off,
                               size: 14,
-                              color: kprimaryTextColor2,
+                              color: context.modeTextSecondary,
                             ),
                           if (hasUnread) ...[
                             const SizedBox(width: 4),
@@ -258,13 +261,13 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: kPrimary,
+                                color: context.modePrimary,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
                                 '${room.unreadCount}',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: context.modeTextInverse,
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -294,19 +297,19 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
     switch (room.type) {
       case 'BRANCH':
         label = '🏪 Branch Chat';
-        color = kPrimary;
+        color = context.modePrimary;
         break;
       case 'GENERAL':
         label = '🌐 General Org Chat';
-        color = kPrimary;
+        color = context.modePrimary;
         break;
       case 'DEPARTMENT':
         label = '👥 ${room.department ?? 'Departmental'} Departmental Chat';
-        color = kPrimary;
+        color = context.modePrimary;
         break;
       default:
         label = room.type;
-        color = Colors.grey;
+        color = context.modeTextSecondary;
     }
 
     return Text(
@@ -324,14 +327,18 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
+          Icon(
+            Icons.chat_bubble_outline,
+            size: 64,
+            color: context.modeTextMuted.withValues(alpha: 0.55),
+          ),
           const SizedBox(height: 16),
           Text(
             'No chats yet',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -339,7 +346,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
             'Your chat rooms will appear here',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -354,26 +361,29 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline_outlined,
               size: 56,
-              color: Colors.red,
+              color: context.modeError,
             ),
             const SizedBox(height: 16),
             Text(
               error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: kPrimary),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
+              ),
               onPressed: () =>
                   context.read<ChatBloc>().add(const LoadChatRooms()),
-              child: const Text('Retry', style: TextStyle(color: Colors.white)),
+              child: const Text('Retry'),
             ),
           ],
         ),

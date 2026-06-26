@@ -15,6 +15,8 @@ class KitchenAppDrawer extends StatelessWidget {
       moduleTitle: 'Kitchen',
       moduleSubtitle: 'Kitchen workflow and production readiness',
       footerChildren: [
+        const AppDrawerThemeSwitch(),
+        const SizedBox(height: 8),
         _buildDrawerItem(
           context,
           icon: Icons.lock_outline_rounded,

@@ -154,11 +154,11 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
         content: Text(
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
-            color: Colors.white,
+            color: context.modeTextInverse,
             fontSize: 14,
           ),
         ),
-        backgroundColor: isError ? const Color(0xFFE53935) : kGreen,
+        backgroundColor: isError ? context.modeError : context.modeSuccess,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -196,8 +196,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
           final maxContentWidth = _getMaxContentWidth(screenWidth);
 
           return Scaffold(
-            backgroundColor: const Color(0xFFF8F6F6),
-            // appBar: _buildAppBar(screenWidth),
+            backgroundColor: context.modeBackground,
             body: BlocBuilder<RecipeComplianceBloc, RecipeComplianceState>(
               builder: (context, state) {
                 if (state is MenuItemsLoading) {
@@ -342,7 +341,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: _getSectionTitleFontSize(screenWidth),
         fontWeight: FontWeight.w600,
-        color: kprimaryTextColor1,
+        color: context.modeTextPrimary,
       ),
     );
   }
@@ -356,7 +355,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -373,14 +372,14 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
               vertical: _getInputPaddingVertical(screenWidth),
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
               border: Border.all(
                 color: _selectedMenuItem == null && !_isSearching
-                    ? const Color(0xFFE0E0E0)
-                    : kPrimary.withValues(alpha: 0.3),
+                    ? context.modeBorder
+                    : context.modePrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -388,7 +387,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
               children: [
                 Icon(
                   Icons.search,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 const SizedBox(width: 12),
@@ -400,22 +399,22 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                       fontSize: _getInputFontSize(screenWidth),
                       fontWeight: FontWeight.w400,
                       color: _selectedMenuItem != null
-                          ? kprimaryTextColor1
-                          : kprimaryTextColor2,
+                          ? context.modeTextPrimary
+                          : context.modeTextSecondary,
                     ),
                   ),
                 ),
                 _isOpened
                     ? Icon(
                         Icons.arrow_drop_down,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                         size: _getIconSize(screenWidth) + 4,
                       )
                     : Transform.rotate(
                         angle: -90 * 3.14159 / 180,
                         child: Icon(
                           Icons.arrow_drop_down,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth) + 4,
                         ),
                       ),
@@ -435,12 +434,12 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
     return Container(
       constraints: const BoxConstraints(maxHeight: 300),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: context.modeTextPrimary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -460,24 +459,24 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                     autofocus: true,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getInputFontSize(screenWidth),
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Type to search...',
                       hintStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getInputFontSize(screenWidth),
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                       prefixIcon: Icon(
                         Icons.search,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                         size: _getIconSize(screenWidth),
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: Icon(
                                 Icons.clear,
-                                color: kprimaryTextColor2,
+                                color: context.modeTextSecondary,
                                 size: _getIconSize(screenWidth),
                               ),
                               onPressed: () {
@@ -492,13 +491,16 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                         borderRadius: BorderRadius.circular(
                           _getBorderRadius(screenWidth),
                         ),
-                        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                        borderSide: BorderSide(color: context.modeBorder),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(
                           _getBorderRadius(screenWidth),
                         ),
-                        borderSide: BorderSide(color: kPrimary, width: 1.5),
+                        borderSide: BorderSide(
+                          color: context.modePrimary,
+                          width: 1.5,
+                        ),
                       ),
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: _getInputPaddingHorizontal(screenWidth),
@@ -514,12 +516,12 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                   onPressed: () {
                     context.read<RecipeComplianceBloc>().add(LoadMenuItems());
                   },
-                  icon: Icon(Icons.refresh),
+                  icon: Icon(Icons.refresh, color: context.modePrimary),
                 ),
               ),
             ],
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           Expanded(
             child: _filteredMenuItems.isEmpty
                 ? Center(
@@ -531,7 +533,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                         'No menu items found',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getInputFontSize(screenWidth),
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ),
@@ -561,7 +563,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.grey.shade200,
+                                color: context.modeDivider,
                                 width: 1,
                               ),
                             ),
@@ -585,12 +587,11 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                                 height:
                                                     _getIconSize(screenWidth) +
                                                     24,
-                                                color: kPrimary.withValues(
-                                                  alpha: 0.1,
-                                                ),
+                                                color: context.modePrimary
+                                                    .withValues(alpha: 0.1),
                                                 child: Icon(
                                                   Icons.restaurant_menu,
-                                                  color: kPrimary,
+                                                  color: context.modePrimary,
                                                   size: _getIconSize(
                                                     screenWidth,
                                                   ),
@@ -602,7 +603,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                         width: _getIconSize(screenWidth) + 24,
                                         height: _getIconSize(screenWidth) + 24,
                                         decoration: BoxDecoration(
-                                          color: kPrimary.withValues(
+                                          color: context.modePrimary.withValues(
                                             alpha: 0.1,
                                           ),
                                           borderRadius: BorderRadius.circular(
@@ -611,7 +612,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                         ),
                                         child: Icon(
                                           Icons.restaurant_menu,
-                                          color: kPrimary,
+                                          color: context.modePrimary,
                                           size: _getIconSize(screenWidth),
                                         ),
                                       ),
@@ -629,7 +630,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                               screenWidth,
                                             ),
                                             fontWeight: FontWeight.w600,
-                                            color: kprimaryTextColor1,
+                                            color: context.modeTextPrimary,
                                           ),
                                     ),
                                     const SizedBox(height: 2),
@@ -640,7 +641,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                             fontSize: _getCaptionFontSize(
                                               screenWidth,
                                             ),
-                                            color: kprimaryTextColor2,
+                                            color: context.modeTextSecondary,
                                           ),
                                     ),
                                   ],
@@ -653,7 +654,9 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: kPrimary.withValues(alpha: 0.1),
+                                    color: context.modePrimary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -663,7 +666,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                           fontSize: _getCaptionFontSize(
                                             screenWidth,
                                           ),
-                                          color: kPrimary,
+                                          color: context.modePrimary,
                                           fontWeight: FontWeight.w600,
                                         ),
                                   ),
@@ -698,7 +701,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -709,66 +712,54 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             prefixText: prefixText,
             prefixStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
             filled: true,
             fillColor: readOnly
                 ? context.modePrimary.withValues(alpha: 0.06)
-                : Colors.white,
+                : context.modeSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: BorderSide(color: kPrimary, width: 1.5),
+              borderSide: BorderSide(color: context.modePrimary, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE53935),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeError, width: 1.5),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE53935),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeError, width: 1.5),
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: _getInputPaddingHorizontal(screenWidth),
@@ -798,7 +789,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -808,40 +799,34 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: BorderSide(color: kPrimary, width: 1.5),
+              borderSide: BorderSide(color: context.modePrimary, width: 1.5),
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: _getInputPaddingHorizontal(screenWidth),
@@ -864,8 +849,10 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
           child: ElevatedButton(
             onPressed: isLoading ? null : _submitForm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
-              disabledBackgroundColor: kPrimary.withValues(alpha: 0.6),
+              backgroundColor: context.modePrimary,
+              disabledBackgroundColor: context.modePrimary.withValues(
+                alpha: 0.6,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(
                   _getBorderRadius(screenWidth),
@@ -877,9 +864,11 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                 ? SizedBox(
                     height: _getIconSize(screenWidth),
                     width: _getIconSize(screenWidth),
-                    child: const CircularProgressIndicator(
+                    child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        context.modeTextInverse,
+                      ),
                     ),
                   )
                 : Text(
@@ -887,7 +876,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getButtonFontSize(screenWidth),
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                     ),
                   ),
           ),

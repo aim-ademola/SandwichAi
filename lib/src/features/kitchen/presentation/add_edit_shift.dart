@@ -73,8 +73,8 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: kPrimary,
-              onPrimary: Colors.white,
+              primary: context.modePrimary,
+              onPrimary: context.modeTextInverse,
             ),
           ),
           child: child!,
@@ -97,8 +97,8 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: kPrimary,
-              onPrimary: Colors.white,
+              primary: context.modePrimary,
+              onPrimary: context.modeTextInverse,
             ),
           ),
           child: child!,
@@ -188,16 +188,14 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFFE53935),
-      ),
+      SnackBar(content: Text(message), backgroundColor: context.modeError),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: context.modeSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
         child: Padding(
@@ -218,12 +216,12 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
+                      icon: Icon(Icons.close, color: context.modeTextPrimary),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
@@ -262,14 +260,14 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                       return Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey[300]!),
+                          border: Border.all(color: context.modeBorder),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           'Loading employees...',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       );
@@ -281,7 +279,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                         labelText: 'Employee *',
                         labelStyle: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -323,7 +321,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                       labelText: 'Date *',
                       labelStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -345,11 +343,15 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 15,
                             color: _selectedDate != null
-                                ? kprimaryTextColor1
-                                : kprimaryTextColor2,
+                                ? context.modeTextPrimary
+                                : context.modeTextSecondary,
                           ),
                         ),
-                        Icon(Icons.calendar_today, color: kPrimary, size: 20),
+                        Icon(
+                          Icons.calendar_today,
+                          color: context.modePrimary,
+                          size: 20,
+                        ),
                       ],
                     ),
                   ),
@@ -363,7 +365,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                     labelText: 'Shift Type *',
                     labelStyle: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -407,7 +409,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                             labelText: 'Start Time *',
                             labelStyle: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
-                              color: kprimaryTextColor2,
+                              color: context.modeTextSecondary,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -427,13 +429,13 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 15,
                                   color: _startTime != null
-                                      ? kprimaryTextColor1
-                                      : kprimaryTextColor2,
+                                      ? context.modeTextPrimary
+                                      : context.modeTextSecondary,
                                 ),
                               ),
                               Icon(
                                 Icons.access_time,
-                                color: kPrimary,
+                                color: context.modePrimary,
                                 size: 20,
                               ),
                             ],
@@ -450,7 +452,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                             labelText: 'End Time *',
                             labelStyle: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
-                              color: kprimaryTextColor2,
+                              color: context.modeTextSecondary,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -470,13 +472,13 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 15,
                                   color: _endTime != null
-                                      ? kprimaryTextColor1
-                                      : kprimaryTextColor2,
+                                      ? context.modeTextPrimary
+                                      : context.modeTextSecondary,
                                 ),
                               ),
                               Icon(
                                 Icons.access_time,
-                                color: kPrimary,
+                                color: context.modePrimary,
                                 size: 20,
                               ),
                             ],
@@ -497,15 +499,15 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                     hintText: 'Add any relevant notes or instructions',
                     labelStyle: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     hintStyle: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2.withValues(alpha: 0.6),
+                      color: context.modeTextMuted,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kPrimary),
+                      borderSide: BorderSide(color: context.modePrimary),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -514,7 +516,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                   ),
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 15,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -526,7 +528,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: kPrimary),
+                          side: BorderSide(color: context.modePrimary),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -535,7 +537,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                         child: Text(
                           'Cancel',
                           style: WorkSansAppTextStyles.medium.copyWith(
-                            color: kPrimary,
+                            color: context.modePrimary,
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
                           ),
@@ -547,7 +549,8 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                       child: ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimary,
+                          backgroundColor: context.modePrimary,
+                          foregroundColor: context.modeTextInverse,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -556,7 +559,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                         child: Text(
                           widget.existingShift == null ? 'Add Shift' : 'Update',
                           style: WorkSansAppTextStyles.medium.copyWith(
-                            color: Colors.white,
+                            color: context.modeTextInverse,
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
                           ),
@@ -626,9 +629,9 @@ class ShiftDetailsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -643,12 +646,12 @@ class ShiftDetailsSheet extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close),
+                icon: Icon(Icons.close, color: context.modeTextPrimary),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -656,12 +659,12 @@ class ShiftDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          _buildDetailRow('Employee', shift.employee.fullName),
-          _buildDetailRow('Date', shift.formattedDate),
-          _buildDetailRow('Shift Type', shift.shiftTypeDisplay),
-          _buildDetailRow('Time', shift.formattedTimeRange),
+          _buildDetailRow(context, 'Employee', shift.employee.fullName),
+          _buildDetailRow(context, 'Date', shift.formattedDate),
+          _buildDetailRow(context, 'Shift Type', shift.shiftTypeDisplay),
+          _buildDetailRow(context, 'Time', shift.formattedTimeRange),
           if (shift.notes != null && shift.notes!.isNotEmpty)
-            _buildDetailRow('Notes', shift.notes!),
+            _buildDetailRow(context, 'Notes', shift.notes!),
 
           const SizedBox(height: 24),
         ],
@@ -669,7 +672,7 @@ class ShiftDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -681,7 +684,7 @@ class ShiftDetailsSheet extends StatelessWidget {
               label,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ),
@@ -691,7 +694,7 @@ class ShiftDetailsSheet extends StatelessWidget {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),

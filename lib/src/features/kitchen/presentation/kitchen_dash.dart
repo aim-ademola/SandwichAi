@@ -86,7 +86,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
       child: Scaffold(
         key: _scaffoldKey,
         drawer: KitchenAppDrawer(),
-        backgroundColor: const Color(0xFFF5F4F2),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(),
         body: BlocConsumer<KitchenDashboardBloc, KitchenDashboardState>(
           listener: (context, state) {
@@ -97,10 +97,10 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   content: Text(
                     state.message,
                     style: WorkSansAppTextStyles.medium.copyWith(
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                     ),
                   ),
-                  backgroundColor: const Color(0xFF2D9B6F),
+                  backgroundColor: context.modeSuccess,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -115,10 +115,10 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   content: Text(
                     state.error,
                     style: WorkSansAppTextStyles.medium.copyWith(
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                     ),
                   ),
-                  backgroundColor: Colors.red,
+                  backgroundColor: context.modeError,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -133,20 +133,24 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           buildWhen: (previous, current) =>
               current is! OrderActionSuccess && current is! OrderActionError,
           builder: (context, state) {
-            if (state is DashboardLoading) return _buildLoadingState();
-            if (state is DashboardLoaded)
+            if (state is DashboardLoading) {
+              return _buildLoadingState();
+            }
+            if (state is DashboardLoaded) {
               return _buildLoadedState(
                 state.dashboardData,
                 state.filteredOrders,
                 state.currentFilter,
               );
-            if (state is DashboardRefreshing)
+            }
+            if (state is DashboardRefreshing) {
               return _buildLoadedState(
                 state.currentData,
                 state.currentData.recentOrders,
                 OrderFilter.all,
                 isRefreshing: true,
               );
+            }
             if (state is DashboardEmpty) return _buildEmptyState();
             if (state is DashboardError) return _buildErrorState(state);
             return _buildLoadingState();
@@ -160,11 +164,11 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.menu_rounded, color: Color(0xFF1A1A1A)),
+        icon: Icon(Icons.menu_rounded, color: context.modeTextPrimary),
         onPressed: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       title: Text(
@@ -172,20 +176,20 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 17,
           fontWeight: FontWeight.w700,
-          color: const Color(0xFF1A1A1A),
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
       actions: [
         const NotificationBellAction(margin: EdgeInsets.zero),
         IconButton(
-          icon: Icon(Icons.refresh_rounded, color: kPrimary),
+          icon: Icon(Icons.refresh_rounded, color: context.modePrimary),
           onPressed: () => _dispatch(const RefreshDashboardData()),
         ),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: const Color(0xFFEEEEEE)),
+        child: Container(height: 1, color: context.modeDivider),
       ),
     );
   }
@@ -209,7 +213,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
             _dispatch(const RefreshDashboardData());
             await Future.delayed(const Duration(seconds: 1));
           },
-          color: kPrimary,
+          color: context.modePrimary,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
             children: [
@@ -236,7 +240,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
             right: 0,
             child: LinearProgressIndicator(
               backgroundColor: Colors.transparent,
-              color: kPrimary,
+              color: context.modePrimary,
             ),
           ),
       ],
@@ -251,8 +255,8 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
         _statCard(
           label: 'Ongoing',
           value: '${data.orderStats.ongoingOrders}',
-          color: kPrimary,
-          bg: kPrimary.withValues(alpha: 0.08),
+          color: context.modePrimary,
+          bg: context.modePrimary.withValues(alpha: 0.08),
           icon: Icons.pending_actions_rounded,
         ),
         const SizedBox(width: 10),
@@ -260,7 +264,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           label: 'Delivered',
           value: '${data.orderStats.ordersDelivered}',
           color: const Color(0xFF2D9B6F),
-          bg: const Color(0xFFE8F7F1),
+          bg: context.modeSuccess.withValues(alpha: 0.12),
           icon: Icons.check_circle_rounded,
         ),
         const SizedBox(width: 10),
@@ -268,7 +272,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           label: 'Staff',
           value: '${data.staffOnDuty.total}',
           color: const Color(0xFF4A6FE3),
-          bg: const Color(0xFFEBF0FF),
+          bg: context.modeInfo.withValues(alpha: 0.12),
           icon: Icons.people_alt_rounded,
         ),
       ],
@@ -355,10 +359,10 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: selected ? kPrimary : Colors.white,
+                  color: selected ? context.modePrimary : context.modeSurface,
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(
-                    color: selected ? kPrimary : const Color(0xFFDDDDDD),
+                    color: selected ? context.modePrimary : context.modeBorder,
                   ),
                 ),
                 child: Text(
@@ -366,7 +370,9 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: selected ? Colors.white : const Color(0xFF555555),
+                    color: selected
+                        ? context.modeTextInverse
+                        : context.modeTextSecondary,
                   ),
                 ),
               ),
@@ -394,11 +400,11 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: context.modeTextPrimary.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -417,14 +423,16 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(cfg.icon, color: Colors.white, size: 20),
+                    Icon(cfg.icon, color: context.modeTextInverse, size: 20),
                     RotatedBox(
                       quarterTurns: 3,
                       child: Text(
                         order.getTimeAgo(),
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 10,
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: context.modeTextInverse.withValues(
+                            alpha: 0.85,
+                          ),
                           fontWeight: FontWeight.w500,
                           letterSpacing: 0.4,
                         ),
@@ -460,7 +468,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF0F0F0),
+                                color: context.modeSurfaceAlt,
                                 borderRadius: BorderRadius.circular(5),
                               ),
                               child: Row(
@@ -469,7 +477,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                                   Icon(
                                     Icons.table_restaurant_rounded,
                                     size: 11,
-                                    color: Colors.grey[600],
+                                    color: context.modeTextMuted,
                                   ),
                                   const SizedBox(width: 3),
                                   Text(
@@ -477,7 +485,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                                     style: WorkSansAppTextStyles.medium
                                         .copyWith(
                                           fontSize: 11,
-                                          color: Colors.grey[600],
+                                          color: context.modeTextMuted,
                                           fontWeight: FontWeight.w600,
                                         ),
                                   ),
@@ -516,7 +524,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A1A),
+                          color: context.modeTextPrimary,
                         ),
                       ),
 
@@ -527,7 +535,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                         order.getItemsSummary(),
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 13,
-                          color: const Color(0xFF888888),
+                          color: context.modeTextSecondary,
                           height: 1.4,
                         ),
                         maxLines: 2,
@@ -540,17 +548,21 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                         Container(
                           padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFFBEB),
+                            color: context.modeWarning.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFFFE082)),
+                            border: Border.all(
+                              color: context.modeWarning.withValues(
+                                alpha: 0.35,
+                              ),
+                            ),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.info_outline_rounded,
                                 size: 13,
-                                color: Color(0xFFF59E0B),
+                                color: context.modeWarning,
                               ),
                               const SizedBox(width: 5),
                               Expanded(
@@ -558,7 +570,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                                   order.specialInstructions!,
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 12,
-                                    color: const Color(0xFF92400E),
+                                    color: context.modeWarning,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -603,7 +615,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                                       decoration: BoxDecoration(
                                         color: isPrimary
                                             ? cfg.color
-                                            : const Color(0xFFF5F5F5),
+                                            : context.modeSurfaceAlt,
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       alignment: Alignment.center,
@@ -614,8 +626,8 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
                                               color: isPrimary
-                                                  ? Colors.white
-                                                  : const Color(0xFF666666),
+                                                  ? context.modeTextInverse
+                                                  : context.modeTextSecondary,
                                             ),
                                       ),
                                     ),
@@ -661,13 +673,13 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
         );
       case 'PREPARING':
         return _StatusConfig(
-          color: kPrimary,
+          color: context.modePrimary,
           icon: Icons.outdoor_grill_rounded,
           label: 'PREPARING',
         );
       case 'READY':
-        return const _StatusConfig(
-          color: Color(0xFF00ACC1),
+        return _StatusConfig(
+          color: context.modeInfo,
           icon: Icons.done_all_rounded,
           label: 'READY',
         );
@@ -779,13 +791,16 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: kPrimary, strokeWidth: 2.5),
+          CircularProgressIndicator(
+            color: context.modePrimary,
+            strokeWidth: 2.5,
+          ),
           const SizedBox(height: 16),
           Text(
             'Loading orders...',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: const Color(0xFF888888),
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -804,13 +819,13 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.08),
+                color: context.modePrimary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.receipt_long_rounded,
                 size: 36,
-                color: kPrimary,
+                color: context.modePrimary,
               ),
             ),
             const SizedBox(height: 20),
@@ -819,7 +834,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A1A),
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 6),
@@ -827,7 +842,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               'Orders will show up here as customers place them',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 13,
-                color: const Color(0xFF888888),
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -840,7 +855,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: kPrimary,
+                  color: context.modePrimary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -848,7 +863,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
               ),
@@ -871,13 +886,17 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
       padding: const EdgeInsets.symmetric(vertical: 60),
       child: Column(
         children: [
-          Icon(Icons.inbox_rounded, size: 48, color: Colors.grey[300]),
+          Icon(
+            Icons.inbox_rounded,
+            size: 48,
+            color: context.modeTextMuted.withValues(alpha: 0.45),
+          ),
           const SizedBox(height: 12),
           Text(
             message,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: const Color(0xFFAAAAAA),
+              color: context.modeTextMuted,
             ),
           ),
         ],
@@ -918,10 +937,10 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF2F2),
+                color: context.modeError.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 32, color: const Color(0xFFE57373)),
+              child: Icon(icon, size: 32, color: context.modeError),
             ),
             const SizedBox(height: 20),
             Text(
@@ -929,7 +948,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A1A),
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 6),
@@ -937,7 +956,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               message,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 13,
-                color: const Color(0xFF888888),
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -950,7 +969,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: kPrimary,
+                  color: context.modePrimary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -958,7 +977,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
               ),

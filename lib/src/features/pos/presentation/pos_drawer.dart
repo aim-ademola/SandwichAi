@@ -16,6 +16,8 @@ class PosAppDrawer extends StatelessWidget {
       moduleTitle: 'Point of Sale',
       moduleSubtitle: 'Customer service, payments and orders',
       footerChildren: [
+        const AppDrawerThemeSwitch(),
+        const SizedBox(height: 8),
         _buildDrawerItem(
           context,
           icon: Icons.lock_outline_rounded,

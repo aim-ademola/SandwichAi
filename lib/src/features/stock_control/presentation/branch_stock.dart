@@ -60,7 +60,7 @@ class _InventoryBodyState extends State<InventoryBody> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: context.modeBackground,
       body: BlocBuilder<BranchStockBloc, BranchStockState>(
         builder: (context, state) {
           if (state is BranchStockLoading || state is BranchStockRefreshing) {
@@ -79,14 +79,14 @@ class _InventoryBodyState extends State<InventoryBody> {
                   Icon(
                     Icons.inventory_2_outlined,
                     size: 48,
-                    color: Colors.grey,
+                    color: context.modeTextMuted,
                   ),
                   SizedBox(height: 12),
                   Text(
                     "No stock data found",
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 16,
-                      color: Colors.grey,
+                      color: context.modeTextMuted,
                     ),
                   ),
                 ],
@@ -105,7 +105,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                     Icon(
                       _getErrorIcon(state.errorType),
                       size: 64,
-                      color: Colors.red,
+                      color: context.modeError,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -113,7 +113,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -122,7 +122,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                       state.error,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -132,7 +132,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                         context.read<BranchStockBloc>().add(LoadBranchStock());
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimary,
+                        backgroundColor: context.modePrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 12,
@@ -143,7 +143,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
                     ),
@@ -185,7 +185,7 @@ class _InventoryBodyState extends State<InventoryBody> {
               child: Column(
                 children: [
                   Container(
-                    color: kPrimary,
+                    color: context.modePrimary,
                     padding: EdgeInsets.symmetric(
                       horizontal: horizontalPadding,
                       vertical: _getSearchSectionPadding(constraints.maxWidth),
@@ -243,12 +243,12 @@ class _InventoryBodyState extends State<InventoryBody> {
             Icon(
               Icons.inventory_2_outlined,
               size: 64,
-              color: Colors.grey.shade400,
+              color: context.modeTextMuted,
             ),
             const SizedBox(height: 16),
             Text(
               'No items found',
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 16, color: context.modeTextSecondary),
             ),
           ],
         ),
@@ -292,9 +292,6 @@ class _InventoryBodyState extends State<InventoryBody> {
     final nameFontSize = _getItemNameFontSize(screenWidth);
     final detailsFontSize = _getItemDetailsFontSize(screenWidth);
 
-    // Get the actual itemId from the state
-    final itemId = state.getItemId(item.name);
-
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
@@ -307,9 +304,9 @@ class _InventoryBodyState extends State<InventoryBody> {
       child: Container(
         padding: EdgeInsets.all(_getItemCardPadding(screenWidth)),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          border: Border.all(color: context.modeBorder, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,7 +327,7 @@ class _InventoryBodyState extends State<InventoryBody> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: nameFontSize,
                 fontWeight: FontWeight.w600,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
             ),
             if (item.expiryDays > 0 && item.expiryDays < 999) ...[
@@ -340,7 +337,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: detailsFontSize,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextSecondary,
                 ),
               ),
             ],
@@ -349,7 +346,7 @@ class _InventoryBodyState extends State<InventoryBody> {
             Container(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: const Color(0XFFECECEA),
+                color: context.modeSurfaceAlt,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -357,7 +354,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   Icon(
                     _getStorageIcon(item.storage),
                     size: _getInfoIconSize(screenWidth),
-                    color: const Color(0xFF757575),
+                    color: context.modeTextSecondary,
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -365,14 +362,14 @@ class _InventoryBodyState extends State<InventoryBody> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: detailsFontSize,
                       fontWeight: FontWeight.w700,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const Spacer(),
                   Icon(
                     Icons.layers_outlined,
                     size: _getInfoIconSize(screenWidth),
-                    color: const Color(0xFF757575),
+                    color: context.modeTextSecondary,
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -380,7 +377,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: detailsFontSize,
                       fontWeight: FontWeight.w700,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                 ],
@@ -410,7 +407,7 @@ class _InventoryBodyState extends State<InventoryBody> {
           vertical: _getRestockButtonPaddingVertical(screenWidth),
         ),
         decoration: BoxDecoration(
-          color: kPrimary,
+          color: context.modePrimary,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -418,7 +415,7 @@ class _InventoryBodyState extends State<InventoryBody> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getRestockButtonFontSize(screenWidth),
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: context.modeTextInverse,
           ),
         ),
       ),
@@ -438,20 +435,21 @@ class _InventoryBodyState extends State<InventoryBody> {
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
           Icon(
             Icons.search,
-            color: const Color(0xFF9E9E9E),
+            color: context.modeTextMuted,
             size: _getSearchIconSize(screenWidth),
           ),
           SizedBox(width: _getSearchIconSpacing(screenWidth)),
           Expanded(
             child: TextField(
-              cursorColor: kPrimary,
+              cursorColor: context.modePrimary,
               controller: _searchController,
               onChanged: (value) {
                 context.read<BranchStockBloc>().add(SearchItems(query: value));
@@ -459,14 +457,14 @@ class _InventoryBodyState extends State<InventoryBody> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: fontSize,
                 fontWeight: FontWeight.w400,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Search for foods',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: fontSize,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF9E9E9E),
+                  color: context.modeTextMuted,
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -482,7 +480,7 @@ class _InventoryBodyState extends State<InventoryBody> {
               },
               child: Icon(
                 Icons.clear,
-                color: const Color(0xFF9E9E9E),
+                color: context.modeTextMuted,
                 size: _getSearchIconSize(screenWidth),
               ),
             ),
@@ -531,7 +529,7 @@ class _InventoryBodyState extends State<InventoryBody> {
           vertical: _getTabPaddingVertical(screenWidth),
         ),
         decoration: BoxDecoration(
-          color: isSelected ? kWhite : Colors.transparent,
+          color: isSelected ? context.modeSurface : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -539,7 +537,9 @@ class _InventoryBodyState extends State<InventoryBody> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getTabFontSize(screenWidth),
             fontWeight: FontWeight.w700,
-            color: isSelected ? Colors.black : Colors.white,
+            color: isSelected
+                ? context.modeTextPrimary
+                : context.modeTextInverse,
           ),
         ),
       ),
@@ -558,18 +558,19 @@ class _InventoryBodyState extends State<InventoryBody> {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          border: Border.all(color: context.modeBorder, width: 1),
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
             headingRowHeight: _getTableHeaderHeight(screenWidth),
-            dataRowHeight: _getTableRowHeight(screenWidth),
+            dataRowMinHeight: _getTableRowHeight(screenWidth),
+            dataRowMaxHeight: _getTableRowHeight(screenWidth),
             horizontalMargin: _getTableHorizontalMargin(screenWidth),
             columnSpacing: _getTableColumnSpacing(screenWidth),
-            headingRowColor: WidgetStateProperty.all(const Color(0xFFF8F6F6)),
+            headingRowColor: WidgetStateProperty.all(context.modeSurfaceAlt),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
             columns: [
               DataColumn(
@@ -578,7 +579,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getTableHeaderFontSize(screenWidth),
                     fontWeight: FontWeight.w700,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -588,7 +589,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getTableHeaderFontSize(screenWidth),
                     fontWeight: FontWeight.w700,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -598,7 +599,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getTableHeaderFontSize(screenWidth),
                     fontWeight: FontWeight.w700,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -608,7 +609,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getTableHeaderFontSize(screenWidth),
                     fontWeight: FontWeight.w700,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -618,7 +619,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getTableHeaderFontSize(screenWidth),
                     fontWeight: FontWeight.w700,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -628,7 +629,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getTableHeaderFontSize(screenWidth),
                     fontWeight: FontWeight.w700,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -638,7 +639,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getTableHeaderFontSize(screenWidth),
                     fontWeight: FontWeight.w700,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -648,7 +649,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getTableHeaderFontSize(screenWidth),
                     fontWeight: FontWeight.w700,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -672,7 +673,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getTableCellFontSize(screenWidth),
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
@@ -684,7 +685,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: _getTableCellFontSize(screenWidth),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF757575),
+                              color: context.modeTextSecondary,
                             ),
                           ),
                   ),
@@ -694,7 +695,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getTableCellFontSize(screenWidth),
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
@@ -707,8 +708,8 @@ class _InventoryBodyState extends State<InventoryBody> {
                         fontSize: _getTableCellFontSize(screenWidth),
                         fontWeight: FontWeight.w400,
                         color: item.expiryDays > 0
-                            ? const Color(0xFF757575)
-                            : const Color(0xFFE53935),
+                            ? context.modeTextSecondary
+                            : context.modeError,
                       ),
                     ),
                   ),
@@ -718,7 +719,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                         Icon(
                           _getStorageIcon(item.storage),
                           size: _getTableIconSize(screenWidth),
-                          color: const Color(0xFF757575),
+                          color: context.modeTextSecondary,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -726,7 +727,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getTableCellFontSize(screenWidth),
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF757575),
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
@@ -738,7 +739,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getTableCellFontSize(screenWidth),
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ),
@@ -748,7 +749,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getTableCellFontSize(screenWidth),
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ),
@@ -766,7 +767,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                                 ),
                               ),
                               decoration: BoxDecoration(
-                                color: kPrimary,
+                                color: context.modePrimary,
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -776,7 +777,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                                     screenWidth,
                                   ),
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: context.modeTextInverse,
                                 ),
                               ),
                             ),
@@ -799,28 +800,28 @@ class _InventoryBodyState extends State<InventoryBody> {
 
     switch (status) {
       case ItemStatus.useSoon:
-        bgColor = const Color(0xFFFFF3E0);
-        textColor = const Color(0xFFA1000C);
+        bgColor = context.modeWarning.withValues(alpha: 0.14);
+        textColor = context.modeWarning;
         label = 'USE SOON';
         break;
       case ItemStatus.lowStock:
-        bgColor = const Color(0xFFFFF3E0);
-        textColor = kPrimary;
+        bgColor = context.modePrimary.withValues(alpha: 0.12);
+        textColor = context.modePrimary;
         label = 'LOW STOCK';
         break;
       case ItemStatus.expired:
-        bgColor = const Color(0xFFFFEBEE);
-        textColor = const Color(0xFFE53935);
+        bgColor = context.modeError.withValues(alpha: 0.12);
+        textColor = context.modeError;
         label = 'EXPIRED';
         break;
       case ItemStatus.nearReorder:
-        bgColor = const Color(0xFFFFF9C4);
-        textColor = const Color(0xFFF57F17);
+        bgColor = context.modeWarning.withValues(alpha: 0.14);
+        textColor = context.modeWarning;
         label = 'NEAR REORDER';
         break;
       case ItemStatus.outOfStock:
-        bgColor = const Color(0xFFFFEBEE);
-        textColor = const Color(0xFFC62828);
+        bgColor = context.modeError.withValues(alpha: 0.12);
+        textColor = context.modeError;
         label = 'OUT OF STOCK';
         break;
     }
@@ -853,34 +854,34 @@ class _InventoryBodyState extends State<InventoryBody> {
 
     switch (status) {
       case ItemStatus.useSoon:
-        bgColor = const Color(0xFFFFF3E0);
-        iconColor = const Color(0XFFA1000C);
+        bgColor = context.modeWarning.withValues(alpha: 0.14);
+        iconColor = context.modeWarning;
         label = 'USE SOON';
         icon = Icons.warning_amber_rounded;
         break;
       case ItemStatus.lowStock:
-        bgColor = const Color(0xFFFFF3E0);
-        iconColor = kPrimary;
+        bgColor = context.modePrimary.withValues(alpha: 0.12);
+        iconColor = context.modePrimary;
         label = 'LOW STOCK';
         icon = Icons.inventory_2_outlined;
         break;
       case ItemStatus.expired:
-        bgColor = const Color(0xFFFFEBEE);
-        iconColor = const Color(0xFFE53935);
+        bgColor = context.modeError.withValues(alpha: 0.12);
+        iconColor = context.modeError;
         label = 'EXPIRED';
         icon = Icons.error_outline;
         break;
       case ItemStatus.nearReorder:
-        bgColor = const Color(0xFFFFFDE7); // Light yellow
-        iconColor = const Color(0xFFF57F17); // Dark amber
+        bgColor = context.modeWarning.withValues(alpha: 0.14);
+        iconColor = context.modeWarning;
         label = 'NEAR REORDER';
-        icon = Icons.trending_down; // or Icons.show_chart
+        icon = Icons.trending_down;
         break;
       case ItemStatus.outOfStock:
-        bgColor = const Color(0xFFFFEBEE); // Light red
-        iconColor = const Color(0xFFC62828); // Dark red
+        bgColor = context.modeError.withValues(alpha: 0.12);
+        iconColor = context.modeError;
         label = 'OUT OF STOCK';
-        icon = Icons.remove_circle_outline; // or Icons.block
+        icon = Icons.remove_circle_outline;
         break;
     }
 
@@ -950,7 +951,7 @@ class _InventoryBodyState extends State<InventoryBody> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getQuantityFontSize(screenWidth),
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
         ),
@@ -1089,18 +1090,6 @@ class _InventoryBodyState extends State<InventoryBody> {
     return 14;
   }
 
-  double _getAppBarIconSize(double width) {
-    if (width < 360) return 22;
-    if (width < 600) return 24;
-    return 26;
-  }
-
-  double _getAppBarTitleFontSize(double width) {
-    if (width < 360) return 17;
-    if (width < 600) return 18;
-    return 19;
-  }
-
   double _getCardSectionSpacing(double width) {
     if (width < 360) return 10;
     if (width < 600) return 12;
@@ -1209,24 +1198,6 @@ class _InventoryBodyState extends State<InventoryBody> {
     if (width < 360) return 12;
     if (width < 600) return 13;
     return 14;
-  }
-
-  double _getRestockButtonIconSize(double width) {
-    if (width < 360) return 16;
-    if (width < 600) return 18;
-    return 20;
-  }
-
-  double _getRestockButtonIconSpacing(double width) {
-    if (width < 360) return 6;
-    if (width < 600) return 7;
-    return 8;
-  }
-
-  double _getRestockButtonSpacing(double width) {
-    if (width < 360) return 8;
-    if (width < 600) return 10;
-    return 12;
   }
 
   // Table restock button sizing

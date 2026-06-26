@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/sandwich_app_bar.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -38,7 +39,7 @@ class _StockCatalogScreenState extends State<StockCatalogScreen> {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: InventoryBody(isTableView: _isTableView),
       ),
@@ -46,26 +47,13 @@ class _StockCatalogScreenState extends State<StockCatalogScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return AppBar(
-      backgroundColor: kPrimary,
-      elevation: 0,
-      title: Text(
-        'Stock Catalog',
-        style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: _getAppBarTitleFontSize(screenWidth),
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-        ),
-      ),
-      centerTitle: true,
+    return SandwichAppBar(
+      title: 'Stock Catalog',
       actions: [
-        // Toggle View Button
         IconButton(
           icon: Icon(
             _isTableView ? Icons.grid_view : Icons.table_chart,
-            color: Colors.white,
-            size: _getAppBarIconSize(screenWidth),
+            color: context.modeTextPrimary,
           ),
           onPressed: () {
             setState(() {
@@ -75,11 +63,7 @@ class _StockCatalogScreenState extends State<StockCatalogScreen> {
           tooltip: _isTableView ? 'Card View' : 'Table View',
         ),
         IconButton(
-          icon: Icon(
-            Icons.add,
-            color: Colors.white,
-            size: _getAppBarIconSize(screenWidth),
-          ),
+          icon: Icon(Icons.add, color: context.modeTextPrimary),
           onPressed: () async {
             Navigator.push(
               context,
@@ -91,17 +75,5 @@ class _StockCatalogScreenState extends State<StockCatalogScreen> {
         ),
       ],
     );
-  }
-
-  double _getAppBarIconSize(double width) {
-    if (width < 360) return 22;
-    if (width < 600) return 24;
-    return 26;
-  }
-
-  double _getAppBarTitleFontSize(double width) {
-    if (width < 360) return 17;
-    if (width < 600) return 18;
-    return 19;
   }
 }

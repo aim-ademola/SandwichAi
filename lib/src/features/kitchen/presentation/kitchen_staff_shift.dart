@@ -54,11 +54,11 @@ class _KitchenShiftManagementScreenState
         content: Text(
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
-            color: Colors.white,
+            color: context.modeTextInverse,
             fontSize: 14,
           ),
         ),
-        backgroundColor: isError ? const Color(0xFFE53935) : kGreen,
+        backgroundColor: isError ? context.modeError : context.modeSuccess,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -77,8 +77,8 @@ class _KitchenShiftManagementScreenState
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: kPrimary,
-              onPrimary: Colors.white,
+              primary: context.modePrimary,
+              onPrimary: context.modeTextInverse,
             ),
           ),
           child: child!,
@@ -86,12 +86,14 @@ class _KitchenShiftManagementScreenState
       },
     );
 
+    if (!mounted) return;
+
     if (picked != null) {
       setState(() {
         _selectedStartDate = picked.start;
         _selectedEndDate = picked.end;
       });
-      context.read<KitchenShiftBloc>().add(
+      this.context.read<KitchenShiftBloc>().add(
         FilterShiftsByDateRange(startDate: picked.start, endDate: picked.end),
       );
     }
@@ -127,7 +129,7 @@ class _KitchenShiftManagementScreenState
           final horizontalPadding = _getHorizontalPadding(screenWidth);
 
           return Scaffold(
-            backgroundColor: const Color(0xFFF8F6F6),
+            backgroundColor: context.modeBackground,
             body: BlocBuilder<KitchenShiftBloc, KitchenShiftState>(
               builder: (context, state) {
                 if (state is KitchenShiftLoading ||
@@ -177,12 +179,13 @@ class _KitchenShiftManagementScreenState
             ),
             floatingActionButton: FloatingActionButton.extended(
               onPressed: () => _showAddShiftDialog(context),
-              backgroundColor: kPrimary,
-              icon: const Icon(Icons.add, color: Colors.white),
+              backgroundColor: context.modePrimary,
+              foregroundColor: context.modeTextInverse,
+              icon: const Icon(Icons.add),
               label: Text(
                 'Add Shift',
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -197,11 +200,12 @@ class _KitchenShiftManagementScreenState
     return Container(
       padding: EdgeInsets.all(_getInputPaddingHorizontal(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: context.modeTextPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -215,7 +219,7 @@ class _KitchenShiftManagementScreenState
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getSectionTitleFontSize(screenWidth),
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           SizedBox(height: _getFieldSpacing(screenWidth)),
@@ -227,7 +231,7 @@ class _KitchenShiftManagementScreenState
               labelText: 'Filter by Employee',
               labelStyle: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getLabelFontSize(screenWidth),
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
@@ -266,14 +270,14 @@ class _KitchenShiftManagementScreenState
                 vertical: _getInputPaddingVertical(screenWidth),
               ),
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE0E0E0)),
+                border: Border.all(color: context.modeBorder),
                 borderRadius: BorderRadius.circular(
                   _getBorderRadius(screenWidth),
                 ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.date_range, color: kPrimary),
+                  Icon(Icons.date_range, color: context.modePrimary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -282,7 +286,7 @@ class _KitchenShiftManagementScreenState
                           : 'Select Date Range',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getInputFontSize(screenWidth),
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
@@ -326,11 +330,12 @@ class _KitchenShiftManagementScreenState
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: context.modeTextPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -349,7 +354,7 @@ class _KitchenShiftManagementScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getSectionTitleFontSize(screenWidth),
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 Text(
@@ -358,13 +363,13 @@ class _KitchenShiftManagementScreenState
                       : '',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getCaptionFontSize(screenWidth),
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ],
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
 
           // Table
           SingleChildScrollView(
@@ -372,7 +377,7 @@ class _KitchenShiftManagementScreenState
             child: DataTable(
               columnSpacing: 16,
               horizontalMargin: _getInputPaddingHorizontal(screenWidth),
-              headingRowColor: WidgetStateProperty.all(Colors.grey.shade50),
+              headingRowColor: WidgetStateProperty.all(context.modeSurfaceAlt),
               columns: [
                 DataColumn(
                   label: Text(
@@ -380,7 +385,7 @@ class _KitchenShiftManagementScreenState
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getLabelFontSize(screenWidth),
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                 ),
@@ -393,7 +398,7 @@ class _KitchenShiftManagementScreenState
                           DateFormat('E').format(date),
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getCaptionFontSize(screenWidth),
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                         Text(
@@ -401,7 +406,7 @@ class _KitchenShiftManagementScreenState
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getLabelFontSize(screenWidth),
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                       ],
@@ -422,16 +427,9 @@ class _KitchenShiftManagementScreenState
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: _getInputFontSize(screenWidth),
                               fontWeight: FontWeight.w600,
-                              color: kprimaryTextColor1,
+                              color: context.modeTextPrimary,
                             ),
                           ),
-                          // Text(
-                          //   employee.role,
-                          //   style: WorkSansAppTextStyles.medium.copyWith(
-                          //     fontSize: _getCaptionFontSize(screenWidth),
-                          //     color: kprimaryTextColor2,
-                          //   ),
-                          // ),
                         ],
                       ),
                     ),
@@ -448,14 +446,14 @@ class _KitchenShiftManagementScreenState
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
+                              color: context.modeSurfaceAlt,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               'OFF',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: _getCaptionFontSize(screenWidth),
-                                color: kprimaryTextColor2,
+                                color: context.modeTextSecondary,
                               ),
                             ),
                           ),
@@ -483,7 +481,7 @@ class _KitchenShiftManagementScreenState
                                   '${shift.shiftTypeDisplay} (${shift.formattedTimeRange})',
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: _getCaptionFontSize(screenWidth),
-                                    color: Colors.white,
+                                    color: context.modeTextInverse,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -506,7 +504,7 @@ class _KitchenShiftManagementScreenState
   Color _getShiftTypeColor(ShiftType type) {
     switch (type) {
       case ShiftType.MORNING:
-        return const Color(0xFFFFB74D);
+        return context.modeWarning;
       case ShiftType.AFTERNOON:
         return const Color(0xFF64B5F6);
       case ShiftType.EVENING:
@@ -514,7 +512,7 @@ class _KitchenShiftManagementScreenState
       case ShiftType.NIGHT:
         return const Color(0xFF4DB6AC);
       case ShiftType.FULL_DAY:
-        return kPrimary;
+        return context.modePrimary;
     }
   }
 
@@ -540,7 +538,7 @@ class _KitchenShiftManagementScreenState
             Icon(
               Icons.calendar_today_outlined,
               size: 80,
-              color: kprimaryTextColor2.withValues(alpha: 0.5),
+              color: context.modeTextMuted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -548,7 +546,7 @@ class _KitchenShiftManagementScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getSectionTitleFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -556,7 +554,7 @@ class _KitchenShiftManagementScreenState
               'Tap the + button to add a new shift',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -579,7 +577,7 @@ class _KitchenShiftManagementScreenState
             Icon(
               Icons.error_outline,
               size: 80,
-              color: const Color(0xFFE53935).withValues(alpha: 0.5),
+              color: context.modeError.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -587,7 +585,7 @@ class _KitchenShiftManagementScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getSectionTitleFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -596,7 +594,7 @@ class _KitchenShiftManagementScreenState
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -610,7 +608,7 @@ class _KitchenShiftManagementScreenState
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
+                backgroundColor: context.modePrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
                     _getBorderRadius(screenWidth),
@@ -620,7 +618,7 @@ class _KitchenShiftManagementScreenState
               child: Text(
                 'Retry',
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                   fontWeight: FontWeight.w600,
                 ),
               ),

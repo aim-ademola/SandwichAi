@@ -36,7 +36,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
   List<InventoryItem> _filteredItems = [];
   List<InventoryItem> _allItems = [];
-  List<req.StockRequestItemInput> _addedItems = [];
+  final List<req.StockRequestItemInput> _addedItems = [];
   BranchStockResponse? _branchStockData;
 
   String _branchId = '';
@@ -143,6 +143,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
   }
 
   /// QUICK ADD: Automatically add all low stock items
+  // ignore: unused_element
   Future<void> _quickAddLowStockItems() async {
     if (_branchStockData == null) {
       _showSnackBar('Loading stock data...', isError: false, isInfo: true);
@@ -231,11 +232,13 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     return StatefulBuilder(
       builder: (context, setDialogState) {
         return AlertDialog(
+          backgroundColor: context.modeSurface,
           title: Text(
             'Quick Add Low Stock Items',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
+              color: context.modeTextPrimary,
             ),
           ),
           content: Container(
@@ -246,7 +249,10 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               children: [
                 Text(
                   'Select items to add to stock request:',
-                  style: WorkSansAppTextStyles.medium.copyWith(fontSize: 14),
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 14,
+                    color: context.modeTextSecondary,
+                  ),
                 ),
                 SizedBox(height: 16),
                 Expanded(
@@ -263,6 +269,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         subtitle: Column(
@@ -270,11 +277,17 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                           children: [
                             Text(
                               'Current: ${stockItem.currentStock} ${stockItem.item.unit}',
-                              style: TextStyle(fontSize: 12),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: context.modeTextSecondary,
+                              ),
                             ),
                             Text(
                               'Reorder Level: ${stockItem.reorderLevel} ${stockItem.item.unit}',
-                              style: TextStyle(fontSize: 12, color: Colors.red),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: context.modeError,
+                              ),
                             ),
                             if (stockItem.isOutOfStock)
                               Container(
@@ -284,14 +297,16 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.shade100,
+                                  color: context.modeError.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   'OUT OF STOCK',
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: Colors.red.shade900,
+                                    color: context.modeError,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -308,8 +323,8 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                             }
                           });
                         },
-                        activeColor: kPrimary,
-                        checkColor: Colors.white,
+                        activeColor: context.modePrimary,
+                        checkColor: context.modeTextInverse,
                       );
                     },
                   ),
@@ -322,7 +337,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 'Cancel',
-                style: TextStyle(color: kprimaryTextColor2),
+                style: TextStyle(color: context.modeTextSecondary),
               ),
             ),
             ElevatedButton(
@@ -330,9 +345,11 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                   ? null
                   : () => Navigator.pop(context, selectedIds.toList()),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                disabledBackgroundColor: kPrimary.withValues(alpha: 0.3),
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                disabledBackgroundColor: context.modePrimary.withValues(
+                  alpha: 0.3,
+                ),
+                foregroundColor: context.modeTextInverse,
               ),
               child: Text('Add Selected (${selectedIds.length})'),
             ),
@@ -449,15 +466,15 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         content: Text(
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
-            color: Colors.white,
+            color: context.modeTextInverse,
             fontSize: 14,
           ),
         ),
         backgroundColor: isError
-            ? const Color(0xFFE53935)
+            ? context.modeError
             : isInfo
-            ? kBlue
-            : kGreen,
+            ? context.modeInfo
+            : context.modeSuccess,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -539,8 +556,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
               return Scaffold(
                 resizeToAvoidBottomInset: true,
-                backgroundColor: const Color(0xFFF8F6F6),
-                // appBar: _buildAppBar(screenWidth),
+                backgroundColor: context.modeBackground,
                 body: Center(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: maxContentWidth),
@@ -548,7 +564,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                         ? Center(
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                kPrimary,
+                                context.modePrimary,
                               ),
                             ),
                           )
@@ -579,7 +595,6 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                           _getSectionSpacing(screenWidth) * 3,
                                     ),
 
-                                    // Quick Add Section
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -588,23 +603,6 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                           'Add Items',
                                           screenWidth,
                                         ),
-                                        // TextButton.icon(
-                                        //   onPressed: _quickAddLowStockItems,
-                                        //   icon: Icon(
-                                        //     Icons.flash_on,
-                                        //     size: 18,
-                                        //     color: kPrimary,
-                                        //   ),
-                                        //   label: Text(
-                                        //     'Quick Add Low Stock',
-                                        //     style: WorkSansAppTextStyles.medium
-                                        //         .copyWith(
-                                        //           color: kPrimary,
-                                        //           fontSize: 13,
-                                        //           fontWeight: FontWeight.w600,
-                                        //         ),
-                                        //   ),
-                                        // ),
                                       ],
                                     ),
                                     SizedBox(
@@ -662,14 +660,16 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     );
   }
 
+  // ignore: unused_element
   PreferredSizeWidget _buildAppBar(double screenWidth) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
         icon: Icon(
           Icons.arrow_back,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
           size: _getIconSize(screenWidth),
         ),
         onPressed: () => Navigator.pop(context),
@@ -679,13 +679,13 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getAppBarTitleFontSize(screenWidth),
           fontWeight: FontWeight.w600,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
       actions: [
         IconButton(
-          icon: Icon(Icons.info_outline, color: kPrimary),
+          icon: Icon(Icons.info_outline, color: context.modePrimary),
           onPressed: () {
             _showSnackBar(
               '💡 Tip: Use Quick Add to automatically add low stock items!',
@@ -702,18 +702,18 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            kPrimary.withValues(alpha: 0.1),
-            kPrimary.withValues(alpha: 0.05),
+            context.modePrimary.withValues(alpha: 0.1),
+            context.modePrimary.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: kPrimary.withValues(alpha: 0.2)),
+        border: Border.all(color: context.modePrimary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          Icon(Icons.auto_awesome, color: kPrimary, size: 24),
+          Icon(Icons.auto_awesome, color: context.modePrimary, size: 24),
           SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -724,7 +724,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: kPrimary,
+                    color: context.modePrimary,
                   ),
                 ),
                 SizedBox(height: 4),
@@ -732,7 +732,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                   'Stock levels and quantities are auto-calculated based on your inventory',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ],
@@ -749,7 +749,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: _getSectionTitleFontSize(screenWidth),
         fontWeight: FontWeight.w600,
-        color: kprimaryTextColor1,
+        color: context.modeTextPrimary,
       ),
     );
   }
@@ -765,13 +765,13 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getLabelFontSize(screenWidth),
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             SizedBox(width: 8),
             Icon(
               Icons.help_outline,
-              color: kPrimary,
+              color: context.modePrimary,
               size: _getIconSize(screenWidth) - 4,
             ),
           ],
@@ -790,14 +790,14 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               vertical: _getInputPaddingVertical(screenWidth),
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
               border: Border.all(
                 color: _selectedItemId == null && _isSearching == false
-                    ? const Color(0xFFE0E0E0)
-                    : kPrimary.withValues(alpha: 0.3),
+                    ? context.modeBorder
+                    : context.modePrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -805,7 +805,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               children: [
                 Icon(
                   Icons.search,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 SizedBox(width: 12),
@@ -816,14 +816,14 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                       fontSize: _getInputFontSize(screenWidth),
                       fontWeight: FontWeight.w400,
                       color: _selectedItemName != null
-                          ? kprimaryTextColor1
-                          : kprimaryTextColor2,
+                          ? context.modeTextPrimary
+                          : context.modeTextSecondary,
                     ),
                   ),
                 ),
                 Icon(
                   _isOpened ? Icons.arrow_drop_down : Icons.arrow_drop_up,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth) + 4,
                 ),
               ],
@@ -844,12 +844,12 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         maxHeight: MediaQuery.of(context).size.height * 0.35,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: context.modeTextPrimary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -864,24 +864,24 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               autofocus: true,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Type to search...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getInputFontSize(screenWidth),
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
                 prefixIcon: Icon(
                   Icons.search,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: Icon(
                           Icons.clear,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth),
                         ),
                         onPressed: () {
@@ -893,13 +893,16 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                   borderRadius: BorderRadius.circular(
                     _getBorderRadius(screenWidth),
                   ),
-                  borderSide: BorderSide(color: const Color(0xFFE0E0E0)),
+                  borderSide: BorderSide(color: context.modeBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(
                     _getBorderRadius(screenWidth),
                   ),
-                  borderSide: BorderSide(color: kPrimary, width: 1.5),
+                  borderSide: BorderSide(
+                    color: context.modePrimary,
+                    width: 1.5,
+                  ),
                 ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: _getInputPaddingHorizontal(screenWidth),
@@ -908,7 +911,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           Expanded(
             child: _filteredItems.isEmpty
                 ? Center(
@@ -920,7 +923,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                         'No items found',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getInputFontSize(screenWidth),
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ),
@@ -962,7 +965,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.grey.shade200,
+                                color: context.modeDivider,
                                 width: 1,
                               ),
                             ),
@@ -973,12 +976,14 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                 width: _getIconSize(screenWidth) + 8,
                                 height: _getIconSize(screenWidth) + 8,
                                 decoration: BoxDecoration(
-                                  color: kPrimary.withValues(alpha: 0.1),
+                                  color: context.modePrimary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
                                   Icons.inventory_2_outlined,
-                                  color: kPrimary,
+                                  color: context.modePrimary,
                                   size: _getIconSize(screenWidth) - 4,
                                 ),
                               ),
@@ -995,7 +1000,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                               screenWidth,
                                             ),
                                             fontWeight: FontWeight.w600,
-                                            color: kprimaryTextColor1,
+                                            color: context.modeTextPrimary,
                                           ),
                                     ),
                                     const SizedBox(height: 2),
@@ -1006,7 +1011,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                             fontSize: _getCaptionFontSize(
                                               screenWidth,
                                             ),
-                                            color: kprimaryTextColor2,
+                                            color: context.modeTextSecondary,
                                           ),
                                     ),
                                   ],
@@ -1028,23 +1033,23 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: kPrimary.withValues(alpha: 0.05),
+        color: context.modePrimary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: kPrimary.withValues(alpha: 0.2)),
+        border: Border.all(color: context.modePrimary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome, color: kPrimary, size: 20),
+              Icon(Icons.auto_awesome, color: context.modePrimary, size: 20),
               SizedBox(width: 8),
               Text(
                 'Auto-filled Data',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
               ),
             ],
@@ -1060,7 +1065,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     'Current Stock',
                     '${_currentStock!.toStringAsFixed(0)} $_selectedItemUnit',
                     Icons.inventory,
-                    Colors.blue,
+                    context.modeInfo,
                     screenWidth,
                   ),
                 ),
@@ -1070,7 +1075,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     'Reorder Level',
                     '${_reorderLevel!.toStringAsFixed(0)} $_selectedItemUnit',
                     Icons.warning_amber,
-                    Colors.orange,
+                    context.modeWarning,
                     screenWidth,
                   ),
                 ),
@@ -1088,7 +1093,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getLabelFontSize(screenWidth),
                   fontWeight: FontWeight.w500,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               SizedBox(height: 12),
@@ -1098,32 +1103,32 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getInputFontSize(screenWidth),
                   fontWeight: FontWeight.w400,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Enter quantity',
                   hintStyle: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getInputFontSize(screenWidth),
                     fontWeight: FontWeight.w400,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                   suffix: _selectedItemUnit != null
                       ? Text(
                           _selectedItemUnit!,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getInputFontSize(screenWidth),
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         )
                       : null,
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.modeSurface,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       _getBorderRadius(screenWidth),
                     ),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
+                    borderSide: BorderSide(
+                      color: context.modeBorder,
                       width: 1.5,
                     ),
                   ),
@@ -1131,8 +1136,8 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     borderRadius: BorderRadius.circular(
                       _getBorderRadius(screenWidth),
                     ),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
+                    borderSide: BorderSide(
+                      color: context.modeBorder,
                       width: 1.5,
                     ),
                   ),
@@ -1140,7 +1145,10 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     borderRadius: BorderRadius.circular(
                       _getBorderRadius(screenWidth),
                     ),
-                    borderSide: BorderSide(color: kPrimary, width: 1.5),
+                    borderSide: BorderSide(
+                      color: context.modePrimary,
+                      width: 1.5,
+                    ),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: _getInputPaddingHorizontal(screenWidth),
@@ -1172,17 +1180,19 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               icon: Icon(
                 Icons.add_circle_outline,
                 size: _getIconSize(screenWidth),
+                color: context.modePrimary,
               ),
               label: Text(
                 'Add Item to Request',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getButtonFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
+                  color: context.modePrimary,
                 ),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: kPrimary,
-                side: BorderSide(color: kPrimary, width: 1.5),
+                foregroundColor: context.modePrimary,
+                side: BorderSide(color: context.modePrimary, width: 1.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
                     _getBorderRadius(screenWidth),
@@ -1206,7 +1216,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
@@ -1222,7 +1232,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                   label,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 11,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ),
@@ -1234,7 +1244,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
         ],
@@ -1251,7 +1261,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getSectionTitleFontSize(screenWidth),
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         SizedBox(height: _getSectionSpacing(screenWidth)),
@@ -1280,11 +1290,11 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
             return Container(
               padding: EdgeInsets.all(_getInputPaddingHorizontal(screenWidth)),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.modeSurface,
                 borderRadius: BorderRadius.circular(
                   _getBorderRadius(screenWidth),
                 ),
-                border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+                border: Border.all(color: context.modeBorder, width: 1),
               ),
               child: Row(
                 children: [
@@ -1292,12 +1302,12 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     width: _getIconSize(screenWidth) + 8,
                     height: _getIconSize(screenWidth) + 8,
                     decoration: BoxDecoration(
-                      color: kPrimary.withValues(alpha: 0.1),
+                      color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.inventory_2,
-                      color: kPrimary,
+                      color: context.modePrimary,
                       size: _getIconSize(screenWidth) - 4,
                     ),
                   ),
@@ -1311,7 +1321,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getInputFontSize(screenWidth),
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         SizedBox(height: 4),
@@ -1319,7 +1329,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                           'Quantity: ${item.qtyRequested} ${itemInfo.unit}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getCaptionFontSize(screenWidth),
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
@@ -1328,7 +1338,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                   IconButton(
                     icon: Icon(
                       Icons.delete_outline,
-                      color: const Color(0xFFE53935),
+                      color: context.modeError,
                       size: _getIconSize(screenWidth),
                     ),
                     onPressed: () => _removeItemFromList(index),
@@ -1351,7 +1361,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         SizedBox(height: 12),
@@ -1361,40 +1371,34 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: 'Add any additional notes for this request',
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: BorderSide(color: kPrimary, width: 1.5),
+              borderSide: BorderSide(color: context.modePrimary, width: 1.5),
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: _getInputPaddingHorizontal(screenWidth),
@@ -1417,8 +1421,10 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
           child: ElevatedButton(
             onPressed: isLoading ? null : _submitForm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
-              disabledBackgroundColor: kPrimary.withValues(alpha: 0.6),
+              backgroundColor: context.modePrimary,
+              disabledBackgroundColor: context.modePrimary.withValues(
+                alpha: 0.6,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(
                   _getBorderRadius(screenWidth),
@@ -1432,7 +1438,9 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     width: _getIconSize(screenWidth),
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        context.modeTextInverse,
+                      ),
                     ),
                   )
                 : Text(
@@ -1440,7 +1448,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getButtonFontSize(screenWidth),
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                     ),
                   ),
           ),

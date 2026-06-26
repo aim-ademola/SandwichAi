@@ -79,6 +79,8 @@ class _StockControlAppDrawerContentState
       moduleTitle: 'Stock Control',
       moduleSubtitle: 'Inventory movement and branch stock visibility',
       footerChildren: [
+        const AppDrawerThemeSwitch(),
+        const SizedBox(height: 8),
         _buildDrawerItem(
           context,
           icon: Icons.lock_outline_rounded,

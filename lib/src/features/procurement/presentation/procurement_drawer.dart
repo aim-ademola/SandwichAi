@@ -65,6 +65,8 @@ class _ProcurementAppDrawerContentState
       moduleTitle: 'Procurement',
       moduleSubtitle: 'Supplier orders and received goods',
       footerChildren: [
+        const AppDrawerThemeSwitch(),
+        const SizedBox(height: 8),
         _buildDrawerItem(
           context,
           icon: Icons.lock_outline_rounded,

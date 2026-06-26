@@ -89,6 +89,8 @@ class _ProcessingAppDrawerContentState
       moduleTitle: 'Processing',
       moduleSubtitle: 'Production control and recipe operations',
       footerChildren: [
+        const AppDrawerThemeSwitch(),
+        const SizedBox(height: 8),
         _buildDrawerItem(
           context,
           icon: Icons.lock_outline_rounded,

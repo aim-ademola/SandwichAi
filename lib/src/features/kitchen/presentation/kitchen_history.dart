@@ -50,8 +50,8 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: kPrimary,
-              onPrimary: Colors.white,
+              primary: context.modePrimary,
+              onPrimary: context.modeTextInverse,
             ),
           ),
           child: child!,
@@ -59,12 +59,14 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
       },
     );
 
+    if (!mounted) return;
+
     if (picked != null) {
       setState(() {
         _selectedStartDate = picked.start;
         _selectedEndDate = picked.end;
       });
-      context.read<KitchenShiftBloc>().add(
+      this.context.read<KitchenShiftBloc>().add(
         FilterShiftsByDateRange(startDate: picked.start, endDate: picked.end),
       );
     }
@@ -78,7 +80,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         final horizontalPadding = _getHorizontalPadding(screenWidth);
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           body: BlocBuilder<KitchenShiftBloc, KitchenShiftState>(
             builder: (context, state) {
               if (state is KitchenShiftLoading ||
@@ -137,11 +139,12 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
     return Container(
       padding: EdgeInsets.all(_getInputPaddingHorizontal(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: context.modeTextPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -155,7 +158,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getSectionTitleFontSize(screenWidth),
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           SizedBox(height: _getFieldSpacing(screenWidth)),
@@ -167,7 +170,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
               labelText: 'Filter by Employee',
               labelStyle: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getLabelFontSize(screenWidth),
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
@@ -206,14 +209,14 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
                 vertical: _getInputPaddingVertical(screenWidth),
               ),
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE0E0E0)),
+                border: Border.all(color: context.modeBorder),
                 borderRadius: BorderRadius.circular(
                   _getBorderRadius(screenWidth),
                 ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.date_range, color: kPrimary),
+                  Icon(Icons.date_range, color: context.modePrimary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -222,7 +225,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
                           : 'Select Date Range',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getInputFontSize(screenWidth),
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
@@ -248,7 +251,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
               },
               icon: const Icon(Icons.clear, size: 18),
               label: Text('Clear Filters'),
-              style: TextButton.styleFrom(foregroundColor: kPrimary),
+              style: TextButton.styleFrom(foregroundColor: context.modePrimary),
             ),
           ],
         ],
@@ -265,11 +268,12 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
     return Container(
       padding: EdgeInsets.all(_getInputPaddingHorizontal(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: context.modeTextPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -283,7 +287,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getSectionTitleFontSize(screenWidth),
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           SizedBox(height: _getFieldSpacing(screenWidth)),
@@ -295,7 +299,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
                   'Total Shifts',
                   totalShifts.toString(),
                   Icons.calendar_today,
-                  kPrimary,
+                  context.modePrimary,
                 ),
               ),
               SizedBox(width: _getFieldSpacing(screenWidth)),
@@ -356,7 +360,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
             textAlign: TextAlign.center,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getCaptionFontSize(screenWidth),
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -369,11 +373,12 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: context.modeTextPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -389,17 +394,17 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getSectionTitleFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: shifts.length,
             separatorBuilder: (context, index) =>
-                Divider(height: 1, color: Colors.grey.shade200),
+                Divider(height: 1, color: context.modeDivider),
             itemBuilder: (context, index) {
               final shift = shifts[index];
               return _buildShiftTile(screenWidth, shift);
@@ -434,7 +439,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getInputFontSize(screenWidth),
           fontWeight: FontWeight.w600,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
         ),
       ),
       subtitle: Column(
@@ -445,7 +450,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
             '${shift.formattedDate} • ${shift.shiftTypeDisplay}',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getCaptionFontSize(screenWidth),
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
           const SizedBox(height: 2),
@@ -453,7 +458,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
             shift.formattedTimeRange,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getCaptionFontSize(screenWidth),
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -463,7 +468,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         decoration: BoxDecoration(
           color: shift.isActive
               ? kGreen.withValues(alpha: 0.1)
-              : Colors.grey.shade200,
+              : context.modeSurfaceAlt,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
@@ -471,7 +476,9 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getCaptionFontSize(screenWidth),
             fontWeight: FontWeight.w600,
-            color: shift.isActive ? kGreen : kprimaryTextColor2,
+            color: shift.isActive
+                ? context.modeSuccess
+                : context.modeTextSecondary,
           ),
         ),
       ),
@@ -481,7 +488,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
   Color _getShiftTypeColor(ShiftType type) {
     switch (type) {
       case ShiftType.MORNING:
-        return const Color(0xFFFFB74D);
+        return context.modeWarning;
       case ShiftType.AFTERNOON:
         return const Color(0xFF64B5F6);
       case ShiftType.EVENING:
@@ -489,7 +496,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
       case ShiftType.NIGHT:
         return const Color(0xFF4DB6AC);
       case ShiftType.FULL_DAY:
-        return kPrimary;
+        return context.modePrimary;
     }
   }
 
@@ -518,7 +525,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
             Icon(
               Icons.history,
               size: 80,
-              color: kprimaryTextColor2.withValues(alpha: 0.5),
+              color: context.modeTextMuted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -526,7 +533,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getSectionTitleFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -534,7 +541,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
               'Past shifts will appear here',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -557,7 +564,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
             Icon(
               Icons.error_outline,
               size: 80,
-              color: const Color(0xFFE53935).withValues(alpha: 0.5),
+              color: context.modeError.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -565,7 +572,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getSectionTitleFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -574,7 +581,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -588,7 +595,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
+                backgroundColor: context.modePrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
                     _getBorderRadius(screenWidth),
@@ -598,7 +605,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
               child: Text(
                 'Retry',
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                   fontWeight: FontWeight.w600,
                 ),
               ),

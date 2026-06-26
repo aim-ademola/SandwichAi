@@ -247,6 +247,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   void _showMessageOptions(ChatMessageModel message) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: context.modeSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -256,8 +257,11 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.reply, color: kPrimary),
-                title: const Text('Reply'),
+                leading: Icon(Icons.reply, color: context.modePrimary),
+                title: Text(
+                  'Reply',
+                  style: TextStyle(color: context.modeTextPrimary),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() => _replyToMessage = message);
@@ -265,8 +269,11 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.copy, color: kPrimary),
-                title: const Text('Copy'),
+                leading: Icon(Icons.copy, color: context.modePrimary),
+                title: Text(
+                  'Copy',
+                  style: TextStyle(color: context.modeTextPrimary),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -274,10 +281,13 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   );
                 },
               ),
-              const Divider(height: 0),
+              Divider(height: 0, color: context.modeDivider),
               ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('Cancel'),
+                leading: Icon(Icons.close, color: context.modeTextSecondary),
+                title: Text(
+                  'Cancel',
+                  style: TextStyle(color: context.modeTextPrimary),
+                ),
                 onTap: () => Navigator.pop(context),
               ),
             ],
@@ -332,6 +342,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   //  Recording
 
+  // ignore: unused_element
   Future<void> _startRecording() async {
     try {
       if (await _audioRecorder.hasPermission()) {
@@ -422,6 +433,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   void _showChatOptions(ChatRoomModel? room) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: context.modeSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -435,12 +447,13 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   room?.isMuted == true
                       ? Icons.notifications_active_outlined
                       : Icons.notifications_off_outlined,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
                 title: Text(
                   room?.isMuted == true
                       ? 'Unmute notifications'
                       : 'Mute notifications',
+                  style: TextStyle(color: context.modeTextPrimary),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -457,10 +470,11 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               ListTile(
                 leading: Icon(
                   room?.isStarred == true ? Icons.star : Icons.star_border,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
                 title: Text(
                   room?.isStarred == true ? 'Unstar chat' : 'Star chat',
+                  style: TextStyle(color: context.modeTextPrimary),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -479,9 +493,12 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   room?.isPinned == true
                       ? Icons.push_pin
                       : Icons.push_pin_outlined,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
-                title: Text(room?.isPinned == true ? 'Unpin chat' : 'Pin chat'),
+                title: Text(
+                  room?.isPinned == true ? 'Unpin chat' : 'Pin chat',
+                  style: TextStyle(color: context.modeTextPrimary),
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
                   context.read<ChatBloc>().add(
@@ -495,17 +512,23 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.search, color: kPrimary),
-                title: const Text('Search messages'),
+                leading: Icon(Icons.search, color: context.modePrimary),
+                title: Text(
+                  'Search messages',
+                  style: TextStyle(color: context.modeTextPrimary),
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
                   _toggleSearch();
                 },
               ),
-              const Divider(height: 0),
+              Divider(height: 0, color: context.modeDivider),
               ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('Cancel'),
+                leading: Icon(Icons.close, color: context.modeTextSecondary),
+                title: Text(
+                  'Cancel',
+                  style: TextStyle(color: context.modeTextPrimary),
+                ),
                 onTap: () => Navigator.pop(ctx),
               ),
             ],
@@ -519,13 +542,21 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: context.modeTextInverse),
+        ),
+        backgroundColor: context.modeError,
+      ),
     );
   }
 
+  // ignore: unused_element
   void _showAttachmentOptions() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: context.modeSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -541,11 +572,11 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
-              const Divider(height: 0),
+              Divider(height: 0, color: context.modeDivider),
               _attachmentOption(
                 icon: Icons.photo_library,
                 label: 'Photo Gallery',
@@ -570,10 +601,13 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   _pickFile();
                 },
               ),
-              const Divider(height: 0),
+              Divider(height: 0, color: context.modeDivider),
               ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('Cancel'),
+                leading: Icon(Icons.close, color: context.modeTextSecondary),
+                title: Text(
+                  'Cancel',
+                  style: TextStyle(color: context.modeTextPrimary),
+                ),
                 onTap: () => Navigator.pop(context),
               ),
             ],
@@ -592,12 +626,12 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: kPrimary.withValues(alpha: 0.1),
+          color: context.modePrimary.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: kPrimary),
+        child: Icon(icon, color: context.modePrimary),
       ),
-      title: Text(label),
+      title: Text(label, style: TextStyle(color: context.modeTextPrimary)),
       onTap: onTap,
     );
   }
@@ -642,7 +676,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
           }
 
           return Scaffold(
-            backgroundColor: const Color(0xFFF8F6F6),
+            backgroundColor: context.modeBackground,
             appBar: _buildAppBar(room),
             body: Column(
               children: [
@@ -652,12 +686,12 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 if (_isSearching && state is ChatSearchResults)
                   _buildSearchResults(state.results),
                 if (_isSearching && state is ChatSearchLoading)
-                  const LinearProgressIndicator(color: kPrimary),
+                  LinearProgressIndicator(color: context.modePrimary),
                 if (_isSearching && state is ChatSearchEmpty)
                   _buildSearchEmpty(),
                 // Load-more indicator at top
                 if (isLoadingMore)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(vertical: 8),
                     child: Center(
                       child: SizedBox(
@@ -665,7 +699,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: kPrimary,
+                          color: context.modePrimary,
                         ),
                       ),
                     ),
@@ -688,10 +722,11 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   PreferredSizeWidget _buildAppBar(ChatRoomModel? room) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 1,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
+        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () {
           widget.showNavBarCallback?.call();
         },
@@ -705,7 +740,11 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               color: widget.department.color,
               shape: BoxShape.circle,
             ),
-            child: Icon(widget.department.icon, color: Colors.white, size: 20),
+            child: Icon(
+              widget.department.icon,
+              color: context.modeTextInverse,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -719,7 +758,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -730,7 +769,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                       : 'Department Chat',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ],
@@ -744,14 +783,14 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             margin: const EdgeInsets.symmetric(vertical: 12),
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: kPrimary,
+              color: context.modePrimary,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Center(
               child: Text(
                 '${room.unreadCount}',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: context.modeTextInverse,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
@@ -761,12 +800,12 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         IconButton(
           icon: Icon(
             _isSearching ? Icons.search_off : Icons.search,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           onPressed: _toggleSearch,
         ),
         IconButton(
-          icon: const Icon(Icons.more_vert, color: kprimaryTextColor1),
+          icon: Icon(Icons.more_vert, color: context.modeTextPrimary),
           onPressed: () => _showChatOptions(room),
         ),
       ],
@@ -777,7 +816,9 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   Widget _buildBody(ChatState state, List<ChatMessageModel> messages) {
     if (state is ChatMessagesLoading && state.chatRoomId == widget.roomId) {
-      return const Center(child: CircularProgressIndicator(color: kPrimary));
+      return Center(
+        child: CircularProgressIndicator(color: context.modePrimary),
+      );
     }
 
     if (state is ChatMessagesError && state.chatRoomId == widget.roomId) {
@@ -829,7 +870,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -837,7 +878,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             'Start the conversation with your team',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -853,21 +894,28 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.wifi_off_rounded, size: 56, color: Colors.grey),
+            Icon(
+              Icons.wifi_off_rounded,
+              size: 56,
+              color: context.modeTextMuted,
+            ),
             const SizedBox(height: 16),
             Text(
               error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: kPrimary),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
+              ),
               onPressed: _loadInitialData,
-              child: const Text('Retry', style: TextStyle(color: Colors.white)),
+              child: const Text('Retry'),
             ),
           ],
         ),
@@ -879,7 +927,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   Widget _buildSearchBar() {
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
@@ -890,21 +938,25 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               onChanged: _runSearch,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Search messages...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
-                prefixIcon: const Icon(Icons.search, color: kPrimary, size: 20),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: context.modePrimary,
+                  size: 20,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: const Color(0xFFF8F6F6),
+                fillColor: context.modeSurfaceAlt,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 10,
@@ -918,7 +970,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             child: Text(
               'Cancel',
               style: WorkSansAppTextStyles.medium.copyWith(
-                color: kPrimary,
+                color: context.modePrimary,
                 fontSize: 14,
               ),
             ),
@@ -931,11 +983,12 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   Widget _buildSearchResults(List<ChatMessageModel> results) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 280),
-      color: Colors.white,
+      color: context.modeSurface,
       child: ListView.separated(
         shrinkWrap: true,
         itemCount: results.length,
-        separatorBuilder: (_, __) => const Divider(height: 0, indent: 16),
+        separatorBuilder: (_, _) =>
+            Divider(height: 0, indent: 16, color: context.modeDivider),
         itemBuilder: (context, index) {
           final msg = results[index];
           return ListTile(
@@ -957,7 +1010,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             subtitle: Text(
@@ -966,14 +1019,14 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               overflow: TextOverflow.ellipsis,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 12,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
             trailing: Text(
               DateFormat('h:mm a').format(msg.sentAt),
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 11,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
             onTap: () {
@@ -988,13 +1041,13 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   Widget _buildSearchEmpty() {
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       padding: const EdgeInsets.all(16),
       child: Center(
         child: Text(
           'No messages found',
           style: WorkSansAppTextStyles.medium.copyWith(
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
         ),
       ),
@@ -1009,14 +1062,14 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.grey[300],
+          color: context.modeSurfaceAlt,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           _formatDate(date),
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 12,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
         ),
       ),
@@ -1068,7 +1121,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ),
@@ -1081,13 +1134,20 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                     decoration: BoxDecoration(
                       color: isMe
                           ? (message.id.startsWith('temp_')
-                                ? kPrimary.withValues(alpha: 0.6)
-                                : kPrimary)
-                          : Colors.white,
+                                ? context.modePrimary.withValues(alpha: 0.6)
+                                : context.modePrimary)
+                          : context.modeSurface,
                       borderRadius: BorderRadius.circular(12),
+                      border: isMe
+                          ? null
+                          : Border.all(
+                              color: context.modeBorder.withValues(alpha: 0.45),
+                            ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
+                          color: context.modeTextPrimary.withValues(
+                            alpha: 0.05,
+                          ),
                           blurRadius: 5,
                           offset: const Offset(0, 2),
                         ),
@@ -1104,7 +1164,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                         DateFormat('h:mm a').format(message.sentAt),
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 11,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                       if (message.isEdited) ...[
@@ -1113,7 +1173,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                           '• edited',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 10,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
@@ -1136,7 +1196,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                             '${message.replyCount} repl${message.replyCount == 1 ? 'y' : 'ies'}',
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 11,
-                              color: kPrimary,
+                              color: context.modePrimary,
                               decoration: TextDecoration.underline,
                             ),
                           ),
@@ -1155,9 +1215,9 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   Widget _buildSendStatus(ChatMessageModel message) {
     if (message.id.startsWith('temp_')) {
-      return const Icon(Icons.access_time, size: 14, color: Colors.grey);
+      return Icon(Icons.access_time, size: 14, color: context.modeTextMuted);
     }
-    return Icon(Icons.done_all, size: 14, color: Colors.grey[600]);
+    return Icon(Icons.done_all, size: 14, color: context.modeTextSecondary);
   }
 
   Widget _buildAvatar(ChatMessageModel message) {
@@ -1188,12 +1248,14 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: isMe ? Colors.transparent : const Color(0xFFF8F6F6),
+        color: isMe
+            ? Colors.transparent
+            : context.modeSurfaceAlt.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isMe
-              ? kPrimary.withValues(alpha: 0.3)
-              : Colors.grey.withValues(alpha: 0.3),
+              ? context.modePrimary.withValues(alpha: 0.3)
+              : context.modeBorder.withValues(alpha: 0.45),
           width: 1,
         ),
       ),
@@ -1206,8 +1268,8 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 Icons.reply,
                 size: 14,
                 color: isMe
-                    ? Colors.black.withValues(alpha: 0.7)
-                    : kprimaryTextColor2,
+                    ? context.modeTextInverse.withValues(alpha: 0.78)
+                    : context.modeTextSecondary,
               ),
               const SizedBox(width: 4),
               Text(
@@ -1215,7 +1277,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: isMe ? Colors.black.withValues(alpha: 0.9) : kPrimary,
+                  color: isMe ? context.modeTextInverse : context.modePrimary,
                 ),
               ),
             ],
@@ -1226,8 +1288,8 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
               color: isMe
-                  ? Colors.black.withValues(alpha: 0.7)
-                  : kprimaryTextColor2,
+                  ? context.modeTextInverse.withValues(alpha: 0.78)
+                  : context.modeTextSecondary,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -1251,7 +1313,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 File(path),
                 width: 180,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _imagePlaceholder(isMe),
+                errorBuilder: (_, _, _) => _imagePlaceholder(isMe),
               ),
             );
           }
@@ -1260,7 +1322,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         return Text(
           message.content,
           style: TextStyle(
-            color: isMe ? Colors.white : kprimaryTextColor1,
+            color: isMe ? context.modeTextInverse : context.modeTextPrimary,
             fontSize: 14,
           ),
         );
@@ -1271,14 +1333,16 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
           children: [
             Icon(
               Icons.insert_drive_file,
-              color: isMe ? Colors.white : kPrimary,
+              color: isMe ? context.modeTextInverse : context.modePrimary,
             ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 message.content.replaceFirst('📎 ', ''),
                 style: TextStyle(
-                  color: isMe ? Colors.white : kprimaryTextColor1,
+                  color: isMe
+                      ? context.modeTextInverse
+                      : context.modeTextPrimary,
                 ),
               ),
             ),
@@ -1292,7 +1356,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         return Text(
           message.content,
           style: TextStyle(
-            color: isMe ? Colors.white : kprimaryTextColor1,
+            color: isMe ? context.modeTextInverse : context.modeTextPrimary,
             fontSize: 14,
           ),
         );
@@ -1303,11 +1367,13 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     return Container(
       width: 180,
       height: 180,
-      color: isMe ? Colors.white.withValues(alpha: 0.2) : Colors.grey[200],
+      color: isMe
+          ? context.modeTextInverse.withValues(alpha: 0.2)
+          : context.modeSurfaceAlt,
       child: Icon(
         Icons.image,
         size: 60,
-        color: isMe ? Colors.white : kprimaryTextColor2,
+        color: isMe ? context.modeTextInverse : context.modeTextSecondary,
       ),
     );
   }
@@ -1318,7 +1384,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       children: [
         Icon(
           Icons.play_circle_filled,
-          color: isMe ? Colors.white : kPrimary,
+          color: isMe ? context.modeTextInverse : context.modePrimary,
           size: 32,
         ),
         const SizedBox(width: 8),
@@ -1331,8 +1397,8 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 width: 100,
                 decoration: BoxDecoration(
                   color: isMe
-                      ? Colors.white.withValues(alpha: 0.3)
-                      : Colors.grey[300],
+                      ? context.modeTextInverse.withValues(alpha: 0.3)
+                      : context.modeSurfaceAlt,
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: FractionallySizedBox(
@@ -1340,7 +1406,9 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   widthFactor: 0.3,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isMe ? Colors.white : kPrimary,
+                      color: isMe
+                          ? context.modeTextInverse
+                          : context.modePrimary,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1352,8 +1420,8 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   color: isMe
-                      ? Colors.white.withValues(alpha: 0.8)
-                      : Colors.black54,
+                      ? context.modeTextInverse.withValues(alpha: 0.82)
+                      : context.modeTextSecondary,
                 ),
               ),
             ],
@@ -1367,7 +1435,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   Widget _buildReplyPreview() {
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
@@ -1375,7 +1443,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             width: 3,
             height: 40,
             decoration: BoxDecoration(
-              color: kPrimary,
+              color: context.modePrimary,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1389,7 +1457,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: kPrimary,
+                    color: context.modePrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1397,7 +1465,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   _replyToMessage!.content,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1406,7 +1474,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: 20, color: kprimaryTextColor2),
+            icon: Icon(Icons.close, size: 20, color: context.modeTextSecondary),
             onPressed: _cancelReply,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -1424,7 +1492,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         : Duration.zero;
 
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: SafeArea(
         top: false,
@@ -1434,15 +1502,15 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
+                color: context.modeError.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Container(
                   width: 16,
                   height: 16,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
+                  decoration: BoxDecoration(
+                    color: context.modeError,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -1458,7 +1526,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.red,
+                      color: context.modeError,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -1466,18 +1534,18 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                     _formatDuration(duration),
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 13,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              icon: Icon(Icons.delete_outline, color: context.modeError),
               onPressed: _cancelRecording,
             ),
             IconButton(
-              icon: const Icon(Icons.send, color: kPrimary),
+              icon: Icon(Icons.send, color: context.modePrimary),
               onPressed: _stopRecording,
             ),
           ],
@@ -1490,18 +1558,13 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   Widget _buildMessageInput() {
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SafeArea(
         top: false,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // IconButton(
-            //   icon: const Icon(Icons.add_circle_outline, color: kPrimary),
-            //   onPressed: _showAttachmentOptions,
-            //   padding: const EdgeInsets.all(8),
-            // ),
             Expanded(
               child: Container(
                 constraints: const BoxConstraints(
@@ -1509,7 +1572,10 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   maxHeight: 120,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8F6F6),
+                  color: context.modeSurfaceAlt,
+                  border: Border.all(
+                    color: context.modeBorder.withValues(alpha: 0.45),
+                  ),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: TextField(
@@ -1519,13 +1585,13 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   textCapitalization: TextCapitalization.sentences,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Type a message...',
                     hintStyle: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
@@ -1538,12 +1604,16 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             ),
             const SizedBox(width: 8),
             Container(
-              decoration: const BoxDecoration(
-                color: kPrimary,
+              decoration: BoxDecoration(
+                color: context.modePrimary,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                icon: Icon(
+                  Icons.send,
+                  color: context.modeTextInverse,
+                  size: 20,
+                ),
                 onPressed: _sendMessage,
                 padding: const EdgeInsets.all(8),
               ),

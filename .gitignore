@@ -60,6 +60,7 @@ android/key.properties
 /reports/
 /tmp/
 /temp/
+skills/
 *.tmp
 *.temp
 DAY_ONE_TASK.MD

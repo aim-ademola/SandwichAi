@@ -1264,10 +1264,30 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         color: Colors.black,
       ),
       icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF9E9E9E)),
+      selectedItemBuilder: (context) {
+        return Unit.values.map((unit) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              unit.displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: inputFontSize,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList();
+      },
       items: Unit.values.map((unit) {
         return DropdownMenuItem<Unit>(
           value: unit,
-          child: Text(unit.displayName),
+          child: Text(
+            unit.displayName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         );
       }).toList(),
       onChanged: (value) {
@@ -1455,7 +1475,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                         context.read<EmployeeBloc>().add(
                           LoadEmployeesByDepartment(
                             branchId: branchId,
-                            department: 'PROCUREMENT',
+                            department: 'PROCESSING',
                             status: 'ACTIVE',
                           ),
                         );
@@ -1522,6 +1542,22 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                   Icons.keyboard_arrow_down,
                   color: Color(0xFF9E9E9E),
                 ),
+                selectedItemBuilder: (context) {
+                  return state.employees.map((employee) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        employee.fullName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: inputFontSize,
+                          color: Colors.black,
+                        ),
+                      ),
+                    );
+                  }).toList();
+                },
                 items: state.employees.map((employee) {
                   return DropdownMenuItem<String>(
                     value: employee.id,

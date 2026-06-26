@@ -11,6 +11,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 abstract class InventoryItemsRepositoryInterface {
   Future<ApiResponse<List<InventoryItem>>> getInventoryItems({
     required String organizationId,
+    int page = 1,
+    int limit = 20,
+    String? search,
   });
 }
 
@@ -23,14 +26,17 @@ class InventoryItemsRepository extends BaseRepository
     required String organizationId,
     int page = 1,
     int limit = 20,
+    String? search,
   }) async {
     try {
+      final trimmedSearch = search?.trim() ?? '';
       final response = await _apiClient
           .get(
             'inventory-items',
             queryParameters: {
               'page': page,
               'limit': limit,
+              if (trimmedSearch.isNotEmpty) 'search': trimmedSearch,
               // 'organizationId': organizationId,
             },
           )
@@ -180,11 +186,13 @@ class LoadInventoryItems extends InventoryItemsEvent {
   final String organizationId;
   final int page;
   final int limit;
+  final String? search;
 
   LoadInventoryItems({
     required this.organizationId,
     this.page = 1,
     this.limit = 20,
+    this.search,
   });
 }
 
@@ -204,12 +212,16 @@ class InventoryItemsLoading extends InventoryItemsState {}
 class InventoryItemsLoaded extends InventoryItemsState {
   final List<InventoryItem> items;
   final int currentPage;
+  final int pageLimit;
+  final String searchQuery;
   final bool hasMore;
   final bool isLoadingMore;
 
   InventoryItemsLoaded({
     required this.items,
     this.currentPage = 1,
+    this.pageLimit = 20,
+    this.searchQuery = '',
     this.hasMore = true,
     this.isLoadingMore = false,
   });
@@ -217,12 +229,16 @@ class InventoryItemsLoaded extends InventoryItemsState {
   InventoryItemsLoaded copyWith({
     List<InventoryItem>? items,
     int? currentPage,
+    int? pageLimit,
+    String? searchQuery,
     bool? hasMore,
     bool? isLoadingMore,
   }) {
     return InventoryItemsLoaded(
       items: items ?? this.items,
       currentPage: currentPage ?? this.currentPage,
+      pageLimit: pageLimit ?? this.pageLimit,
+      searchQuery: searchQuery ?? this.searchQuery,
       hasMore: hasMore ?? this.hasMore,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
@@ -237,7 +253,6 @@ class InventoryItemsError extends InventoryItemsState {
 class InventoryItemsBloc
     extends Bloc<InventoryItemsEvent, InventoryItemsState> {
   final InventoryItemsRepository _repository;
-  static const int _limit = 20;
 
   InventoryItemsBloc({required InventoryItemsRepository repository})
     : _repository = repository,
@@ -256,6 +271,7 @@ class InventoryItemsBloc
       organizationId: event.organizationId,
       page: event.page,
       limit: event.limit,
+      search: event.search,
     );
 
     response.when(
@@ -263,6 +279,8 @@ class InventoryItemsBloc
         InventoryItemsLoaded(
           items: items,
           currentPage: event.page,
+          pageLimit: event.limit,
+          searchQuery: event.search?.trim() ?? '',
           hasMore:
               items.length >= event.limit, // if less than limit, no more pages
         ),
@@ -286,7 +304,8 @@ class InventoryItemsBloc
     final response = await _repository.getInventoryItems(
       organizationId: event.organizationId,
       page: nextPage,
-      limit: _limit,
+      limit: currentState.pageLimit,
+      search: currentState.searchQuery,
     );
 
     response.when(
@@ -297,7 +316,7 @@ class InventoryItemsBloc
             ...newItems,
           ], // append to existing list
           currentPage: nextPage,
-          hasMore: newItems.length >= _limit,
+          hasMore: newItems.length >= currentState.pageLimit,
           isLoadingMore: false,
         ),
       ),

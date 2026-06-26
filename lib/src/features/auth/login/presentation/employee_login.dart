@@ -8,6 +8,7 @@ import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/config/responsive_config.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/core/navigation/department_navigation.dart';
 import 'package:sandwich_ai/src/features/auth/data/models/login_model.dart';
 import 'package:sandwich_ai/src/features/auth/login/presentation/login_textfield.dart';
 import 'package:sandwich_ai/src/features/auth/login/presentation/snack_bar.dart';
@@ -171,6 +172,10 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
     final responsive = ResponsiveConfig.instance;
     final screenWidth = context.screenWidth;
     final screenHeight = context.screenHeight;
+    final loginIconSize = responsive
+        .getLargeIconSize(screenWidth)
+        .clamp(56.0, 72.0)
+        .toDouble();
 
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
@@ -191,34 +196,8 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
           );
           AppLogger.log('Branch: ${state.response.user.branch?.name}');
 
-          // Navigate based on department
-          // context.go('/Pos-nav');
-
-          // Uncomment to enable department-based navigation
-          if (dpt == null) {
-            context.go('/');
-            return;
-          }
-
-          switch (dpt) {
-            case 'KITCHEN':
-              context.go('/Kitchen-nav');
-              break;
-            case 'PROCESSING':
-              context.go('/Processing-nav');
-              break;
-            case 'PROCUREMENT':
-              context.go('/Procurement-nav');
-              break;
-            case 'STOCK_CONTROL':
-              context.go('/Stock-control-nav');
-              break;
-            case 'CUSTOMER_SERVICE':
-              context.go('/Pos-nav');
-              break;
-            default:
-              context.go('/');
-          }
+          final route = DepartmentNavigation.routeForDepartment(dpt);
+          context.go(route ?? '/');
         }
       },
       child: DefaultTextStyle.merge(
@@ -243,7 +222,16 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Logo/Icon
-                        SvgPicture.asset('assets/svg/person.svg'),
+                        Center(
+                          child: SizedBox(
+                            width: loginIconSize,
+                            height: loginIconSize,
+                            child: SvgPicture.asset(
+                              'assets/svg/person.svg',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
                         SizedBox(
                           height:
                               responsive.getVerticalSpacing(screenHeight) * 0.8,

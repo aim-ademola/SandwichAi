@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
@@ -29,6 +31,8 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
   final _stockBatchIdController = TextEditingController();
   final _qtyReceivedController = TextEditingController();
   final _notesController = TextEditingController();
+  final _inventorySearchController = TextEditingController();
+  Timer? _inventorySearchDebounce;
 
   // State variables
   String branchId = '';
@@ -38,12 +42,46 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
   ProductType _selectedProductType = ProductType.rawMaterial;
   Unit _selectedUnit = Unit.kg;
   bool _qualityStatus = true;
+  bool _isInventoryPickerOpen = false;
+  List<InventoryItem> _allInventoryItems = [];
+  List<InventoryItem> _filteredInventoryItems = [];
 
   @override
   void initState() {
     super.initState();
+    _inventorySearchController.addListener(_onInventorySearchChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getBranchId();
+    });
+  }
+
+  void _onInventorySearchChanged() {
+    final rawQuery = _inventorySearchController.text.trim();
+    final query = rawQuery.toLowerCase();
+    setState(() {
+      _filteredInventoryItems = query.isEmpty
+          ? _allInventoryItems
+          : _allInventoryItems.where((item) {
+              return item.itemName.toLowerCase().contains(query) ||
+                  item.category.toLowerCase().contains(query) ||
+                  item.sku.toLowerCase().contains(query);
+            }).toList();
+    });
+
+    if (!_isInventoryPickerOpen || organizationId.isEmpty) return;
+
+    _inventorySearchDebounce?.cancel();
+    _inventorySearchDebounce = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) return;
+
+      context.read<InventoryItemsBloc>().add(
+        LoadInventoryItems(
+          organizationId: organizationId,
+          page: 1,
+          limit: 100,
+          search: rawQuery,
+        ),
+      );
     });
   }
 
@@ -73,6 +111,8 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
     _stockBatchIdController.dispose();
     _qtyReceivedController.dispose();
     _notesController.dispose();
+    _inventorySearchDebounce?.cancel();
+    _inventorySearchController.dispose();
     super.dispose();
   }
 
@@ -508,6 +548,8 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
       _selectedProductType = ProductType.rawMaterial;
       _selectedUnit = Unit.kg;
       _qualityStatus = true;
+      _isInventoryPickerOpen = false;
+      _inventorySearchController.clear();
       _issuedByController.clear();
       _stockBatchIdController.clear();
       _qtyReceivedController.clear();
@@ -544,6 +586,29 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                   break;
               }
               _showErrorSnackBar(message);
+            }
+          },
+        ),
+        BlocListener<InventoryItemsBloc, InventoryItemsState>(
+          listener: (context, state) {
+            if (state is InventoryItemsLoaded) {
+              final query = _inventorySearchController.text
+                  .trim()
+                  .toLowerCase();
+              setState(() {
+                _allInventoryItems = state.items;
+                _filteredInventoryItems = query.isEmpty
+                    ? state.items
+                    : state.items.where((item) {
+                        return item.itemName.toLowerCase().contains(query) ||
+                            item.category.toLowerCase().contains(query) ||
+                            item.sku.toLowerCase().contains(query);
+                      }).toList();
+              });
+            } else if (state is InventoryItemsError) {
+              _showErrorSnackBar(
+                'Failed to load inventory items: ${state.error}',
+              );
             }
           },
         ),
@@ -821,6 +886,10 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         AppLogger.log('InventoryItemsBloc State: $state'); // Debug print
 
         if (state is InventoryItemsLoading) {
+          if (_isInventoryPickerOpen && _allInventoryItems.isNotEmpty) {
+            return _buildInventoryPicker(labelFontSize, inputFontSize);
+          }
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -900,103 +969,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             'InventoryItemsLoaded: ${state.items.length} items',
           ); // Debug print
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLabel('Inventory Item', labelFontSize),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedItem?.id,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  hintText: 'Select an item',
-                  hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: inputFontSize,
-                    color: const Color(0xFFBDBDBD),
-                    fontWeight: FontWeight.w400,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: kPrimary, width: 2),
-                  ),
-                ),
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: inputFontSize,
-                  color: Colors.black,
-                ),
-                icon: const Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Color(0xFF9E9E9E),
-                ),
-                items: state.items.map((item) {
-                  return DropdownMenuItem<String>(
-                    value: item.id,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          item.itemName,
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: inputFontSize,
-                            color: Colors.black,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          '${item.category} • SKU: ${item.sku}',
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: inputFontSize - 2,
-                            color: Colors.grey,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                onChanged: (String? value) {
-                  if (value != null) {
-                    final item = state.items.firstWhere((i) => i.id == value);
-                    setState(() {
-                      _selectedItem = item;
-                      // Auto-set unit based on item's unit
-                      _selectedUnit = UnitExtension.fromString(item.unit);
-                    });
-                    AppLogger.log(
-                      'Selected item: ${item.itemName}',
-                    ); // Debug print
-                  }
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select an inventory item';
-                  }
-                  return null;
-                },
-              ),
-            ],
-          );
+          return _buildInventoryPicker(labelFontSize, inputFontSize);
         }
 
         return Column(
@@ -1016,6 +989,206 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildInventoryPicker(double labelFontSize, double inputFontSize) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel('Inventory Item', labelFontSize),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () {
+            setState(() {
+              _isInventoryPickerOpen = !_isInventoryPickerOpen;
+            });
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFE0E0E0)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.inventory_2_outlined, color: kPrimary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _selectedItem?.itemName ?? 'Search and select an item',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: inputFontSize,
+                      color: _selectedItem == null
+                          ? const Color(0xFF9E9E9E)
+                          : Colors.black,
+                    ),
+                  ),
+                ),
+                Icon(
+                  _isInventoryPickerOpen
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: const Color(0xFF9E9E9E),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_isInventoryPickerOpen) ...[
+          const SizedBox(height: 8),
+          _buildInventorySearchDropdown(inputFontSize),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildInventorySearchDropdown(double inputFontSize) {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 320),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              controller: _inventorySearchController,
+              autofocus: true,
+              cursorColor: kPrimary,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: inputFontSize,
+                color: Colors.black,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Type to search...',
+                hintStyle: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: inputFontSize,
+                  color: const Color(0xFF9E9E9E),
+                ),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF9E9E9E)),
+                suffixIcon: _inventorySearchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: _inventorySearchController.clear,
+                      ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: kPrimary, width: 1.5),
+                ),
+              ),
+            ),
+          ),
+          Divider(height: 1, color: Colors.grey.shade200),
+          Expanded(
+            child: _filteredInventoryItems.isEmpty
+                ? Center(
+                    child: Text(
+                      'No items found',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: inputFontSize,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _filteredInventoryItems.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == _filteredInventoryItems.length) {
+                        final inventoryState = context
+                            .read<InventoryItemsBloc>()
+                            .state;
+                        if (inventoryState is InventoryItemsLoaded &&
+                            inventoryState.hasMore &&
+                            !inventoryState.isLoadingMore) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            context.read<InventoryItemsBloc>().add(
+                              LoadMoreInventoryItems(
+                                organizationId: organizationId,
+                              ),
+                            );
+                          });
+                        }
+
+                        if (inventoryState is InventoryItemsLoaded &&
+                            inventoryState.isLoadingMore) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child: Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }
+
+                      final item = _filteredInventoryItems[index];
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            _selectedItem = item;
+                            _selectedUnit = UnitExtension.fromString(item.unit);
+                            _isInventoryPickerOpen = false;
+                            _inventorySearchController.clear();
+                          });
+                          AppLogger.log('Selected item: ${item.itemName}');
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.itemName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: inputFontSize,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${item.category} - SKU: ${item.sku}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: inputFontSize - 2,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 

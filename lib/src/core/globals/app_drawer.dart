@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
-import 'package:sandwich_ai/src/core/globals/mobile_drawer_controls.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/theme/theme_controller.dart';
@@ -34,15 +33,7 @@ class AppDrawerShell extends StatelessWidget {
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
-                children: [
-                  DrawerBranchSwitcher(activeModuleTitle: moduleTitle),
-                  const SizedBox(height: 12),
-                  DrawerModuleNavigation(activeModuleTitle: moduleTitle),
-                  const SizedBox(height: 12),
-                  const AppDrawerThemeSwitch(),
-                  const SizedBox(height: 12),
-                  ...children,
-                ],
+                children: [...children],
               ),
             ),
             Padding(
@@ -78,11 +69,7 @@ class _PremiumDrawerHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            context.modePrimary,
-            context.modePrimaryBlue,
-            context.modePrimaryAlt,
-          ],
+          colors: [context.modePrimary, context.modePrimary],
         ),
         boxShadow: [
           BoxShadow(

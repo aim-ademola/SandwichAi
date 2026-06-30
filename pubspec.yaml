@@ -60,6 +60,7 @@ dependencies:
   flutter_blue_plus: ^2.1.1
   usb_serial: ^0.5.2
   qr_flutter: ^4.1.0
+  uuid: ^4.5.2
 
 dev_dependencies:
   flutter_test:

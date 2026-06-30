@@ -24,6 +24,7 @@ extension PosOrderDetailsDialogExtension on BuildContext {
   Future<PosOrderDetails?> showPosOrderDetailsDialog({
     required Map<String, int> orderItems,
     required double totalAmount,
+    String? initialSpecialInstructions,
   }) async {
     return showDialog<PosOrderDetails>(
       context: this,
@@ -31,6 +32,7 @@ extension PosOrderDetailsDialogExtension on BuildContext {
       builder: (context) => _PosOrderDetailsDialog(
         orderItems: orderItems,
         totalAmount: totalAmount,
+        initialSpecialInstructions: initialSpecialInstructions,
       ),
     );
   }
@@ -39,10 +41,12 @@ extension PosOrderDetailsDialogExtension on BuildContext {
 class _PosOrderDetailsDialog extends StatefulWidget {
   final Map<String, int> orderItems;
   final double totalAmount;
+  final String? initialSpecialInstructions;
 
   const _PosOrderDetailsDialog({
     required this.orderItems,
     required this.totalAmount,
+    this.initialSpecialInstructions,
   });
 
   @override
@@ -65,6 +69,13 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
     {'value': 'DELIVERY', 'label': 'Delivery'},
     {'value': 'ONLINE', 'label': 'Online'},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _specialInstructionsController.text =
+        widget.initialSpecialInstructions ?? '';
+  }
 
   @override
   void dispose() {

@@ -1,16 +1,17 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/event.dart';
+import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/tax-config-bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/tax_config_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/repository/pos_order_repo.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/minimze.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/payment_method.dart';
 
 class OrderSummaryScreen extends StatefulWidget {
   final Map<ApiMenuItem, int> orderItems;
@@ -67,204 +68,270 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
 
   String _formatPrice(double price) => '₦${price.toStringAsFixed(2)}';
 
+  bool get _isDineIn => _normalizeOrderType(widget.orderType) == 'DINE_IN';
+
   //  Navigation ──
 
-  void _continueToPayment(List<TaxConfiguration> salesTaxes) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: context.read<PosOrderBloc>()),
-            BlocProvider.value(value: context.read<OrderSessionCubit>()),
-            BlocProvider.value(value: context.read<TaxConfigBloc>()),
-          ],
-          child: PaymentMethodScreen(
-            orderItems: widget.orderItems,
-            specialRequests: widget.specialRequests,
-            orderType: widget.orderType,
-            tableNumber: widget.tableNumber,
-            customerName: widget.customerName,
-            customerPhone: widget.customerPhone,
-            discount: widget.discount,
-            specialInstructions: widget.specialInstructions,
-            totalAmount: _calculateGrandTotal(salesTaxes),
-            sessionId: widget.sessionId,
-          ),
-        ),
+  void _confirmOrder() {
+    final items = widget.orderItems.entries.map((entry) {
+      return PosOrderItemPayload(
+        menuItemId: entry.key.id,
+        quantity: entry.value,
+        specialRequest: widget.specialRequests[entry.key.id],
+      );
+    }).toList();
+
+    context.read<PosOrderBloc>().add(
+      CreatePosOrder(
+        orderType: _normalizeOrderType(widget.orderType),
+        tableNumber: widget.tableNumber,
+        customerName: widget.customerName,
+        customerPhone: widget.customerPhone,
+        items: items,
+        discount: widget.discount,
+        specialInstructions: widget.specialInstructions,
       ),
     );
+  }
+
+  String _normalizeOrderType(String orderType) {
+    switch (orderType.toLowerCase().trim().replaceAll(' ', '_')) {
+      case 'dine_in':
+      case 'dinein':
+      case 'dine-in':
+        return 'DINE_IN';
+      case 'take_out':
+      case 'takeout':
+      case 'take-away':
+      case 'takeaway':
+      case 'to_go':
+      case 'togo':
+        return 'TAKEAWAY';
+      case 'delivery':
+        return 'DELIVERY';
+      case 'online':
+        return 'ONLINE';
+      default:
+        return orderType.toUpperCase().replaceAll(' ', '_');
+    }
   }
 
   //  Build ─
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle.merge(
-      style: WorkSansAppTextStyles.medium,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            'Order Summary',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
-            ),
-          ),
-          actions: [
-            MinimizeButton(
-              sessionId: widget.sessionId,
-              screen: MinimizedScreen.orderSummary,
-            ),
-          ],
-          centerTitle: true,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<PosOrderBloc, PosOrderState>(
+          listener: (context, state) {
+            if (state is PosOrderCreated) {
+              final orderSessionCubit = context.read<OrderSessionCubit>();
+              final posOrderBloc = context.read<PosOrderBloc>();
+              if (widget.sessionId != null) {
+                orderSessionCubit.closeSession(widget.sessionId!);
+              }
+              orderSessionCubit.createSession();
+              posOrderBloc.add(const ResetPosOrderState());
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Order sent to Kitchen #${state.order.orderId}',
+                  ),
+                  backgroundColor: context.modeSuccess,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            } else if (state is PosOrderError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.error),
+                  backgroundColor: context.modeError,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          },
         ),
-        // React to tax config state so the totals update once taxes load.
-        body: BlocBuilder<TaxConfigBloc, TaxConfigState>(
-          builder: (context, taxState) {
-            // Resolve the applicable sales taxes from the current state.
-            final salesTaxes = taxState is TaxConfigLoaded
-                ? taxState.salesTaxes
-                : <TaxConfiguration>[];
+      ],
+      child: DefaultTextStyle.merge(
+        style: WorkSansAppTextStyles.medium,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              'Order Summary',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: kprimaryTextColor1,
+              ),
+            ),
+            actions: [
+              MinimizeButton(
+                sessionId: widget.sessionId,
+                screen: MinimizedScreen.orderSummary,
+              ),
+            ],
+            centerTitle: true,
+          ),
+          // React to tax config state so the totals update once taxes load.
+          body: BlocBuilder<TaxConfigBloc, TaxConfigState>(
+            builder: (context, taxState) {
+              // Resolve the applicable sales taxes from the current state.
+              final salesTaxes = taxState is TaxConfigLoaded
+                  ? taxState.salesTaxes
+                  : <TaxConfiguration>[];
 
-            final subtotal = _calculateSubtotal();
-            final discount = widget.discount;
-            final totalTax = _calculateTotalTax(salesTaxes);
-            final grandTotal = _calculateGrandTotal(salesTaxes);
+              final subtotal = _calculateSubtotal();
+              final discount = widget.discount;
+              final totalTax = _calculateTotalTax(salesTaxes);
+              final grandTotal = _calculateGrandTotal(salesTaxes);
 
-            return Column(
-              children: [
-                // ── Scrollable body ─
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 16),
+              return Column(
+                children: [
+                  // ── Scrollable body ─
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 16),
 
-                        // Order Details Card
-                        _OrderDetailsCard(widget: widget),
+                          // Order Details Card
+                          _OrderDetailsCard(widget: widget),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
-                        Text(
-                          'Order Items',
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                          Text(
+                            'Order Items',
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: kprimaryTextColor1,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        // Item rows
-                        ...widget.orderItems.entries.map((entry) {
-                          final item = entry.key;
-                          final quantity = entry.value;
-                          final totalPrice =
-                              double.parse(item.price) * quantity;
-                          final hasSpecialRequest = widget.specialRequests
-                              .containsKey(item.id);
+                          // Item rows
+                          ...widget.orderItems.entries.map((entry) {
+                            final item = entry.key;
+                            final quantity = entry.value;
+                            final totalPrice =
+                                double.parse(item.price) * quantity;
+                            final hasSpecialRequest = widget.specialRequests
+                                .containsKey(item.id);
 
-                          return _OrderItemCard(
-                            item: item,
-                            quantity: quantity,
-                            totalPrice: totalPrice,
-                            specialRequest: hasSpecialRequest
-                                ? widget.specialRequests[item.id]
-                                : null,
-                            formatPrice: _formatPrice,
-                          );
-                        }),
-
-                        const SizedBox(height: 8),
-                        Divider(color: Colors.grey[300], thickness: 1),
-                        const SizedBox(height: 16),
-
-                        // Subtotal
-                        _buildSummaryRow('Subtotal', _formatPrice(subtotal)),
-                        const SizedBox(height: 12),
-
-                        // Discount
-                        if (discount > 0) ...[
-                          _buildSummaryRow(
-                            'Discount',
-                            '-${_formatPrice(discount)}',
-                            isDiscount: true,
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-
-                        // ── Tax rows
-                        if (taxState is TaxConfigLoading)
-                          _TaxLoadingRow()
-                        else if (taxState is TaxConfigError)
-                          _TaxErrorRow(message: taxState.error)
-                        else if (salesTaxes.isEmpty &&
-                            taxState is! TaxConfigInitial)
-                          _buildSummaryRow('Tax', _formatPrice(0))
-                        else
-                          ...salesTaxes.map(
-                            (tax) => _TaxRow(
-                              tax: tax,
-                              taxableAmount: _taxableAmount(),
+                            return _OrderItemCard(
+                              item: item,
+                              quantity: quantity,
+                              totalPrice: totalPrice,
+                              specialRequest: hasSpecialRequest
+                                  ? widget.specialRequests[item.id]
+                                  : null,
                               formatPrice: _formatPrice,
+                            );
+                          }),
+
+                          const SizedBox(height: 8),
+                          Divider(color: Colors.grey[300], thickness: 1),
+                          const SizedBox(height: 16),
+
+                          // Subtotal
+                          _buildSummaryRow('Subtotal', _formatPrice(subtotal)),
+                          const SizedBox(height: 12),
+
+                          // Discount
+                          if (discount > 0) ...[
+                            _buildSummaryRow(
+                              'Discount',
+                              '-${_formatPrice(discount)}',
+                              isDiscount: true,
                             ),
-                          ),
+                            const SizedBox(height: 12),
+                          ],
 
-                        // Total additional tax (only when > 1 tax line)
-                        if (salesTaxes.length > 1) ...[
-                          const SizedBox(height: 4),
-                          _buildSummaryRow('Total Tax', _formatPrice(totalTax)),
-                        ],
-
-                        const SizedBox(height: 16),
-
-                        // Grand Total
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Grand Total',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: kprimaryTextColor1,
+                          // ── Tax rows
+                          if (taxState is TaxConfigLoading)
+                            _TaxLoadingRow()
+                          else if (taxState is TaxConfigError)
+                            _TaxErrorRow(message: taxState.error)
+                          else if (salesTaxes.isEmpty &&
+                              taxState is! TaxConfigInitial)
+                            _buildSummaryRow('Tax', _formatPrice(0))
+                          else
+                            ...salesTaxes.map(
+                              (tax) => _TaxRow(
+                                tax: tax,
+                                taxableAmount: _taxableAmount(),
+                                formatPrice: _formatPrice,
                               ),
                             ),
-                            Text(
-                              _formatPrice(grandTotal),
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: kPrimary,
-                              ),
+
+                          // Total additional tax (only when > 1 tax line)
+                          if (salesTaxes.length > 1) ...[
+                            const SizedBox(height: 4),
+                            _buildSummaryRow(
+                              'Total Tax',
+                              _formatPrice(totalTax),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+
+                          const SizedBox(height: 16),
+
+                          // Grand Total
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Grand Total',
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: kprimaryTextColor1,
+                                ),
+                              ),
+                              Text(
+                                _formatPrice(grandTotal),
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: kPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-                // ── Bottom CTA
-                _BottomCta(
-                  onPressed: taxState is TaxConfigLoading
-                      ? null // disable while taxes are loading
-                      : () => _continueToPayment(salesTaxes),
-                ),
-              ],
-            );
-          },
+                  // ── Bottom CTA
+                  BlocBuilder<PosOrderBloc, PosOrderState>(
+                    builder: (context, orderState) {
+                      return _BottomCta(
+                        label: _isDineIn ? 'Send to Kitchen' : 'Confirm Order',
+                        isLoading: orderState is PosOrderCreating,
+                        onPressed:
+                            taxState is TaxConfigLoading ||
+                                orderState is PosOrderCreating
+                            ? null
+                            : _confirmOrder,
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -344,6 +411,36 @@ class _OrderDetailsCard extends StatelessWidget {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 color: kprimaryTextColor2,
+              ),
+            ),
+          ],
+          if (widget.orderType == 'DINE_IN') ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: kPrimary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.restaurant_menu_rounded,
+                    color: kPrimary,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Dine-in orders are served before payment.',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: kPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -645,8 +742,14 @@ class _TaxErrorRow extends StatelessWidget {
 
 class _BottomCta extends StatelessWidget {
   final VoidCallback? onPressed;
+  final String label;
+  final bool isLoading;
 
-  const _BottomCta({required this.onPressed});
+  const _BottomCta({
+    required this.onPressed,
+    required this.label,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -675,14 +778,23 @@ class _BottomCta extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: Text(
-            'Continue to Payment',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
+          child: isLoading
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  label,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ),
     );

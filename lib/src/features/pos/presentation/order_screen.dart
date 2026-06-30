@@ -37,6 +37,7 @@ class _OrderScreenState extends State<OrderScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _orderNoteController = TextEditingController();
   final _animateToController = AnimateToController();
   Timer? _searchDebounce;
 
@@ -81,6 +82,8 @@ class _OrderScreenState extends State<OrderScreen>
       _itemSpecialRequests
         ..clear()
         ..addAll(session.specialRequests);
+      _orderNoteController.text =
+          session.orderNote ?? session.orderDetails?.specialInstructions ?? '';
       _lastKnownSessionId = session.sessionId;
     });
 
@@ -224,6 +227,8 @@ class _OrderScreenState extends State<OrderScreen>
     context.read<OrderSessionCubit>().updateActiveSessionItems(
       orderItems: Map.from(_orderItems),
       specialRequests: Map.from(_itemSpecialRequests),
+      orderNote: _orderNoteController.text.trim(),
+      clearOrderNote: _orderNoteController.text.trim().isEmpty,
     );
   }
 
@@ -274,6 +279,13 @@ class _OrderScreenState extends State<OrderScreen>
     setState(() {});
   }
 
+  void _clearVisibleOrder() {
+    _orderItems.clear();
+    _itemSpecialRequests.clear();
+    _orderNoteController.clear();
+    setState(() {});
+  }
+
   Future<void> _addSpecialRequest(ApiMenuItem item) async {
     final existingRequest = _itemSpecialRequests[item.id];
     final request = await context.showSpecialRequestDialog(
@@ -291,11 +303,204 @@ class _OrderScreenState extends State<OrderScreen>
     }
   }
 
+  Future<void> _editOrderNote() async {
+    final controller = TextEditingController(text: _orderNoteController.text);
+    final result = await showModalBottomSheet<String?>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.modeSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 18,
+              right: 18,
+              top: 18,
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 18,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Order Notes',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: controller,
+                  maxLines: 4,
+                  autofocus: true,
+                  cursorColor: context.modePrimary,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    color: context.modeTextPrimary,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Add kitchen or service notes...',
+                    hintStyle: WorkSansAppTextStyles.medium.copyWith(
+                      color: context.modeTextMuted,
+                    ),
+                    filled: true,
+                    fillColor: context.modeSurfaceAlt,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: context.modeBorder),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: context.modePrimary),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    if (controller.text.trim().isNotEmpty)
+                      TextButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(''),
+                        child: Text(
+                          'Clear',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            color: context.modeError,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () => Navigator.of(sheetContext).pop(null),
+                      child: Text(
+                        'Cancel',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          color: context.modeTextSecondary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(
+                        sheetContext,
+                      ).pop(controller.text.trim()),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.modePrimary,
+                        foregroundColor: context.modeTextInverse,
+                      ),
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    controller.dispose();
+
+    if (result == null) return;
+    if (!mounted) return;
+    _orderNoteController.text = result;
+    context.read<OrderSessionCubit>().updateActiveSessionNote(result);
+    setState(() {});
+  }
+
+  void _parkOrder() {
+    final hasWork =
+        _orderItems.isNotEmpty || _orderNoteController.text.trim().isNotEmpty;
+    if (!hasWork) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Add items or notes before holding an order.'),
+          backgroundColor: context.modeWarning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    _syncToCubit();
+    context.read<OrderSessionCubit>().parkActiveSession();
+    _clearVisibleOrder();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Order parked. Started a new order.'),
+        backgroundColor: context.modeSuccess,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _confirmDiscardActiveOrder() {
+    final session = context.read<OrderSessionCubit>().state.activeSession;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.modeSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Discard Order?',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: context.modeTextPrimary,
+          ),
+        ),
+        content: Text(
+          'Discard "${session?.label ?? 'New Order'}"? This will remove the current items and notes.',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            color: context.modeTextSecondary,
+            height: 1.45,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Cancel',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modeTextSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              if (session != null) {
+                context.read<OrderSessionCubit>().discardSession(
+                  session.sessionId,
+                );
+              } else {
+                context.read<OrderSessionCubit>().createSession();
+              }
+              _clearVisibleOrder();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.modeError,
+              foregroundColor: context.modeTextInverse,
+            ),
+            child: const Text('Discard'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
     _searchDebounce?.cancel();
     _searchController.dispose();
+    _orderNoteController.dispose();
     _animateToController.dispose();
     super.dispose();
   }
@@ -332,9 +537,13 @@ class _OrderScreenState extends State<OrderScreen>
     final orderDetails = await context.showPosOrderDetailsDialog(
       orderItems: _orderItems,
       totalAmount: totalAmount,
+      initialSpecialInstructions: _orderNoteController.text.trim().isEmpty
+          ? null
+          : _orderNoteController.text.trim(),
     );
 
     if (orderDetails != null) {
+      if (!mounted) return;
       context.read<OrderSessionCubit>().confirmActiveSessionDetails(
         orderDetails,
       );
@@ -560,6 +769,70 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
+  Widget _buildOrderNoteBar() {
+    final note = _orderNoteController.text.trim();
+    return Material(
+      color: context.modeSurface,
+      child: InkWell(
+        onTap: _editOrderNote,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(color: context.modeDivider),
+              bottom: BorderSide(color: context.modeDivider),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: context.modePrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.sticky_note_2_outlined,
+                  size: 18,
+                  color: context.modePrimary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      note.isEmpty ? 'Add Order Note' : 'Order Note',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: context.modeTextPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      note.isEmpty ? 'Tap to add kitchen/service notes' : note,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 12,
+                        color: context.modeTextMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.edit_note_rounded, color: context.modeTextMuted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLoadedBody(MenuItemsState state) {
     final menuItems = state is MenuItemsLoaded
         ? state.menuItems
@@ -649,6 +922,8 @@ class _OrderScreenState extends State<OrderScreen>
           ),
         if (state is MenuItemsRefreshing)
           LinearProgressIndicator(color: context.modePrimary),
+        if (hasOrders || _orderNoteController.text.trim().isNotEmpty)
+          _buildOrderNoteBar(),
         Expanded(
           child: categories.isEmpty
               ? Center(
@@ -883,13 +1158,51 @@ class _OrderScreenState extends State<OrderScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
+                leading: Icon(
+                  Icons.sticky_note_2_outlined,
+                  color: context.modePrimary,
+                ),
+                title: Text(
+                  _orderNoteController.text.trim().isEmpty
+                      ? 'Add Order Note'
+                      : 'Edit Order Note',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editOrderNote();
+                },
+              ),
+              Divider(height: 0, color: context.modeDivider),
+              ListTile(
+                leading: Icon(
+                  Icons.pause_circle_outline,
+                  color: context.modeWarning,
+                ),
+                title: Text(
+                  'Hold Order',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _parkOrder();
+                },
+              ),
+              Divider(height: 0, color: context.modeDivider),
+              ListTile(
                 leading: SvgPicture.asset(
                   'assets/svg/delete.svg',
                   // ignore: deprecated_member_use
                   color: context.modePrimary,
                 ),
                 title: Text(
-                  'Clear Order items',
+                  'Clear Items',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: context.modeError,
@@ -898,6 +1211,24 @@ class _OrderScreenState extends State<OrderScreen>
                 onTap: () {
                   Navigator.pop(context);
                   _clearAllItems();
+                },
+              ),
+              Divider(height: 0, color: context.modeDivider),
+              ListTile(
+                leading: Icon(
+                  Icons.delete_forever_outlined,
+                  color: context.modeError,
+                ),
+                title: Text(
+                  'Discard Order',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: context.modeError,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDiscardActiveOrder();
                 },
               ),
               Divider(height: 0, color: context.modeDivider),
@@ -987,7 +1318,7 @@ class _OrderScreenState extends State<OrderScreen>
                     child: Image.network(
                       item.imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (context, error, stackTrace) => Container(
                         color: context.modeSurfaceAlt,
                         child: Icon(
                           Icons.restaurant,
@@ -1114,7 +1445,10 @@ class _OrderScreenState extends State<OrderScreen>
                       alignment: Alignment.center,
                       child: SvgPicture.asset(
                         'assets/svg/delete.svg',
-                        color: context.modePrimary,
+                        colorFilter: ColorFilter.mode(
+                          context.modePrimary,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                   ),
@@ -1173,7 +1507,7 @@ class _OrderScreenState extends State<OrderScreen>
               child: Image.network(
                 item.imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (context, error, stackTrace) => Container(
                   color: context.modeSurfaceAlt,
                   child: Icon(
                     Icons.restaurant,

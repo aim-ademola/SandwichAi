@@ -60,6 +60,13 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
     emit(state.copyWith(sessions: remaining, activeSessionId: nextActiveId));
   }
 
+  void discardSession(String sessionId) {
+    closeSession(sessionId);
+    if (state.sessions.isEmpty) {
+      createSession();
+    }
+  }
+
   void renameSession(String sessionId, String newLabel) {
     _updateSession(sessionId, (s) => s.copyWith(label: newLabel));
   }
@@ -86,6 +93,8 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
   void updateActiveSessionItems({
     required Map<String, int> orderItems,
     required Map<String, String> specialRequests,
+    String? orderNote,
+    bool clearOrderNote = false,
   }) {
     final id = state.activeSessionId;
     if (id == null) return;
@@ -95,11 +104,38 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
       (s) => s.copyWith(
         orderItems: Map.from(orderItems),
         specialRequests: Map.from(specialRequests),
+        orderNote: clearOrderNote ? null : (orderNote ?? s.orderNote),
         status: orderItems.isEmpty && s.status == SessionStatus.building
             ? SessionStatus.building
             : s.status,
       ),
     );
+  }
+
+  void updateActiveSessionNote(String? note) {
+    final id = state.activeSessionId;
+    if (id == null) return;
+
+    final trimmed = note?.trim();
+    _updateSession(
+      id,
+      (s) => s.copyWith(
+        orderNote: trimmed == null || trimmed.isEmpty ? null : trimmed,
+        clearOrderNote: trimmed == null || trimmed.isEmpty,
+      ),
+    );
+  }
+
+  void parkActiveSession() {
+    final id = state.activeSessionId;
+    if (id == null) return;
+
+    _updateSession(id, (s) => s.copyWith(status: SessionStatus.parked));
+    if (state.sessions.length < _maxSessions) {
+      createSession();
+    } else {
+      emit(state.copyWith(activeSessionId: null));
+    }
   }
 
   void confirmActiveSessionDetails(PosOrderDetails details) {
@@ -117,6 +153,10 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
       id,
       (s) => s.copyWith(
         orderDetails: details,
+        orderNote: details.specialInstructions,
+        clearOrderNote:
+            details.specialInstructions == null ||
+            details.specialInstructions!.trim().isEmpty,
         label: newLabel ?? s.label,
         status: SessionStatus.detailsConfirmed,
       ),

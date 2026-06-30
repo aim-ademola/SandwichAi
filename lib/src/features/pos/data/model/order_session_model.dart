@@ -1,7 +1,13 @@
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_order_dtls_dialoge.dart';
 
-enum SessionStatus { building, detailsConfirmed, paymentInProgress, completed }
+enum SessionStatus {
+  building,
+  parked,
+  detailsConfirmed,
+  paymentInProgress,
+  completed,
+}
 
 enum MinimizedScreen { orderSummary, paymentMethod, cashWaiting, onlineQr }
 
@@ -10,6 +16,7 @@ class OrderSession {
   final String label;
   final Map<String, int> orderItems;
   final Map<String, String> specialRequests;
+  final String? orderNote;
   final PosOrderDetails? orderDetails;
   final SessionPaymentState paymentState;
   final SessionStatus status;
@@ -23,6 +30,7 @@ class OrderSession {
     required this.label,
     this.orderItems = const {},
     this.specialRequests = const {},
+    this.orderNote,
     this.orderDetails,
     this.paymentState = const SessionPaymentState.none(),
     this.status = SessionStatus.building,
@@ -54,6 +62,8 @@ class OrderSession {
     String? label,
     Map<String, int>? orderItems,
     Map<String, String>? specialRequests,
+    String? orderNote,
+    bool clearOrderNote = false,
     PosOrderDetails? orderDetails,
     bool clearOrderDetails = false,
     SessionPaymentState? paymentState,
@@ -66,6 +76,7 @@ class OrderSession {
       label: label ?? this.label,
       orderItems: orderItems ?? Map.from(this.orderItems),
       specialRequests: specialRequests ?? Map.from(this.specialRequests),
+      orderNote: clearOrderNote ? null : (orderNote ?? this.orderNote),
       orderDetails: clearOrderDetails
           ? null
           : (orderDetails ?? this.orderDetails),

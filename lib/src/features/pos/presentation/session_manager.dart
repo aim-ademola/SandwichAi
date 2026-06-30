@@ -140,6 +140,12 @@ class SessionManagerScreen extends StatelessWidget {
               const SizedBox(width: 8),
               _SummaryChip(
                 label:
+                    '${state.sessions.where((s) => s.status == SessionStatus.parked).length} Parked',
+                color: context.modeInfo,
+              ),
+              const SizedBox(width: 8),
+              _SummaryChip(
+                label:
                     '${state.sessions.where((s) => s.status == SessionStatus.completed).length} Done',
                 color: context.modeSuccess,
               ),
@@ -212,7 +218,7 @@ class SessionManagerScreen extends StatelessWidget {
         backgroundColor: context.modeSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Close Session?',
+          'Discard Order?',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontWeight: FontWeight.w600,
             fontSize: 17,
@@ -220,7 +226,7 @@ class SessionManagerScreen extends StatelessWidget {
           ),
         ),
         content: Text(
-          'Close "${session.label}"? This will discard all items and order progress.',
+          'Discard "${session.label}"? This will remove all items, notes, and order progress.',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             color: context.modeTextSecondary,
@@ -241,7 +247,7 @@ class SessionManagerScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              cubit.closeSession(session.sessionId);
+              cubit.discardSession(session.sessionId);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.modeError,
@@ -251,7 +257,7 @@ class SessionManagerScreen extends StatelessWidget {
               ),
             ),
             child: Text(
-              'Close',
+              'Discard',
               style: WorkSansAppTextStyles.medium.copyWith(
                 color: context.modeTextInverse,
                 fontWeight: FontWeight.w600,
@@ -481,9 +487,15 @@ class _SessionCard extends StatelessWidget {
           icon: Icons.shopping_cart_outlined,
           color: Colors.blue,
         );
+      case SessionStatus.parked:
+        return _StatusInfo(
+          label: 'Parked',
+          icon: Icons.pause_circle_outline,
+          color: Colors.purple,
+        );
       case SessionStatus.detailsConfirmed:
         return _StatusInfo(
-          label: 'Ready to pay',
+          label: 'Ready to confirm',
           icon: Icons.check_circle_outline,
           color: Colors.green,
         );

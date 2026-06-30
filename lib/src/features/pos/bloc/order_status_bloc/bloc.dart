@@ -2,6 +2,7 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/order_status_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/order_status_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/oder_status_model.dart';
@@ -36,8 +37,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
   }
 
   bool _isActiveOrder(KitchenOrder order) {
-    if (order.status == OrderStatus.pending ||
-        order.status == OrderStatus.cancelled ||
+    if (order.status == OrderStatus.cancelled ||
         order.status == OrderStatus.completed) {
       return false;
     }
@@ -51,6 +51,49 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
 
   List<KitchenOrder> _activeOrders(List<KitchenOrder> orders) {
     return orders.where(_isActiveOrder).toList();
+  }
+
+  Future<ApiResponse<List<KitchenOrder>>> _getOrdersIncludingPending({
+    required String branchId,
+    String? startDate,
+    String? endDate,
+    String? status,
+  }) async {
+    final response = await _repository.getKitchenOrders(
+      branchId: branchId,
+      startDate: startDate,
+      endDate: endDate,
+      status: status,
+    );
+
+    if (status != null && status.isNotEmpty) {
+      return response;
+    }
+
+    if (!response.isSuccess || response.data == null) {
+      return response;
+    }
+
+    final pendingResponse = await _repository.getKitchenOrders(
+      branchId: branchId,
+      startDate: startDate,
+      endDate: endDate,
+      status: OrderStatus.pending.value,
+    );
+
+    if (!pendingResponse.isSuccess || pendingResponse.data == null) {
+      return response;
+    }
+
+    final merged = <String, KitchenOrder>{};
+    for (final order in response.data!) {
+      merged[order.id.isNotEmpty ? order.id : order.orderId] = order;
+    }
+    for (final order in pendingResponse.data!) {
+      merged[order.id.isNotEmpty ? order.id : order.orderId] = order;
+    }
+
+    return ApiResponse.success(merged.values.toList());
   }
 
   Future<void> _onLoadKitchenOrders(
@@ -73,7 +116,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
         return;
       }
 
-      final response = await _repository.getKitchenOrders(
+      final response = await _getOrdersIncludingPending(
         branchId: fetchedBranchId,
       );
 
@@ -89,10 +132,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
           // If no active orders but there are orders, show empty state
           // but store all orders so filters can work
           emit(
-            KitchenOrdersLoaded(
-              orders: orders,
-              filteredOrders: activeOrders,
-            ),
+            KitchenOrdersLoaded(orders: orders, filteredOrders: activeOrders),
           );
         },
         error: (error) async {
@@ -137,7 +177,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
       return;
     }
 
-    final response = await _repository.getKitchenOrders(
+    final response = await _getOrdersIncludingPending(
       branchId: fetchedBranchId,
       status: currentState.selectedStatus,
       startDate: currentState.startDate,
@@ -269,7 +309,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
       return;
     }
 
-    final response = await _repository.getKitchenOrders(
+    final response = await _getOrdersIncludingPending(
       branchId: fetchedBranchId,
       startDate: event.startDate,
       endDate: event.endDate,

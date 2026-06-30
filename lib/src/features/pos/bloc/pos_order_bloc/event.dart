@@ -16,6 +16,7 @@ class CreatePosOrder extends PosOrderEvent {
   final List<PosOrderItemPayload> items;
   final double discount;
   final String? specialInstructions;
+  final bool confirmForKitchen;
 
   const CreatePosOrder({
     required this.orderType,
@@ -25,6 +26,7 @@ class CreatePosOrder extends PosOrderEvent {
     required this.items,
     this.discount = 0,
     this.specialInstructions,
+    this.confirmForKitchen = false,
   });
 
   @override
@@ -36,6 +38,7 @@ class CreatePosOrder extends PosOrderEvent {
     items,
     discount,
     specialInstructions,
+    confirmForKitchen,
   ];
 }
 

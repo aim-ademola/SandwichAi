@@ -80,6 +80,10 @@ class _GlobalProfileScreenState extends State<GlobalProfileScreen> {
             final data = snapshot.data ?? const _AccountProfileData();
             final user = data.user;
             final displayName = _displayName(user);
+            final moduleTitle = _formatDisplayLabel(
+              widget.activeModuleTitle,
+              fallback: widget.activeModuleTitle,
+            );
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
@@ -87,7 +91,7 @@ class _GlobalProfileScreenState extends State<GlobalProfileScreen> {
                 _ProfileHero(
                   name: displayName,
                   email: user?.email ?? '',
-                  moduleTitle: widget.activeModuleTitle,
+                  moduleTitle: moduleTitle,
                 ),
                 const SizedBox(height: 14),
                 const _MobileThemeSelection(),
@@ -100,13 +104,18 @@ class _GlobalProfileScreenState extends State<GlobalProfileScreen> {
                     _InfoRowData('Email', user?.email ?? 'Not available'),
                     _InfoRowData(
                       'Role',
-                      user?.role ?? user?.type ?? 'Employee',
+                      _formatDisplayLabel(user?.role ?? user?.type),
                     ),
                     _InfoRowData(
                       'Department',
-                      user?.department ?? widget.activeModuleTitle,
+                      _formatDisplayLabel(
+                        user?.department ?? widget.activeModuleTitle,
+                      ),
                     ),
-                    _InfoRowData('Status', user?.status ?? 'Active'),
+                    _InfoRowData(
+                      'Status',
+                      _formatDisplayLabel(user?.status, fallback: 'Active'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -193,6 +202,27 @@ class _GlobalProfileScreenState extends State<GlobalProfileScreen> {
     if (email != null && email.isNotEmpty) return email;
 
     return 'Account';
+  }
+
+  String _formatDisplayLabel(String? value, {String fallback = 'Employee'}) {
+    final raw = value?.trim();
+    if (raw == null || raw.isEmpty) return fallback;
+
+    final normalized = raw
+        .replaceAll('_', ' ')
+        .replaceAll('-', ' ')
+        .replaceAll(RegExp(r'\s+'), ' ');
+
+    return normalized
+        .split(' ')
+        .where((part) => part.isNotEmpty)
+        .map((part) {
+          if (part.length <= 2 && part == part.toUpperCase()) return part;
+
+          final lower = part.toLowerCase();
+          return lower[0].toUpperCase() + lower.substring(1);
+        })
+        .join(' ');
   }
 
   String _formatDate(DateTime value) {
@@ -316,7 +346,7 @@ class _MobileThemeSelection extends StatelessWidget {
         final selected = ThemeController.instance.themeMode;
 
         return _Panel(
-          title: 'Theme',
+          title: 'Appearance',
           icon: Icons.palette_outlined,
           child: Row(
             children: [

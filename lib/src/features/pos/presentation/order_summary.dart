@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -12,6 +13,7 @@ import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart
 import 'package:sandwich_ai/src/features/pos/data/model/tax_config_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/pos_order_repo.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/minimze.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/payment_method.dart';
 
 class OrderSummaryScreen extends StatefulWidget {
   final Map<ApiMenuItem, int> orderItems;
@@ -90,6 +92,33 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
         items: items,
         discount: widget.discount,
         specialInstructions: widget.specialInstructions,
+        confirmForKitchen: _isDineIn,
+      ),
+    );
+  }
+
+  void _continueToPayment(List<TaxConfiguration> salesTaxes) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.read<PosOrderBloc>()),
+            BlocProvider.value(value: context.read<OrderSessionCubit>()),
+            BlocProvider.value(value: context.read<TaxConfigBloc>()),
+          ],
+          child: PaymentMethodScreen(
+            orderItems: widget.orderItems,
+            specialRequests: widget.specialRequests,
+            orderType: widget.orderType,
+            tableNumber: widget.tableNumber,
+            customerName: widget.customerName,
+            customerPhone: widget.customerPhone,
+            discount: widget.discount,
+            specialInstructions: widget.specialInstructions,
+            totalAmount: _calculateGrandTotal(salesTaxes),
+            sessionId: widget.sessionId,
+          ),
+        ),
       ),
     );
   }
@@ -318,13 +347,21 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                   BlocBuilder<PosOrderBloc, PosOrderState>(
                     builder: (context, orderState) {
                       return _BottomCta(
-                        label: _isDineIn ? 'Send to Kitchen' : 'Confirm Order',
+                        label: _isDineIn
+                            ? 'Send to Kitchen'
+                            : 'Continue to Payment',
                         isLoading: orderState is PosOrderCreating,
                         onPressed:
                             taxState is TaxConfigLoading ||
                                 orderState is PosOrderCreating
                             ? null
-                            : _confirmOrder,
+                            : () {
+                                if (_isDineIn) {
+                                  _confirmOrder();
+                                } else {
+                                  _continueToPayment(salesTaxes);
+                                }
+                              },
                       );
                     },
                   ),

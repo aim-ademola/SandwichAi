@@ -17,6 +17,12 @@ abstract class PosOrderRepositoryInterface {
     String? specialInstructions,
     required String takenBy,
   });
+
+  Future<ApiResponse<void>> updateOrderStatus({
+    required String orderId,
+    required String status,
+    required String updatedBy,
+  });
 }
 
 class PosOrderItemPayload {
@@ -108,6 +114,54 @@ class PosOrderRepository extends BaseRepository
 
       final order = PosOrderResponseModel.fromJson(response.data);
       return ApiResponse.success(order);
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } on FormatException catch (e) {
+      return ApiResponse.errorMessage(e.message);
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+    }
+  }
+
+  @override
+  Future<ApiResponse<void>> updateOrderStatus({
+    required String orderId,
+    required String status,
+    required String updatedBy,
+  }) async {
+    try {
+      if (orderId.isEmpty) {
+        throw FormatException('Order ID cannot be empty');
+      }
+      if (status.isEmpty) {
+        throw FormatException('Order status cannot be empty');
+      }
+      if (updatedBy.isEmpty) {
+        throw FormatException('Employee ID (updatedBy) cannot be empty');
+      }
+
+      final response = await _apiClient
+          .patch(
+            'kitchen/orders/$orderId/status',
+            data: {'status': status, 'updatedBy': updatedBy},
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      return response.when(
+        success: (_) => ApiResponse.success(null),
+        error: (error) => ApiResponse.errorMessage(error.toString()),
+      );
     } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',

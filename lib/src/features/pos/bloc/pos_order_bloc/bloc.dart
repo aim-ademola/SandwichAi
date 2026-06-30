@@ -122,6 +122,24 @@ class PosOrderBloc extends Bloc<PosOrderEvent, PosOrderState> {
 
       await response.when(
         success: (order) async {
+          if (event.confirmForKitchen && order.status != 'CONFIRMED') {
+            final confirmResponse = await _repository.updateOrderStatus(
+              orderId: order.id,
+              status: 'CONFIRMED',
+              updatedBy: employeeId,
+            );
+
+            if (!confirmResponse.isSuccess) {
+              emit(
+                PosOrderError(
+                  error:
+                      'Order was created but could not be sent to Kitchen. Please try again from Active Orders.',
+                ),
+              );
+              return;
+            }
+          }
+
           emit(PosOrderCreated(order: order));
 
           // Print to kitchen printers (supports all connection types)

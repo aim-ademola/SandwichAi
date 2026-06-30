@@ -155,8 +155,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               children: [
                 _buildFilterChip('All', null),
                 const SizedBox(width: 8),
-                // _buildFilterChip('Pending', OrderStatus.pending.value),
-                // const SizedBox(width: 8),
+                _buildFilterChip('Pending', OrderStatus.pending.value),
+                const SizedBox(width: 8),
                 _buildFilterChip('Confirmed', OrderStatus.confirmed.value),
                 const SizedBox(width: 8),
                 _buildFilterChip('Preparing', OrderStatus.preparing.value),
@@ -559,8 +559,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
   }
 
   bool _isActiveOrder(KitchenOrder order) {
-    if (order.status == OrderStatus.pending ||
-        order.status == OrderStatus.cancelled ||
+    if (order.status == OrderStatus.cancelled ||
         order.status == OrderStatus.completed) {
       return false;
     }

@@ -206,8 +206,10 @@ class _AppDrawerAccountMenuState extends State<AppDrawerAccountMenu> {
         final user = snapshot.data;
         final name = _displayName(user);
         final subtitle = [
-          if ((user?.department ?? '').isNotEmpty) user!.department!,
-          if ((user?.role ?? '').isNotEmpty) user!.role!,
+          if ((user?.department ?? '').trim().isNotEmpty)
+            _formatDisplayLabel(user!.department),
+          if ((user?.role ?? '').trim().isNotEmpty)
+            _formatDisplayLabel(user!.role),
         ].join(' • ');
 
         return Material(

@@ -198,6 +198,27 @@ class _AppDrawerAccountMenuState extends State<AppDrawerAccountMenu> {
     _future = AuthCacheHelper.instance.getUserData();
   }
 
+  String _formatDisplayLabel(String? value, {String fallback = 'Employee'}) {
+    final raw = value?.trim();
+    if (raw == null || raw.isEmpty) return fallback;
+
+    final normalized = raw
+        .replaceAll('_', ' ')
+        .replaceAll('-', ' ')
+        .replaceAll(RegExp(r'\s+'), ' ');
+
+    return normalized
+        .split(' ')
+        .where((part) => part.isNotEmpty)
+        .map((part) {
+          if (part.length <= 2 && part == part.toUpperCase()) return part;
+
+          final lower = part.toLowerCase();
+          return lower[0].toUpperCase() + lower.substring(1);
+        })
+        .join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<UserModel?>(

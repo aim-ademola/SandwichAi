@@ -373,7 +373,7 @@ class AddBranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
   /// Current stock validation
   String? _validateCurrentStock(String value) {
     if (value.isEmpty) return 'Current stock is required';
-    final stock = int.tryParse(value);
+    final stock = double.tryParse(value);
     if (stock == null) return 'Please enter a valid number';
     if (stock < 0) return 'Stock cannot be negative';
     return null;
@@ -382,7 +382,7 @@ class AddBranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
   /// Reorder level validation
   String? _validateReorderLevel(String value) {
     if (value.isEmpty) return 'Reorder level is required';
-    final level = int.tryParse(value);
+    final level = double.tryParse(value);
     if (level == null) return 'Please enter a valid number';
     if (level < 0) return 'Reorder level cannot be negative';
     return null;
@@ -391,7 +391,7 @@ class AddBranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
   /// Max level validation
   String? _validateMaxLevel(String value) {
     if (value.isEmpty) return 'Max level is required';
-    final level = int.tryParse(value);
+    final level = double.tryParse(value);
     if (level == null) return 'Please enter a valid number';
     if (level <= 0) return 'Max level must be greater than zero';
     return null;
@@ -423,7 +423,7 @@ class AddBranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
   /// Adjustment quantity validation
   String? _validateAdjustmentQuantity(String value) {
     if (value.isEmpty) return 'Quantity is required';
-    final quantity = int.tryParse(value);
+    final quantity = double.tryParse(value);
     if (quantity == null) return 'Please enter a valid number';
     if (quantity <= 0) return 'Quantity must be greater than zero';
     return null;

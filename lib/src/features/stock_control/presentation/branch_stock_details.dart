@@ -157,7 +157,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
         child: StockAdjustmentDialog(
           stockId: widget.stockId,
           itemName: details.item.itemName,
-          currentStock: int.parse(details.currentStock),
+          currentStock: double.parse(details.currentStock),
           unit: details.item.unit,
           performedBy: 'current-user-id', // Replace with actual user ID
         ),

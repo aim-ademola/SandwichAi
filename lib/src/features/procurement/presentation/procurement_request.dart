@@ -66,7 +66,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: _buildBody(context),
       ),
@@ -75,10 +75,11 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.menu, color: Colors.black),
+        icon: Icon(Icons.menu, color: context.modeTextPrimary),
         onPressed: () {},
       ),
       title: Text(
@@ -86,13 +87,16 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+          icon: Icon(
+            Icons.notifications_outlined,
+            color: context.modeTextPrimary,
+          ),
           onPressed: () {},
         ),
       ],
@@ -144,21 +148,21 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Row(
         children: [
           Icon(
             Icons.search,
-            color: const Color(0xFF9E9E9E),
+            color: context.modeTextMuted,
             size: _getSearchIconSize(screenWidth),
           ),
           SizedBox(width: _getSearchIconSpacing(screenWidth)),
           Expanded(
             child: TextField(
-              cursorColor: kPrimary,
+              cursorColor: context.modePrimary,
               controller: _searchController,
               onChanged: (value) {
                 setState(() {
@@ -168,14 +172,14 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: fontSize,
                 fontWeight: FontWeight.w400,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Search by item or department...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: fontSize,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF9E9E9E),
+                  color: context.modeTextMuted,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(vertical: 12),
@@ -193,7 +197,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
               },
               child: Icon(
                 Icons.clear,
-                color: const Color(0xFF9E9E9E),
+                color: context.modeTextMuted,
                 size: _getSearchIconSize(screenWidth),
               ),
             ),
@@ -232,10 +236,10 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                 vertical: _getFilterPaddingVertical(screenWidth),
               ),
               decoration: BoxDecoration(
-                color: isSelected ? kPrimary : Colors.white,
+                color: isSelected ? context.modePrimary : context.modeSurface,
                 borderRadius: BorderRadius.circular(15),
                 border: Border.all(
-                  color: isSelected ? kPrimary : const Color(0xFFE0E0E0),
+                  color: isSelected ? context.modePrimary : context.modeBorder,
                 ),
               ),
               child: Text(
@@ -243,7 +247,9 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: fontSize,
                   fontWeight: FontWeight.w500,
-                  color: isSelected ? Colors.white : const Color(0xFF424242),
+                  color: isSelected
+                      ? context.modeTextInverse
+                      : context.modeTextPrimary,
                 ),
               ),
             ),
@@ -282,8 +288,9 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +304,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: fromFontSize,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextSecondary,
                 ),
               ),
               _buildPriorityBadge(
@@ -315,7 +322,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: titleFontSize,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           SizedBox(height: _getDescriptionSpacing(screenWidth)),
@@ -327,7 +334,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: descriptionFontSize,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -338,7 +345,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: descriptionFontSize,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 2),
@@ -347,7 +354,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: descriptionFontSize,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -359,8 +366,8 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
             children: [
               _buildActionButton(
                 'Reject',
-                const Color(0xFFE0E0E0),
-                Colors.black,
+                context.modeSurfaceMuted,
+                context.modeTextPrimary,
                 buttonFontSize,
                 screenWidth,
                 () {},
@@ -368,8 +375,8 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
               SizedBox(width: _getButtonGap(screenWidth)),
               _buildActionButton(
                 'Approve',
-                kPrimary,
-                Colors.white,
+                context.modePrimary,
+                context.modeTextInverse,
                 buttonFontSize,
                 screenWidth,
                 () {},
@@ -422,20 +429,20 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
 
     switch (priority.toLowerCase()) {
       case 'high':
-        bgColor = const Color(0xFFFFEBEE);
-        textColor = const Color(0xFFE53935);
+        bgColor = context.modeError.withValues(alpha: 0.12);
+        textColor = context.modeError;
         break;
       case 'medium':
-        bgColor = const Color(0xFFFEE2E2);
-        textColor = kPrimary;
+        bgColor = context.modePrimary.withValues(alpha: 0.12);
+        textColor = context.modePrimary;
         break;
       case 'low':
-        bgColor = const Color(0xFFDCFCE7);
-        textColor = const Color(0xFF4CAF50);
+        bgColor = context.modeSuccess.withValues(alpha: 0.12);
+        textColor = context.modeSuccess;
         break;
       default:
-        bgColor = const Color(0xFFF5F5F5);
-        textColor = const Color(0xFF757575);
+        bgColor = context.modeSurfaceMuted;
+        textColor = context.modeTextSecondary;
     }
 
     return Container(
@@ -475,13 +482,13 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
               width: iconSize,
               height: iconSize,
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
+                color: context.modeSurfaceMuted,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.check_circle_outline,
                 size: iconSize * 0.6,
-                color: const Color(0xFF9E9E9E),
+                color: context.modeTextMuted,
               ),
             ),
             SizedBox(height: _getEmptySpacing(screenWidth)),
@@ -490,7 +497,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: titleFontSize,
                 fontWeight: FontWeight.w600,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
             ),
             SizedBox(height: _getEmptyDescriptionSpacing(screenWidth)),
@@ -500,7 +507,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: descriptionFontSize,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
                 height: 1.5,
               ),
             ),

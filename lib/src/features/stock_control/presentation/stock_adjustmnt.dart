@@ -9,7 +9,7 @@ import 'package:sandwich_ai/src/features/stock_control/data/repo/add_branch_stoc
 class StockAdjustmentDialog extends StatefulWidget {
   final String stockId;
   final String itemName;
-  final int currentStock;
+  final num currentStock;
   final String unit;
   final String performedBy;
 
@@ -30,12 +30,12 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
   final _quantityController = TextEditingController();
   final _noteController = TextEditingController();
   String _selectedType = 'ADD';
-  int _calculatedStock = 0;
+  double _calculatedStock = 0;
 
   @override
   void initState() {
     super.initState();
-    _calculatedStock = widget.currentStock;
+    _calculatedStock = widget.currentStock.toDouble();
     _quantityController.addListener(_updateCalculatedStock);
   }
 
@@ -47,7 +47,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
   }
 
   void _updateCalculatedStock() {
-    final quantity = int.tryParse(_quantityController.text) ?? 0;
+    final quantity = double.tryParse(_quantityController.text) ?? 0;
     setState(() {
       switch (_selectedType) {
         case 'ADD':
@@ -64,7 +64,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
   }
 
   void _handleAdjustment() {
-    final quantity = int.tryParse(_quantityController.text) ?? 0;
+    final quantity = double.tryParse(_quantityController.text) ?? 0;
 
     if (quantity <= 0) {
       _showErrorSnackBar('Please enter a valid quantity');
@@ -246,7 +246,9 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
               const SizedBox(height: 8),
               TextField(
                 controller: _quantityController,
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 16,
                   color: context.modeTextPrimary,

@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/globals/app_drawer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
-import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/chnge_pwd.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/daily_stock_alerts.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -78,31 +76,7 @@ class _StockControlAppDrawerContentState
     return AppDrawerShell(
       moduleTitle: 'Stock Control',
       moduleSubtitle: 'Inventory movement and branch stock visibility',
-      footerChildren: [
-        const AppDrawerThemeSwitch(),
-        const SizedBox(height: 8),
-        _buildDrawerItem(
-          context,
-          icon: Icons.lock_outline_rounded,
-          title: 'Change Password',
-          onTap: () {
-            Navigator.push(
-              context,
-              CupertinoPageRoute(builder: (_) => ChangePasswordScreen()),
-            );
-          },
-        ),
-        const SizedBox(height: 8),
-        _buildDrawerItem(
-          context,
-          icon: Icons.logout,
-          title: 'Logout',
-          isLogout: true,
-          onTap: () {
-            LogoutService.instance.showLogoutDialog(context);
-          },
-        ),
-      ],
+      footerChildren: const [AppDrawerThemeSwitch()],
       children: [
         Showcase(
           key: _stockTransferKey,

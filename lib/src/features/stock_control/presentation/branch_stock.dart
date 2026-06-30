@@ -24,7 +24,6 @@ class InventoryBody extends StatefulWidget {
 }
 
 class _InventoryBodyState extends State<InventoryBody> {
-  final TextEditingController _searchController = TextEditingController();
   final _stockNotificationHelper = StockNotificationHelper();
 
   @override
@@ -32,12 +31,6 @@ class _InventoryBodyState extends State<InventoryBody> {
     super.initState();
     // Load branch stock on init
     context.read<BranchStockBloc>().add(LoadBranchStock());
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   /// Check stock levels and trigger notifications
@@ -192,10 +185,6 @@ class _InventoryBodyState extends State<InventoryBody> {
                     ),
                     child: Column(
                       children: [
-                        _buildSearchBar(context, constraints.maxWidth, state),
-                        SizedBox(
-                          height: _getCategorySpacing(constraints.maxWidth),
-                        ),
                         _buildCategoryTabs(
                           context,
                           constraints.maxWidth,
@@ -418,73 +407,6 @@ class _InventoryBodyState extends State<InventoryBody> {
             color: context.modeTextInverse,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(
-    BuildContext context,
-    double screenWidth,
-    BranchStockLoaded state,
-  ) {
-    final fontSize = _getSearchFontSize(screenWidth);
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: _getSearchPaddingHorizontal(screenWidth),
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        border: Border.all(color: context.modeBorder),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.search,
-            color: context.modeTextMuted,
-            size: _getSearchIconSize(screenWidth),
-          ),
-          SizedBox(width: _getSearchIconSpacing(screenWidth)),
-          Expanded(
-            child: TextField(
-              cursorColor: context.modePrimary,
-              controller: _searchController,
-              onChanged: (value) {
-                context.read<BranchStockBloc>().add(SearchItems(query: value));
-              },
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w400,
-                color: context.modeTextPrimary,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Search for foods',
-                hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w400,
-                  color: context.modeTextMuted,
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                isDense: true,
-              ),
-            ),
-          ),
-          if (state.searchQuery.isNotEmpty)
-            GestureDetector(
-              onTap: () {
-                _searchController.clear();
-                context.read<BranchStockBloc>().add(const ClearSearch());
-              },
-              child: Icon(
-                Icons.clear,
-                color: context.modeTextMuted,
-                size: _getSearchIconSize(screenWidth),
-              ),
-            ),
-        ],
       ),
     );
   }
@@ -1010,36 +932,6 @@ class _InventoryBodyState extends State<InventoryBody> {
     if (width < 360) return 12;
     if (width < 600) return 14;
     return 16;
-  }
-
-  double _getCategorySpacing(double width) {
-    if (width < 360) return 12;
-    if (width < 600) return 14;
-    return 16;
-  }
-
-  double _getSearchFontSize(double width) {
-    if (width < 360) return 13;
-    if (width < 600) return 14;
-    return 15;
-  }
-
-  double _getSearchPaddingHorizontal(double width) {
-    if (width < 360) return 12;
-    if (width < 600) return 14;
-    return 16;
-  }
-
-  double _getSearchIconSize(double width) {
-    if (width < 360) return 20;
-    if (width < 600) return 22;
-    return 24;
-  }
-
-  double _getSearchIconSpacing(double width) {
-    if (width < 360) return 8;
-    if (width < 600) return 10;
-    return 12;
   }
 
   double _getTabSpacing(double width) {

@@ -2,7 +2,7 @@ class WasteLogRequest {
   final String branchId;
   final String itemName;
   final String itemId;
-  final int quantity;
+  final double quantity;
   final String unit;
   final String reason;
   final double valueLost;
@@ -203,7 +203,7 @@ class WasteLogItem {
 
   double get valueLostAsDouble => double.tryParse(valueLost) ?? 0.0;
 
-  int get quantityAsInt => int.tryParse(quantity) ?? 0;
+  double get quantityAsDouble => double.tryParse(quantity) ?? 0.0;
 }
 
 class WasteLogsResponse {

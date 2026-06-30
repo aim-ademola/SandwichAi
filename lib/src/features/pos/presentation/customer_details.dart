@@ -102,6 +102,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
   }
 
   Future<void> _selectDate() async {
+    final colors = Theme.of(context).colorScheme;
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
@@ -110,10 +111,11 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: kPrimary,
-              onPrimary: Colors.white,
-              surface: Colors.white,
+            colorScheme: colors.copyWith(
+              primary: context.modePrimary,
+              onPrimary: context.modeTextInverse,
+              surface: context.modeSurface,
+              onSurface: context.modeTextPrimary,
             ),
           ),
           child: child!,
@@ -183,12 +185,13 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: context.modeBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.modeSurface,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
+          icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -196,7 +199,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         centerTitle: true,
@@ -209,10 +212,10 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                 content: Text(
                   'Customer created successfully',
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
-                backgroundColor: kGreen,
+                backgroundColor: context.modeSuccess,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -228,10 +231,10 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                 content: Text(
                   'Customer updated successfully',
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
-                backgroundColor: kGreen,
+                backgroundColor: context.modeSuccess,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -247,10 +250,10 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                 content: Text(
                   state.error,
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
-                backgroundColor: Colors.red,
+                backgroundColor: context.modeError,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -285,10 +288,14 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: kPrimary.withValues(alpha: 0.05),
+                                color: context.modePrimary.withValues(
+                                  alpha: 0.05,
+                                ),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: kPrimary.withValues(alpha: 0.1),
+                                  color: context.modePrimary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   width: 1,
                                 ),
                               ),
@@ -298,14 +305,16 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                     width: 48,
                                     height: 48,
                                     decoration: BoxDecoration(
-                                      color: kPrimary.withValues(alpha: 0.1),
+                                      color: context.modePrimary.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
                                       isEditMode
                                           ? Icons.edit_outlined
                                           : Icons.person_add_outlined,
-                                      color: kPrimary,
+                                      color: context.modePrimary,
                                       size: 24,
                                     ),
                                   ),
@@ -323,7 +332,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                               .copyWith(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
-                                                color: kprimaryTextColor1,
+                                                color: context.modeTextPrimary,
                                               ),
                                         ),
                                         const SizedBox(height: 2),
@@ -334,7 +343,8 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                           style: WorkSansAppTextStyles.medium
                                               .copyWith(
                                                 fontSize: 13,
-                                                color: kprimaryTextColor2,
+                                                color:
+                                                    context.modeTextSecondary,
                                               ),
                                         ),
                                       ],
@@ -351,11 +361,17 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: context.modeSurface,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.04),
+                                    color: Colors.black.withValues(
+                                      alpha:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? 0.24
+                                          : 0.04,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -415,11 +431,17 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: context.modeSurface,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.04),
+                                    color: Colors.black.withValues(
+                                      alpha:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? 0.24
+                                          : 0.04,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -451,11 +473,17 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: context.modeSurface,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.04),
+                                    color: Colors.black.withValues(
+                                      alpha:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? 0.24
+                                          : 0.04,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -478,11 +506,17 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: context.modeSurface,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.04),
+                                    color: Colors.black.withValues(
+                                      alpha:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? 0.24
+                                          : 0.04,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -502,7 +536,10 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                       });
                                     },
                                   ),
-                                  const Divider(height: 24),
+                                  Divider(
+                                    height: 24,
+                                    color: context.modeDivider,
+                                  ),
                                   _buildSwitchRow(
                                     icon: Icons.sms_outlined,
                                     label: 'SMS Notifications',
@@ -514,7 +551,10 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                       });
                                     },
                                   ),
-                                  const Divider(height: 24),
+                                  Divider(
+                                    height: 24,
+                                    color: context.modeDivider,
+                                  ),
                                   _buildSwitchRow(
                                     icon: Icons.email_outlined,
                                     label: 'Email Notifications',
@@ -537,7 +577,8 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                               child: ElevatedButton(
                                 onPressed: isLoading ? null : _handleSubmit,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: kPrimary,
+                                  backgroundColor: context.modePrimary,
+                                  foregroundColor: context.modeTextInverse,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -547,14 +588,14 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                   ),
                                 ),
                                 child: isLoading
-                                    ? const SizedBox(
+                                    ? SizedBox(
                                         height: 20,
                                         width: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
+                                                context.modeTextInverse,
                                               ),
                                         ),
                                       )
@@ -566,7 +607,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                             .copyWith(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.white,
+                                              color: context.modeTextInverse,
                                             ),
                                       ),
                               ),
@@ -592,7 +633,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: kprimaryTextColor1,
+        color: context.modeTextPrimary,
       ),
     );
   }
@@ -617,7 +658,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -631,17 +672,25 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor2,
+              color: context.modeTextMuted,
             ),
-            prefixIcon: Icon(icon, size: 20, color: kprimaryTextColor2),
+            prefixIcon: Icon(icon, size: 20, color: context.modeTextMuted),
             suffixIcon: suffixIcon != null
-                ? Icon(suffixIcon, size: 20, color: kprimaryTextColor2)
+                ? Icon(suffixIcon, size: 20, color: context.modeTextMuted)
                 : null,
             filled: true,
-            fillColor: const Color(0xFFF8F6F6),
+            fillColor: context.modeSurfaceAlt,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(color: context.modeBorder),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: context.modeBorder),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: context.modePrimary),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -650,7 +699,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
           ),
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           validator: validator,
         ),
@@ -667,7 +716,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 24, color: kprimaryTextColor2),
+        Icon(icon, size: 24, color: context.modeTextMuted),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -678,7 +727,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -686,13 +735,17 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                 subtitle,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 12,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
               ),
             ],
           ),
         ),
-        Switch(value: value, onChanged: onChanged, activeThumbColor: kPrimary),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+          activeThumbColor: context.modePrimary,
+        ),
       ],
     );
   }

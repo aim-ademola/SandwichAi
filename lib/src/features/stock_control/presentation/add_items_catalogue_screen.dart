@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,6 +44,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
   List<InventoryItem> _filteredItems = [];
   List<InventoryItem> _allItems = [];
   String _orgId = '';
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -67,6 +70,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _currentStockController.dispose();
     _reorderLevelController.dispose();
@@ -81,18 +85,31 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
   }
 
   void _onSearchChanged() {
+    final query = _searchController.text.trim();
     setState(() {
-      if (_searchController.text.isEmpty) {
+      if (query.isEmpty) {
         _filteredItems = _allItems;
       } else {
         _filteredItems = _allItems
             .where(
-              (item) => item.name.toLowerCase().contains(
-                _searchController.text.toLowerCase(),
-              ),
+              (item) => item.name.toLowerCase().contains(query.toLowerCase()),
             )
             .toList();
       }
+    });
+
+    if (_orgId.isEmpty) return;
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) return;
+      context.read<InventoryItemsBloc>().add(
+        LoadInventoryItems(
+          organizationId: _orgId,
+          page: 1,
+          limit: 100,
+          search: query,
+        ),
+      );
     });
   }
 
@@ -327,9 +344,9 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
     }
 
     try {
-      final currentStock = int.tryParse(_currentStockController.text.trim());
-      final reorderLevel = int.tryParse(_reorderLevelController.text.trim());
-      final maxLevel = int.tryParse(_maxLevelController.text.trim());
+      final currentStock = double.tryParse(_currentStockController.text.trim());
+      final reorderLevel = double.tryParse(_reorderLevelController.text.trim());
+      final maxLevel = double.tryParse(_maxLevelController.text.trim());
       final unitCost = double.tryParse(_unitCostController.text.trim());
 
       if (currentStock == null ||
@@ -420,11 +437,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                 }
               });
             } else if (state is addbranchstock.BranchStockError) {
-              _showSnackBar(
-                state.error ??
-                    'Failed to ${widget.itemId == null ? 'add' : 'update'} stock item',
-                isError: true,
-              );
+              _showSnackBar(state.error, isError: true);
             }
           },
         ),
@@ -520,7 +533,10 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                     controller: _currentStockController,
                                     label: 'Current Stock',
                                     hint: 'Enter current stock quantity',
-                                    keyboardType: TextInputType.number,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     screenWidth: screenWidth,
                                     onHelpTap: () => _showHelpBottomSheet(
                                       title: 'Current Stock',
@@ -538,7 +554,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter current stock';
                                       }
-                                      if (int.tryParse(value) == null) {
+                                      if (double.tryParse(value) == null) {
                                         return 'Please enter a valid number';
                                       }
                                       return null;
@@ -551,7 +567,10 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                     controller: _reorderLevelController,
                                     label: 'Reorder Level',
                                     hint: 'Minimum stock before reorder',
-                                    keyboardType: TextInputType.number,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     screenWidth: screenWidth,
                                     onHelpTap: () => _showHelpBottomSheet(
                                       title: 'Reorder Level',
@@ -570,7 +589,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter reorder level';
                                       }
-                                      if (int.tryParse(value) == null) {
+                                      if (double.tryParse(value) == null) {
                                         return 'Please enter a valid number';
                                       }
                                       return null;
@@ -583,7 +602,10 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                     controller: _maxLevelController,
                                     label: 'Maximum Level',
                                     hint: 'Maximum stock capacity',
-                                    keyboardType: TextInputType.number,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     screenWidth: screenWidth,
                                     onHelpTap: () => _showHelpBottomSheet(
                                       title: 'Maximum Level',
@@ -602,7 +624,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter maximum level';
                                       }
-                                      if (int.tryParse(value) == null) {
+                                      if (double.tryParse(value) == null) {
                                         return 'Please enter a valid number';
                                       }
                                       return null;

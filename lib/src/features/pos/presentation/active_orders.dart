@@ -18,19 +18,12 @@ class ActiveOrdersScreen extends StatefulWidget {
 }
 
 class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
-  final TextEditingController _searchController = TextEditingController();
   String? _selectedStatus;
 
   @override
   void initState() {
     super.initState();
     context.read<KitchenOrdersBloc>().add(const LoadKitchenOrders());
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -96,7 +89,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                                     ? state.filteredOrders
                                     : (state as KitchenOrdersRefreshing)
                                           .currentData)
-                                .where((o) => o.status != OrderStatus.pending)
+                                .where(_isActiveOrder)
                                 .toList();
 
                         if (orders.isEmpty) {
@@ -155,45 +148,6 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       color: context.modeSurface,
       child: Column(
         children: [
-          TextField(
-            cursorColor: context.modePrimary,
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search orders...',
-              hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                color: context.modeTextMuted,
-                fontSize: 14,
-              ),
-              prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: Icon(Icons.clear, color: context.modeTextMuted),
-                      onPressed: () {
-                        _searchController.clear();
-                        context.read<KitchenOrdersBloc>().add(
-                          const SearchKitchenOrders(query: ''),
-                        );
-                      },
-                    )
-                  : null,
-              filled: true,
-              fillColor: context.modeSurfaceAlt,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-            ),
-            onChanged: (value) {
-              context.read<KitchenOrdersBloc>().add(
-                SearchKitchenOrders(query: value),
-              );
-            },
-          ),
-          SizedBox(height: verticalSpacing),
           SizedBox(
             height: 40,
             child: ListView(
@@ -209,15 +163,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                 const SizedBox(width: 8),
                 _buildFilterChip('Ready', OrderStatus.ready.value),
                 const SizedBox(width: 8),
-                _buildFilterChip(
-                  'Completed',
-                  OrderStatus.completed.value,
-                ), // ADD
-                const SizedBox(width: 8),
-
                 _buildFilterChip('Served', OrderStatus.served.value),
-                const SizedBox(width: 8),
-                _buildFilterChip('Cancelled', OrderStatus.cancelled.value),
               ],
             ),
           ),
@@ -257,6 +203,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
   Widget _buildOrderCard(KitchenOrder order, double textSize) {
     final amount = double.tryParse(order.totalAmount.toString()) ?? 0;
     final formattedAmount = NumberFormat('#,##0.##').format(amount);
+    final isServedUnpaid =
+        order.status == OrderStatus.served && !_hasPayment(order);
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -379,6 +327,27 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                 color: context.modeTextMuted,
               ),
             ),
+            if (isServedUnpaid) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: context.modeWarning.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Served - payment pending',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: textSize - 2,
+                    fontWeight: FontWeight.w600,
+                    color: context.modeWarning,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -581,5 +550,25 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
     if (width < 600) return 15;
     if (width < 900) return 16;
     return 17;
+  }
+
+  bool _hasPayment(KitchenOrder order) {
+    final amountPaid = double.tryParse(order.amountPaid ?? '') ?? 0;
+    final method = order.paymentMethod?.trim();
+    return amountPaid > 0 || (method != null && method.isNotEmpty);
+  }
+
+  bool _isActiveOrder(KitchenOrder order) {
+    if (order.status == OrderStatus.pending ||
+        order.status == OrderStatus.cancelled ||
+        order.status == OrderStatus.completed) {
+      return false;
+    }
+
+    if (order.status == OrderStatus.served) {
+      return !_hasPayment(order);
+    }
+
+    return true;
   }
 }

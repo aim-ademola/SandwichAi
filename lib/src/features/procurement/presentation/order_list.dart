@@ -93,7 +93,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: _buildBody(context),
         // floatingActionButton: _buildFAB(),
@@ -103,10 +103,11 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -114,7 +115,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
@@ -134,7 +135,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               children: [
                 // Search and Filter Bar
                 Container(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   padding: EdgeInsets.symmetric(
                     horizontal: horizontalPadding,
                     vertical: 16,
@@ -187,7 +188,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: context.modeSurfaceAlt,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
@@ -197,11 +198,11 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
           hintText: 'Search by order number or supplier...',
           hintStyle: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: const Color(0xFFBDBDBD),
+            color: context.modeTextMuted,
           ),
-          prefixIcon: const Icon(
+          prefixIcon: Icon(
             Icons.search,
-            color: Color(0xFF9E9E9E),
+            color: context.modeTextMuted,
             size: 20,
           ),
           suffixIcon: _searchController.text.isNotEmpty
@@ -233,16 +234,18 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
           height: 48,
           width: 48,
           decoration: BoxDecoration(
-            color: hasFilters ? kPrimary : Colors.white,
+            color: hasFilters ? context.modePrimary : context.modeSurface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: hasFilters ? kPrimary : const Color(0xFFE0E0E0),
+              color: hasFilters ? context.modePrimary : context.modeBorder,
             ),
           ),
           child: IconButton(
             icon: Icon(
               Icons.filter_list,
-              color: hasFilters ? Colors.white : Colors.black,
+              color: hasFilters
+                  ? context.modeTextInverse
+                  : context.modeTextPrimary,
             ),
             onPressed: _showFilterBottomSheet,
           ),
@@ -254,8 +257,8 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
             child: Container(
               width: 8,
               height: 8,
-              decoration: const BoxDecoration(
-                color: Colors.red,
+              decoration: BoxDecoration(
+                color: context.modeError,
                 shape: BoxShape.circle,
               ),
             ),
@@ -266,7 +269,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
 
   Widget _buildActiveFilters(double padding) {
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       padding: EdgeInsets.only(left: padding, right: padding, bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,7 +281,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const Spacer(),
@@ -293,7 +296,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   'Clear All',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
-                    color: kPrimary,
+                    color: context.modePrimary,
                   ),
                 ),
               ),
@@ -331,9 +334,9 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: kPrimary.withValues(alpha: 0.1),
+        color: context.modePrimary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kPrimary.withValues(alpha: 0.3)),
+        border: Border.all(color: context.modePrimary.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -342,14 +345,14 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: kPrimary,
+              color: context.modePrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(width: 4),
           InkWell(
             onTap: onRemove,
-            child: Icon(Icons.close, size: 16, color: kPrimary),
+            child: Icon(Icons.close, size: 16, color: context.modePrimary),
           ),
         ],
       ),
@@ -362,7 +365,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         context.read<OrdersListBloc>().add(const RefreshOrders());
         await Future.delayed(const Duration(seconds: 1));
       },
-      color: kPrimary,
+      color: context.modePrimary,
       child: ListView.builder(
         controller: _scrollController,
         padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16),
@@ -381,9 +384,11 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
       itemCount: state.currentOrders.length + 1,
       itemBuilder: (context, index) {
         if (index == state.currentOrders.length) {
-          return const Padding(
+          return Padding(
             padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator(color: kPrimary)),
+            child: Center(
+              child: CircularProgressIndicator(color: context.modePrimary),
+            ),
           );
         }
         return _buildOrderCard(state.currentOrders[index]);
@@ -395,11 +400,15 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.2
+                  : 0.05,
+            ),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -436,7 +445,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: Colors.black,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -444,7 +453,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                             order.supplier.businessName,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
-                              color: Colors.grey.shade600,
+                              color: context.modeTextSecondary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -463,7 +472,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF7EADD),
+                    color: context.modePrimary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -476,7 +485,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                               'Total Amount',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 12,
-                                color: Colors.black54,
+                                color: context.modeTextSecondary,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -485,7 +494,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                                color: kPrimary,
+                                color: context.modePrimary,
                               ),
                             ),
                           ],
@@ -497,7 +506,8 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.modeSurface,
+                          border: Border.all(color: context.modeBorder),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -505,7 +515,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                       ),
@@ -569,7 +579,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey.shade600),
+        Icon(icon, size: 16, color: context.modeTextMuted),
         const SizedBox(width: 6),
         Expanded(
           child: Column(
@@ -579,7 +589,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 label,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 11,
-                  color: Colors.grey.shade600,
+                  color: context.modeTextMuted,
                 ),
               ),
               Text(
@@ -587,7 +597,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -605,36 +615,36 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
 
     switch (status.toUpperCase()) {
       case 'PENDING':
-        backgroundColor = Colors.orange.shade50;
-        textColor = Colors.orange.shade700;
+        backgroundColor = context.modeWarning.withValues(alpha: 0.12);
+        textColor = context.modeWarning;
         break;
       case 'ACCEPTED':
-        backgroundColor = Colors.blue.shade50;
-        textColor = Colors.blue.shade700;
+        backgroundColor = context.modeInfo.withValues(alpha: 0.12);
+        textColor = context.modeInfo;
         break;
       case 'DECLINED':
-        backgroundColor = Colors.red.shade50;
-        textColor = Colors.red.shade700;
+        backgroundColor = context.modeError.withValues(alpha: 0.12);
+        textColor = context.modeError;
         break;
       case 'IN_TRANSIT':
-        backgroundColor = Colors.purple.shade50;
-        textColor = Colors.purple.shade700;
+        backgroundColor = context.modePrimaryAlt.withValues(alpha: 0.12);
+        textColor = context.modePrimaryAlt;
         break;
       case 'DELIVERED':
-        backgroundColor = Colors.teal.shade50;
-        textColor = Colors.teal.shade700;
+        backgroundColor = context.modeSuccess.withValues(alpha: 0.12);
+        textColor = context.modeSuccess;
         break;
       case 'COMPLETED':
-        backgroundColor = Colors.green.shade50;
-        textColor = Colors.green.shade700;
+        backgroundColor = context.modeSuccess.withValues(alpha: 0.12);
+        textColor = context.modeSuccess;
         break;
       case 'CANCELLED':
-        backgroundColor = Colors.grey.shade200;
-        textColor = Colors.grey.shade700;
+        backgroundColor = context.modeSurfaceMuted;
+        textColor = context.modeTextSecondary;
         break;
       default:
-        backgroundColor = Colors.grey.shade100;
-        textColor = Colors.grey.shade700;
+        backgroundColor = context.modeSurfaceMuted;
+        textColor = context.modeTextSecondary;
     }
 
     return Container(
@@ -658,13 +668,13 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     Color color;
     switch (priority.toUpperCase()) {
       case 'URGENT':
-        color = Colors.red;
+        color = context.modeError;
         break;
       case 'HIGH':
-        color = Colors.orange;
+        color = context.modeWarning;
         break;
       default:
-        color = Colors.grey;
+        color = context.modeTextMuted;
     }
 
     return Container(
@@ -696,13 +706,13 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     Color color;
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        color = Colors.green;
+        color = context.modeSuccess;
         break;
       case 'FAILED':
-        color = Colors.red;
+        color = context.modeError;
         break;
       default:
-        color = Colors.amber;
+        color = context.modeWarning;
     }
 
     return Container(
@@ -734,21 +744,21 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.1),
+        color: context.modeInfo.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+        border: Border.all(color: context.modeInfo.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.local_shipping, size: 12, color: Colors.blue),
+          Icon(Icons.local_shipping, size: 12, color: context.modeInfo),
           const SizedBox(width: 4),
           Text(
             status.replaceAll('_', ' '),
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Colors.blue,
+              color: context.modeInfo,
             ),
           ),
         ],
@@ -757,7 +767,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(child: CircularProgressIndicator(color: kPrimary));
+    return Center(child: CircularProgressIndicator(color: context.modePrimary));
   }
 
   Widget _buildErrorState(OrdersError state) {
@@ -788,14 +798,14 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: Colors.grey.shade400),
+            Icon(icon, size: 64, color: context.modeTextMuted),
             const SizedBox(height: 16),
             Text(
               message,
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 16,
-                color: Colors.grey.shade600,
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -804,7 +814,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 context.read<OrdersListBloc>().add(const RefreshOrders());
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
+                backgroundColor: context.modePrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 16,
@@ -818,7 +828,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                 ),
               ),
             ),
@@ -835,7 +845,11 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inbox_outlined, size: 80, color: Colors.grey.shade300),
+            Icon(
+              Icons.inbox_outlined,
+              size: 80,
+              color: context.modeTextMuted,
+            ),
             const SizedBox(height: 24),
             Text(
               state.message,
@@ -843,7 +857,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 8),
@@ -852,7 +866,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.grey.shade500,
+                color: context.modeTextMuted,
               ),
             ),
           ],
@@ -869,9 +883,11 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     return StatefulBuilder(
       builder: (context, setModalState) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: context.modeSurface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(24),
+            ),
           ),
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -886,7 +902,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   IconButton(
@@ -903,7 +919,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -940,7 +956,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -970,7 +986,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -1010,7 +1026,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   _applyFilters(tempStatus, tempPriority, tempCategory);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kPrimary,
+                  backgroundColor: context.modePrimary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -1021,7 +1037,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
               ),
@@ -1042,10 +1058,10 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? kPrimary : Colors.grey.shade100,
+          color: isSelected ? context.modePrimary : context.modeSurfaceAlt,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? kPrimary : Colors.grey.shade300,
+            color: isSelected ? context.modePrimary : context.modeBorder,
           ),
         ),
         child: Text(
@@ -1053,27 +1069,10 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.white : Colors.black87,
+            color: isSelected
+                ? context.modeTextInverse
+                : context.modeTextPrimary,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFAB() {
-    return FloatingActionButton.extended(
-      onPressed: () {
-        // Navigate to create order screen
-        // Navigator.push(context, MaterialPageRoute(...));
-      },
-      backgroundColor: kPrimary,
-      icon: const Icon(Icons.add, color: Colors.white),
-      label: Text(
-        'New Order',
-        style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
         ),
       ),
     );

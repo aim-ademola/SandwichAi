@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
+import 'package:sandwich_ai/src/core/theme/context_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/procurement_good_recieved_model.dart';
@@ -43,8 +44,8 @@ class _GoodsReceivedHistoryScreenState
         if (state is GoodsReceivedLoading) {
           return Center(
             child: CircularProgressIndicator(
-              color: kPrimary,
-              valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
+              color: context.modePrimary,
+              valueColor: AlwaysStoppedAnimation<Color>(context.modePrimary),
             ),
           );
         }
@@ -72,14 +73,14 @@ class _GoodsReceivedHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            Icon(Icons.error_outline, size: 64, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               'Error Loading Data',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -88,7 +89,7 @@ class _GoodsReceivedHistoryScreenState
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -97,7 +98,8 @@ class _GoodsReceivedHistoryScreenState
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -120,7 +122,7 @@ class _GoodsReceivedHistoryScreenState
             Icon(
               Icons.inventory_2_outlined,
               size: 80,
-              color: kprimaryTextColor2.withValues(alpha: 0.3),
+              color: context.modeTextMuted.withValues(alpha: 0.45),
             ),
             const SizedBox(height: 16),
             Text(
@@ -128,7 +130,7 @@ class _GoodsReceivedHistoryScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -137,7 +139,7 @@ class _GoodsReceivedHistoryScreenState
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -151,7 +153,7 @@ class _GoodsReceivedHistoryScreenState
       builder: (context, constraints) {
         final screenWidth = constraints.maxWidth;
         return RefreshIndicator(
-          color: kPrimary,
+          color: context.modePrimary,
           onRefresh: () async => _loadData(),
           child: ListView.builder(
             padding: EdgeInsets.all(_getPadding(screenWidth)),
@@ -175,11 +177,14 @@ class _GoodsReceivedHistoryScreenState
     return Container(
       margin: EdgeInsets.only(bottom: _getSpacing(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.24 : 0.05,
+            ),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -200,12 +205,12 @@ class _GoodsReceivedHistoryScreenState
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: kPrimary.withValues(alpha: 0.1),
+                        color: context.modePrimary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
                         Icons.receipt_long,
-                        color: kPrimary,
+                        color: context.modePrimary,
                         size: 24,
                       ),
                     ),
@@ -219,7 +224,7 @@ class _GoodsReceivedHistoryScreenState
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: _getTitleFontSize(screenWidth),
                               fontWeight: FontWeight.w600,
-                              color: kprimaryTextColor1,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -227,7 +232,7 @@ class _GoodsReceivedHistoryScreenState
                             receipt.supplierName,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: _getLabelFontSize(screenWidth),
-                              color: kprimaryTextColor2,
+                              color: context.modeTextSecondary,
                             ),
                           ),
                         ],
@@ -236,7 +241,7 @@ class _GoodsReceivedHistoryScreenState
                     Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextMuted,
                     ),
                   ],
                 ),
@@ -262,7 +267,7 @@ class _GoodsReceivedHistoryScreenState
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
+                    color: context.modeSurfaceAlt,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -271,7 +276,7 @@ class _GoodsReceivedHistoryScreenState
                         child: _buildQualityChip(
                           'Passed',
                           receipt.passedQC.toString(),
-                          Colors.green,
+                          context.modeSuccess,
                           screenWidth,
                         ),
                       ),
@@ -280,7 +285,7 @@ class _GoodsReceivedHistoryScreenState
                         child: _buildQualityChip(
                           'Failed',
                           receipt.failedQC.toString(),
-                          Colors.red,
+                          context.modeError,
                           screenWidth,
                         ),
                       ),
@@ -289,7 +294,7 @@ class _GoodsReceivedHistoryScreenState
                         child: _buildQualityChip(
                           'Pass Rate',
                           '$passRate%',
-                          kPrimary,
+                          context.modePrimary,
                           screenWidth,
                         ),
                       ),
@@ -307,14 +312,18 @@ class _GoodsReceivedHistoryScreenState
   Widget _buildInfoRow(IconData icon, String text, double screenWidth) {
     return Row(
       children: [
-        Icon(icon, size: _getIconSize(screenWidth), color: kprimaryTextColor2),
+        Icon(
+          icon,
+          size: _getIconSize(screenWidth),
+          color: context.modeTextMuted,
+        ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getLabelFontSize(screenWidth),
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
         ),
@@ -343,7 +352,7 @@ class _GoodsReceivedHistoryScreenState
           label,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 11,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
         ),
       ],
@@ -360,9 +369,9 @@ class _GoodsReceivedHistoryScreenState
         minChildSize: 0.5,
         maxChildSize: 0.95,
         builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: context.modeSurface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
@@ -371,7 +380,7 @@ class _GoodsReceivedHistoryScreenState
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: context.modeDivider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -385,12 +394,12 @@ class _GoodsReceivedHistoryScreenState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: Icon(Icons.close, color: context.modeTextPrimary),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -432,7 +441,7 @@ class _GoodsReceivedHistoryScreenState
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -456,14 +465,15 @@ class _GoodsReceivedHistoryScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
+            color: context.modeSurfaceAlt,
+            border: Border.all(color: context.modeBorder),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(children: children),
@@ -484,7 +494,7 @@ class _GoodsReceivedHistoryScreenState
               label,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ),
@@ -494,7 +504,7 @@ class _GoodsReceivedHistoryScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -504,13 +514,16 @@ class _GoodsReceivedHistoryScreenState
   }
 
   Widget _buildItemCard(GoodsReceivedItem item) {
-    final statusColor = item.qualityCheck ? Colors.green : Colors.red;
+    final statusColor = item.qualityCheck
+        ? context.modeSuccess
+        : context.modeError;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: context.modeSurfaceAlt,
+        border: Border.all(color: context.modeBorder),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -524,7 +537,7 @@ class _GoodsReceivedHistoryScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -562,7 +575,7 @@ class _GoodsReceivedHistoryScreenState
               'Note: ${item.qcNote}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 13,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -571,13 +584,13 @@ class _GoodsReceivedHistoryScreenState
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.event, size: 14, color: kprimaryTextColor2),
+                Icon(Icons.event, size: 14, color: context.modeTextMuted),
                 const SizedBox(width: 4),
                 Text(
                   'Expires: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(item.expiryDate!))}',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ],
@@ -596,7 +609,7 @@ class _GoodsReceivedHistoryScreenState
           label,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 12,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
         ),
         const SizedBox(height: 2),
@@ -605,7 +618,7 @@ class _GoodsReceivedHistoryScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
       ],

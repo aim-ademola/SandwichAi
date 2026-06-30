@@ -353,7 +353,7 @@ class CreateProductIntakeRequest {
   final String productName;
   final ProductType productType;
   final String itemId;
-  final int qtyReceived;
+  final double qtyReceived;
   final Unit unit;
   final bool qualityStatus;
   final String receivedBy;

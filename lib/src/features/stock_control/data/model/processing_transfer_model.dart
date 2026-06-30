@@ -28,7 +28,7 @@ class ProcessingTransferRequest {
 
 class TransferItem {
   final String itemId;
-  final int qtySent;
+  final double qtySent;
 
   TransferItem({required this.itemId, required this.qtySent});
 
@@ -139,9 +139,9 @@ class ProcessingTransferItemResponse {
       id: json['id'] as String,
       transferId: json['transferId'] as String,
       itemId: json['itemId'] as String,
-      qtySent: json['qtySent'] as String,
-      qtyReceived: json['qtyReceived'] as String?,
-      variance: json['variance'] as String?,
+      qtySent: json['qtySent']?.toString() ?? '0',
+      qtyReceived: json['qtyReceived']?.toString(),
+      variance: json['variance']?.toString(),
       status: json['status'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
@@ -250,7 +250,7 @@ class ReceiveTransferRequest {
 
 class ReceiveTransferItem {
   final String itemId;
-  final int qtyReceived;
+  final double qtyReceived;
 
   ReceiveTransferItem({required this.itemId, required this.qtyReceived});
 

@@ -67,7 +67,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               'Printer settings saved',
               style: WorkSansAppTextStyles.medium,
             ),
-            backgroundColor: const Color(0xFF4CAF50),
+            backgroundColor: context.modeSuccess,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -85,7 +85,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               'Failed to save printer settings',
               style: WorkSansAppTextStyles.medium,
             ),
-            backgroundColor: const Color(0xFFF44336),
+            backgroundColor: context.modeError,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -100,16 +100,18 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(),
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: CircularProgressIndicator(color: context.modePrimary),
+        ),
       );
     }
 
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -132,10 +134,11 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () {
           // Auto-save when leaving the screen
           _savePrinters();
@@ -147,26 +150,27 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: false,
       actions: [
         // Save button
         IconButton(
-          icon: const Icon(Icons.save, color: Colors.black),
+          icon: Icon(Icons.save, color: context.modeTextPrimary),
           onPressed: _savePrinters,
           tooltip: 'Save Settings',
         ),
         // Add manually button
         IconButton(
-          icon: const Icon(Icons.add, color: Colors.black),
+          icon: Icon(Icons.add, color: context.modeTextPrimary),
           onPressed: _showAddPrinterDialog,
           tooltip: 'Add Manually',
         ),
         // More options
         PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, color: Colors.black),
+          icon: Icon(Icons.more_vert, color: context.modeTextPrimary),
+          color: context.modeSurface,
           onSelected: (value) {
             switch (value) {
               case 'clear':
@@ -178,23 +182,30 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
             }
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'summary',
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 20),
-                  SizedBox(width: 12),
-                  Text('Printer Summary'),
+                  Icon(
+                    Icons.info_outline,
+                    size: 20,
+                    color: context.modeTextSecondary,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Printer Summary',
+                    style: TextStyle(color: context.modeTextPrimary),
+                  ),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'clear',
               child: Row(
                 children: [
-                  Icon(Icons.delete_sweep, size: 20, color: Colors.red),
-                  SizedBox(width: 12),
-                  Text('Clear All', style: TextStyle(color: Colors.red)),
+                  Icon(Icons.delete_sweep, size: 20, color: context.modeError),
+                  const SizedBox(width: 12),
+                  Text('Clear All', style: TextStyle(color: context.modeError)),
                 ],
               ),
             ),
@@ -208,9 +219,9 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,10 +232,10 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: kPrimary.withValues(alpha: 0.1),
+                  color: context.modePrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.search, color: kPrimary, size: 22),
+                child: Icon(Icons.search, color: context.modePrimary, size: 22),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -236,7 +247,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -244,7 +255,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                       'Find printers via Network, Bluetooth, USB',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
-                        color: const Color(0xFF9E9E9E),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -258,18 +269,18 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
           Container(
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFFF8F6F6),
+              color: context.modeSurfaceAlt,
               borderRadius: BorderRadius.circular(10),
             ),
             child: TabBar(
               indicatorSize: TabBarIndicatorSize.tab,
               controller: _tabController,
               indicator: BoxDecoration(
-                color: kPrimary,
+                color: context.modePrimary,
                 borderRadius: BorderRadius.circular(8),
               ),
-              labelColor: Colors.white,
-              unselectedLabelColor: const Color(0xFF757575),
+              labelColor: context.modeTextInverse,
+              unselectedLabelColor: context.modeTextSecondary,
               labelStyle: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -290,8 +301,8 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
             child: ElevatedButton(
               onPressed: _isScanning ? null : _scanForPrinters,
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -302,13 +313,13 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(
+                        SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                              context.modeTextInverse,
                             ),
                           ),
                         ),
@@ -318,7 +329,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: context.modeTextInverse,
                           ),
                         ),
                       ],
@@ -333,7 +344,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: context.modeTextInverse,
                           ),
                         ),
                       ],
@@ -362,9 +373,9 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -380,7 +391,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -388,13 +399,17 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                     '${_discoveredPrinters.length} printer(s) found',
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 13,
-                      color: const Color(0xFF9E9E9E),
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
               ),
               IconButton(
-                icon: const Icon(Icons.clear, size: 20),
+                icon: Icon(
+                  Icons.clear,
+                  size: 20,
+                  color: context.modeTextSecondary,
+                ),
                 onPressed: () {
                   setState(() {
                     _discoveredPrinters.clear();
@@ -409,11 +424,8 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _discoveredPrinters.length,
-            separatorBuilder: (context, index) => const Divider(
-              height: 24,
-              color: Color(0xFFF5F5F5),
-              thickness: 1,
-            ),
+            separatorBuilder: (context, index) =>
+                Divider(height: 24, color: context.modeDivider, thickness: 1),
             itemBuilder: (context, index) {
               final printer = _discoveredPrinters[index];
               return _buildDiscoveredPrinterItem(printer);
@@ -454,7 +466,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -484,7 +496,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                           _getConnectionInfo(printer),
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: const Color(0xFF9E9E9E),
+                            color: context.modeTextSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -497,7 +509,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
             Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: const Color(0xFF9E9E9E),
+              color: context.modeTextMuted,
             ),
           ],
         ),
@@ -509,9 +521,9 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,7 +536,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
               Container(
@@ -533,7 +545,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: kPrimary.withValues(alpha: 0.1),
+                  color: context.modePrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -541,7 +553,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: kPrimary,
+                    color: context.modePrimary,
                   ),
                 ),
               ),
@@ -557,14 +569,14 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                     Icon(
                       Icons.print_disabled,
                       size: 48,
-                      color: Colors.grey[300],
+                      color: context.modeTextMuted,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'No printers configured',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: Colors.grey[500],
+                        color: context.modeTextMuted,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -572,7 +584,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                       'Scan or add manually',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: Colors.grey[400],
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -584,11 +596,8 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _printerService.printers.length,
-              separatorBuilder: (context, index) => const Divider(
-                height: 24,
-                color: Color(0xFFF5F5F5),
-                thickness: 1,
-              ),
+              separatorBuilder: (context, index) =>
+                  Divider(height: 24, color: context.modeDivider, thickness: 1),
               itemBuilder: (context, index) {
                 final printer = _printerService.printers[index];
                 return _buildConfiguredPrinterItem(printer);
@@ -601,7 +610,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
 
   Widget _buildConfiguredPrinterItem(PrinterConfig printer) {
     final isTesting = _testingPrinters[printer.id] ?? false;
-    final statusColor = const Color(0xFF4CAF50);
+    final statusColor = context.modeSuccess;
     final connectionIcon = _getConnectionIcon(printer.connectionType);
     final connectionColor = _getConnectionColor(printer.connectionType);
 
@@ -631,7 +640,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -661,7 +670,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                           printer.connectionInfo,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: const Color(0xFF9E9E9E),
+                            color: context.modeTextSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -672,10 +681,13 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               ),
             ),
             if (isTesting)
-              const SizedBox(
+              SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: context.modePrimary,
+                ),
               )
             else
               Container(
@@ -700,7 +712,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
             Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: const Color(0xFF9E9E9E),
+              color: context.modeTextMuted,
             ),
           ],
         ),
@@ -760,6 +772,51 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
         return printer.address;
     }
   }
+
+  InputDecoration _printerInputDecoration({
+    required String label,
+    String? hint,
+    String? helper,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: WorkSansAppTextStyles.medium.copyWith(
+        color: context.modeTextSecondary,
+      ),
+      hintText: hint,
+      hintStyle: WorkSansAppTextStyles.medium.copyWith(
+        color: context.modeTextMuted,
+      ),
+      helperText: helper,
+      helperStyle: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: 11,
+        color: context.modeTextMuted,
+      ),
+      filled: true,
+      fillColor: context.modeSurfaceAlt,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: context.modeBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: context.modeBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: context.modePrimary),
+      ),
+    );
+  }
+
+  TextStyle get _dialogTitleStyle => WorkSansAppTextStyles.medium.copyWith(
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    color: context.modeTextPrimary,
+  );
+
+  TextStyle get _dialogBodyStyle =>
+      WorkSansAppTextStyles.medium.copyWith(color: context.modeTextPrimary);
 
   // Actions
   Future<void> _scanForPrinters() async {
@@ -823,6 +880,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => Dialog(
+          backgroundColor: context.modeSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -832,37 +890,19 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Add Printer',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
-                ),
+                Text('Add Printer', style: _dialogTitleStyle),
                 const SizedBox(height: 24),
                 TextField(
                   controller: nameController,
-                  style: WorkSansAppTextStyles.medium,
-                  decoration: InputDecoration(
-                    labelText: 'Printer Name',
-                    labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                      color: const Color(0xFF9E9E9E),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: kPrimary),
-                    ),
-                  ),
+                  style: _dialogBodyStyle,
+                  decoration: _printerInputDecoration(label: 'Printer Name'),
                 ),
                 const SizedBox(height: 20),
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8F6F6),
+                    color: context.modeSurfaceAlt,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: context.modeBorder),
                   ),
                   child: SwitchListTile(
                     title: Text(
@@ -870,17 +910,18 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     subtitle: Text(
                       'Orders will be printed automatically',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
-                        color: const Color(0xFF9E9E9E),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                     value: isKitchen,
-                    activeThumbColor: kPrimary,
+                    activeThumbColor: context.modePrimary,
                     onChanged: (value) {
                       setDialogState(() {
                         isKitchen = value;
@@ -894,7 +935,10 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                     Expanded(
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: context.modeTextSecondary),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -922,13 +966,13 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                                 '${config.name} added successfully',
                                 style: WorkSansAppTextStyles.medium,
                               ),
-                              backgroundColor: const Color(0xFF4CAF50),
+                              backgroundColor: context.modeSuccess,
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimary,
-                          foregroundColor: Colors.white,
+                          backgroundColor: context.modePrimary,
+                          foregroundColor: context.modeTextInverse,
                         ),
                         child: const Text('Add Printer'),
                       ),
@@ -992,6 +1036,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => Dialog(
+          backgroundColor: context.modeSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -1002,33 +1047,16 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Add Printer Manually',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
+                  Text('Add Printer Manually', style: _dialogTitleStyle),
                   const SizedBox(height: 24),
 
                   // Printer Name
                   TextField(
                     controller: nameController,
-                    style: WorkSansAppTextStyles.medium,
-                    decoration: InputDecoration(
-                      labelText: 'Printer Name',
-                      labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                        color: const Color(0xFF9E9E9E),
-                      ),
-                      hintText: 'e.g., Kitchen Printer 1',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: kPrimary),
-                      ),
+                    style: _dialogBodyStyle,
+                    decoration: _printerInputDecoration(
+                      label: 'Printer Name',
+                      hint: 'e.g., Kitchen Printer 1',
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -1039,13 +1067,14 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xFFE0E0E0)),
+                      color: context.modeSurfaceAlt,
+                      border: Border.all(color: context.modeBorder),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -1059,12 +1088,17 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                                 color: Color(0xFF2196F3),
                               ),
                               const SizedBox(width: 12),
-                              const Text('Network (Wi-Fi/Ethernet)'),
+                              Text(
+                                'Network (Wi-Fi/Ethernet)',
+                                style: TextStyle(
+                                  color: context.modeTextPrimary,
+                                ),
+                              ),
                             ],
                           ),
                           value: PrinterConnectionType.network,
                           groupValue: selectedType,
-                          activeColor: kPrimary,
+                          activeColor: context.modePrimary,
                           onChanged: (value) {
                             setDialogState(() {
                               selectedType = value!;
@@ -1080,12 +1114,17 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                                 color: Color(0xFF3F51B5),
                               ),
                               const SizedBox(width: 12),
-                              const Text('Bluetooth'),
+                              Text(
+                                'Bluetooth',
+                                style: TextStyle(
+                                  color: context.modeTextPrimary,
+                                ),
+                              ),
                             ],
                           ),
                           value: PrinterConnectionType.bluetooth,
                           groupValue: selectedType,
-                          activeColor: kPrimary,
+                          activeColor: context.modePrimary,
                           onChanged: (value) {
                             setDialogState(() {
                               selectedType = value!;
@@ -1101,12 +1140,17 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                                 color: Color(0xFF9C27B0),
                               ),
                               const SizedBox(width: 12),
-                              const Text('USB'),
+                              Text(
+                                'USB',
+                                style: TextStyle(
+                                  color: context.modeTextPrimary,
+                                ),
+                              ),
                             ],
                           ),
                           value: PrinterConnectionType.usb,
                           groupValue: selectedType,
-                          activeColor: kPrimary,
+                          activeColor: context.modePrimary,
                           onChanged: (value) {
                             setDialogState(() {
                               selectedType = value!;
@@ -1122,12 +1166,17 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                                 color: Color(0xFFFF9800),
                               ),
                               const SizedBox(width: 12),
-                              const Text('Serial Port'),
+                              Text(
+                                'Serial Port',
+                                style: TextStyle(
+                                  color: context.modeTextPrimary,
+                                ),
+                              ),
                             ],
                           ),
                           value: PrinterConnectionType.serial,
                           groupValue: selectedType,
-                          activeColor: kPrimary,
+                          activeColor: context.modePrimary,
                           onChanged: (value) {
                             setDialogState(() {
                               selectedType = value!;
@@ -1143,41 +1192,21 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   if (selectedType == PrinterConnectionType.network) ...[
                     TextField(
                       controller: ipController,
-                      style: WorkSansAppTextStyles.medium,
+                      style: _dialogBodyStyle,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'IP Address',
-                        labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                          color: const Color(0xFF9E9E9E),
-                        ),
-                        hintText: '192.168.1.100',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: kPrimary),
-                        ),
+                      decoration: _printerInputDecoration(
+                        label: 'IP Address',
+                        hint: '192.168.1.100',
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: portController,
-                      style: WorkSansAppTextStyles.medium,
+                      style: _dialogBodyStyle,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Port',
-                        labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                          color: const Color(0xFF9E9E9E),
-                        ),
-                        hintText: '9100',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: kPrimary),
-                        ),
+                      decoration: _printerInputDecoration(
+                        label: 'Port',
+                        hint: '9100',
                       ),
                     ),
                   ],
@@ -1185,25 +1214,11 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   if (selectedType == PrinterConnectionType.bluetooth) ...[
                     TextField(
                       controller: bluetoothAddressController,
-                      style: WorkSansAppTextStyles.medium,
-                      decoration: InputDecoration(
-                        labelText: 'Bluetooth Address',
-                        labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                          color: const Color(0xFF9E9E9E),
-                        ),
-                        hintText: 'XX:XX:XX:XX:XX:XX',
-                        helperText: 'Use scanner to find address automatically',
-                        helperStyle: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: 11,
-                          color: const Color(0xFF9E9E9E),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: kPrimary),
-                        ),
+                      style: _dialogBodyStyle,
+                      decoration: _printerInputDecoration(
+                        label: 'Bluetooth Address',
+                        hint: 'XX:XX:XX:XX:XX:XX',
+                        helper: 'Use scanner to find address automatically',
                       ),
                     ),
                   ],
@@ -1211,26 +1226,12 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   if (selectedType == PrinterConnectionType.usb) ...[
                     TextField(
                       controller: usbDeviceIdController,
-                      style: WorkSansAppTextStyles.medium,
+                      style: _dialogBodyStyle,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'USB Device ID',
-                        labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                          color: const Color(0xFF9E9E9E),
-                        ),
-                        hintText: 'Device identifier',
-                        helperText: 'Use scanner to find device automatically',
-                        helperStyle: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: 11,
-                          color: const Color(0xFF9E9E9E),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: kPrimary),
-                        ),
+                      decoration: _printerInputDecoration(
+                        label: 'USB Device ID',
+                        hint: 'Device identifier',
+                        helper: 'Use scanner to find device automatically',
                       ),
                     ),
                   ],
@@ -1238,40 +1239,20 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   if (selectedType == PrinterConnectionType.serial) ...[
                     TextField(
                       controller: serialPortController,
-                      style: WorkSansAppTextStyles.medium,
-                      decoration: InputDecoration(
-                        labelText: 'Serial Port',
-                        labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                          color: const Color(0xFF9E9E9E),
-                        ),
-                        hintText: 'COM1 or /dev/ttyUSB0',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: kPrimary),
-                        ),
+                      style: _dialogBodyStyle,
+                      decoration: _printerInputDecoration(
+                        label: 'Serial Port',
+                        hint: 'COM1 or /dev/ttyUSB0',
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: baudRateController,
-                      style: WorkSansAppTextStyles.medium,
+                      style: _dialogBodyStyle,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Baud Rate',
-                        labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                          color: const Color(0xFF9E9E9E),
-                        ),
-                        hintText: '9600',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: kPrimary),
-                        ),
+                      decoration: _printerInputDecoration(
+                        label: 'Baud Rate',
+                        hint: '9600',
                       ),
                     ),
                   ],
@@ -1281,8 +1262,9 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   // Kitchen/Receipt toggle
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8F6F6),
+                      color: context.modeSurfaceAlt,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: context.modeBorder),
                     ),
                     child: SwitchListTile(
                       title: Text(
@@ -1290,17 +1272,18 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                       subtitle: Text(
                         'Orders will be printed automatically',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 13,
-                          color: const Color(0xFF9E9E9E),
+                          color: context.modeTextSecondary,
                         ),
                       ),
                       value: isKitchen,
-                      activeThumbColor: kPrimary,
+                      activeThumbColor: context.modePrimary,
                       onChanged: (value) {
                         setDialogState(() {
                           isKitchen = value;
@@ -1320,7 +1303,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(color: Color(0xFFE0E0E0)),
+                              side: BorderSide(color: context.modeBorder),
                             ),
                           ),
                           child: Text(
@@ -1328,7 +1311,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF757575),
+                              color: context.modeTextSecondary,
                             ),
                           ),
                         ),
@@ -1370,7 +1353,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                                     validationError,
                                     style: WorkSansAppTextStyles.medium,
                                   ),
-                                  backgroundColor: const Color(0xFFF44336),
+                                  backgroundColor: context.modeError,
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -1436,7 +1419,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                                   '${config.name} added successfully',
                                   style: WorkSansAppTextStyles.medium,
                                 ),
-                                backgroundColor: const Color(0xFF4CAF50),
+                                backgroundColor: context.modeSuccess,
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -1445,8 +1428,8 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: kPrimary,
-                            foregroundColor: Colors.white,
+                            backgroundColor: context.modePrimary,
+                            foregroundColor: context.modeTextInverse,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
@@ -1458,7 +1441,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: context.modeTextInverse,
                             ),
                           ),
                         ),
@@ -1477,6 +1460,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
   void _showPrinterOptions(PrinterConfig printer) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: context.modeSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1489,7 +1473,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFE0E0E0),
+                color: context.modeBorder,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1499,6 +1483,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -1506,23 +1491,37 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               printer.connectionInfo,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: const Color(0xFF9E9E9E),
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
             ListTile(
               leading: const Icon(Icons.print, color: Color(0xFF2196F3)),
-              title: const Text('Test Print'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              title: Text(
+                'Test Print',
+                style: TextStyle(color: context.modeTextPrimary),
+              ),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: context.modeTextMuted,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _testPrinter(printer);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete, color: Color(0xFFF44336)),
-              title: const Text('Remove Printer'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              leading: Icon(Icons.delete, color: context.modeError),
+              title: Text(
+                'Remove Printer',
+                style: TextStyle(color: context.modeError),
+              ),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: context.modeTextMuted,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _confirmDelete(printer);
@@ -1552,9 +1551,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
             success ? 'Test successful!' : 'Connection failed',
             style: WorkSansAppTextStyles.medium,
           ),
-          backgroundColor: success
-              ? const Color(0xFF4CAF50)
-              : const Color(0xFFF44336),
+          backgroundColor: success ? context.modeSuccess : context.modeError,
         ),
       );
     }
@@ -1564,12 +1561,19 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove Printer'),
-        content: Text('Remove "${printer.name}"?'),
+        backgroundColor: context.modeSurface,
+        title: Text('Remove Printer', style: _dialogTitleStyle),
+        content: Text(
+          'Remove "${printer.name}"?',
+          style: TextStyle(color: context.modeTextPrimary),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: context.modeTextSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -1586,7 +1590,8 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF44336),
+              backgroundColor: context.modeError,
+              foregroundColor: context.modeTextInverse,
             ),
             child: const Text('Remove'),
           ),
@@ -1599,14 +1604,19 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear All Printers'),
-        content: const Text(
+        backgroundColor: context.modeSurface,
+        title: Text('Clear All Printers', style: _dialogTitleStyle),
+        content: Text(
           'Remove all configured printers? This cannot be undone.',
+          style: TextStyle(color: context.modeTextPrimary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: context.modeTextSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -1622,7 +1632,8 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF44336),
+              backgroundColor: context.modeError,
+              foregroundColor: context.modeTextInverse,
             ),
             child: const Text('Clear All'),
           ),
@@ -1637,26 +1648,27 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Printer Summary'),
+        backgroundColor: context.modeSurface,
+        title: Text('Printer Summary', style: _dialogTitleStyle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Total: ${summary['total']}'),
+            Text('Total: ${summary['total']}', style: _dialogBodyStyle),
             const SizedBox(height: 8),
-            Text('Network: ${summary['network']}'),
-            Text('Bluetooth: ${summary['bluetooth']}'),
-            Text('USB: ${summary['usb']}'),
-            Text('Serial: ${summary['serial']}'),
-            const Divider(),
-            Text('Kitchen: ${summary['kitchen']}'),
-            Text('Receipt: ${summary['receipt']}'),
+            Text('Network: ${summary['network']}', style: _dialogBodyStyle),
+            Text('Bluetooth: ${summary['bluetooth']}', style: _dialogBodyStyle),
+            Text('USB: ${summary['usb']}', style: _dialogBodyStyle),
+            Text('Serial: ${summary['serial']}', style: _dialogBodyStyle),
+            Divider(color: context.modeDivider),
+            Text('Kitchen: ${summary['kitchen']}', style: _dialogBodyStyle),
+            Text('Receipt: ${summary['receipt']}', style: _dialogBodyStyle),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('Close', style: TextStyle(color: context.modePrimary)),
           ),
         ],
       ),

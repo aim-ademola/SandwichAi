@@ -44,27 +44,29 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
       child: Stack(
         children: [
           Scaffold(
-            backgroundColor: const Color(0xFFF8F6F6),
+            backgroundColor: context.modeBackground,
             appBar: _buildAppBar(context),
             body: _buildBody(context),
           ),
           if (_isGeneratingPdf)
             Container(
-              color: Colors.black54,
+              color: Colors.black.withValues(alpha: 0.54),
               child: Center(
                 child: Card(
+                  color: context.modeSurface,
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CircularProgressIndicator(color: kPrimary),
+                        CircularProgressIndicator(color: context.modePrimary),
                         const SizedBox(height: 16),
                         Text(
                           'Generating PDF...',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                       ],
@@ -80,10 +82,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -91,17 +94,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.share_outlined, color: Colors.black),
+          icon: Icon(Icons.share_outlined, color: context.modeTextPrimary),
           onPressed: _shareOrderPdf,
         ),
         PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, color: Colors.black),
+          icon: Icon(Icons.more_vert, color: context.modeTextPrimary),
           onSelected: (value) {
             switch (value) {
               case 'print':
@@ -587,7 +590,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -595,17 +598,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   fileName,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: context.modeTextInverse.withValues(alpha: 0.9),
                   ),
                 ),
               ],
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: context.modeSuccess,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 6),
             action: SnackBarAction(
               label: 'Open',
-              textColor: Colors.white,
+              textColor: context.modeTextInverse,
               onPressed: () async {
                 final result = await OpenFile.open(filePath);
                 if (result.type != ResultType.done && mounted) {
@@ -632,7 +635,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.info_outline, color: kPrimary),
+            Icon(Icons.info_outline, color: context.modePrimary),
             const SizedBox(width: 12),
             const Text('Open PDF'),
           ],
@@ -647,7 +650,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             child: Text(
               'Cancel',
               style: WorkSansAppTextStyles.medium.copyWith(
-                color: Colors.grey.shade700,
+                color: context.modeTextSecondary,
               ),
             ),
           ),
@@ -657,14 +660,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               Printing.sharePdf(bytes: bytes as Uint8List, filename: fileName);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
+              backgroundColor: context.modePrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
             child: Text(
               'Share',
-              style: WorkSansAppTextStyles.medium.copyWith(color: Colors.white),
+              style: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modeTextInverse,
+              ),
             ),
           ),
         ],
@@ -697,10 +702,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: Colors.white,
+            color: context.modeTextInverse,
           ),
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: context.modeError,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -719,12 +724,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               children: [
                 _buildStatusHeader(horizontalPadding),
                 Container(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   child: TabBar(
                     controller: _tabController,
-                    labelColor: kPrimary,
-                    unselectedLabelColor: Colors.grey,
-                    indicatorColor: kPrimary,
+                    labelColor: context.modePrimary,
+                    unselectedLabelColor: context.modeTextSecondary,
+                    indicatorColor: context.modePrimary,
                     labelStyle: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -756,7 +761,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
 
   Widget _buildStatusHeader(double padding) {
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       padding: EdgeInsets.all(padding),
       child: Column(
         children: [
@@ -772,7 +777,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -780,7 +785,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                       'Ordered on ${DateFormat('MMM dd, yyyy').format(widget.order.orderDate)}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: Colors.grey.shade600,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -793,7 +798,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFF7EADD),
+              color: context.modePrimary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -806,7 +811,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                       'Total Amount',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: Colors.black54,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -815,7 +820,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
-                        color: kPrimary,
+                        color: context.modePrimary,
                       ),
                     ),
                   ],
@@ -830,7 +835,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ],
@@ -932,12 +937,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                 (item) => Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.modeSurface,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFEC9455),
-                      width: 1.5,
-                    ),
+                    border: Border.all(color: context.modePrimary, width: 1.5),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -949,7 +951,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Colors.black,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -957,7 +959,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                           item.productCode,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -975,7 +977,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: kPrimary,
+                                color: context.modePrimary,
                               ),
                             ),
                           ],
@@ -1003,6 +1005,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w700,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -1020,9 +1023,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1032,7 +1035,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -1040,7 +1043,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             date,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 13,
-              color: Colors.grey.shade600,
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -1055,9 +1058,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1069,10 +1072,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: kPrimary.withValues(alpha: 0.1),
+                    color: context.modePrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: kPrimary, size: 20),
+                  child: Icon(icon, color: context.modePrimary, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -1080,13 +1083,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: context.modeDivider),
           Padding(padding: const EdgeInsets.all(16), child: child),
         ],
       ),
@@ -1104,7 +1107,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: context.modeTextSecondary,
             ),
           ),
         ),
@@ -1116,7 +1119,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: context.modeTextPrimary,
             ),
             textAlign: TextAlign.right,
           ),
@@ -1134,7 +1137,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: isTotal ? 16 : 14,
             fontWeight: isTotal ? FontWeight.w700 : FontWeight.w500,
-            color: isTotal ? Colors.black : Colors.grey.shade600,
+            color: isTotal
+                ? context.modeTextPrimary
+                : context.modeTextSecondary,
           ),
         ),
         Text(
@@ -1142,7 +1147,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: isTotal ? 18 : 14,
             fontWeight: FontWeight.w700,
-            color: isTotal ? kPrimary : Colors.black87,
+            color: isTotal ? context.modePrimary : context.modeTextPrimary,
           ),
         ),
       ],
@@ -1155,36 +1160,36 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
 
     switch (status.toUpperCase()) {
       case 'PENDING':
-        backgroundColor = Colors.orange.shade50;
-        textColor = Colors.orange.shade700;
+        backgroundColor = context.modeWarning.withValues(alpha: 0.12);
+        textColor = context.modeWarning;
         break;
       case 'ACCEPTED':
-        backgroundColor = Colors.blue.shade50;
-        textColor = Colors.blue.shade700;
+        backgroundColor = context.modeInfo.withValues(alpha: 0.12);
+        textColor = context.modeInfo;
         break;
       case 'DECLINED':
-        backgroundColor = Colors.red.shade50;
-        textColor = Colors.red.shade700;
+        backgroundColor = context.modeError.withValues(alpha: 0.12);
+        textColor = context.modeError;
         break;
       case 'IN_TRANSIT':
-        backgroundColor = Colors.purple.shade50;
-        textColor = Colors.purple.shade700;
+        backgroundColor = context.modePrimaryAlt.withValues(alpha: 0.12);
+        textColor = context.modePrimaryAlt;
         break;
       case 'DELIVERED':
-        backgroundColor = Colors.teal.shade50;
-        textColor = Colors.teal.shade700;
+        backgroundColor = context.modeSuccess.withValues(alpha: 0.12);
+        textColor = context.modeSuccess;
         break;
       case 'COMPLETED':
-        backgroundColor = Colors.green.shade50;
-        textColor = Colors.green.shade700;
+        backgroundColor = context.modeSuccess.withValues(alpha: 0.12);
+        textColor = context.modeSuccess;
         break;
       case 'CANCELLED':
-        backgroundColor = Colors.grey.shade200;
-        textColor = Colors.grey.shade700;
+        backgroundColor = context.modeSurfaceMuted;
+        textColor = context.modeTextSecondary;
         break;
       default:
-        backgroundColor = Colors.grey.shade100;
-        textColor = Colors.grey.shade700;
+        backgroundColor = context.modeSurfaceMuted;
+        textColor = context.modeTextSecondary;
     }
 
     return Container(
@@ -1210,15 +1215,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
 
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        color = Colors.green;
+        color = context.modeSuccess;
         icon = Icons.check_circle;
         break;
       case 'FAILED':
-        color = Colors.red;
+        color = context.modeError;
         icon = Icons.error;
         break;
       default:
-        color = Colors.amber;
+        color = context.modeWarning;
         icon = Icons.pending;
     }
 

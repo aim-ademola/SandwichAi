@@ -29,6 +29,30 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
     return branchId;
   }
 
+  bool _hasPayment(KitchenOrder order) {
+    final amountPaid = double.tryParse(order.amountPaid ?? '') ?? 0;
+    final method = order.paymentMethod?.trim();
+    return amountPaid > 0 || (method != null && method.isNotEmpty);
+  }
+
+  bool _isActiveOrder(KitchenOrder order) {
+    if (order.status == OrderStatus.pending ||
+        order.status == OrderStatus.cancelled ||
+        order.status == OrderStatus.completed) {
+      return false;
+    }
+
+    if (order.status == OrderStatus.served) {
+      return !_hasPayment(order);
+    }
+
+    return true;
+  }
+
+  List<KitchenOrder> _activeOrders(List<KitchenOrder> orders) {
+    return orders.where(_isActiveOrder).toList();
+  }
+
   Future<void> _onLoadKitchenOrders(
     LoadKitchenOrders event,
     Emitter<KitchenOrdersState> emit,
@@ -60,16 +84,14 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
             return;
           }
 
-          final activeOrders = orders.where((order) {
-            return order.status != OrderStatus.pending;
-          }).toList();
+          final activeOrders = _activeOrders(orders);
 
           // If no active orders but there are orders, show empty state
           // but store all orders so filters can work
           emit(
             KitchenOrdersLoaded(
               orders: orders,
-              filteredOrders: activeOrders.isEmpty ? orders : activeOrders,
+              filteredOrders: activeOrders,
             ),
           );
         },
@@ -129,13 +151,11 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
           return;
         }
 
-        final activeOrders = orders.where((order) {
-          return order.status != OrderStatus.pending;
-        }).toList();
+        final activeOrders = _activeOrders(orders);
         emit(
           KitchenOrdersLoaded(
             orders: orders,
-            filteredOrders: activeOrders.isEmpty ? orders : activeOrders,
+            filteredOrders: activeOrders,
             selectedStatus: currentState.selectedStatus,
             searchQuery: currentState.searchQuery,
             startDate: currentState.startDate,
@@ -160,22 +180,19 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
     final orders = currentState.orders;
 
     if (event.status == null || event.status!.isEmpty) {
-      // Show active orders (excluding completed and cancelled)
-      final activeOrders = orders.where((order) {
-        return order.status != OrderStatus.pending;
-      }).toList();
+      final activeOrders = _activeOrders(orders);
 
       emit(
         KitchenOrdersLoaded(
           orders: orders,
-          filteredOrders: activeOrders.isEmpty ? orders : activeOrders,
+          filteredOrders: activeOrders,
           searchQuery: currentState.searchQuery,
         ),
       );
       return;
     }
 
-    final filtered = orders.where((order) {
+    final filtered = _activeOrders(orders).where((order) {
       return order.status.value == event.status;
     }).toList();
 
@@ -199,15 +216,12 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
     final orders = currentState.orders;
 
     if (event.query.isEmpty) {
-      // Show active orders (excluding completed and cancelled)
-      final activeOrders = orders.where((order) {
-        return order.status != OrderStatus.pending;
-      }).toList();
+      final activeOrders = _activeOrders(orders);
 
       emit(
         KitchenOrdersLoaded(
           orders: orders,
-          filteredOrders: activeOrders.isEmpty ? orders : activeOrders,
+          filteredOrders: activeOrders,
           selectedStatus: currentState.selectedStatus,
           searchQuery: null,
         ),
@@ -216,10 +230,10 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
     }
 
     final query = event.query.toLowerCase();
-    final filtered = orders.where((order) {
+    final filtered = _activeOrders(orders).where((order) {
       return order.orderId.toLowerCase().contains(query) ||
-          order.customerName!.toLowerCase().contains(query) ||
-          order.customerPhone!.contains(query) ||
+          (order.customerName?.toLowerCase().contains(query) ?? false) ||
+          (order.customerPhone?.contains(query) ?? false) ||
           (order.tableNumber?.toLowerCase().contains(query) ?? false);
     }).toList();
 
@@ -269,14 +283,12 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
           return;
         }
 
-        final activeOrders = orders.where((order) {
-          return order.status != OrderStatus.pending;
-        }).toList();
+        final activeOrders = _activeOrders(orders);
 
         emit(
           KitchenOrdersLoaded(
             orders: orders,
-            filteredOrders: activeOrders.isEmpty ? orders : activeOrders,
+            filteredOrders: activeOrders,
             selectedStatus: currentState.selectedStatus,
             searchQuery: currentState.searchQuery,
             startDate: event.startDate,

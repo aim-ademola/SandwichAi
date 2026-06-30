@@ -191,9 +191,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -218,12 +218,12 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: kPrimary,
+                          color: context.modePrimary,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: Icon(Icons.close, color: context.modeTextPrimary),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -235,7 +235,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   subtitle,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: Colors.grey.shade600,
+                    color: context.modeTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -248,17 +248,17 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: kPrimary.withValues(alpha: 0.1),
+                      color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: kPrimary.withValues(alpha: 0.3),
+                        color: context.modePrimary.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.lightbulb_outline,
-                          color: kPrimary,
+                          color: context.modePrimary,
                           size: 24,
                         ),
                         const SizedBox(width: 12),
@@ -267,7 +267,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                             tip,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 13,
-                              color: Colors.black87,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                         ),
@@ -290,9 +290,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: context.modeSurfaceAlt,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: context.modeBorder),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,10 +300,10 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.1),
+                color: context.modePrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: kPrimary, size: 20),
+              child: Icon(icon, color: context.modePrimary, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -315,7 +315,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -323,7 +323,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                     description,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 13,
-                      color: Colors.grey.shade700,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
@@ -406,11 +406,11 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
         content: Text(
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
-            color: Colors.white,
+            color: context.modeTextInverse,
             fontSize: 14,
           ),
         ),
-        backgroundColor: isError ? const Color(0xFFE53935) : kGreen,
+        backgroundColor: isError ? context.modeError : context.modeSuccess,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -455,13 +455,13 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: kPrimary.withValues(alpha: 0.1),
+                            color: context.modePrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.help_outline,
                             size: 16,
-                            color: kPrimary,
+                            color: context.modePrimary,
                           ),
                         ),
                       ),
@@ -479,13 +479,13 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: kPrimary.withValues(alpha: 0.1),
+                            color: context.modePrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.help_outline,
                             size: 16,
-                            color: kPrimary,
+                            color: context.modePrimary,
                           ),
                         ),
                       ),
@@ -534,13 +534,13 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: kPrimary.withValues(alpha: 0.1),
+                            color: context.modePrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.help_outline,
                             size: 16,
-                            color: kPrimary,
+                            color: context.modePrimary,
                           ),
                         ),
                       ),
@@ -564,13 +564,13 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: kPrimary.withValues(alpha: 0.1),
+                            color: context.modePrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.help_outline,
                             size: 16,
-                            color: kPrimary,
+                            color: context.modePrimary,
                           ),
                         ),
                       ),
@@ -608,29 +608,32 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getLabelFontSize(screenWidth),
                   fontWeight: FontWeight.w500,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE0E0E0)),
+                  border: Border.all(color: context.modeBorder),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: kPrimary,
+                        color: context.modePrimary,
                       ),
                     ),
-                    SizedBox(width: 12),
-                    Text('Loading suppliers...'),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Loading suppliers...',
+                      style: TextStyle(color: context.modeTextSecondary),
+                    ),
                   ],
                 ),
               ),
@@ -647,32 +650,37 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getLabelFontSize(screenWidth),
                   fontWeight: FontWeight.w500,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: context.modeError.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red.shade200),
+                  border: Border.all(
+                    color: context.modeError.withValues(alpha: 0.28),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    Icon(Icons.error_outline, color: context.modeError),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Failed to load suppliers',
-                        style: TextStyle(color: Colors.red.shade700),
+                        style: TextStyle(color: context.modeError),
                       ),
                     ),
                     TextButton(
                       onPressed: () {
                         context.read<SupplierBloc>().add(LoadSuppliers());
                       },
-                      child: Text('Retry', style: TextStyle(color: kPrimary)),
+                      child: Text(
+                        'Retry',
+                        style: TextStyle(color: context.modePrimary),
+                      ),
                     ),
                   ],
                 ),
@@ -690,7 +698,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getLabelFontSize(screenWidth),
                   fontWeight: FontWeight.w500,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -700,19 +708,19 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.modeSurface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _selectedSupplierId != null
-                          ? kPrimary
-                          : const Color(0xFFE0E0E0),
+                          ? context.modePrimary
+                          : context.modeBorder,
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.business,
-                        color: kPrimary,
+                        color: context.modePrimary,
                         size: _getIconSize(screenWidth),
                       ),
                       const SizedBox(width: 12),
@@ -722,12 +730,16 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getInputFontSize(screenWidth),
                             color: _selectedSupplierName != null
-                                ? kprimaryTextColor1
-                                : kprimaryTextColor2,
+                                ? context.modeTextPrimary
+                                : context.modeTextSecondary,
                           ),
                         ),
                       ),
-                      Icon(Icons.arrow_drop_down, color: kPrimary, size: 24),
+                      Icon(
+                        Icons.arrow_drop_down,
+                        color: context.modePrimary,
+                        size: 24,
+                      ),
                     ],
                   ),
                 ),
@@ -780,12 +792,15 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
-                                  color: kPrimary,
+                                  color: context.modePrimary,
                                 ),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close),
+                              icon: Icon(
+                                Icons.close,
+                                color: context.modeTextPrimary,
+                              ),
                               onPressed: () => Navigator.pop(context),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
@@ -799,13 +814,16 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                           onChanged: (value) => setState(() {}),
                           decoration: InputDecoration(
                             hintText: 'Search suppliers...',
-                            prefixIcon: const Icon(
+                            prefixIcon: Icon(
                               Icons.search,
-                              color: kPrimary,
+                              color: context.modePrimary,
                             ),
                             suffixIcon: searchController.text.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear),
+                                    icon: Icon(
+                                      Icons.clear,
+                                      color: context.modeTextMuted,
+                                    ),
                                     onPressed: () {
                                       searchController.clear();
                                       setState(() {});
@@ -813,7 +831,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                   )
                                 : null,
                             filled: true,
-                            fillColor: Colors.grey.shade100,
+                            fillColor: context.modeSurfaceAlt,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide.none,
@@ -839,7 +857,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                   Icon(
                                     Icons.search_off,
                                     size: 64,
-                                    color: Colors.grey.shade400,
+                                    color: context.modeTextMuted,
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
@@ -847,7 +865,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                     style: WorkSansAppTextStyles.medium
                                         .copyWith(
                                           fontSize: 16,
-                                          color: Colors.grey.shade600,
+                                          color: context.modeTextSecondary,
                                         ),
                                   ),
                                 ],
@@ -868,12 +886,14 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                 leading: Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: kPrimary.withValues(alpha: 0.1),
+                                    color: context.modePrimary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
                                     Icons.business,
-                                    color: kPrimary,
+                                    color: context.modePrimary,
                                     size: 24,
                                   ),
                                 ),
@@ -884,16 +904,18 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                     fontWeight: isSelected
                                         ? FontWeight.w600
                                         : FontWeight.w500,
-                                    color: kprimaryTextColor1,
+                                    color: context.modeTextPrimary,
                                   ),
                                 ),
                                 trailing: isSelected
-                                    ? Icon(Icons.check_circle, color: kPrimary)
+                                    ? Icon(
+                                        Icons.check_circle,
+                                        color: context.modePrimary,
+                                      )
                                     : null,
                                 selected: isSelected,
-                                selectedTileColor: kPrimary.withValues(
-                                  alpha: 0.05,
-                                ),
+                                selectedTileColor: context.modePrimary
+                                    .withValues(alpha: 0.05),
                                 onTap: () {
                                   this.setState(() {
                                     _selectedSupplierId = supplier.id;
@@ -921,7 +943,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: _getTitleFontSize(screenWidth),
         fontWeight: FontWeight.w600,
-        color: kprimaryTextColor1,
+        color: context.modeTextPrimary,
       ),
     );
   }
@@ -942,45 +964,49 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           maxLines: maxLines,
-          cursorColor: kPrimary,
+          cursorColor: context.modePrimary,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
               fontWeight: FontWeight.w400,
             ),
             prefixIcon: icon != null
-                ? Icon(icon, color: kPrimary, size: _getIconSize(screenWidth))
+                ? Icon(
+                    icon,
+                    color: context.modePrimary,
+                    size: _getIconSize(screenWidth),
+                  )
                 : null,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16,
               vertical: maxLines > 1 ? 16 : 18,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              borderSide: BorderSide(color: context.modeBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              borderSide: BorderSide(color: context.modeBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: kPrimary, width: 2),
+              borderSide: BorderSide(color: context.modePrimary, width: 2),
             ),
           ),
           validator: (value) {
@@ -999,9 +1025,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
       margin: EdgeInsets.only(bottom: _getSpacing(screenWidth)),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kPrimary.withValues(alpha: 0.3)),
+        border: Border.all(color: context.modePrimary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1014,12 +1040,12 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getLabelFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
               ),
               if (_selectedItems.length > 1)
                 IconButton(
-                  icon: const Icon(Icons.close, size: 20, color: Colors.red),
+                  icon: Icon(Icons.close, size: 20, color: context.modeError),
                   onPressed: () {
                     setState(() {
                       _selectedItems[index].dispose(); // ADD THIS
@@ -1049,7 +1075,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   controller: item.orderedQtyController, // ADD
                   onChanged: (value) {
                     setState(() {
-                      item.orderedQty = int.tryParse(value);
+                      item.orderedQty = double.tryParse(value);
                     });
                   },
                 ),
@@ -1063,7 +1089,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   controller: item.receivedQtyController, // ADD
                   onChanged: (value) {
                     setState(() {
-                      item.receivedQty = int.tryParse(value);
+                      item.receivedQty = double.tryParse(value);
                     });
                   },
                 ),
@@ -1080,7 +1106,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getLabelFontSize(screenWidth),
                   fontWeight: FontWeight.w500,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1089,7 +1115,10 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   children: [
                     Expanded(
                       child: RadioListTile<bool>(
-                        title: const Text('Passed'),
+                        title: Text(
+                          'Passed',
+                          style: TextStyle(color: context.modeTextPrimary),
+                        ),
                         value: true,
                         groupValue: item.qualityCheck,
                         onChanged: (value) {
@@ -1100,14 +1129,17 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                             }
                           });
                         },
-                        activeColor: kPrimary,
+                        activeColor: context.modePrimary,
                         contentPadding: EdgeInsets.zero,
                         visualDensity: VisualDensity.compact,
                       ),
                     ),
                     Expanded(
                       child: RadioListTile<bool>(
-                        title: const Text('Failed'),
+                        title: Text(
+                          'Failed',
+                          style: TextStyle(color: context.modeTextPrimary),
+                        ),
                         value: false,
                         groupValue: item.qualityCheck,
                         onChanged: (value) {
@@ -1118,7 +1150,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                             }
                           });
                         },
-                        activeColor: Colors.red,
+                        activeColor: context.modeError,
                         contentPadding: EdgeInsets.zero,
                         visualDensity: VisualDensity.compact,
                       ),
@@ -1150,7 +1182,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -1159,19 +1191,19 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: item.inventoryItem != null
-                    ? kPrimary
-                    : const Color(0xFFE0E0E0),
+                    ? context.modePrimary
+                    : context.modeBorder,
               ),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.inventory_2,
-                  color: kPrimary,
+                  color: context.modePrimary,
                   size: _getIconSize(screenWidth),
                 ),
                 const SizedBox(width: 12),
@@ -1181,12 +1213,16 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getInputFontSize(screenWidth),
                       color: item.inventoryItem != null
-                          ? kprimaryTextColor1
-                          : kprimaryTextColor2,
+                          ? context.modeTextPrimary
+                          : context.modeTextSecondary,
                     ),
                   ),
                 ),
-                Icon(Icons.arrow_drop_down, color: kPrimary, size: 24),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: context.modePrimary,
+                  size: 24,
+                ),
               ],
             ),
           ),
@@ -1238,12 +1274,15 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
-                                  color: kPrimary,
+                                  color: context.modePrimary,
                                 ),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close),
+                              icon: Icon(
+                                Icons.close,
+                                color: context.modeTextPrimary,
+                              ),
                               onPressed: () => Navigator.pop(context),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
@@ -1257,13 +1296,16 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                           onChanged: (value) => setDialogState(() {}),
                           decoration: InputDecoration(
                             hintText: 'Search items...',
-                            prefixIcon: const Icon(
+                            prefixIcon: Icon(
                               Icons.search,
-                              color: kPrimary,
+                              color: context.modePrimary,
                             ),
                             suffixIcon: searchController.text.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear),
+                                    icon: Icon(
+                                      Icons.clear,
+                                      color: context.modeTextMuted,
+                                    ),
                                     onPressed: () {
                                       searchController.clear();
                                       setDialogState(() {});
@@ -1271,7 +1313,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                   )
                                 : null,
                             filled: true,
-                            fillColor: Colors.grey.shade100,
+                            fillColor: context.modeSurfaceAlt,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide.none,
@@ -1297,7 +1339,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                   Icon(
                                     Icons.search_off,
                                     size: 64,
-                                    color: Colors.grey.shade400,
+                                    color: context.modeTextMuted,
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
@@ -1307,7 +1349,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                     style: WorkSansAppTextStyles.medium
                                         .copyWith(
                                           fontSize: 16,
-                                          color: Colors.grey.shade600,
+                                          color: context.modeTextSecondary,
                                         ),
                                   ),
                                   if (searchController.text.isEmpty) ...[
@@ -1317,7 +1359,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: 14,
-                                            color: Colors.grey.shade500,
+                                            color: context.modeTextMuted,
                                           ),
                                     ),
                                   ],
@@ -1339,12 +1381,14 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                 leading: Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: kPrimary.withValues(alpha: 0.1),
+                                    color: context.modePrimary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.inventory_2,
-                                    color: kPrimary,
+                                    color: context.modePrimary,
                                     size: 24,
                                   ),
                                 ),
@@ -1355,27 +1399,26 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                     fontWeight: isSelected
                                         ? FontWeight.w600
                                         : FontWeight.w500,
-                                    color: kprimaryTextColor1,
+                                    color: context.modeTextPrimary,
                                   ),
                                 ),
                                 subtitle: Text(
                                   '${invItem.category} • ${invItem.unit} • SKU: ${invItem.sku}',
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 12,
-                                    color: Colors.grey.shade600,
+                                    color: context.modeTextSecondary,
                                   ),
                                 ),
 
                                 trailing: isSelected
-                                    ? const Icon(
+                                    ? Icon(
                                         Icons.check_circle,
-                                        color: kPrimary,
+                                        color: context.modePrimary,
                                       )
                                     : null,
                                 selected: isSelected,
-                                selectedTileColor: kPrimary.withValues(
-                                  alpha: 0.05,
-                                ),
+                                selectedTileColor: context.modePrimary
+                                    .withValues(alpha: 0.05),
                                 onTap: () {
                                   this.setState(() {
                                     item.inventoryItem = invItem;
@@ -1410,45 +1453,45 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller, // ADD
-          keyboardType: TextInputType.number,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-          ], // ADD - prevents non-numeric input
+            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+          ],
           onChanged: onChanged,
-          cursorColor: kPrimary,
+          cursorColor: context.modePrimary,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 18,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              borderSide: BorderSide(color: context.modeBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              borderSide: BorderSide(color: context.modeBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: kPrimary, width: 2),
+              borderSide: BorderSide(color: context.modePrimary, width: 2),
             ),
           ),
         ),
@@ -1465,7 +1508,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -1476,34 +1519,34 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
               item.qcNote = value;
             });
           },
-          cursorColor: kPrimary,
+          cursorColor: context.modePrimary,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: 'Enter quality check notes',
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              borderSide: BorderSide(color: context.modeBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              borderSide: BorderSide(color: context.modeBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: kPrimary, width: 2),
+              borderSide: BorderSide(color: context.modePrimary, width: 2),
             ),
           ),
         ),
@@ -1520,7 +1563,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -1536,10 +1579,10 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
               builder: (context, child) {
                 return Theme(
                   data: Theme.of(context).copyWith(
-                    colorScheme: const ColorScheme.light(
-                      primary: kPrimary,
-                      onPrimary: Colors.white,
-                      onSurface: Colors.black,
+                    colorScheme: Theme.of(context).colorScheme.copyWith(
+                      primary: context.modePrimary,
+                      onPrimary: context.modeTextInverse,
+                      onSurface: context.modeTextPrimary,
                     ),
                   ),
                   child: child!,
@@ -1555,9 +1598,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE0E0E0)),
+              border: Border.all(color: context.modeBorder),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1569,13 +1612,13 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getInputFontSize(screenWidth),
                     color: item.expiryDate != null
-                        ? kprimaryTextColor1
-                        : kprimaryTextColor2,
+                        ? context.modeTextPrimary
+                        : context.modeTextSecondary,
                   ),
                 ),
                 Icon(
                   Icons.calendar_today,
-                  color: kPrimary,
+                  color: context.modePrimary,
                   size: _getIconSize(screenWidth),
                 ),
               ],
@@ -1599,9 +1642,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           });
         },
         style: OutlinedButton.styleFrom(
-          foregroundColor: kPrimary,
-          backgroundColor: kPrimary.withValues(alpha: 0.1),
-          side: BorderSide(color: kPrimary, width: 1.5),
+          foregroundColor: context.modePrimary,
+          backgroundColor: context.modePrimary.withValues(alpha: 0.1),
+          side: BorderSide(color: context.modePrimary, width: 1.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -1629,11 +1672,11 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           child: ElevatedButton(
             onPressed: isSubmitting ? null : _submitForm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: Colors.grey.shade300,
+              backgroundColor: context.modePrimary,
+              foregroundColor: context.modeTextInverse,
+              disabledBackgroundColor: context.modeSurfaceMuted,
               elevation: 2,
-              shadowColor: kPrimary.withValues(alpha: 0.4),
+              shadowColor: context.modePrimary.withValues(alpha: 0.35),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1642,12 +1685,12 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -1656,7 +1699,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getInputFontSize(screenWidth),
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
                     ],
@@ -1666,7 +1709,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getInputFontSize(screenWidth),
                       fontWeight: FontWeight.w600,
-                      color: kWhite,
+                      color: context.modeTextInverse,
                     ),
                   ),
           ),
@@ -1754,8 +1797,8 @@ class HelpItem {
 // Helper class for SelectedItem
 class SelectedItem {
   InventoryItem? inventoryItem;
-  int? orderedQty;
-  int? receivedQty;
+  double? orderedQty;
+  double? receivedQty;
   bool? qualityCheck;
   String? qcStatus;
   String? qcNote;
@@ -1771,8 +1814,8 @@ class SelectedItem {
   }
 
   bool validate() {
-    final ordered = int.tryParse(orderedQtyController.text.trim());
-    final received = int.tryParse(receivedQtyController.text.trim());
+    final ordered = double.tryParse(orderedQtyController.text.trim());
+    final received = double.tryParse(receivedQtyController.text.trim());
     return inventoryItem != null &&
         ordered != null &&
         ordered > 0 &&

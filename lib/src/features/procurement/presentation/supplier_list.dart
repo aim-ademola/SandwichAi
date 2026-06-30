@@ -67,7 +67,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(),
         body: Column(
           children: [
@@ -81,15 +81,16 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       centerTitle: true,
       title: Text(
         'Suppliers',
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 24,
           fontWeight: FontWeight.w700,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       actions: [
@@ -98,7 +99,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
         //   onPressed: _showFilterSheet,
         // ),
         IconButton(
-          icon: const Icon(Icons.refresh, color: Colors.black),
+          icon: Icon(Icons.refresh, color: context.modeTextPrimary),
           onPressed: () {
             context.read<SupplierBloc>().add(LoadSuppliers());
           },
@@ -110,21 +111,21 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
   Widget _buildSearchAndFilters() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.white,
+      color: context.modeSurface,
       child: Column(
         children: [
           TextField(
-            cursorColor: kPrimary,
+            cursorColor: context.modePrimary,
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search suppliers...',
               hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                color: const Color(0xFF9E9E9E),
+                color: context.modeTextMuted,
               ),
-              prefixIcon: const Icon(Icons.search, color: Color(0xFF757575)),
+              prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: Color(0xFF757575)),
+                      icon: Icon(Icons.clear, color: context.modeTextMuted),
                       onPressed: () {
                         _searchController.clear();
                         context.read<SupplierBloc>().add(LoadSuppliers());
@@ -132,7 +133,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                     )
                   : null,
               filled: true,
-              fillColor: const Color(0xFFF5F5F5),
+              fillColor: context.modeSurfaceAlt,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -200,8 +201,8 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
       builder: (context, state) {
         // Show loading only on first load
         if (state is SupplierLoading && _cachedSuppliers.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(color: kPrimary),
+          return Center(
+            child: CircularProgressIndicator(color: context.modePrimary),
           );
         }
 
@@ -230,7 +231,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
         // Show suppliers list (either from state or cache)
         if (suppliersToShow.isNotEmpty) {
           return RefreshIndicator(
-            color: kPrimary,
+            color: context.modePrimary,
             onRefresh: () async {
               context.read<SupplierBloc>().add(LoadSuppliers());
               // Wait for the refresh to complete
@@ -270,9 +271,9 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          border: Border.all(color: context.modeBorder, width: 1),
         ),
         child: Column(
           children: [
@@ -284,7 +285,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
+                      color: context.modeSurfaceMuted,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: supplier.logo != null
@@ -297,7 +298,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                                 return Icon(
                                   Icons.business,
                                   size: 32,
-                                  color: Colors.grey[400],
+                                  color: context.modeTextMuted,
                                 );
                               },
                             ),
@@ -305,7 +306,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                         : Icon(
                             Icons.business,
                             size: 32,
-                            color: Colors.grey[400],
+                            color: context.modeTextMuted,
                           ),
                   ),
                   const SizedBox(width: 16),
@@ -321,7 +322,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.black,
+                                  color: context.modeTextPrimary,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -332,15 +333,15 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                                 margin: const EdgeInsets.only(left: 8),
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF4CAF50,
-                                  ).withValues(alpha: 0.1),
+                                  color: context.modeSuccess.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.verified,
                                   size: 16,
-                                  color: Color(0xFF4CAF50),
+                                  color: context.modeSuccess,
                                 ),
                               ),
                           ],
@@ -350,7 +351,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                           supplier.supplierType?.replaceAll('_', ' ') ?? '',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: const Color(0xFF757575),
+                            color: context.modeTextSecondary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -359,14 +360,14 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                             Icon(
                               Icons.location_on,
                               size: 14,
-                              color: Colors.grey[600],
+                              color: context.modeTextMuted,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '${supplier.city}, ${supplier.state}',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 12,
-                                color: const Color(0xFF757575),
+                                color: context.modeTextSecondary,
                               ),
                             ),
                           ],
@@ -380,7 +381,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8F6F6),
+                color: context.modeSurfaceAlt,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(16),
                   bottomRight: Radius.circular(16),
@@ -392,7 +393,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                     child: _buildInfoChip(
                       icon: Icons.access_time,
                       label: '${supplier.deliveryLeadTime} days',
-                      color: const Color(0xFF2196F3),
+                      color: context.modeInfo,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -400,7 +401,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                     child: _buildInfoChip(
                       icon: Icons.shopping_cart,
                       label: '${supplier.totalOrders} orders',
-                      color: const Color(0xFFFF9800),
+                      color: context.modeWarning,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -472,14 +473,18 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey[400]),
+          Icon(
+            Icons.inventory_2_outlined,
+            size: 80,
+            color: context.modeTextMuted,
+          ),
           const SizedBox(height: 16),
           Text(
             'No suppliers found',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF757575),
+              color: context.modeTextSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -487,7 +492,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
             'Try adjusting your filters',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: const Color(0xFF9E9E9E),
+              color: context.modeTextMuted,
             ),
           ),
         ],
@@ -502,14 +507,14 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
+            Icon(Icons.error_outline, size: 80, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               'Oops! Something went wrong',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: context.modeTextPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -518,7 +523,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
               state.error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -530,8 +535,8 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -619,9 +624,9 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Clear',
-                            style: TextStyle(color: kBlack),
+                            style: TextStyle(color: context.modeTextPrimary),
                           ),
                         ),
                       ),
@@ -639,15 +644,15 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: kPrimary,
+                            backgroundColor: context.modePrimary,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Apply',
-                            style: TextStyle(color: kWhite),
+                            style: TextStyle(color: context.modeTextInverse),
                           ),
                         ),
                       ),
@@ -683,7 +688,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
           initialValue: value,
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFF5F5F5),
+            fillColor: context.modeSurfaceAlt,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -707,17 +712,17 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
   Color _getStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'ACTIVE':
-        return const Color(0xFF4CAF50);
+        return context.modeSuccess;
       case 'PENDING_APPROVAL':
-        return const Color(0xFFFF9800);
+        return context.modeWarning;
       case 'SUSPENDED':
-        return const Color(0xFFF44336);
+        return context.modeError;
       case 'INACTIVE':
-        return const Color(0xFF9E9E9E);
+        return context.modeTextMuted;
       case 'BLACKLISTED':
-        return const Color(0xFF000000);
+        return context.modeTextPrimary;
       default:
-        return const Color(0xFF757575);
+        return context.modeTextSecondary;
     }
   }
 }

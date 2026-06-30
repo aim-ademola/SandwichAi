@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
@@ -17,7 +19,7 @@ import 'package:sandwich_ai/src/features/stock_control/presentation/shimmer_card
 class RequisitionItem {
   String itemId;
   String itemName;
-  int quantity;
+  double quantity;
 
   RequisitionItem({
     required this.itemId,
@@ -56,6 +58,7 @@ class _StockTransferToProcessingOrKItchenScreenState
   final List<RequisitionItem> _requisitionItems = [];
   List<InventoryItem> _filteredItems = [];
   List<InventoryItem> _allItems = [];
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -120,24 +123,38 @@ class _StockTransferToProcessingOrKItchenScreenState
   }
 
   void _onSearchChanged() {
+    final query = _searchController.text.trim();
     setState(() {
-      if (_searchController.text.isEmpty) {
+      if (query.isEmpty) {
         _filteredItems = _allItems;
       } else {
         _filteredItems = _allItems
             .where(
-              (item) => item.name.toLowerCase().contains(
-                _searchController.text.toLowerCase(),
-              ),
+              (item) => item.name.toLowerCase().contains(query.toLowerCase()),
             )
             .toList();
       }
+    });
+
+    if (orgaID.isEmpty) return;
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) return;
+      context.read<InventoryItemsBloc>().add(
+        LoadInventoryItems(
+          organizationId: orgaID,
+          page: 1,
+          limit: 20,
+          search: query,
+        ),
+      );
     });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchDebounce?.cancel();
     _batchCodeController.dispose();
     _notesController.dispose();
     _searchController.dispose();
@@ -153,7 +170,7 @@ class _StockTransferToProcessingOrKItchenScreenState
       return;
     }
 
-    final quantity = int.tryParse(_quantityController.text.trim());
+    final quantity = double.tryParse(_quantityController.text.trim());
     if (quantity == null || quantity <= 0) {
       _showSnackBar('Please enter a valid quantity', isError: true);
       return;
@@ -1154,7 +1171,9 @@ class _StockTransferToProcessingOrKItchenScreenState
                 child: TextField(
                   controller: _quantityController,
                   cursorColor: kPrimary,
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Enter quantity',
                     hintStyle: WorkSansAppTextStyles.medium.copyWith(

@@ -26,7 +26,7 @@ class CreateStockRequestRequest {
 
 class StockRequestItemInput {
   final String itemId;
-  final int qtyRequested;
+  final double qtyRequested;
 
   StockRequestItemInput({required this.itemId, required this.qtyRequested});
 
@@ -162,8 +162,9 @@ class StockRequestItem {
     );
   }
 
-  int get qtyRequestedValue => int.tryParse(qtyRequested) ?? 0;
-  int? get qtySentValue => qtySent != null ? int.tryParse(qtySent!) : null;
+  double get qtyRequestedValue => double.tryParse(qtyRequested) ?? 0.0;
+  double? get qtySentValue =>
+      qtySent != null ? double.tryParse(qtySent!) : null;
 }
 
 class ItemInfo {

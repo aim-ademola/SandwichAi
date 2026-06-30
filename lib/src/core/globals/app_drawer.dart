@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/globals/account_profile_screen.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/theme/theme_controller.dart';
+import 'package:sandwich_ai/src/features/auth/data/models/login_model.dart';
 
 class AppDrawerShell extends StatelessWidget {
   const AppDrawerShell({
@@ -30,6 +33,11 @@ class AppDrawerShell extends StatelessWidget {
               moduleSubtitle: moduleSubtitle,
             ),
             const SizedBox(height: 14),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: AppDrawerAccountMenu(moduleTitle: moduleTitle),
+            ),
+            const SizedBox(height: 10),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -172,6 +180,149 @@ class _PremiumDrawerHeader extends StatelessWidget {
   }
 }
 
+class AppDrawerAccountMenu extends StatefulWidget {
+  const AppDrawerAccountMenu({super.key, required this.moduleTitle});
+
+  final String moduleTitle;
+
+  @override
+  State<AppDrawerAccountMenu> createState() => _AppDrawerAccountMenuState();
+}
+
+class _AppDrawerAccountMenuState extends State<AppDrawerAccountMenu> {
+  late Future<UserModel?> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = AuthCacheHelper.instance.getUserData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<UserModel?>(
+      future: _future,
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        final name = _displayName(user);
+        final subtitle = [
+          if ((user?.department ?? '').isNotEmpty) user!.department!,
+          if ((user?.role ?? '').isNotEmpty) user!.role!,
+        ].join(' • ');
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => GlobalProfileScreen(
+                    activeModuleTitle: widget.moduleTitle,
+                  ),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Ink(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: context.modeSurfaceAlt,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: context.modeBorder.withValues(alpha: 0.45),
+                ),
+              ),
+              child: Row(
+                children: [
+                  _AccountAvatar(name: name),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: context.modeTextPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle.isEmpty ? 'Account profile' : subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: context.modeTextMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_right_rounded,
+                    color: context.modeTextMuted,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _displayName(UserModel? user) {
+    final fullName = user?.fullName?.trim();
+    if (fullName != null && fullName.isNotEmpty) return fullName;
+
+    final nameParts = [
+      user?.firstName?.trim(),
+      user?.lastName?.trim(),
+    ].whereType<String>().where((part) => part.isNotEmpty).join(' ');
+    if (nameParts.isNotEmpty) return nameParts;
+
+    final email = user?.email.trim();
+    if (email != null && email.isNotEmpty) return email;
+
+    return 'Account';
+  }
+}
+
+class _AccountAvatar extends StatelessWidget {
+  const _AccountAvatar({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final initial = name.trim().isEmpty ? 'A' : name.trim()[0].toUpperCase();
+
+    return Container(
+      width: 42,
+      height: 42,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.modePrimary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        initial,
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          color: context.modePrimary,
+        ),
+      ),
+    );
+  }
+}
+
 class AppDrawerThemeSwitch extends StatelessWidget {
   const AppDrawerThemeSwitch({super.key});
 
@@ -235,20 +386,82 @@ class AppDrawerThemeSwitch extends StatelessWidget {
                   ],
                 ),
               ),
-              Switch.adaptive(
-                value: isDark,
-                activeThumbColor: context.modePrimary,
-                activeTrackColor: context.modePrimary.withValues(alpha: 0.24),
-                onChanged: (value) {
-                  ThemeController.instance.setThemeMode(
-                    value ? ThemeMode.dark : ThemeMode.light,
-                  );
-                },
+              const SizedBox(width: 8),
+              _ThemeModeSelector(
+                selectedMode: isDark ? ThemeMode.dark : ThemeMode.light,
               ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _ThemeModeSelector extends StatelessWidget {
+  const _ThemeModeSelector({required this.selectedMode});
+
+  final ThemeMode selectedMode;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ThemeModeButton(
+            icon: Icons.light_mode_rounded,
+            selected: selectedMode == ThemeMode.light,
+            onTap: () => ThemeController.instance.setThemeMode(ThemeMode.light),
+          ),
+          _ThemeModeButton(
+            icon: Icons.dark_mode_rounded,
+            selected: selectedMode == ThemeMode.dark,
+            onTap: () => ThemeController.instance.setThemeMode(ThemeMode.dark),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ThemeModeButton extends StatelessWidget {
+  const _ThemeModeButton({
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: selected ? null : onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 34,
+        height: 32,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? context.modePrimary : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Icon(
+          icon,
+          size: 18,
+          color: selected ? context.modeTextInverse : context.modeTextMuted,
+        ),
+      ),
     );
   }
 }

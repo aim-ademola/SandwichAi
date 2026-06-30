@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/globals/app_drawer.dart';
-import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/chnge_pwd.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/printer_settings_screen.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_to_stock_requisitin_tab.dart';
 
@@ -15,32 +13,7 @@ class PosAppDrawer extends StatelessWidget {
     return AppDrawerShell(
       moduleTitle: 'Point of Sale',
       moduleSubtitle: 'Customer service, payments and orders',
-      footerChildren: [
-        const AppDrawerThemeSwitch(),
-        const SizedBox(height: 8),
-        _buildDrawerItem(
-          context,
-          icon: Icons.lock_outline_rounded,
-          title: 'Change Password',
-          onTap: () {
-            Navigator.push(
-              context,
-              CupertinoPageRoute(builder: (_) => ChangePasswordScreen()),
-            );
-          },
-        ),
-        const SizedBox(height: 8),
-        _buildDrawerItem(
-          context,
-          icon: Icons.logout,
-          title: 'Logout',
-          isLogout: true,
-          onTap: () {
-            // Show logout confirmation dialog
-            LogoutService.instance.showLogoutDialog(context);
-          },
-        ),
-      ],
+      footerChildren: const [AppDrawerThemeSwitch()],
       children: [
         // _buildDrawerItem(
         //   context,

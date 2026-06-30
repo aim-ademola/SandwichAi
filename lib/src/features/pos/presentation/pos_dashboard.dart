@@ -34,13 +34,14 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
         key: _scaffoldKey,
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         drawer: const PosAppDrawer(),
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: context.modeSurface,
           elevation: 0,
+          surfaceTintColor: Colors.transparent,
           leading: IconButton(
-            icon: const Icon(Icons.menu, color: Colors.black),
+            icon: Icon(Icons.menu, color: context.modeTextPrimary),
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
             },
@@ -50,7 +51,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           actions: [
@@ -61,8 +62,8 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                   icon: Icon(
                     Icons.refresh,
                     color: state is DashboardRefreshing
-                        ? Colors.grey
-                        : Colors.black,
+                        ? context.modeTextMuted
+                        : context.modeTextPrimary,
                   ),
                   onPressed: state is DashboardRefreshing
                       ? null
@@ -79,7 +80,9 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
         body: BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
             if (state is DashboardLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                child: CircularProgressIndicator(color: context.modePrimary),
+              );
             }
 
             if (state is DashboardError) {
@@ -148,7 +151,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: headerTextSize,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                             SizedBox(height: spacing * 2.5),
@@ -156,7 +159,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                             // Snapshot Cards with real data
                             _buildSnapshotCard(
                               asset: 'assets/svg/ordersss.svg',
-                              color: const Color(0xFFE3F2FD),
+                              color: context.modeInfo.withValues(alpha: 0.14),
                               label: 'Orders',
                               value: '${summary.totalOrders}',
                               textSize: bodyTextSize,
@@ -164,7 +167,9 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                             SizedBox(height: spacing * 0.7),
                             _buildSnapshotCard(
                               asset: 'assets/svg/sales.svg',
-                              color: const Color(0xFFE8F5E9),
+                              color: context.modeSuccess.withValues(
+                                alpha: 0.14,
+                              ),
                               label: 'Sales',
                               value: summary.formattedSales,
                               textSize: bodyTextSize,
@@ -172,7 +177,9 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                             SizedBox(height: spacing * 0.7),
                             _buildSnapshotCard(
                               asset: 'assets/svg/pending.svg',
-                              color: const Color(0xFFFFF9C4),
+                              color: context.modeWarning.withValues(
+                                alpha: 0.16,
+                              ),
                               label: 'Pending Orders',
                               value: '${summary.pendingOrders}',
                               textSize: bodyTextSize,
@@ -180,7 +187,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                             SizedBox(height: spacing * 0.7),
                             _buildSnapshotCard(
                               asset: 'assets/svg/sales.svg',
-                              color: const Color(0xFFE1F5FE),
+                              color: context.modeInfo.withValues(alpha: 0.14),
                               label: 'Completed Orders',
                               value: '${summary.completedOrders}',
                               textSize: bodyTextSize,
@@ -188,7 +195,9 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                             SizedBox(height: spacing * 0.7),
                             _buildSnapshotCard(
                               asset: 'assets/svg/sales.svg',
-                              color: const Color(0xFFF3E5F5),
+                              color: context.modePrimaryAlt.withValues(
+                                alpha: 0.14,
+                              ),
                               label: 'Avg Order Value',
                               value: summary.formattedAvgOrder,
                               textSize: bodyTextSize,
@@ -204,8 +213,10 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                           left: 0,
                           right: 0,
                           child: LinearProgressIndicator(
-                            backgroundColor: Colors.grey[200],
-                            valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
+                            backgroundColor: context.modeSurfaceMuted,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              context.modePrimary,
+                            ),
                           ),
                         ),
                     ],
@@ -228,14 +239,14 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            Icon(Icons.error_outline, size: 64, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               'Oops! Something went wrong',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -244,7 +255,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
               error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -256,8 +267,8 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -283,7 +294,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: kPrimary,
+          color: context.modePrimary,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -291,7 +302,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
           children: [
             svg != null
                 ? SvgPicture.asset(svg)
-                : Icon(icon, size: iconSize, color: Colors.white),
+                : Icon(icon, size: iconSize, color: context.modeTextInverse),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -301,10 +312,13 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: textSize,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
-                Icon(Icons.arrow_right_outlined, color: kWhite),
+                Icon(
+                  Icons.arrow_right_outlined,
+                  color: context.modeTextInverse,
+                ),
               ],
             ),
           ],
@@ -323,8 +337,9 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
@@ -344,7 +359,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize,
                 fontWeight: FontWeight.w500,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -353,7 +368,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: textSize,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
         ],

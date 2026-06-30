@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/globals/app_drawer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
-import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart'
-    show LogoutService;
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/chnge_pwd.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/product_intake_tab.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
@@ -88,39 +85,15 @@ class _ProcessingAppDrawerContentState
     return AppDrawerShell(
       moduleTitle: 'Processing',
       moduleSubtitle: 'Production control and recipe operations',
-      footerChildren: [
-        const AppDrawerThemeSwitch(),
-        const SizedBox(height: 8),
-        _buildDrawerItem(
-          context,
-          icon: Icons.lock_outline_rounded,
-          title: 'Change Password',
-          onTap: () {
-            Navigator.push(
-              context,
-              CupertinoPageRoute(builder: (_) => ChangePasswordScreen()),
-            );
-          },
-        ),
-        const SizedBox(height: 8),
-        _buildDrawerItem(
-          context,
-          icon: Icons.logout,
-          title: 'Logout',
-          isLogout: true,
-          onTap: () {
-            LogoutService.instance.showLogoutDialog(context);
-          },
-        ),
-      ],
+      footerChildren: const [AppDrawerThemeSwitch()],
       children: [
         Showcase(
           key: _assignTaskKey,
           description:
               'Create and assign tasks to your team members. Track progress and manage workload efficiently.',
           targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
+          tooltipBackgroundColor: context.modePrimary,
+          textColor: context.modeTextInverse,
           targetPadding: const EdgeInsets.all(8),
           child: _buildDrawerItem(
             context,
@@ -140,8 +113,8 @@ class _ProcessingAppDrawerContentState
           description:
               'Review and approve stock transfer requests from Stock Control',
           targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
+          tooltipBackgroundColor: context.modePrimary,
+          textColor: context.modeTextInverse,
           targetPadding: const EdgeInsets.all(8),
           child: _buildDrawerItem(
             context,
@@ -157,8 +130,8 @@ class _ProcessingAppDrawerContentState
           key: _stockRequisitionKey,
           description: 'Request and track requisitions to Stock Control',
           targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
+          tooltipBackgroundColor: context.modePrimary,
+          textColor: context.modeTextInverse,
           targetPadding: const EdgeInsets.all(8),
           child: _buildDrawerItem(
             context,
@@ -181,8 +154,8 @@ class _ProcessingAppDrawerContentState
           description:
               'Record and track incoming products. Monitor quality status and manage product intakes efficiently.',
           targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
+          tooltipBackgroundColor: context.modePrimary,
+          textColor: context.modeTextInverse,
           targetPadding: const EdgeInsets.all(8),
           child: _buildDrawerItem(
             context,
@@ -204,8 +177,8 @@ class _ProcessingAppDrawerContentState
           description:
               'Monitor recipe adherence and ensure quality standards are maintained across all production.',
           targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
+          tooltipBackgroundColor: context.modePrimary,
+          textColor: context.modeTextInverse,
           targetPadding: const EdgeInsets.all(8),
           child: _buildDrawerItem(
             context,
@@ -222,8 +195,8 @@ class _ProcessingAppDrawerContentState
           description:
               'Verify production outputs and validate quantities against expected results.',
           targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
+          tooltipBackgroundColor: context.modePrimary,
+          textColor: context.modeTextInverse,
           targetPadding: const EdgeInsets.all(8),
           child: _buildDrawerItem(
             context,
@@ -240,8 +213,8 @@ class _ProcessingAppDrawerContentState
           description:
               'Track and analyze wastage patterns to optimize operations and reduce costs.',
           targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
+          tooltipBackgroundColor: context.modePrimary,
+          textColor: context.modeTextInverse,
           targetPadding: const EdgeInsets.all(8),
           child: _buildDrawerItem(
             context,

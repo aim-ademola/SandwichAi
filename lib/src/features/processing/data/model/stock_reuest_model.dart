@@ -211,16 +211,16 @@ class StockRequest {
 
   int get totalItemsCount => items.length;
 
-  int get totalQuantityRequested => items.fold(
-    0,
-    (sum, item) => sum + (int.tryParse(item.qtyRequested) ?? 0),
+  double get totalQuantityRequested => items.fold(
+    0.0,
+    (sum, item) => sum + (double.tryParse(item.qtyRequested) ?? 0.0),
   );
 }
 
 // Create Stock Request Models
 class CreateStockRequestItem {
   final String itemId;
-  final int qtyRequested;
+  final double qtyRequested;
 
   CreateStockRequestItem({required this.itemId, required this.qtyRequested});
 

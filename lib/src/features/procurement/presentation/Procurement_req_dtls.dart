@@ -14,7 +14,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: _buildBody(context),
       ),
@@ -23,10 +23,11 @@ class ProcurementDetailsScreen extends StatelessWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -34,7 +35,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
@@ -58,17 +59,17 @@ class ProcurementDetailsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildOrderSummaryCard(constraints.maxWidth),
+                  _buildOrderSummaryCard(context, constraints.maxWidth),
                   const SizedBox(height: 16),
-                  _buildOrderInfoCard(constraints.maxWidth),
+                  _buildOrderInfoCard(context, constraints.maxWidth),
                   const SizedBox(height: 16),
-                  _buildItemsSection(constraints.maxWidth),
+                  _buildItemsSection(context, constraints.maxWidth),
                   const SizedBox(height: 16),
                   if (order.notes != null) ...[
-                    _buildNotesCard(constraints.maxWidth),
+                    _buildNotesCard(context, constraints.maxWidth),
                     const SizedBox(height: 16),
                   ],
-                  _buildTimelineCard(constraints.maxWidth),
+                  _buildTimelineCard(context, constraints.maxWidth),
                 ],
               ),
             ),
@@ -78,13 +79,13 @@ class ProcurementDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderSummaryCard(double screenWidth) {
+  Widget _buildOrderSummaryCard(BuildContext context, double screenWidth) {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,32 +98,35 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getTitleFontSize(screenWidth),
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
-              _buildStatusBadge(order.status, screenWidth),
+              _buildStatusBadge(context, order.status, screenWidth),
             ],
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
+            context,
             'Requested By',
             order.requestingDepartment,
             screenWidth,
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
+            context,
             'Branch',
             '${order.branch.name} (${order.branch.branchCode})',
             screenWidth,
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
+            context,
             'Priority',
             order.priority,
             screenWidth,
             valueColor: order.priority == 'URGENT'
-                ? Colors.red.shade700
-                : const Color(0xFF757575),
+                ? context.modeError
+                : context.modeTextSecondary,
           ),
           const Divider(height: 24),
           Row(
@@ -133,7 +137,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getBodyFontSize(screenWidth),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextSecondary,
                 ),
               ),
               Text(
@@ -141,7 +145,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getAmountFontSize(screenWidth),
                   fontWeight: FontWeight.bold,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
               ),
             ],
@@ -151,13 +155,13 @@ class ProcurementDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderInfoCard(double screenWidth) {
+  Widget _buildOrderInfoCard(BuildContext context, double screenWidth) {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,11 +171,12 @@ class ProcurementDetailsScreen extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getSubtitleFontSize(screenWidth),
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 16),
           _buildInfoRow(
+            context,
             'Expected Delivery',
             order.formattedExpectedDelivery,
             screenWidth,
@@ -179,15 +184,22 @@ class ProcurementDetailsScreen extends StatelessWidget {
           const SizedBox(height: 8),
           if (order.actualDelivery != null) ...[
             _buildInfoRow(
+              context,
               'Actual Delivery',
               _formatDate(order.actualDelivery!),
               screenWidth,
             ),
             const SizedBox(height: 8),
           ],
-          _buildInfoRow('Created Date', order.formattedCreatedAt, screenWidth),
+          _buildInfoRow(
+            context,
+            'Created Date',
+            order.formattedCreatedAt,
+            screenWidth,
+          ),
           const SizedBox(height: 8),
           _buildInfoRow(
+            context,
             'Items Count',
             '${order.itemCount} item${order.itemCount != 1 ? 's' : ''}',
             screenWidth,
@@ -197,13 +209,13 @@ class ProcurementDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildItemsSection(double screenWidth) {
+  Widget _buildItemsSection(BuildContext context, double screenWidth) {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +225,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getSubtitleFontSize(screenWidth),
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -222,8 +234,8 @@ class ProcurementDetailsScreen extends StatelessWidget {
             final item = entry.value;
             return Column(
               children: [
-                if (index > 0) const Divider(height: 24),
-                _buildItemCard(item, screenWidth),
+                if (index > 0) Divider(height: 24, color: context.modeDivider),
+                _buildItemCard(context, item, screenWidth),
               ],
             );
           }).toList(),
@@ -232,7 +244,11 @@ class ProcurementDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildItemCard(ProcurementItem item, double screenWidth) {
+  Widget _buildItemCard(
+    BuildContext context,
+    ProcurementItem item,
+    double screenWidth,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -245,14 +261,17 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getBodyFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: _getItemStatusColor(item.status).withValues(alpha: 0.1),
+                color: _getItemStatusColor(
+                  context,
+                  item.status,
+                ).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -260,7 +279,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getSmallFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: _getItemStatusColor(item.status),
+                  color: _getItemStatusColor(context, item.status),
                 ),
               ),
             ),
@@ -271,6 +290,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildItemDetail(
+                context,
                 'Qty Needed',
                 '${item.qtyNeeded} ${item.item.unit}',
                 screenWidth,
@@ -278,6 +298,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
             ),
             Expanded(
               child: _buildItemDetail(
+                context,
                 'Unit Cost',
                 '₦${_formatAmount(item.unitCostDouble)}',
                 screenWidth,
@@ -290,6 +311,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildItemDetail(
+                context,
                 'Current Stock',
                 '${item.currentStock} ${item.item.unit}',
                 screenWidth,
@@ -297,6 +319,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
             ),
             Expanded(
               child: _buildItemDetail(
+                context,
                 'Total Cost',
                 '₦${_formatAmount(item.totalCostDouble)}',
                 screenWidth,
@@ -310,6 +333,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildItemDetail(
+    BuildContext context,
     String label,
     String value,
     double screenWidth, {
@@ -323,7 +347,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getSmallFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF757575),
+            color: context.modeTextSecondary,
           ),
         ),
         const SizedBox(height: 2),
@@ -332,25 +356,28 @@ class ProcurementDetailsScreen extends StatelessWidget {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getBodyFontSize(screenWidth),
             fontWeight: highlight ? FontWeight.bold : FontWeight.w500,
-            color: highlight ? kPrimary : Colors.black,
+            color: highlight ? context.modePrimary : context.modeTextPrimary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildNotesCard(double screenWidth) {
+  Widget _buildNotesCard(BuildContext context, double screenWidth) {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.amber.shade50,
+        color: context.modeWarning.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber.shade200, width: 1),
+        border: Border.all(
+          color: context.modeWarning.withValues(alpha: 0.28),
+          width: 1,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.note_alt_outlined, color: Colors.amber.shade700, size: 20),
+          Icon(Icons.note_alt_outlined, color: context.modeWarning, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -361,7 +388,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getBodyFontSize(screenWidth),
                     fontWeight: FontWeight.w600,
-                    color: Colors.amber.shade900,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -370,7 +397,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getBodyFontSize(screenWidth),
                     fontWeight: FontWeight.w400,
-                    color: Colors.amber.shade900,
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ],
@@ -381,13 +408,13 @@ class ProcurementDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineCard(double screenWidth) {
+  Widget _buildTimelineCard(BuildContext context, double screenWidth) {
     return Container(
       padding: EdgeInsets.all(_getCardPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,34 +424,37 @@ class ProcurementDetailsScreen extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getSubtitleFontSize(screenWidth),
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 16),
           _buildTimelineItem(
+            context,
             'Created',
             order.formattedCreatedAt,
             Icons.create,
-            Colors.blue,
+            context.modeInfo,
             screenWidth,
           ),
           if (order.approvedBy != null) ...[
             const SizedBox(height: 12),
             _buildTimelineItem(
+              context,
               'Approved by ${order.approvedBy}',
               _formatDate(order.approvedAt!),
               Icons.check_circle,
-              Colors.green,
+              context.modeSuccess,
               screenWidth,
             ),
           ],
           if (order.rejectedBy != null) ...[
             const SizedBox(height: 12),
             _buildTimelineItem(
+              context,
               'Rejected by ${order.rejectedBy}',
               _formatDate(order.rejectedAt!),
               Icons.cancel,
-              Colors.red,
+              context.modeError,
               screenWidth,
             ),
             if (order.rejectionNote != null) ...[
@@ -436,7 +466,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getSmallFontSize(screenWidth),
                     fontWeight: FontWeight.w400,
-                    color: Colors.red.shade700,
+                    color: context.modeError,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -449,6 +479,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildTimelineItem(
+    BuildContext context,
     String title,
     String date,
     IconData icon,
@@ -475,7 +506,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getBodyFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -484,7 +515,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getSmallFontSize(screenWidth),
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextSecondary,
                 ),
               ),
             ],
@@ -495,6 +526,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow(
+    BuildContext context,
     String label,
     String value,
     double screenWidth, {
@@ -508,7 +540,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getBodyFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: const Color(0xFF757575),
+            color: context.modeTextSecondary,
           ),
         ),
         Flexible(
@@ -517,7 +549,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getBodyFontSize(screenWidth),
               fontWeight: FontWeight.w600,
-              color: valueColor ?? Colors.black,
+              color: valueColor ?? context.modeTextPrimary,
             ),
             textAlign: TextAlign.right,
           ),
@@ -526,30 +558,34 @@ class ProcurementDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(String status, double screenWidth) {
+  Widget _buildStatusBadge(
+    BuildContext context,
+    String status,
+    double screenWidth,
+  ) {
     Color bgColor;
     Color textColor;
 
     switch (status.toUpperCase()) {
       case 'PENDING':
-        bgColor = const Color(0xFFF7EADD);
-        textColor = kPrimary;
+        bgColor = context.modePrimary.withValues(alpha: 0.12);
+        textColor = context.modePrimary;
         break;
       case 'APPROVED':
-        bgColor = const Color(0xFFE8F5E9);
-        textColor = const Color(0xFF4CAF50);
+        bgColor = context.modeSuccess.withValues(alpha: 0.12);
+        textColor = context.modeSuccess;
         break;
       case 'REJECTED':
-        bgColor = const Color(0xFFFFEBEE);
-        textColor = const Color(0xFFE53935);
+        bgColor = context.modeError.withValues(alpha: 0.12);
+        textColor = context.modeError;
         break;
       case 'COMPLETED':
-        bgColor = const Color(0xFFE3F2FD);
-        textColor = const Color(0xFF1976D2);
+        bgColor = context.modeInfo.withValues(alpha: 0.12);
+        textColor = context.modeInfo;
         break;
       default:
-        bgColor = const Color(0xFFF5F5F5);
-        textColor = const Color(0xFF757575);
+        bgColor = context.modeSurfaceMuted;
+        textColor = context.modeTextSecondary;
     }
 
     return Container(
@@ -572,18 +608,18 @@ class ProcurementDetailsScreen extends StatelessWidget {
     );
   }
 
-  Color _getItemStatusColor(String status) {
+  Color _getItemStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return kPrimary;
+        return context.modePrimary;
       case 'APPROVED':
-        return const Color(0xFF4CAF50);
+        return context.modeSuccess;
       case 'REJECTED':
-        return const Color(0xFFE53935);
+        return context.modeError;
       case 'COMPLETED':
-        return const Color(0xFF1976D2);
+        return context.modeInfo;
       default:
-        return const Color(0xFF757575);
+        return context.modeTextSecondary;
     }
   }
 

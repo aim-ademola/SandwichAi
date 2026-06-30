@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,6 +38,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
   List<InventoryItem> _allItems = [];
   // Add field:
   String _orgId = '';
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -56,6 +59,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _quantityController.dispose();
     _valueLostController.dispose();
@@ -65,18 +69,31 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
   }
 
   void _onSearchChanged() {
+    final query = _searchController.text.trim();
     setState(() {
-      if (_searchController.text.isEmpty) {
+      if (query.isEmpty) {
         _filteredItems = _allItems;
       } else {
         _filteredItems = _allItems
             .where(
-              (item) => item.name.toLowerCase().contains(
-                _searchController.text.toLowerCase(),
-              ),
+              (item) => item.name.toLowerCase().contains(query.toLowerCase()),
             )
             .toList();
       }
+    });
+
+    if (_orgId.isEmpty) return;
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) return;
+      context.read<InventoryItemsBloc>().add(
+        LoadInventoryItems(
+          organizationId: _orgId,
+          page: 1,
+          limit: 100,
+          search: query,
+        ),
+      );
     });
   }
 
@@ -97,7 +114,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
     }
 
     try {
-      final quantity = int.parse(_quantityController.text.trim());
+      final quantity = double.parse(_quantityController.text.trim());
       final valueLost = double.parse(_valueLostController.text.trim());
       final empId = await AuthCacheHelper.instance.getEmpID() ?? '';
       final bid = await AuthCacheHelper.instance.getBranchID() ?? '';
@@ -394,7 +411,10 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                   controller: _quantityController,
                                   label: 'Quantity',
                                   hint: 'Enter quantity',
-                                  keyboardType: TextInputType.number,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
                                   onHelpTap: () => _showHelpBottomSheet(
                                     title: 'Quantity',
                                     description:
@@ -411,7 +431,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                     if (value == null || value.isEmpty) {
                                       return 'Please enter quantity';
                                     }
-                                    if (int.tryParse(value) == null) {
+                                    if (double.tryParse(value) == null) {
                                       return 'Please enter a valid number';
                                     }
                                     return null;

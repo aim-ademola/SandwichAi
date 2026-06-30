@@ -52,9 +52,11 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
           SnackBar(
             content: Text(
               'Please select a category',
-              style: WorkSansAppTextStyles.medium.copyWith(color: Colors.white),
+              style: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modeTextInverse,
+              ),
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: context.modeError,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -87,7 +89,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
     // Show image picker options
     showModalBottomSheet(
       context: rootContext,
-      backgroundColor: Colors.white,
+      backgroundColor: rootContext.modeSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -101,17 +103,17 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: rootContext.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 20),
             ListTile(
-              leading: const Icon(Icons.camera_alt, color: kPrimary),
+              leading: Icon(Icons.camera_alt, color: rootContext.modePrimary),
               title: Text(
                 'Camera',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 16,
-                  color: kprimaryTextColor1,
+                  color: rootContext.modeTextPrimary,
                 ),
               ),
               onTap: () {
@@ -128,7 +130,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     content: Text(
                       'Camera feature coming soon',
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        color: Colors.white,
+                        color: rootContext.modeTextInverse,
                       ),
                     ),
                   ),
@@ -136,12 +138,15 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library, color: kPrimary),
+              leading: Icon(
+                Icons.photo_library,
+                color: rootContext.modePrimary,
+              ),
               title: Text(
                 'Gallery',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 16,
-                  color: kprimaryTextColor1,
+                  color: rootContext.modeTextPrimary,
                 ),
               ),
               onTap: () {
@@ -158,7 +163,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     content: Text(
                       'Gallery feature coming soon',
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        color: Colors.white,
+                        color: rootContext.modeTextInverse,
                       ),
                     ),
                   ),
@@ -175,7 +180,6 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
   Widget build(BuildContext context) {
     return BlocListener<MenuItemsBloc, MenuItemsState>(
       listener: (context, state) {
-        final rootContext = Navigator.of(context, rootNavigator: true).context;
         if (state is MenuItemCreated) {
           setState(() {
             _isSubmitting = false;
@@ -190,10 +194,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                 content: Text(
                   'Menu item "${state.menuItem.dishName}" added successfully',
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
-                backgroundColor: kGreen,
+                backgroundColor: context.modeSuccess,
                 duration: const Duration(seconds: 2),
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
@@ -212,10 +216,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
               content: Text(
                 state.error,
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                 ),
               ),
-              backgroundColor: Colors.red,
+              backgroundColor: context.modeError,
               duration: const Duration(seconds: 3),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -226,7 +230,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
         }
       },
       child: Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: context.modeSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: SingleChildScrollView(
           child: Padding(
@@ -246,15 +250,12 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(
-                          Icons.close,
-                          color: kprimaryTextColor2,
-                        ),
+                        icon: Icon(Icons.close, color: context.modeTextMuted),
                         onPressed: _isSubmitting
                             ? null
                             : () => Navigator.of(context).pop(),
@@ -271,7 +272,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -281,26 +282,35 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                       hintText: 'Select category',
                       hintStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextMuted,
                       ),
                       filled: true,
-                      fillColor: const Color(0xFFF8F6F6),
+                      fillColor: context.modeSurfaceAlt,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: context.modeBorder),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: context.modeBorder),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: context.modePrimary),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
                       ),
                     ),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_drop_down,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextMuted,
                     ),
+                    dropdownColor: context.modeSurface,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                     items: _categories.map((category) {
                       return DropdownMenuItem<String>(
@@ -324,7 +334,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -335,13 +345,21 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                       hintText: 'Enter item name',
                       hintStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextMuted,
                       ),
                       filled: true,
-                      fillColor: const Color(0xFFF8F6F6),
+                      fillColor: context.modeSurfaceAlt,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: context.modeBorder),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: context.modeBorder),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: context.modePrimary),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -350,7 +368,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     ),
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -367,7 +385,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -379,13 +397,21 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                       hintText: 'Enter item description',
                       hintStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextMuted,
                       ),
                       filled: true,
-                      fillColor: const Color(0xFFF8F6F6),
+                      fillColor: context.modeSurfaceAlt,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: context.modeBorder),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: context.modeBorder),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: context.modePrimary),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -394,7 +420,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     ),
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -418,7 +444,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -434,13 +460,27 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                                 hintStyle: WorkSansAppTextStyles.medium
                                     .copyWith(
                                       fontSize: 14,
-                                      color: kprimaryTextColor2,
+                                      color: context.modeTextMuted,
                                     ),
                                 filled: true,
-                                fillColor: const Color(0xFFF8F6F6),
+                                fillColor: context.modeSurfaceAlt,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide.none,
+                                  borderSide: BorderSide(
+                                    color: context.modeBorder,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: context.modeBorder,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: context.modePrimary,
+                                  ),
                                 ),
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -449,7 +489,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                               ),
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
@@ -476,7 +516,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -492,13 +532,27 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                                 hintStyle: WorkSansAppTextStyles.medium
                                     .copyWith(
                                       fontSize: 14,
-                                      color: kprimaryTextColor2,
+                                      color: context.modeTextMuted,
                                     ),
                                 filled: true,
-                                fillColor: const Color(0xFFF8F6F6),
+                                fillColor: context.modeSurfaceAlt,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide.none,
+                                  borderSide: BorderSide(
+                                    color: context.modeBorder,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: context.modeBorder,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: context.modePrimary,
+                                  ),
                                 ),
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -507,7 +561,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                               ),
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
@@ -536,7 +590,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                       Switch(
@@ -548,7 +602,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                                   _isAvailable = value;
                                 });
                               },
-                        activeThumbColor: kPrimary,
+                        activeThumbColor: context.modePrimary,
                       ),
                     ],
                   ),
@@ -560,7 +614,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -570,10 +624,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                       width: double.infinity,
                       height: 120,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8F6F6),
+                        color: context.modeSurfaceAlt,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.grey[300]!,
+                          color: context.modeBorder,
                           style: BorderStyle.solid,
                           width: 1,
                         ),
@@ -585,14 +639,14 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                                 Icon(
                                   Icons.add_photo_alternate_outlined,
                                   size: 40,
-                                  color: kprimaryTextColor2,
+                                  color: context.modeTextMuted,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'Tap to add image',
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 14,
-                                    color: kprimaryTextColor2,
+                                    color: context.modeTextMuted,
                                   ),
                                 ),
                               ],
@@ -603,7 +657,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                                   child: Icon(
                                     Icons.image,
                                     size: 60,
-                                    color: kprimaryTextColor2,
+                                    color: context.modeTextMuted,
                                   ),
                                 ),
                                 Positioned(
@@ -625,10 +679,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                                         ),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.close,
                                         size: 20,
-                                        color: Colors.white,
+                                        color: context.modeTextInverse,
                                       ),
                                     ),
                                   ),
@@ -646,8 +700,9 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     child: ElevatedButton(
                       onPressed: _isSubmitting ? null : _handleDone,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimary,
-                        disabledBackgroundColor: kPrimary.withValues(
+                        backgroundColor: context.modePrimary,
+                        foregroundColor: context.modeTextInverse,
+                        disabledBackgroundColor: context.modePrimary.withValues(
                           alpha: 0.5,
                         ),
                         shape: RoundedRectangleBorder(
@@ -656,13 +711,13 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                         elevation: 0,
                       ),
                       child: _isSubmitting
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  context.modeTextInverse,
                                 ),
                               ),
                             )
@@ -671,7 +726,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: context.modeTextInverse,
                               ),
                             ),
                     ),

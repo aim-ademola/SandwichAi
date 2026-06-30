@@ -56,7 +56,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
       child: Scaffold(
         drawer: ProcurementAppDrawer(),
         key: _scaffoldKey,
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: _buildBody(context),
       ),
@@ -65,10 +65,11 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.menu, color: Colors.black),
+        icon: Icon(Icons.menu, color: context.modeTextPrimary),
         onPressed: () {
           _scaffoldKey.currentState?.openDrawer();
         },
@@ -78,13 +79,13 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.refresh, color: Colors.black),
+          icon: Icon(Icons.refresh, color: context.modeTextPrimary),
           onPressed: () {
             context.read<ProcurementBloc>().add(
               const RefreshProcurementOrders(),
@@ -121,12 +122,12 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
         }
 
         return Container(
-          color: Colors.white,
+          color: context.modeSurface,
           child: TabBar(
             controller: _tabController,
             isScrollable: false,
-            labelColor: kPrimary,
-            unselectedLabelColor: const Color(0xFF757575),
+            labelColor: context.modePrimary,
+            unselectedLabelColor: context.modeTextSecondary,
             labelStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: tabFontSize,
               fontWeight: FontWeight.w600,
@@ -135,7 +136,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
               fontSize: tabFontSize,
               fontWeight: FontWeight.w500,
             ),
-            indicatorColor: kPrimary,
+            indicatorColor: context.modePrimary,
             indicatorWeight: 3,
             tabs: [
               Tab(text: 'Pending ($pendingCount)'),
@@ -153,8 +154,8 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
     return BlocBuilder<ProcurementBloc, ProcurementState>(
       builder: (context, state) {
         if (state is ProcurementLoading) {
-          return const Center(
-            child: CircularProgressIndicator(color: kPrimary),
+          return Center(
+            child: CircularProgressIndicator(color: context.modePrimary),
           );
         }
 
@@ -178,11 +179,11 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
           return Stack(
             children: [
               _buildOrderList(filteredOrders),
-              const Positioned(
+              Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: LinearProgressIndicator(color: kPrimary),
+                child: LinearProgressIndicator(color: context.modePrimary),
               ),
             ],
           );
@@ -200,13 +201,17 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(_getErrorIcon(state.errorType), size: 64, color: Colors.red),
+            Icon(
+              _getErrorIcon(state.errorType),
+              size: 64,
+              color: context.modeError,
+            ),
             const SizedBox(height: 16),
             Text(
               state.error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 16,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -222,8 +227,8 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
               ),
             ),
           ],
@@ -237,17 +242,17 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.receipt_long_outlined,
             size: 64,
-            color: Color(0xFF757575),
+            color: context.modeTextMuted,
           ),
           const SizedBox(height: 16),
           Text(
             'No procurement requests found',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 16,
-              color: const Color(0xFF757575),
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -262,7 +267,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
           'No requests in this category',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 16,
-            color: const Color(0xFF757575),
+            color: context.modeTextSecondary,
           ),
         ),
       );
@@ -313,9 +318,9 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
       child: Container(
         padding: EdgeInsets.all(_getCardPadding(screenWidth)),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          border: Border.all(color: context.modeBorder, width: 1),
         ),
         child: Column(
           children: [
@@ -330,7 +335,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: supplierFontSize,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -339,7 +344,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: orderNumberFontSize,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF757575),
+                          color: context.modeTextSecondary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -348,7 +353,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: orderNumberFontSize - 1,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFF757575),
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ],
@@ -362,7 +367,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: amountFontSize,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -380,20 +385,20 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: context.modeError.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.warning, size: 14, color: Colors.red.shade700),
+                    Icon(Icons.warning, size: 14, color: context.modeError),
                     const SizedBox(width: 4),
                     Text(
                       'URGENT',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Colors.red.shade700,
+                        color: context.modeError,
                       ),
                     ),
                   ],
@@ -423,8 +428,8 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: kPrimary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: context.modePrimary,
+                    foregroundColor: context.modeTextInverse,
                     padding: EdgeInsets.symmetric(
                       vertical: _getButtonPaddingVertical(screenWidth),
                       horizontal: 16,
@@ -449,24 +454,24 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
 
     switch (status.toUpperCase()) {
       case 'PENDING':
-        bgColor = const Color(0xFFF7EADD);
-        textColor = kPrimary;
+        bgColor = context.modePrimary.withValues(alpha: 0.12);
+        textColor = context.modePrimary;
         break;
       case 'APPROVED':
-        bgColor = const Color(0xFFE8F5E9);
-        textColor = const Color(0xFF4CAF50);
+        bgColor = context.modeSuccess.withValues(alpha: 0.12);
+        textColor = context.modeSuccess;
         break;
       case 'REJECTED':
-        bgColor = const Color(0xFFFFEBEE);
-        textColor = const Color(0xFFE53935);
+        bgColor = context.modeError.withValues(alpha: 0.12);
+        textColor = context.modeError;
         break;
       case 'COMPLETED':
-        bgColor = const Color(0xFFE3F2FD);
-        textColor = const Color(0xFF1976D2);
+        bgColor = context.modeInfo.withValues(alpha: 0.12);
+        textColor = context.modeInfo;
         break;
       default:
-        bgColor = const Color(0xFFF5F5F5);
-        textColor = const Color(0xFF757575);
+        bgColor = context.modeSurfaceMuted;
+        textColor = context.modeTextSecondary;
     }
 
     return Container(

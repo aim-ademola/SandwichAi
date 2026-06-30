@@ -1,9 +1,9 @@
 class BranchStockRequest {
   final String itemId;
   final String branchId;
-  final int currentStock;
-  final int reorderLevel;
-  final int maxLevel;
+  final double currentStock;
+  final double reorderLevel;
+  final double maxLevel;
   final double unitCost;
   final String expiryDate;
 
@@ -33,9 +33,9 @@ class BranchStockRequest {
     return BranchStockRequest(
       itemId: json['itemId'] as String,
       branchId: json['branchId'] as String,
-      currentStock: json['currentStock'] as int,
-      reorderLevel: json['reorderLevel'] as int,
-      maxLevel: json['maxLevel'] as int,
+      currentStock: (json['currentStock'] as num).toDouble(),
+      reorderLevel: (json['reorderLevel'] as num).toDouble(),
+      maxLevel: (json['maxLevel'] as num).toDouble(),
       unitCost: (json['unitCost'] as num).toDouble(),
       expiryDate: json['expiryDate'] as String,
     );
@@ -71,9 +71,12 @@ class BranchStockResponse {
   String? get id => data is Map ? data['id'] as String? : null;
   String? get itemId => data is Map ? data['itemId'] as String? : null;
   String? get branchId => data is Map ? data['branchId'] as String? : null;
-  int? get currentStock => data is Map ? data['currentStock'] as int? : null;
-  int? get reorderLevel => data is Map ? data['reorderLevel'] as int? : null;
-  int? get maxLevel => data is Map ? data['maxLevel'] as int? : null;
+  double? get currentStock =>
+      data is Map ? (data['currentStock'] as num?)?.toDouble() : null;
+  double? get reorderLevel =>
+      data is Map ? (data['reorderLevel'] as num?)?.toDouble() : null;
+  double? get maxLevel =>
+      data is Map ? (data['maxLevel'] as num?)?.toDouble() : null;
   double? get unitCost =>
       data is Map ? (data['unitCost'] as num?)?.toDouble() : null;
   String? get expiryDate => data is Map ? data['expiryDate'] as String? : null;

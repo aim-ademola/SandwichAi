@@ -208,8 +208,8 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     // Calculate shortage and recommended quantity
     final shortage = stockItem.reorderLevelValue - stockItem.currentStockValue;
     final qtyNeeded = shortage > 0
-        ? (shortage * 1.2).ceil()
-        : (stockItem.reorderLevelValue * 0.5).ceil();
+        ? (shortage * 1.2).ceilToDouble()
+        : (stockItem.reorderLevelValue * 0.5).ceilToDouble();
 
     // Check if item already added
     if (_addedItems.any((item) => item.itemId == inventoryItem.id)) {
@@ -384,7 +384,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       return;
     }
 
-    final qty = int.tryParse(_qtyController.text.trim());
+    final qty = double.tryParse(_qtyController.text.trim());
 
     if (qty == null || qty <= 0) {
       _showSnackBar('Please enter a valid quantity', isError: true);
@@ -1099,7 +1099,9 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               SizedBox(height: 12),
               TextFormField(
                 controller: _qtyController,
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getInputFontSize(screenWidth),
                   fontWeight: FontWeight.w400,
@@ -1155,12 +1157,14 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     vertical: _getInputPaddingVertical(screenWidth),
                   ),
                 ),
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                ],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter quantity';
                   }
-                  final qty = int.tryParse(value);
+                  final qty = double.tryParse(value);
                   if (qty == null || qty <= 0) {
                     return 'Please enter a valid quantity';
                   }

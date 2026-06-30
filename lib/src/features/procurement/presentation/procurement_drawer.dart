@@ -4,8 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_drawer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
-import 'package:sandwich_ai/src/features/auth/data/repo/logout_service.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/chnge_pwd.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_good_reveived_tab.dart';
@@ -64,31 +62,7 @@ class _ProcurementAppDrawerContentState
     return AppDrawerShell(
       moduleTitle: 'Procurement',
       moduleSubtitle: 'Supplier orders and received goods',
-      footerChildren: [
-        const AppDrawerThemeSwitch(),
-        const SizedBox(height: 8),
-        _buildDrawerItem(
-          context,
-          icon: Icons.lock_outline_rounded,
-          title: 'Change Password',
-          onTap: () {
-            Navigator.push(
-              context,
-              CupertinoPageRoute(builder: (_) => ChangePasswordScreen()),
-            );
-          },
-        ),
-        const SizedBox(height: 8),
-        _buildDrawerItem(
-          context,
-          icon: Icons.logout,
-          title: 'Logout',
-          isLogout: true,
-          onTap: () {
-            LogoutService.instance.showLogoutDialog(context);
-          },
-        ),
-      ],
+      footerChildren: const [AppDrawerThemeSwitch()],
       children: [
         Showcase(
           key: _goodsReceivedKey,

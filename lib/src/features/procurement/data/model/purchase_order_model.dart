@@ -207,7 +207,7 @@ class OrderItem {
   final String productName;
   final String productCode;
   final String? productImage;
-  final int quantityOrdered;
+  final double quantityOrdered;
   final String unit;
   final double unitPrice;
   final double tax;
@@ -239,7 +239,7 @@ class OrderItem {
       productName: json['productName'] as String,
       productCode: json['productCode'] as String,
       productImage: json['productImage'] as String?,
-      quantityOrdered: json['quantityOrdered'] as int,
+      quantityOrdered: (json['quantityOrdered'] as num).toDouble(),
       unit: json['unit'] as String,
       unitPrice: (json['unitPrice'] as num).toDouble(),
       tax: (json['tax'] as num).toDouble(),

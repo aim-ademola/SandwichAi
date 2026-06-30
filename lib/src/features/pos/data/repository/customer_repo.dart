@@ -58,14 +58,15 @@ class CustomerRepository extends BaseRepository
     String? search,
   }) async {
     try {
-      // final Map<String, dynamic> queryParams = {'page': page, 'limit': limit};
-
-      // if (search != null && search.isNotEmpty) {
-      //   queryParams['search'] = search;
-      // }
+      final trimmedSearch = search?.trim() ?? '';
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'limit': limit,
+        if (trimmedSearch.isNotEmpty) 'search': trimmedSearch,
+      };
 
       final response = await _apiClient
-          .get('customer-service/customers')
+          .get('customer-service/customers', queryParameters: queryParams)
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {

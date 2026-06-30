@@ -24,7 +24,6 @@ class StockControlDashboardBodyScreen extends StatefulWidget {
 
 class _StockControlDashboardBodyScreenState
     extends State<StockControlDashboardBodyScreen> {
-  final TextEditingController _searchController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -36,12 +35,6 @@ class _StockControlDashboardBodyScreenState
         branchId: context.read<BranchStockSummaryBloc>().branchId,
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   String _formatCurrency(double value) {
@@ -282,12 +275,6 @@ class _StockControlDashboardBodyScreenState
                     toggleVisibility,
                   ),
                 ),
-
-                SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                  child: _buildSearchBar(constraints.maxWidth),
-                ),
                 SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
@@ -449,73 +436,6 @@ class _StockControlDashboardBodyScreenState
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(double screenWidth) {
-    final fontSize = _getSearchFontSize(screenWidth);
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: _getSearchPaddingHorizontal(screenWidth),
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: context.modeBorder),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.search,
-            color: context.modeTextMuted,
-            size: _getSearchIconSize(screenWidth),
-          ),
-          SizedBox(width: _getSearchIconSpacing(screenWidth)),
-          Expanded(
-            child: TextField(
-              cursorColor: context.modePrimary,
-              controller: _searchController,
-              onChanged: (value) {
-                context.read<BranchStockSummaryBloc>().add(
-                  SearchStockCategories(query: value),
-                );
-              },
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w400,
-                color: context.modeTextPrimary,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Search Categories',
-                hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w400,
-                  color: context.modeTextMuted,
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                isDense: true,
-              ),
-            ),
-          ),
-          if (_searchController.text.isNotEmpty)
-            GestureDetector(
-              onTap: () {
-                _searchController.clear();
-                context.read<BranchStockSummaryBloc>().add(
-                  const ClearStockSearch(),
-                );
-              },
-              child: Icon(
-                Icons.clear,
-                color: context.modeTextMuted,
-                size: _getSearchIconSize(screenWidth),
-              ),
-            ),
-        ],
       ),
     );
   }
@@ -799,30 +719,6 @@ class _StockControlDashboardBodyScreenState
   }
 
   double _getTotalStockValueSpacing(double width) {
-    if (width < 360) return 8;
-    if (width < 600) return 10;
-    return 12;
-  }
-
-  double _getSearchFontSize(double width) {
-    if (width < 360) return 13;
-    if (width < 600) return 14;
-    return 15;
-  }
-
-  double _getSearchPaddingHorizontal(double width) {
-    if (width < 360) return 12;
-    if (width < 600) return 14;
-    return 16;
-  }
-
-  double _getSearchIconSize(double width) {
-    if (width < 360) return 20;
-    if (width < 600) return 22;
-    return 24;
-  }
-
-  double _getSearchIconSpacing(double width) {
     if (width < 360) return 8;
     if (width < 600) return 10;
     return 12;

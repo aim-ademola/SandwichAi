@@ -55,49 +55,50 @@ class PurchaseOrdersRepository extends BaseRepository
     String sortOrder = 'desc',
   }) async {
     try {
+      final trimmedSearch = search?.trim() ?? '';
       final queryParams = <String, dynamic>{
-        // 'page': page,
-        // 'limit': limit,
-        // 'sortBy': sortBy,
-        // 'sortOrder': sortOrder,
+        'page': page,
+        'limit': limit,
+        'sortBy': sortBy,
+        'sortOrder': sortOrder,
       };
 
-      // if (status != null && status.isNotEmpty) queryParams['status'] = status;
-      // if (deliveryStatus != null && deliveryStatus.isNotEmpty) {
-      //   queryParams['deliveryStatus'] = deliveryStatus;
-      // }
-      // if (paymentStatus != null && paymentStatus.isNotEmpty) {
-      //   queryParams['paymentStatus'] = paymentStatus;
-      // }
-      // if (supplierId != null && supplierId.isNotEmpty) {
-      //   queryParams['supplierId'] = supplierId;
-      // }
+      if (status != null && status.isNotEmpty) queryParams['status'] = status;
+      if (deliveryStatus != null && deliveryStatus.isNotEmpty) {
+        queryParams['deliveryStatus'] = deliveryStatus;
+      }
+      if (paymentStatus != null && paymentStatus.isNotEmpty) {
+        queryParams['paymentStatus'] = paymentStatus;
+      }
+      if (supplierId != null && supplierId.isNotEmpty) {
+        queryParams['supplierId'] = supplierId;
+      }
       if (buyerBranchId != null && buyerBranchId.isNotEmpty) {
         queryParams['buyerBranchId'] = buyerBranchId;
       }
-      // if (priority != null && priority.isNotEmpty) {
-      //   queryParams['priority'] = priority;
-      // }
-      // if (primaryCategory != null && primaryCategory.isNotEmpty) {
-      //   queryParams['primaryCategory'] = primaryCategory;
-      // }
-      // if (search != null && search.isNotEmpty) {
-      //   queryParams['search'] = search;
-      // }
-      // if (orderDateFrom != null && orderDateFrom.isNotEmpty) {
-      //   queryParams['orderDateFrom'] = orderDateFrom;
-      // }
-      // if (orderDateTo != null && orderDateTo.isNotEmpty) {
-      //   queryParams['orderDateTo'] = orderDateTo;
-      // }
-      // if (deliveryDateFrom != null && deliveryDateFrom.isNotEmpty) {
-      //   queryParams['deliveryDateFrom'] = deliveryDateFrom;
-      // }
-      // if (deliveryDateTo != null && deliveryDateTo.isNotEmpty) {
-      //   queryParams['deliveryDateTo'] = deliveryDateTo;
-      // }
-      // if (minAmount != null) queryParams['minAmount'] = minAmount;
-      // if (maxAmount != null) queryParams['maxAmount'] = maxAmount;
+      if (priority != null && priority.isNotEmpty) {
+        queryParams['priority'] = priority;
+      }
+      if (primaryCategory != null && primaryCategory.isNotEmpty) {
+        queryParams['primaryCategory'] = primaryCategory;
+      }
+      if (trimmedSearch.isNotEmpty) {
+        queryParams['search'] = trimmedSearch;
+      }
+      if (orderDateFrom != null && orderDateFrom.isNotEmpty) {
+        queryParams['orderDateFrom'] = orderDateFrom;
+      }
+      if (orderDateTo != null && orderDateTo.isNotEmpty) {
+        queryParams['orderDateTo'] = orderDateTo;
+      }
+      if (deliveryDateFrom != null && deliveryDateFrom.isNotEmpty) {
+        queryParams['deliveryDateFrom'] = deliveryDateFrom;
+      }
+      if (deliveryDateTo != null && deliveryDateTo.isNotEmpty) {
+        queryParams['deliveryDateTo'] = deliveryDateTo;
+      }
+      if (minAmount != null) queryParams['minAmount'] = minAmount;
+      if (maxAmount != null) queryParams['maxAmount'] = maxAmount;
 
       final response = await _apiClient
           .get('/procurement/orders', queryParameters: queryParams)

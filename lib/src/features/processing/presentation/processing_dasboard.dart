@@ -45,7 +45,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
       child: Scaffold(
         key: _scaffoldKey,
         drawer: ProcessingAppDrawer(),
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: BlocConsumer<ProcessingDashboardBloc, ProcessingDashboardState>(
           listener: (context, state) {
@@ -53,7 +53,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.error),
-                  backgroundColor: Colors.red,
+                  backgroundColor: context.modeError,
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -80,10 +80,11 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.menu, color: Colors.black),
+        icon: Icon(Icons.menu, color: context.modeTextPrimary),
         onPressed: () {
           _scaffoldKey.currentState?.openDrawer();
         },
@@ -93,7 +94,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: false,
@@ -102,7 +103,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
         BlocBuilder<ProcessingDashboardBloc, ProcessingDashboardState>(
           builder: (context, state) {
             return IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.black),
+              icon: Icon(Icons.refresh, color: context.modeTextPrimary),
               onPressed: state is ProcessingDashboardLoading
                   ? null
                   : () => _onRefresh(),
@@ -153,14 +154,14 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(errorIcon, size: 64, color: Colors.grey[400]),
+            Icon(errorIcon, size: 64, color: context.modeTextMuted),
             const SizedBox(height: 16),
             Text(
               errorTitle,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -169,7 +170,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -178,8 +179,8 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -198,7 +199,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
   Widget _buildDashboardContent(ProcessingDashboardData data) {
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      color: kPrimary,
+      color: context.modePrimary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
@@ -257,17 +258,15 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
     String? trend,
   }) {
     final Color? trendColor = trend != null
-        ? (trend.startsWith('+')
-              ? const Color(0xFF4CAF50)
-              : const Color(0xFFF44336))
+        ? (trend.startsWith('+') ? context.modeSuccess : context.modeError)
         : null;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +276,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
               height: 1.3,
-              color: const Color(0xFF757575),
+              color: context.modeTextSecondary,
             ),
           ),
           const SizedBox(height: 16),
@@ -286,7 +285,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 32,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: context.modeTextPrimary,
               height: 1.0,
             ),
           ),
@@ -305,7 +304,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               subtitle,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 13,
-                color: const Color(0xFF9E9E9E),
+                color: context.modeTextMuted,
               ),
             ),
         ],
@@ -328,7 +327,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -336,21 +335,21 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
             label: 'Pending',
             value: tasks.pending,
             total: total,
-            color: const Color(0xFF9E9E9E),
+            color: context.modeTextMuted,
           ),
           const SizedBox(height: 28),
           _buildTaskProgressRow(
             label: 'In Process',
             value: tasks.inProcess,
             total: total,
-            color: const Color(0xFFFF9800),
+            color: context.modeWarning,
           ),
           const SizedBox(height: 28),
           _buildTaskProgressRow(
             label: 'Completed',
             value: tasks.completedToday,
             total: total,
-            color: const Color(0xFF4CAF50),
+            color: context.modeSuccess,
           ),
         ],
       ),
@@ -376,7 +375,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
             ),
             Text(
@@ -394,9 +393,9 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: const Color(0xFFE0E0E0),
+            backgroundColor: context.modeSurfaceMuted,
             valueColor: AlwaysStoppedAnimation<Color>(color),
-            color: kPrimary,
+            color: context.modePrimary,
             minHeight: 8,
           ),
         ),
@@ -408,9 +407,9 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,7 +419,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -433,14 +432,14 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                     Icon(
                       Icons.verified_outlined,
                       size: 48,
-                      color: Colors.grey[300],
+                      color: context.modeTextMuted,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'No recent verifications',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: Colors.grey[500],
+                        color: context.modeTextMuted,
                       ),
                     ),
                   ],
@@ -452,11 +451,8 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: verifications.length,
-              separatorBuilder: (context, index) => Divider(
-                height: 32,
-                color: const Color(0xFFF5F5F5),
-                thickness: 1,
-              ),
+              separatorBuilder: (context, index) =>
+                  Divider(height: 32, color: context.modeDivider, thickness: 1),
               itemBuilder: (context, index) {
                 final verification = verifications[index];
                 return _buildVerificationItem(verification);
@@ -469,8 +465,8 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
 
   Widget _buildVerificationItem(RecentVerification verification) {
     final statusColor = verification.status.toLowerCase() == 'verified'
-        ? const Color(0xFF4CAF50)
-        : const Color(0xFFFF9800);
+        ? context.modeSuccess
+        : context.modeWarning;
 
     return InkWell(
       onTap: () {
@@ -507,7 +503,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -515,7 +511,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                       'By ${verification.verifiedBy}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
-                        color: const Color(0xFF9E9E9E),
+                        color: context.modeTextMuted,
                       ),
                     ),
                   ],
@@ -543,7 +539,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: const Color(0xFF9E9E9E),
+                color: context.modeTextMuted,
               ),
             ],
           ),

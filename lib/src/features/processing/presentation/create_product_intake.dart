@@ -453,7 +453,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         return;
       }
 
-      final qtyReceived = int.tryParse(_qtyReceivedController.text);
+      final qtyReceived = double.tryParse(_qtyReceivedController.text);
       if (qtyReceived == null || qtyReceived <= 0) {
         _showErrorSnackBar('Please enter a valid quantity');
         return;
@@ -734,12 +734,15 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                                     labelFontSize: labelFontSize,
                                     inputFontSize: inputFontSize,
                                     hintText: '0',
-                                    keyboardType: TextInputType.number,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return 'Required';
                                       }
-                                      final qty = int.tryParse(value);
+                                      final qty = double.tryParse(value);
                                       if (qty == null || qty <= 0) {
                                         return 'Invalid quantity';
                                       }

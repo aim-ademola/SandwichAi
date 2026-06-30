@@ -195,12 +195,14 @@ class _AddItemDialogState extends State<AddItemDialog> {
               label: 'Quantity',
               hint: '0',
               screenWidth: screenWidth,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Required';
                 }
-                if (int.tryParse(value) == null) {
+                if (double.tryParse(value) == null) {
                   return 'Invalid number';
                 }
                 return null;
@@ -232,12 +234,14 @@ class _AddItemDialogState extends State<AddItemDialog> {
               label: 'Expiry (Days)',
               hint: '0',
               screenWidth: screenWidth,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Required';
                 }
-                if (int.tryParse(value) == null) {
+                if (double.tryParse(value) == null) {
                   return 'Invalid number';
                 }
                 return null;

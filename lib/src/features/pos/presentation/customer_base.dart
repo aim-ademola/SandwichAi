@@ -70,19 +70,20 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
       case 'platinum':
         return const Color(0xFFE5E4E2);
       default:
-        return kprimaryTextColor2;
+        return context.modeTextMuted;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: context.modeBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.modeSurface,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
+          icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -90,13 +91,13 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: kPrimary, size: 28),
+            icon: Icon(Icons.add, color: context.modePrimary, size: 28),
             onPressed: () {
               context.push('/customer-dtls').then((_) {
                 context.read<CustomerBloc>().add(const RefreshCustomers());
@@ -109,24 +110,22 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
         children: [
           // Search Bar
           Container(
-            color: Colors.white,
+            color: context.modeSurface,
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _searchController,
               onChanged: _onSearchChanged,
+              cursorColor: context.modePrimary,
               decoration: InputDecoration(
                 hintText: 'Search by name, phone, or email...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextMuted,
                 ),
-                prefixIcon: const Icon(Icons.search, color: kprimaryTextColor2),
+                prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(
-                          Icons.clear,
-                          color: kprimaryTextColor2,
-                        ),
+                        icon: Icon(Icons.clear, color: context.modeTextMuted),
                         onPressed: () {
                           _searchController.clear();
                           _onSearchChanged('');
@@ -134,10 +133,18 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                       )
                     : null,
                 filled: true,
-                fillColor: const Color(0xFFF8F6F6),
+                fillColor: context.modeSurfaceAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: context.modeBorder),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.modeBorder),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.modePrimary),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -146,7 +153,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
               ),
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -161,10 +168,10 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                       content: Text(
                         state.error,
                         style: WorkSansAppTextStyles.medium.copyWith(
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
-                      backgroundColor: Colors.red,
+                      backgroundColor: context.modeError,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -175,8 +182,10 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
               },
               builder: (context, state) {
                 if (state is CustomersLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: kPrimary),
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: context.modePrimary,
+                    ),
                   );
                 }
 
@@ -188,7 +197,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                         Icon(
                           Icons.error_outline,
                           size: 64,
-                          color: Colors.red.shade300,
+                          color: context.modeError,
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -196,7 +205,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -204,7 +213,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                           state.error,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -216,7 +225,8 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: kPrimary,
+                            backgroundColor: context.modePrimary,
+                            foregroundColor: context.modeTextInverse,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -230,7 +240,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: context.modeTextInverse,
                             ),
                           ),
                         ),
@@ -260,7 +270,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                         Icon(
                           Icons.people_outline,
                           size: 64,
-                          color: kprimaryTextColor2.withValues(alpha: 0.5),
+                          color: context.modeTextMuted,
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -268,7 +278,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -276,7 +286,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                           'Start by adding your first customer',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
@@ -288,17 +298,19 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   onRefresh: () async {
                     context.read<CustomerBloc>().add(const RefreshCustomers());
                   },
-                  color: kPrimary,
+                  color: context.modePrimary,
                   child: ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
                     itemCount: customers.length + (hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index >= customers.length) {
-                        return const Center(
+                        return Center(
                           child: Padding(
-                            padding: EdgeInsets.all(16),
-                            child: CircularProgressIndicator(color: kPrimary),
+                            padding: const EdgeInsets.all(16),
+                            child: CircularProgressIndicator(
+                              color: context.modePrimary,
+                            ),
                           ),
                         );
                       }
@@ -331,11 +343,16 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.modeBorder.withValues(alpha: 0.5)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.24
+                    : 0.04,
+              ),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -351,7 +368,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: kPrimary.withValues(alpha: 0.1),
+                    color: context.modePrimary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -362,7 +379,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: kPrimary,
+                        color: context.modePrimary,
                       ),
                     ),
                   ),
@@ -379,7 +396,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -387,7 +404,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                         customer.phone,
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 13,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ],
@@ -458,21 +475,21 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
   }) {
     return Column(
       children: [
-        Icon(icon, size: 18, color: kprimaryTextColor2),
+        Icon(icon, size: 18, color: context.modeTextMuted),
         const SizedBox(height: 4),
         Text(
           value,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         Text(
           label,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 11,
-            color: kprimaryTextColor2,
+            color: context.modeTextMuted,
           ),
         ),
       ],

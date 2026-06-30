@@ -2,7 +2,7 @@ class ProcurementRequestItem {
   final String itemId;
   final double currentStock;
   final double minLevel;
-  final int qtyNeeded;
+  final double qtyNeeded;
   final double unitCost;
   final String notes;
 
@@ -31,7 +31,7 @@ class ProcurementRequestItem {
       itemId: json['itemId'] as String,
       currentStock: (json['currentStock'] as num).toDouble(),
       minLevel: (json['minLevel'] as num).toDouble(),
-      qtyNeeded: json['qtyNeeded'] as int,
+      qtyNeeded: (json['qtyNeeded'] as num).toDouble(),
       unitCost: (json['unitCost'] as num).toDouble(),
       notes: json['notes'] as String? ?? '',
     );

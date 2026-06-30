@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -79,6 +81,7 @@ class _StockProcurementRequestScreenState
 
   // Add field:
   String _orgId = '';
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -129,6 +132,7 @@ class _StockProcurementRequestScreenState
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _currentStockController.dispose();
     _minLevelController.dispose();
@@ -142,18 +146,31 @@ class _StockProcurementRequestScreenState
   }
 
   void _onSearchChanged() {
+    final query = _searchController.text.trim();
     setState(() {
-      if (_searchController.text.isEmpty) {
+      if (query.isEmpty) {
         _filteredItems = _allItems;
       } else {
         _filteredItems = _allItems
             .where(
-              (item) => item.name.toLowerCase().contains(
-                _searchController.text.toLowerCase(),
-              ),
+              (item) => item.name.toLowerCase().contains(query.toLowerCase()),
             )
             .toList();
       }
+    });
+
+    if (_orgId.isEmpty) return;
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) return;
+      context.read<InventoryItemsBloc>().add(
+        LoadInventoryItems(
+          organizationId: _orgId,
+          page: 1,
+          limit: 100,
+          search: query,
+        ),
+      );
     });
   }
 
@@ -284,8 +301,8 @@ class _StockProcurementRequestScreenState
     // Calculate shortage
     final shortage = stockItem.reorderLevelValue - stockItem.currentStockValue;
     final qtyNeeded = shortage > 0
-        ? (shortage * 1.2).ceil()
-        : (stockItem.reorderLevelValue * 0.5).ceil();
+        ? (shortage * 1.2).ceilToDouble()
+        : (stockItem.reorderLevelValue * 0.5).ceilToDouble();
 
     // Determine notes based on urgency
     String notes = '';
@@ -692,7 +709,7 @@ class _StockProcurementRequestScreenState
 
     final currentStock = double.tryParse(_currentStockController.text.trim());
     final minLevel = double.tryParse(_minLevelController.text.trim());
-    final qtyNeeded = int.tryParse(_qtyNeededController.text.trim());
+    final qtyNeeded = double.tryParse(_qtyNeededController.text.trim());
     final unitCost = double.tryParse(_unitCostController.text.trim());
 
     if (currentStock == null || currentStock < 0) {
@@ -1273,7 +1290,7 @@ class _StockProcurementRequestScreenState
             controller: _qtyNeededController,
             label: 'Quantity Needed',
             hint: 'Quantity to procure',
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             screenWidth: screenWidth,
             helpTitle: 'Quantity Needed',
             helpDescription: 'Auto-calculated based on shortage + 20% buffer.',

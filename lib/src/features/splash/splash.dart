@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 
 class AppSplashScreen extends StatefulWidget {
   const AppSplashScreen({super.key});
@@ -35,6 +36,7 @@ class _AppSplashScreenState extends State<AppSplashScreen>
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         Future.delayed(const Duration(milliseconds: 300), () {
+          if (!mounted) return;
           context.go('/');
         });
       }
@@ -50,7 +52,7 @@ class _AppSplashScreenState extends State<AppSplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F6F6),
+      backgroundColor: context.modeBackground,
       body: Center(
         child: ScaleTransition(
           scale: _scaleAnimation,

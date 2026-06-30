@@ -16,32 +16,33 @@ class SessionManagerScreen extends StatelessWidget {
         return DefaultTextStyle.merge(
           style: WorkSansAppTextStyles.medium,
           child: Scaffold(
-            backgroundColor: const Color(0xFFF8F6F6),
+            backgroundColor: context.modeBackground,
             appBar: AppBar(
-              backgroundColor: Colors.white,
+              backgroundColor: context.modeSurface,
               elevation: 0,
+              surfaceTintColor: Colors.transparent,
               title: Text(
                 'Sessions',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               centerTitle: true,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
+                icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               actions: [
                 if (state.canAddSession)
                   TextButton.icon(
                     onPressed: () => _createAndSwitch(context),
-                    icon: const Icon(Icons.add, color: kPrimary, size: 20),
+                    icon: Icon(Icons.add, color: context.modePrimary, size: 20),
                     label: Text(
                       'New',
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        color: kPrimary,
+                        color: context.modePrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -53,7 +54,7 @@ class SessionManagerScreen extends StatelessWidget {
                       child: Text(
                         '10/10',
                         style: WorkSansAppTextStyles.medium.copyWith(
-                          color: kprimaryTextColor2,
+                          color: context.modeTextMuted,
                           fontSize: 13,
                         ),
                       ),
@@ -75,14 +76,18 @@ class SessionManagerScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.receipt_long_outlined, size: 72, color: Colors.grey[350]),
+          Icon(
+            Icons.receipt_long_outlined,
+            size: 72,
+            color: context.modeTextMuted,
+          ),
           const SizedBox(height: 16),
           Text(
             'No active sessions',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor2,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -90,7 +95,7 @@ class SessionManagerScreen extends StatelessWidget {
             'Start a new session to take an order.',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: Colors.grey[400],
+              color: context.modeTextSecondary,
             ),
           ),
           const SizedBox(height: 28),
@@ -99,8 +104,8 @@ class SessionManagerScreen extends StatelessWidget {
             icon: const Icon(Icons.add),
             label: const Text('New Session'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
-              foregroundColor: Colors.white,
+              backgroundColor: context.modePrimary,
+              foregroundColor: context.modeTextInverse,
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -118,25 +123,25 @@ class SessionManagerScreen extends StatelessWidget {
       children: [
         // Summary bar
         Container(
-          color: Colors.white,
+          color: context.modeSurface,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Row(
             children: [
               _SummaryChip(
                 label: '${state.sessions.length} Active',
-                color: kPrimary,
+                color: context.modePrimary,
               ),
               const SizedBox(width: 8),
               _SummaryChip(
                 label:
                     '${state.sessions.where((s) => s.status == SessionStatus.paymentInProgress).length} Paying',
-                color: Colors.orange,
+                color: context.modeWarning,
               ),
               const SizedBox(width: 8),
               _SummaryChip(
                 label:
                     '${state.sessions.where((s) => s.status == SessionStatus.completed).length} Done',
-                color: Colors.green,
+                color: context.modeSuccess,
               ),
             ],
           ),
@@ -172,8 +177,8 @@ class SessionManagerScreen extends StatelessWidget {
                 icon: const Icon(Icons.add),
                 label: const Text('New Session'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kPrimary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: context.modePrimary,
+                  foregroundColor: context.modeTextInverse,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -204,19 +209,21 @@ class SessionManagerScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: context.modeSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Close Session?',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontWeight: FontWeight.w600,
             fontSize: 17,
+            color: context.modeTextPrimary,
           ),
         ),
         content: Text(
           'Close "${session.label}"? This will discard all items and order progress.',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
             height: 1.5,
           ),
         ),
@@ -226,7 +233,7 @@ class SessionManagerScreen extends StatelessWidget {
             child: Text(
               'Cancel',
               style: WorkSansAppTextStyles.medium.copyWith(
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -237,7 +244,8 @@ class SessionManagerScreen extends StatelessWidget {
               cubit.closeSession(session.sessionId);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: context.modeError,
+              foregroundColor: context.modeTextInverse,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -245,7 +253,7 @@ class SessionManagerScreen extends StatelessWidget {
             child: Text(
               'Close',
               style: WorkSansAppTextStyles.medium.copyWith(
-                color: Colors.white,
+                color: context.modeTextInverse,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -283,17 +291,21 @@ class _SessionCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isActive ? kPrimary : Colors.transparent,
+            color: isActive ? context.modePrimary : context.modeBorder,
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
               color: isActive
-                  ? kPrimary.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.04),
+                  ? context.modePrimary.withValues(alpha: 0.12)
+                  : Colors.black.withValues(
+                      alpha: Theme.of(context).brightness == Brightness.dark
+                          ? 0.24
+                          : 0.04,
+                    ),
               blurRadius: isActive ? 12 : 6,
               offset: const Offset(0, 2),
             ),
@@ -328,7 +340,7 @@ class _SessionCard extends StatelessWidget {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: kprimaryTextColor1,
+                              color: context.modeTextPrimary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -340,7 +352,7 @@ class _SessionCard extends StatelessWidget {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: kPrimary,
+                              color: context.modePrimary,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -348,7 +360,7 @@ class _SessionCard extends StatelessWidget {
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: context.modeTextInverse,
                               ),
                             ),
                           ),
@@ -398,24 +410,30 @@ class _SessionCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text('·', style: TextStyle(color: Colors.grey[400])),
+                        Text(
+                          '·',
+                          style: TextStyle(color: context.modeTextMuted),
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           '${session.totalItemCount} item${session.totalItemCount != 1 ? "s" : ""}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                         if (session.orderDetails?.orderType != null) ...[
                           const SizedBox(width: 8),
-                          Text('·', style: TextStyle(color: Colors.grey[400])),
+                          Text(
+                            '·',
+                            style: TextStyle(color: context.modeTextMuted),
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             _orderTypeLabel(session.orderDetails!.orderType),
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 12,
-                              color: kprimaryTextColor2,
+                              color: context.modeTextSecondary,
                             ),
                           ),
                         ],
@@ -426,7 +444,7 @@ class _SessionCard extends StatelessWidget {
                       _timeAgo(session.lastUpdatedAt),
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 11,
-                        color: Colors.grey[400],
+                        color: context.modeTextMuted,
                       ),
                     ),
                   ],
@@ -435,7 +453,7 @@ class _SessionCard extends StatelessWidget {
 
               // Close button
               IconButton(
-                icon: Icon(Icons.close, color: Colors.grey[400], size: 20),
+                icon: Icon(Icons.close, color: context.modeTextMuted, size: 20),
                 onPressed: onClose,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),

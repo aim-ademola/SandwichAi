@@ -224,13 +224,13 @@ class ProcurementItem {
 
   double get unitCostDouble => double.tryParse(unitCost) ?? 0.0;
   double get totalCostDouble => double.tryParse(totalCost) ?? 0.0;
-  int get qtyNeededInt => int.tryParse(qtyNeeded) ?? 0;
-  int get currentStockInt => int.tryParse(currentStock) ?? 0;
-  int get minLevelInt => int.tryParse(minLevel) ?? 0;
-  int? get qtyApprovedInt =>
-      qtyApproved != null ? int.tryParse(qtyApproved!) : null;
-  int? get qtyReceivedInt =>
-      qtyReceived != null ? int.tryParse(qtyReceived!) : null;
+  double get qtyNeededValue => double.tryParse(qtyNeeded) ?? 0.0;
+  double get currentStockValue => double.tryParse(currentStock) ?? 0.0;
+  double get minLevelValue => double.tryParse(minLevel) ?? 0.0;
+  double? get qtyApprovedValue =>
+      qtyApproved != null ? double.tryParse(qtyApproved!) : null;
+  double? get qtyReceivedValue =>
+      qtyReceived != null ? double.tryParse(qtyReceived!) : null;
 }
 
 class ItemInfo {

@@ -49,7 +49,7 @@ class _ProcurementDashboardScreenState
         child: Scaffold(
           drawer: ProcurementAppDrawer(),
           key: _scaffoldKey,
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           appBar: _buildAppBar(context),
           body: _buildBody(context),
         ),
@@ -59,10 +59,11 @@ class _ProcurementDashboardScreenState
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.menu, color: kprimaryTextColor1),
+        icon: Icon(Icons.menu, color: context.modeTextPrimary),
         onPressed: () {
           _scaffoldKey.currentState?.openDrawer();
         },
@@ -72,7 +73,7 @@ class _ProcurementDashboardScreenState
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
@@ -87,7 +88,7 @@ class _ProcurementDashboardScreenState
         final maxContentWidth = _getMaxContentWidth(constraints.maxWidth);
 
         return RefreshIndicator(
-          color: kPrimary,
+          color: context.modePrimary,
           onRefresh: () async {
             context.read<SupplierStatsBloc>().add(const RefreshSupplierStats());
             context.read<ProcurementBloc>().add(RefreshProcurementOrders());
@@ -166,8 +167,8 @@ class _ProcurementDashboardScreenState
                 height: cardHeight,
                 number: pendingCount.toString(),
                 label: 'Pending',
-                color: const Color(0xFFF7E9DD),
-                numberColor: kPrimary,
+                color: context.modePrimary.withValues(alpha: 0.12),
+                numberColor: context.modePrimary,
                 fontSize: fontSize,
                 numberFontSize: numberFontSize,
                 isLoading: state is ProcurementLoading,
@@ -179,8 +180,8 @@ class _ProcurementDashboardScreenState
                 height: cardHeight,
                 number: approvedCount.toString(),
                 label: 'Approved',
-                color: const Color(0xFFF7E9DD),
-                numberColor: kPrimary,
+                color: context.modePrimary.withValues(alpha: 0.12),
+                numberColor: context.modePrimary,
                 fontSize: fontSize,
                 numberFontSize: numberFontSize,
                 isLoading: state is ProcurementLoading,
@@ -192,8 +193,8 @@ class _ProcurementDashboardScreenState
                 height: cardHeight,
                 number: receivedCount.toString(),
                 label: 'Received',
-                color: const Color(0xFFF7E9DD),
-                numberColor: kPrimary,
+                color: context.modePrimary.withValues(alpha: 0.12),
+                numberColor: context.modePrimary,
                 fontSize: fontSize,
                 numberFontSize: numberFontSize,
                 isLoading: state is ProcurementLoading,
@@ -248,7 +249,7 @@ class _ProcurementDashboardScreenState
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: fontSize,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF757575),
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -263,7 +264,8 @@ class _ProcurementDashboardScreenState
     return Container(
       padding: EdgeInsets.all(_getContainerPadding(width)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -274,7 +276,7 @@ class _ProcurementDashboardScreenState
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: titleFontSize,
               fontWeight: FontWeight.bold,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -285,7 +287,7 @@ class _ProcurementDashboardScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: budgetFontSize,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -295,8 +297,8 @@ class _ProcurementDashboardScreenState
             child: LinearProgressIndicator(
               value: 0.7,
               minHeight: _getProgressBarHeight(width),
-              backgroundColor: const Color(0xFFFFE0CC),
-              valueColor: const AlwaysStoppedAnimation<Color>(kPrimary),
+              backgroundColor: context.modePrimary.withValues(alpha: 0.14),
+              valueColor: AlwaysStoppedAnimation<Color>(context.modePrimary),
             ),
           ),
         ],
@@ -323,16 +325,18 @@ class _ProcurementDashboardScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: titleFontSize,
                     fontWeight: FontWeight.bold,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 if (state is SupplierStatsLoading)
-                  const SizedBox(
+                  SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        context.modePrimary,
+                      ),
                     ),
                   ),
               ],
@@ -366,13 +370,16 @@ class _ProcurementDashboardScreenState
     return Container(
       padding: EdgeInsets.all(_getContainerPadding(width)),
       decoration: BoxDecoration(
-        color: Colors.red.shade50,
+        color: context.modeError.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade200, width: 1),
+        border: Border.all(
+          color: context.modeError.withValues(alpha: 0.28),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: Colors.red.shade700, size: 24),
+          Icon(Icons.error_outline, color: context.modeError, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -383,7 +390,7 @@ class _ProcurementDashboardScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.red.shade700,
+                    color: context.modeError,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -391,14 +398,14 @@ class _ProcurementDashboardScreenState
                   error,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
-                    color: Colors.red.shade600,
+                    color: context.modeError,
                   ),
                 ),
               ],
             ),
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: Colors.red.shade700),
+            icon: Icon(Icons.refresh, color: context.modeError),
             onPressed: () {
               context.read<SupplierStatsBloc>().add(const LoadSupplierStats());
             },
@@ -480,7 +487,7 @@ class _ProcurementDashboardScreenState
                 width: width,
                 numberSize: supplierNumberSize,
                 labelSize: supplierLabelSize,
-                valueColor: const Color(0xFFFF9800),
+                valueColor: context.modeWarning,
               ),
             ),
             SizedBox(width: _getCardSpacing(width)),
@@ -492,7 +499,7 @@ class _ProcurementDashboardScreenState
                 width: width,
                 numberSize: supplierNumberSize,
                 labelSize: supplierLabelSize,
-                valueColor: const Color(0xFF4CAF50),
+                valueColor: context.modeSuccess,
               ),
             ),
           ],
@@ -515,9 +522,9 @@ class _ProcurementDashboardScreenState
       height: height,
       padding: EdgeInsets.all(_getContainerPadding(width)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -527,7 +534,7 @@ class _ProcurementDashboardScreenState
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: numberSize,
               fontWeight: FontWeight.bold,
-              color: valueColor ?? kprimaryTextColor1,
+              color: valueColor ?? context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -539,7 +546,7 @@ class _ProcurementDashboardScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: labelSize,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -563,14 +570,14 @@ class _ProcurementDashboardScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 16),
         _buildActivityItem(
           icon: Icons.access_time,
-          iconColor: const Color(0xFFFFB74D),
-          iconBgColor: const Color(0xFFF6DEC7),
+          iconColor: context.modeWarning,
+          iconBgColor: context.modeWarning.withValues(alpha: 0.14),
           title: 'Pending Approval',
           subtitle: 'Order #12345 from Fresh Veggies Inc.',
           width: width,
@@ -581,8 +588,8 @@ class _ProcurementDashboardScreenState
         const SizedBox(height: 12),
         _buildActivityItem(
           icon: Icons.local_shipping_outlined,
-          iconColor: const Color(0xFFFF5722),
-          iconBgColor: const Color(0xFFF6DEC7),
+          iconColor: context.modeError,
+          iconBgColor: context.modeError.withValues(alpha: 0.14),
           title: 'Delayed Delivery',
           subtitle: 'Order #67890 is running late',
           width: width,
@@ -608,7 +615,8 @@ class _ProcurementDashboardScreenState
     return Container(
       padding: EdgeInsets.all(_getContainerPadding(width)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -632,7 +640,7 @@ class _ProcurementDashboardScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: activityTitleSize,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -641,7 +649,7 @@ class _ProcurementDashboardScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: activitySubtitleSize,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF757575),
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ],
@@ -666,8 +674,8 @@ class _ProcurementDashboardScreenState
                 context.push('/order-form');
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -679,7 +687,7 @@ class _ProcurementDashboardScreenState
                   fontSize: buttonFontSize,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
-                  color: kWhite,
+                  color: context.modeTextInverse,
                 ),
               ),
             ),
@@ -694,8 +702,8 @@ class _ProcurementDashboardScreenState
                 context.push('/order-list');
               },
               style: OutlinedButton.styleFrom(
-                foregroundColor: kPrimary,
-                side: const BorderSide(color: kPrimary, width: 1.5),
+                foregroundColor: context.modePrimary,
+                side: BorderSide(color: context.modePrimary, width: 1.5),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -707,7 +715,7 @@ class _ProcurementDashboardScreenState
                   fontSize: buttonFontSize,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
               ),
             ),

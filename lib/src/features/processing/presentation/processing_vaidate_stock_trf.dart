@@ -890,7 +890,7 @@ class __ValidateTransferBottomSheetState
       final controller = _quantityControllers[item.itemId];
       if (controller == null) continue;
 
-      final qtyReceived = int.tryParse(controller.text.trim());
+      final qtyReceived = double.tryParse(controller.text.trim());
       if (qtyReceived == null || qtyReceived < 0) {
         _showSnackBar(
           'Please enter valid quantities for all items',
@@ -910,7 +910,7 @@ class __ValidateTransferBottomSheetState
     // Check if there are variances
     bool hasVariance = false;
     for (var i = 0; i < widget.transfer.items.length; i++) {
-      final sentQty = int.parse(widget.transfer.items[i].qtySent);
+      final sentQty = double.parse(widget.transfer.items[i].qtySent);
       final receivedQty = items[i].qtyReceived;
       if (sentQty != receivedQty) {
         hasVariance = true;
@@ -1199,7 +1199,10 @@ class __ValidateTransferBottomSheetState
                                 child: TextField(
                                   cursorColor: kPrimary,
                                   controller: controller,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
                                   textAlign: TextAlign.center,
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 14,

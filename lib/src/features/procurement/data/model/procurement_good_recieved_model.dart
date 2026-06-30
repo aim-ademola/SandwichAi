@@ -3,8 +3,8 @@
 class GoodsReceivedItem {
   final String itemId;
   final String itemName;
-  final int orderedQty;
-  final int receivedQty;
+  final double orderedQty;
+  final double receivedQty;
   final bool qualityCheck;
   final String qcStatus;
   final String? qcNote;
@@ -32,17 +32,18 @@ class GoodsReceivedItem {
     'expiryDate': expiryDate,
   };
 
-  factory GoodsReceivedItem.fromJson(Map<String, dynamic> json) =>
-      GoodsReceivedItem(
-        itemId: json['itemId'] ?? '',
-        itemName: json['itemName'] ?? '',
-        orderedQty: int.tryParse(json['orderedQty']?.toString() ?? '0') ?? 0,
-        receivedQty: int.tryParse(json['receivedQty']?.toString() ?? '0') ?? 0,
-        qualityCheck: json['qualityCheck'] ?? false,
-        qcStatus: json['qcStatus'] ?? '',
-        qcNote: json['qcNote'],
-        expiryDate: json['expiryDate'],
-      );
+  factory GoodsReceivedItem.fromJson(
+    Map<String, dynamic> json,
+  ) => GoodsReceivedItem(
+    itemId: json['itemId'] ?? '',
+    itemName: json['itemName'] ?? '',
+    orderedQty: double.tryParse(json['orderedQty']?.toString() ?? '0') ?? 0.0,
+    receivedQty: double.tryParse(json['receivedQty']?.toString() ?? '0') ?? 0.0,
+    qualityCheck: json['qualityCheck'] ?? false,
+    qcStatus: json['qcStatus'] ?? '',
+    qcNote: json['qcNote'],
+    expiryDate: json['expiryDate'],
+  );
 }
 
 class CreateGoodsReceivedRequest {

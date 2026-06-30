@@ -39,7 +39,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         body: CustomScrollView(
           slivers: [
             _buildAppBar(),
@@ -56,9 +56,10 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
     return SliverAppBar(
       expandedHeight: 200,
       pinned: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.pop(context),
       ),
       flexibleSpace: FlexibleSpaceBar(
@@ -67,7 +68,10 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [kPrimary, kPrimary.withValues(alpha: 0.7)],
+              colors: [
+                context.modePrimary,
+                context.modePrimary.withValues(alpha: 0.74),
+              ],
             ),
           ),
           child: SafeArea(
@@ -82,7 +86,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                         width: 64,
                         height: 64,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: widget.supplier.logo != null
@@ -92,18 +96,18 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                   widget.supplier.logo!,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(
+                                    return Icon(
                                       Icons.business,
                                       size: 32,
-                                      color: Colors.grey,
+                                      color: context.modeTextMuted,
                                     );
                                   },
                                 ),
                               )
-                            : const Icon(
+                            : Icon(
                                 Icons.business,
                                 size: 32,
-                                color: Colors.grey,
+                                color: context.modeTextMuted,
                               ),
                       ),
                       const SizedBox(width: 16),
@@ -120,7 +124,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                         .copyWith(
                                           fontSize: 20,
                                           fontWeight: FontWeight.w700,
-                                          color: Colors.white,
+                                          color: context.modeTextInverse,
                                         ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
@@ -131,15 +135,15 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                     margin: const EdgeInsets.only(left: 8),
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withValues(
+                                      color: context.modeTextInverse.withValues(
                                         alpha: 0.2,
                                       ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.verified,
                                       size: 18,
-                                      color: Colors.white,
+                                      color: context.modeTextInverse,
                                     ),
                                   ),
                               ],
@@ -153,7 +157,9 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                   '',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 13,
-                                color: Colors.white.withValues(alpha: 0.9),
+                                color: context.modeTextInverse.withValues(
+                                  alpha: 0.9,
+                                ),
                               ),
                             ),
                           ],
@@ -175,9 +181,9 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,6 +193,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w700,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -194,28 +201,28 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
             icon: Icons.location_on,
             label: 'Location',
             value: '${widget.supplier.city}, ${widget.supplier.state}',
-            color: const Color(0xFF2196F3),
+            color: context.modeInfo,
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
             icon: Icons.phone,
             label: 'Phone',
             value: widget.supplier.phone ?? '',
-            color: const Color(0xFF4CAF50),
+            color: context.modeSuccess,
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
             icon: Icons.email,
             label: 'Email',
             value: widget.supplier.email ?? '',
-            color: const Color(0xFFFF9800),
+            color: context.modeWarning,
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
             icon: Icons.access_time,
             label: 'Lead Time',
             value: '${widget.supplier.deliveryLeadTime} days',
-            color: const Color(0xFF9C27B0),
+            color: context.modePrimaryAlt,
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
@@ -223,7 +230,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
             label: 'Min Order',
             value:
                 '${widget.supplier.defaultCurrency} ${widget.supplier.minimumOrderValue?.toStringAsFixed(2)}',
-            color: const Color(0xFFF44336),
+            color: context.modeError,
           ),
         ],
       ),
@@ -255,7 +262,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                 label,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 12,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextSecondary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -264,7 +271,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
@@ -310,13 +317,11 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: value != null
-              ? const Color(0xFF2196F3).withValues(alpha: 0.1)
-              : Colors.white,
+              ? context.modeInfo.withValues(alpha: 0.1)
+              : context.modeSurface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: value != null
-                ? const Color(0xFF2196F3)
-                : const Color(0xFFE0E0E0),
+            color: value != null ? context.modeInfo : context.modeBorder,
             width: 1,
           ),
         ),
@@ -330,8 +335,8 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: value != null
-                      ? const Color(0xFF2196F3)
-                      : const Color(0xFF757575),
+                      ? context.modeInfo
+                      : context.modeTextSecondary,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -340,8 +345,8 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
               Icons.arrow_drop_down,
               size: 20,
               color: value != null
-                  ? const Color(0xFF2196F3)
-                  : const Color(0xFF757575),
+                  ? context.modeInfo
+                  : context.modeTextSecondary,
             ),
           ],
         ),
@@ -353,8 +358,10 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
     return BlocBuilder<SupplierBloc, SupplierState>(
       builder: (context, state) {
         if (state is SupplierLoading) {
-          return const SliverFillRemaining(
-            child: Center(child: CircularProgressIndicator(color: kPrimary)),
+          return SliverFillRemaining(
+            child: Center(
+              child: CircularProgressIndicator(color: context.modePrimary),
+            ),
           );
         }
 
@@ -397,9 +404,9 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
       onTap: () => _showProductDetails(product),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          border: Border.all(color: context.modeBorder, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,7 +416,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                 Container(
                   height: 120,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
+                    color: context.modeSurfaceAlt,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
@@ -430,7 +437,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                 child: Icon(
                                   Icons.fastfood,
                                   size: 40,
-                                  color: Colors.grey[400],
+                                  color: context.modeTextMuted,
                                 ),
                               );
                             },
@@ -440,7 +447,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                           child: Icon(
                             Icons.fastfood,
                             size: 40,
-                            color: Colors.grey[400],
+                            color: context.modeTextMuted,
                           ),
                         ),
                 ),
@@ -454,20 +461,24 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF9800),
+                        color: context.modeWarning,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star, size: 12, color: Colors.white),
+                          Icon(
+                            Icons.star,
+                            size: 12,
+                            color: context.modeTextInverse,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'Featured',
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: context.modeTextInverse,
                             ),
                           ),
                         ],
@@ -487,7 +498,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -497,7 +508,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                       product.category?.replaceAll('_', ' ') ?? '',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 11,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                     const Spacer(),
@@ -510,7 +521,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: kPrimary,
+                              color: context.modePrimary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -540,14 +551,18 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey[400]),
+          Icon(
+            Icons.inventory_2_outlined,
+            size: 80,
+            color: context.modeTextMuted,
+          ),
           const SizedBox(height: 16),
           Text(
             'No products available',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF757575),
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -562,21 +577,21 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
+            Icon(Icons.error_outline, size: 80, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               state.error,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -604,6 +619,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      backgroundColor: context.modeSurface,
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(24),
@@ -616,6 +632,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -631,7 +648,10 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                 'OTHERS',
               ].map((category) {
                 return ListTile(
-                  title: Text(category.replaceAll('_', ' ')),
+                  title: Text(
+                    category.replaceAll('_', ' '),
+                    style: TextStyle(color: context.modeTextPrimary),
+                  ),
                   onTap: () {
                     setState(() => _selectedCategory = category);
                     context.read<SupplierBloc>().add(
@@ -657,6 +677,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      backgroundColor: context.modeSurface,
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(24),
@@ -669,6 +690,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -680,7 +702,10 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                 'SEASONAL',
               ].map((status) {
                 return ListTile(
-                  title: Text(status.replaceAll('_', ' ')),
+                  title: Text(
+                    status.replaceAll('_', ' '),
+                    style: TextStyle(color: context.modeTextPrimary),
+                  ),
                   onTap: () {
                     setState(() => _selectedStatus = status);
                     context.read<SupplierBloc>().add(
@@ -707,6 +732,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      backgroundColor: context.modeSurface,
       builder: (context) {
         return DraggableScrollableSheet(
           initialChildSize: 0.9,
@@ -725,7 +751,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: context.modeDivider,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -747,6 +773,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -754,7 +781,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                     product.description ?? '',
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: const Color(0xFF757575),
+                      color: context.modeTextSecondary,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -787,6 +814,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -797,9 +825,9 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                           .map(
                             (cert) => Chip(
                               label: Text(cert ?? ''),
-                              backgroundColor: const Color(
-                                0xFF4CAF50,
-                              ).withValues(alpha: 0.1),
+                              backgroundColor: context.modeSuccess.withValues(
+                                alpha: 0.1,
+                              ),
                             ),
                           )
                           .toList(),
@@ -826,7 +854,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
               label,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
               ),
             ),
           ),
@@ -837,7 +865,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -849,17 +877,17 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
   Color _getStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'AVAILABLE':
-        return const Color(0xFF4CAF50);
+        return context.modeSuccess;
       case 'LOW_STOCK':
-        return const Color(0xFFFF9800);
+        return context.modeWarning;
       case 'OUT_OF_STOCK':
-        return const Color(0xFFF44336);
+        return context.modeError;
       case 'DISCONTINUED':
-        return const Color(0xFF9E9E9E);
+        return context.modeTextMuted;
       case 'SEASONAL':
-        return const Color(0xFF2196F3);
+        return context.modeInfo;
       default:
-        return const Color(0xFF757575);
+        return context.modeTextSecondary;
     }
   }
 }

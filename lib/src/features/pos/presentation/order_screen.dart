@@ -1,8 +1,11 @@
 import 'package:animate_to/animate_to.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
+import 'package:sandwich_ai/src/core/theme/context_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/api_menu_blocs/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/api_menu_blocs/event.dart';
@@ -35,6 +38,7 @@ class _OrderScreenState extends State<OrderScreen>
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   final _animateToController = AnimateToController();
+  Timer? _searchDebounce;
 
   final Map<String, int> _orderItems = {};
   final Map<String, String> _itemSpecialRequests = {};
@@ -263,13 +267,6 @@ class _OrderScreenState extends State<OrderScreen>
     setState(() {});
   }
 
-  void _deleteItem(String itemId) {
-    _orderItems.remove(itemId);
-    _itemSpecialRequests.remove(itemId);
-    _syncToCubit();
-    setState(() {});
-  }
-
   void _clearAllItems() {
     _orderItems.clear();
     _itemSpecialRequests.clear();
@@ -297,6 +294,7 @@ class _OrderScreenState extends State<OrderScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _animateToController.dispose();
     super.dispose();
@@ -383,7 +381,7 @@ class _OrderScreenState extends State<OrderScreen>
       child: DefaultTextStyle.merge(
         style: WorkSansAppTextStyles.medium,
         child: Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           appBar: _buildAppBar(),
           body: BlocConsumer<MenuItemsBloc, MenuItemsState>(
             listenWhen: (previous, current) {
@@ -413,7 +411,7 @@ class _OrderScreenState extends State<OrderScreen>
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.error),
-                    backgroundColor: Colors.red,
+                    backgroundColor: context.modeError,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -424,8 +422,8 @@ class _OrderScreenState extends State<OrderScreen>
             },
             builder: (context, state) {
               if (state is MenuItemsLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: kPrimary),
+                return Center(
+                  child: CircularProgressIndicator(color: context.modePrimary),
                 );
               }
               if (state is MenuItemsEmpty || state is MenuItemsError) {
@@ -444,8 +442,9 @@ class _OrderScreenState extends State<OrderScreen>
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       title: BlocBuilder<OrderSessionCubit, OrderSessionState>(
         builder: (context, sessionState) {
           final label = sessionState.activeSession?.label ?? 'New Order';
@@ -457,7 +456,7 @@ class _OrderScreenState extends State<OrderScreen>
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
               if (sessionState.sessions.length > 1)
@@ -465,7 +464,7 @@ class _OrderScreenState extends State<OrderScreen>
                   '${sessionState.sessions.length} sessions open',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 11,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextMuted,
                   ),
                 ),
             ],
@@ -479,9 +478,9 @@ class _OrderScreenState extends State<OrderScreen>
             alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.layers_outlined,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
                 onPressed: _openSessionManager,
                 tooltip: 'Sessions',
@@ -493,17 +492,17 @@ class _OrderScreenState extends State<OrderScreen>
                   child: Container(
                     width: 17,
                     height: 17,
-                    decoration: const BoxDecoration(
-                      color: kPrimary,
+                    decoration: BoxDecoration(
+                      color: context.modePrimary,
                       shape: BoxShape.circle,
                     ),
                     child: Center(
                       child: Text(
                         '${sessionState.sessions.length}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                           height: 1.0,
                         ),
                       ),
@@ -516,12 +515,12 @@ class _OrderScreenState extends State<OrderScreen>
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.refresh, color: kprimaryTextColor1),
+          icon: Icon(Icons.refresh, color: context.modeTextPrimary),
           onPressed: () =>
               context.read<MenuItemsBloc>().add(const RefreshMenuItems()),
         ),
         IconButton(
-          icon: const Icon(Icons.add, color: kprimaryTextColor1),
+          icon: Icon(Icons.add, color: context.modeTextPrimary),
           onPressed: context.showAddMenuItemDialog,
         ),
       ],
@@ -533,14 +532,16 @@ class _OrderScreenState extends State<OrderScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.restaurant_menu, size: 80, color: Colors.grey[400]),
+          Icon(Icons.restaurant_menu, size: 80, color: context.modeTextMuted),
           const SizedBox(height: 16),
           Text(
             state is MenuItemsError ? state.error : 'No menu items available',
             textAlign: TextAlign.center,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 16,
-              color: state is MenuItemsError ? Colors.red : kprimaryTextColor2,
+              color: state is MenuItemsError
+                  ? context.modeError
+                  : context.modeTextSecondary,
             ),
           ),
           const SizedBox(height: 24),
@@ -550,8 +551,8 @@ class _OrderScreenState extends State<OrderScreen>
             icon: const Icon(Icons.refresh),
             label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
-              foregroundColor: Colors.white,
+              backgroundColor: context.modePrimary,
+              foregroundColor: context.modeTextInverse,
             ),
           ),
         ],
@@ -574,26 +575,38 @@ class _OrderScreenState extends State<OrderScreen>
     return Column(
       children: [
         Container(
-          color: Colors.white,
+          color: context.modeSurface,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: TextField(
-            cursorColor: kPrimary,
-            controller: _searchController,
-            onChanged: (value) => context.read<MenuItemsBloc>().add(
-              SearchMenuItems(query: value),
+            cursorColor: context.modePrimary,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              color: context.modeTextPrimary,
             ),
+            controller: _searchController,
+            onChanged: (value) {
+              setState(() {});
+              _searchDebounce?.cancel();
+              _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+                if (!mounted) return;
+                context.read<MenuItemsBloc>().add(
+                  SearchMenuItems(query: value),
+                );
+              });
+            },
             decoration: InputDecoration(
               hintText: 'Search menu',
               hintStyle: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextMuted,
               ),
-              prefixIcon: const Icon(Icons.search, color: kprimaryTextColor2),
+              prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: kprimaryTextColor2),
+                      icon: Icon(Icons.clear, color: context.modeTextMuted),
                       onPressed: () {
+                        _searchDebounce?.cancel();
                         _searchController.clear();
+                        setState(() {});
                         context.read<MenuItemsBloc>().add(
                           const SearchMenuItems(query: ''),
                         );
@@ -601,10 +614,18 @@ class _OrderScreenState extends State<OrderScreen>
                     )
                   : null,
               filled: true,
-              fillColor: const Color(0xFFF8F6F6),
+              fillColor: context.modeSurfaceAlt,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+                borderSide: BorderSide(color: context.modeBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: context.modeBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: context.modePrimary),
               ),
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
             ),
@@ -612,22 +633,22 @@ class _OrderScreenState extends State<OrderScreen>
         ),
         if (categories.isNotEmpty)
           Container(
-            color: Colors.white,
+            color: context.modeSurface,
             child: TabBar(
               controller: _tabController,
               onTap: (index) => context.read<MenuItemsBloc>().add(
                 FilterMenuItemsByCategory(category: categories[index]),
               ),
-              labelColor: kPrimary,
-              unselectedLabelColor: kprimaryTextColor2,
-              indicatorColor: kPrimary,
+              labelColor: context.modePrimary,
+              unselectedLabelColor: context.modeTextMuted,
+              indicatorColor: context.modePrimary,
               indicatorWeight: 3,
               isScrollable: categories.length > 4,
               tabs: categories.map((cat) => Tab(text: cat)).toList(),
             ),
           ),
         if (state is MenuItemsRefreshing)
-          const LinearProgressIndicator(color: kPrimary),
+          LinearProgressIndicator(color: context.modePrimary),
         Expanded(
           child: categories.isEmpty
               ? Center(
@@ -635,7 +656,7 @@ class _OrderScreenState extends State<OrderScreen>
                     'No menu items available',
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 16,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 )
@@ -663,10 +684,12 @@ class _OrderScreenState extends State<OrderScreen>
                   height: 55,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: kPrimary,
+                    color: context.modePrimary,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Colors.black.withValues(
+                          alpha: context.isDarkMode ? 0.28 : 0.1,
+                        ),
                         blurRadius: 10,
                         offset: const Offset(0, -2),
                       ),
@@ -709,7 +732,9 @@ class _OrderScreenState extends State<OrderScreen>
                           Container(
                             width: 1,
                             height: double.infinity,
-                            color: Colors.grey.shade300,
+                            color: context.modeTextInverse.withValues(
+                              alpha: 0.32,
+                            ),
                           ),
                           const SizedBox(width: 10),
                           GestureDetector(
@@ -721,7 +746,7 @@ class _OrderScreenState extends State<OrderScreen>
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                                    color: context.modeTextInverse,
                                   ),
                                 ),
                                 const SizedBox(width: 5),
@@ -732,9 +757,9 @@ class _OrderScreenState extends State<OrderScreen>
                           const SizedBox(width: 5),
                           GestureDetector(
                             onTap: _showOrderActions,
-                            child: const Icon(
+                            child: Icon(
                               Icons.more_vert,
-                              color: Colors.white,
+                              color: context.modeTextInverse,
                               size: 22,
                             ),
                           ),
@@ -757,8 +782,8 @@ class _OrderScreenState extends State<OrderScreen>
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: context.modeSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
@@ -772,7 +797,7 @@ class _OrderScreenState extends State<OrderScreen>
                   width: 44,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: context.modeBorder,
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -785,7 +810,7 @@ class _OrderScreenState extends State<OrderScreen>
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -795,8 +820,8 @@ class _OrderScreenState extends State<OrderScreen>
                     label: _itemSpecialRequests.containsKey(item.id)
                         ? 'Edit Special Request'
                         : 'Add Special Request',
-                    iconColor: kPrimary,
-                    textColor: kprimaryTextColor1,
+                    iconColor: context.modePrimary,
+                    textColor: context.modeTextPrimary,
                     onTap: () {
                       Navigator.pop(context);
                       _addSpecialRequest(item);
@@ -807,8 +832,8 @@ class _OrderScreenState extends State<OrderScreen>
                 _BottomSheetAction(
                   icon: Icons.edit_outlined,
                   label: 'Edit Menu Item',
-                  iconColor: kPrimary,
-                  textColor: kprimaryTextColor1,
+                  iconColor: context.modePrimary,
+                  textColor: context.modeTextPrimary,
                   onTap: () {
                     Navigator.pop(context);
                     context.showEditMenuItemDialog(item);
@@ -818,8 +843,8 @@ class _OrderScreenState extends State<OrderScreen>
                 _BottomSheetAction(
                   icon: Icons.delete_outline,
                   label: 'Delete Menu Item',
-                  iconColor: Colors.red,
-                  textColor: Colors.red,
+                  iconColor: context.modeError,
+                  textColor: context.modeError,
                   isDestructive: true,
                   onTap: () {
                     Navigator.pop(context);
@@ -827,13 +852,13 @@ class _OrderScreenState extends State<OrderScreen>
                   },
                 ),
                 const SizedBox(height: 12),
-                const Divider(height: 1),
+                Divider(height: 1, color: context.modeDivider),
                 const SizedBox(height: 4),
                 _BottomSheetAction(
                   icon: Icons.close,
                   label: 'Cancel',
-                  iconColor: kprimaryTextColor2,
-                  textColor: kprimaryTextColor2,
+                  iconColor: context.modeTextMuted,
+                  textColor: context.modeTextMuted,
                   onTap: () => Navigator.pop(context),
                 ),
               ],
@@ -847,6 +872,7 @@ class _OrderScreenState extends State<OrderScreen>
   void _showOrderActions() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: context.modeSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -860,13 +886,13 @@ class _OrderScreenState extends State<OrderScreen>
                 leading: SvgPicture.asset(
                   'assets/svg/delete.svg',
                   // ignore: deprecated_member_use
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
-                title: const Text(
+                title: Text(
                   'Clear Order items',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Colors.red,
+                    color: context.modeError,
                   ),
                 ),
                 onTap: () {
@@ -874,10 +900,13 @@ class _OrderScreenState extends State<OrderScreen>
                   _clearAllItems();
                 },
               ),
-              const Divider(height: 0),
+              Divider(height: 0, color: context.modeDivider),
               ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('Cancel'),
+                leading: Icon(Icons.close, color: context.modeTextSecondary),
+                title: Text(
+                  'Cancel',
+                  style: TextStyle(color: context.modeTextPrimary),
+                ),
                 onTap: () => Navigator.pop(context),
               ),
             ],
@@ -897,7 +926,7 @@ class _OrderScreenState extends State<OrderScreen>
           'No items in this category',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 16,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
         ),
       );
@@ -914,7 +943,7 @@ class _OrderScreenState extends State<OrderScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           );
@@ -941,7 +970,9 @@ class _OrderScreenState extends State<OrderScreen>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withValues(
+                      alpha: context.isDarkMode ? 0.24 : 0.08,
+                    ),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -957,8 +988,12 @@ class _OrderScreenState extends State<OrderScreen>
                       item.imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.restaurant, size: 40),
+                        color: context.modeSurfaceAlt,
+                        child: Icon(
+                          Icons.restaurant,
+                          size: 40,
+                          color: context.modeTextMuted,
+                        ),
                       ),
                     ),
                   ),
@@ -981,7 +1016,7 @@ class _OrderScreenState extends State<OrderScreen>
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -995,13 +1030,13 @@ class _OrderScreenState extends State<OrderScreen>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: kPrimary.withValues(alpha: 0.1),
+                            color: context.modePrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.edit_note,
                             size: 14,
-                            color: kPrimary,
+                            color: context.modePrimary,
                           ),
                         ),
                     ],
@@ -1012,7 +1047,7 @@ class _OrderScreenState extends State<OrderScreen>
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                   if (hasSpecialRequest && isAdded) ...[
@@ -1021,7 +1056,7 @@ class _OrderScreenState extends State<OrderScreen>
                       _itemSpecialRequests[item.id]!,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: kPrimary,
+                        color: context.modePrimary,
                         fontStyle: FontStyle.italic,
                       ),
                       maxLines: 1,
@@ -1034,11 +1069,7 @@ class _OrderScreenState extends State<OrderScreen>
           ),
           const SizedBox(width: 12),
           IconButton(
-            icon: const Icon(
-              Icons.more_vert,
-              color: kprimaryTextColor2,
-              size: 20,
-            ),
+            icon: Icon(Icons.more_vert, color: context.modeTextMuted, size: 20),
             onPressed: () => _showMenuItemOptions(item),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -1054,23 +1085,23 @@ class _OrderScreenState extends State<OrderScreen>
                 width: 30,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: Colors.grey[300]!),
+                  border: Border.all(color: context.modeBorder),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.add,
                   size: 20,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             )
           else
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.modeSurface,
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: context.modeBorder),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -1083,7 +1114,7 @@ class _OrderScreenState extends State<OrderScreen>
                       alignment: Alignment.center,
                       child: SvgPicture.asset(
                         'assets/svg/delete.svg',
-                        color: kPrimary,
+                        color: context.modePrimary,
                       ),
                     ),
                   ),
@@ -1096,7 +1127,7 @@ class _OrderScreenState extends State<OrderScreen>
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
@@ -1109,10 +1140,10 @@ class _OrderScreenState extends State<OrderScreen>
                       width: 32,
                       height: 32,
                       alignment: Alignment.center,
-                      child: const Icon(
+                      child: Icon(
                         Icons.add,
                         size: 18,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
@@ -1135,7 +1166,7 @@ class _OrderScreenState extends State<OrderScreen>
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(100),
-              border: Border.all(color: Colors.grey[300]!, width: 2),
+              border: Border.all(color: context.modeBorder, width: 2),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(100),
@@ -1143,8 +1174,12 @@ class _OrderScreenState extends State<OrderScreen>
                 item.imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.restaurant, size: 24),
+                  color: context.modeSurfaceAlt,
+                  child: Icon(
+                    Icons.restaurant,
+                    size: 24,
+                    color: context.modeTextMuted,
+                  ),
                 ),
               ),
             ),
@@ -1154,8 +1189,8 @@ class _OrderScreenState extends State<OrderScreen>
             right: 12,
             child: Container(
               padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Color(0XFFFCFCFC),
+              decoration: BoxDecoration(
+                color: context.modeSurface,
                 shape: BoxShape.circle,
               ),
               constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
@@ -1165,7 +1200,7 @@ class _OrderScreenState extends State<OrderScreen>
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: kPrimary,
+                    color: context.modePrimary,
                     height: 1.0,
                   ),
                   textAlign: TextAlign.center,
@@ -1206,8 +1241,8 @@ class _BottomSheetAction extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(
             color: isDestructive
-                ? Colors.red.withValues(alpha: 0.2)
-                : Colors.grey.shade200,
+                ? context.modeError.withValues(alpha: 0.2)
+                : context.modeBorder,
           ),
           borderRadius: BorderRadius.circular(12),
         ),

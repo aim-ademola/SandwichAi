@@ -70,7 +70,10 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     final currentState = state as MenuItemsLoaded;
     emit(MenuItemsRefreshing(currentData: currentState.menuItems));
 
-    final response = await _repository.getMenuItems(branchId: branchId);
+    final response = await _repository.getMenuItems(
+      branchId: branchId,
+      search: currentState.searchQuery,
+    );
 
     await response.when(
       success: (menuItems) async {
@@ -79,7 +82,13 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
           return;
         }
 
-        emit(MenuItemsLoaded(menuItems: menuItems, filteredItems: menuItems));
+        emit(
+          MenuItemsLoaded(
+            menuItems: menuItems,
+            filteredItems: menuItems,
+            searchQuery: currentState.searchQuery,
+          ),
+        );
       },
       error: (error) async {
         final errorType = _determineErrorType(error.toString());
@@ -88,35 +97,50 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     );
   }
 
-  void _onSearchMenuItems(SearchMenuItems event, Emitter<MenuItemsState> emit) {
-    if (state is! MenuItemsLoaded) return;
-
-    final menuItems = (state as MenuItemsLoaded).menuItems;
-
-    if (event.query.isEmpty) {
-      emit(
-        MenuItemsLoaded(
-          menuItems: menuItems,
-          filteredItems: menuItems,
-          searchQuery: null,
-        ),
-      );
-      return;
+  Future<void> _onSearchMenuItems(
+    SearchMenuItems event,
+    Emitter<MenuItemsState> emit,
+  ) async {
+    final currentItems = state is MenuItemsLoaded
+        ? (state as MenuItemsLoaded).menuItems
+        : <dynamic>[];
+    if (currentItems.isNotEmpty) {
+      emit(MenuItemsRefreshing(currentData: currentItems.cast()));
+    } else {
+      emit(const MenuItemsLoading());
     }
 
-    final query = event.query.toLowerCase();
-    final filtered = menuItems.where((item) {
-      return item.dishName.toLowerCase().contains(query) ||
-          item.description.toLowerCase().contains(query) ||
-          item.category.toLowerCase().contains(query);
-    }).toList();
+    final query = event.query.trim();
+    final response = await _repository.getMenuItems(
+      branchId: branchId,
+      search: query,
+    );
 
-    emit(
-      MenuItemsLoaded(
-        menuItems: menuItems,
-        filteredItems: filtered,
-        searchQuery: event.query,
-      ),
+    await response.when(
+      success: (menuItems) async {
+        if (menuItems.isEmpty) {
+          emit(
+            MenuItemsLoaded(
+              menuItems: const [],
+              filteredItems: const [],
+              searchQuery: query.isEmpty ? null : query,
+            ),
+          );
+          return;
+        }
+
+        emit(
+          MenuItemsLoaded(
+            menuItems: menuItems,
+            filteredItems: menuItems,
+            searchQuery: query.isEmpty ? null : query,
+          ),
+        );
+      },
+      error: (error) async {
+        final errorType = _determineErrorType(error.toString());
+        emit(MenuItemsError(error: error.toString(), errorType: errorType));
+      },
     );
   }
 

@@ -924,7 +924,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: item.quantityController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       cursorColor: kPrimary,
                       onChanged: (value) {
                         setState(() {
@@ -1378,7 +1380,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       for (var lineItem in _lineItems) {
         if (lineItem.selectedProductId != null &&
             lineItem.quantityController.text.isNotEmpty) {
-          final quantity = int.tryParse(lineItem.quantityController.text);
+          final quantity = double.tryParse(lineItem.quantityController.text);
           if (quantity == null || quantity <= 0) {
             _showErrorSnackBar('Please enter valid quantities');
             return;
@@ -1919,7 +1921,7 @@ class OrderLineItem {
 
   void calculateTotal() {
     if (selectedProductPrice != null && quantityController.text.isNotEmpty) {
-      final quantity = int.tryParse(quantityController.text);
+      final quantity = double.tryParse(quantityController.text);
       if (quantity != null && quantity > 0) {
         total = selectedProductPrice! * quantity;
       } else {

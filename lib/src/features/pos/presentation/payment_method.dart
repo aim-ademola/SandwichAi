@@ -46,6 +46,8 @@ class PaymentMethodScreen extends StatefulWidget {
   final String? specialInstructions;
   final double totalAmount;
   final String? sessionId;
+  final String? existingOrderId;
+  final String? existingOrderNumber;
 
   const PaymentMethodScreen({
     super.key,
@@ -59,6 +61,8 @@ class PaymentMethodScreen extends StatefulWidget {
     this.specialInstructions,
     required this.totalAmount,
     this.sessionId,
+    this.existingOrderId,
+    this.existingOrderNumber,
   });
 
   @override
@@ -95,11 +99,18 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   void initState() {
     super.initState();
     _loadBranchId();
+    _mainOrderId = widget.existingOrderId;
+    _createdOrderId = widget.existingOrderNumber;
     _sessionId =
         widget.sessionId ??
         context.read<OrderSessionCubit>().state.activeSession?.sessionId;
-    _restorePaymentState();
+    if (!_isExistingOrderPayment) {
+      _restorePaymentState();
+    }
   }
+
+  bool get _isExistingOrderPayment =>
+      widget.existingOrderId != null && widget.existingOrderId!.isNotEmpty;
 
   Future<void> _loadBranchId() async {
     _branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
@@ -511,12 +522,26 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   void _handleProcessOrder() {
     if (_selectedMethod == null) return;
+    if (_isExistingOrderPayment) {
+      _payExistingOrder();
+      return;
+    }
     if (_selectedMethod == _PaymentMethod.cardOrBankTransfer) {
       // _showEmailDialog();
       _createOrderAndPay();
     } else {
       _createOrderAndPay();
     }
+  }
+
+  void _payExistingOrder() {
+    if (_mainOrderId == null || _mainOrderId!.isEmpty) {
+      _showSnack('Order ID is missing. Refresh and try again.', Colors.red);
+      return;
+    }
+
+    _showLoading('Preparing payment...');
+    _processPayment();
   }
 
   String _normalizeOrderType(String orderType) {
@@ -578,6 +603,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     if (_branchId.isEmpty) {
       _branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
     }
+    if (!mounted) return;
 
     if (_selectedMethod == _PaymentMethod.cash) {
       context.read<PaymentBloc>().add(

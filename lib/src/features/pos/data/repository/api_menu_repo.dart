@@ -10,6 +10,7 @@ import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 abstract class MenuItemsRepositoryInterface {
   Future<ApiResponse<List<ApiMenuItem>>> getMenuItems({
     required String branchId,
+    String? search,
   });
 }
 
@@ -20,11 +21,16 @@ class MenuItemsRepository extends BaseRepository
   @override
   Future<ApiResponse<List<ApiMenuItem>>> getMenuItems({
     required String branchId,
+    String? search,
   }) async {
     try {
       _validateBranchId(branchId);
 
       final queryParams = <String, dynamic>{'branchId': branchId};
+      final trimmedSearch = search?.trim() ?? '';
+      if (trimmedSearch.isNotEmpty) {
+        queryParams['search'] = trimmedSearch;
+      }
 
       final listResponse = await handleListResponse<ApiMenuItem>(
         _apiClient

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/oder_status_model.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/payment_method.dart';
 
 class OrderDetailScreen extends StatelessWidget {
   final KitchenOrder order;
@@ -57,6 +58,10 @@ class OrderDetailScreen extends StatelessWidget {
                   _buildOrderItems(context, textSize),
                   SizedBox(height: verticalSpacing),
                   _buildPricingBreakdown(context, textSize),
+                  if (_shouldShowPaymentAction()) ...[
+                    SizedBox(height: verticalSpacing),
+                    _buildPaymentAction(context, textSize),
+                  ],
                   SizedBox(height: verticalSpacing),
                   _buildTimeline(context, textSize),
                   if (order.specialInstructions != null) ...[
@@ -472,6 +477,88 @@ class OrderDetailScreen extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentAction(BuildContext context, double textSize) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
+        boxShadow: [
+          BoxShadow(
+            color: context.modeTextPrimary.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Payment Pending',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: textSize + 1,
+              fontWeight: FontWeight.w700,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'This order has been served. Take payment to complete it.',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: textSize - 1,
+              fontWeight: FontWeight.w500,
+              color: context.modeTextSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _openPayment(context),
+              icon: const Icon(Icons.payments_outlined),
+              label: Text(
+                'Take Payment',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: textSize,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openPayment(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PaymentMethodScreen(
+          orderItems: const {},
+          specialRequests: const {},
+          orderType: order.orderType.value,
+          tableNumber: order.tableNumber,
+          customerName: order.customerName,
+          customerPhone: order.customerPhone,
+          totalAmount: double.tryParse(order.totalAmount) ?? 0,
+          existingOrderId: order.id,
+          existingOrderNumber: order.orderId,
+        ),
       ),
     );
   }
@@ -900,5 +987,15 @@ class OrderDetailScreen extends StatelessWidget {
     if (width < 600) return 15;
     if (width < 900) return 16;
     return 17;
+  }
+
+  bool _hasPayment() {
+    final amountPaid = double.tryParse(order.amountPaid ?? '') ?? 0;
+    final method = order.paymentMethod?.trim();
+    return amountPaid > 0 || (method != null && method.isNotEmpty);
+  }
+
+  bool _shouldShowPaymentAction() {
+    return order.status == OrderStatus.served && !_hasPayment();
   }
 }

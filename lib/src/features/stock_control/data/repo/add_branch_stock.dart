@@ -363,7 +363,7 @@ class AddBranchStockRepository extends BaseRepository
 /// Stock Adjustment Request Model
 class StockAdjustmentRequest {
   final String type; // ADD, SUBTRACT, SET
-  final int quantity;
+  final double quantity;
   final String note;
   final String performedBy;
 

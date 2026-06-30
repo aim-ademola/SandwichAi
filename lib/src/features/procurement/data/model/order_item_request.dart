@@ -1,6 +1,6 @@
 class OrderItemRequest {
   final String productId;
-  final int quantityOrdered;
+  final double quantityOrdered;
   final String? notes;
 
   const OrderItemRequest({
@@ -12,7 +12,7 @@ class OrderItemRequest {
   factory OrderItemRequest.fromJson(Map<String, dynamic> json) {
     return OrderItemRequest(
       productId: json['productId']?.toString() ?? '',
-      quantityOrdered: _asInt(json['quantityOrdered'] ?? json['quantity']),
+      quantityOrdered: _asDouble(json['quantityOrdered'] ?? json['quantity']),
       notes: json['notes']?.toString(),
     );
   }
@@ -26,8 +26,7 @@ class OrderItemRequest {
   }
 }
 
-int _asInt(dynamic value) {
-  if (value is int) return value;
-  if (value is num) return value.toInt();
-  return int.tryParse(value?.toString() ?? '') ?? 0;
+double _asDouble(dynamic value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0.0;
 }

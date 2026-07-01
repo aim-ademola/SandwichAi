@@ -44,6 +44,7 @@ class _OrderScreenState extends State<OrderScreen>
   final Map<String, int> _orderItems = {};
   final Map<String, String> _itemSpecialRequests = {};
   String? _lastKnownSessionId;
+  bool _showUnavailableItems = false;
 
   @override
   void initState() {
@@ -850,58 +851,67 @@ class _OrderScreenState extends State<OrderScreen>
         Container(
           color: context.modeSurface,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: TextField(
-            cursorColor: context.modePrimary,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              color: context.modeTextPrimary,
-            ),
-            controller: _searchController,
-            onChanged: (value) {
-              setState(() {});
-              _searchDebounce?.cancel();
-              _searchDebounce = Timer(const Duration(milliseconds: 450), () {
-                if (!mounted) return;
-                context.read<MenuItemsBloc>().add(
-                  SearchMenuItems(query: value),
-                );
-              });
-            },
-            decoration: InputDecoration(
-              hintText: 'Search menu',
-              hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                color: context.modeTextMuted,
+          child: Column(
+            children: [
+              TextField(
+                cursorColor: context.modePrimary,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  color: context.modeTextPrimary,
+                ),
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {});
+                  _searchDebounce?.cancel();
+                  _searchDebounce = Timer(
+                    const Duration(milliseconds: 450),
+                    () {
+                      if (!mounted) return;
+                      context.read<MenuItemsBloc>().add(
+                        SearchMenuItems(query: value),
+                      );
+                    },
+                  );
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search menu',
+                  hintStyle: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 14,
+                    color: context.modeTextMuted,
+                  ),
+                  prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear, color: context.modeTextMuted),
+                          onPressed: () {
+                            _searchDebounce?.cancel();
+                            _searchController.clear();
+                            setState(() {});
+                            context.read<MenuItemsBloc>().add(
+                              const SearchMenuItems(query: ''),
+                            );
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: context.modeSurfaceAlt,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: context.modeBorder),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: context.modeBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: context.modePrimary),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
               ),
-              prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: Icon(Icons.clear, color: context.modeTextMuted),
-                      onPressed: () {
-                        _searchDebounce?.cancel();
-                        _searchController.clear();
-                        setState(() {});
-                        context.read<MenuItemsBloc>().add(
-                          const SearchMenuItems(query: ''),
-                        );
-                      },
-                    )
-                  : null,
-              filled: true,
-              fillColor: context.modeSurfaceAlt,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: context.modeBorder),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: context.modeBorder),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: context.modePrimary),
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-            ),
+              const SizedBox(height: 10),
+              _buildAvailabilityToggle(),
+            ],
           ),
         ),
         if (categories.isNotEmpty)
@@ -1252,14 +1262,65 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
+  Widget _buildAvailabilityToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: context.modeSurfaceAlt,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _showUnavailableItems
+                ? Icons.visibility_outlined
+                : Icons.check_circle_outline_rounded,
+            size: 19,
+            color: _showUnavailableItems
+                ? context.modeWarning
+                : context.modeSuccess,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _showUnavailableItems
+                  ? 'Showing unavailable items'
+                  : 'Available items only',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: context.modeTextPrimary,
+              ),
+            ),
+          ),
+          Switch.adaptive(
+            value: _showUnavailableItems,
+            activeThumbColor: context.modePrimary,
+            onChanged: (value) {
+              setState(() {
+                _showUnavailableItems = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMenuList(List<ApiMenuItem> items, String category) {
     final categoryItems = items
         .where((item) => item.category == category)
+        .where((item) => _showUnavailableItems || item.isAvailable)
         .toList();
     if (categoryItems.isEmpty) {
       return Center(
         child: Text(
-          'No items in this category',
+          _showUnavailableItems
+              ? 'No items in this category'
+              : 'No available items in this category',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 16,
             color: context.modeTextSecondary,
@@ -1291,8 +1352,34 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
+  Widget _buildAvailabilityBadge(bool isAvailable) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: isAvailable
+            ? context.modeSuccess.withValues(alpha: 0.12)
+            : context.modeError.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isAvailable
+              ? context.modeSuccess.withValues(alpha: 0.35)
+              : context.modeError.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Text(
+        isAvailable ? 'Available' : 'Unavailable',
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: isAvailable ? context.modeSuccess : context.modeError,
+        ),
+      ),
+    );
+  }
+
   Widget _buildMenuItem(ApiMenuItem item, int quantity, bool isAdded) {
     final hasSpecialRequest = _itemSpecialRequests.containsKey(item.id);
+    final isAvailable = item.isAvailable;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -1316,23 +1403,39 @@ class _OrderScreenState extends State<OrderScreen>
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: KeyedSubtree(
-                  key: ValueKey(item.id),
-                  child: AnimateFrom(
-                    key: _animateToController.tag(item),
-                    child: Image.network(
-                      item.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: context.modeSurfaceAlt,
-                        child: Icon(
-                          Icons.restaurant,
-                          size: 40,
-                          color: context.modeTextMuted,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    KeyedSubtree(
+                      key: ValueKey(item.id),
+                      child: AnimateFrom(
+                        key: _animateToController.tag(item),
+                        child: Image.network(
+                          item.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: context.modeSurfaceAlt,
+                                child: Icon(
+                                  Icons.restaurant,
+                                  size: 40,
+                                  color: context.modeTextMuted,
+                                ),
+                              ),
                         ),
                       ),
                     ),
-                  ),
+                    if (!isAvailable)
+                      Container(
+                        color: Colors.black.withValues(alpha: 0.42),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.block_rounded,
+                          color: Colors.white.withValues(alpha: 0.92),
+                          size: 24,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -1352,7 +1455,9 @@ class _OrderScreenState extends State<OrderScreen>
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: context.modeTextPrimary,
+                            color: isAvailable
+                                ? context.modeTextPrimary
+                                : context.modeTextMuted,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -1377,14 +1482,23 @@ class _OrderScreenState extends State<OrderScreen>
                         ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '₦${item.price}',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: context.modeTextSecondary,
-                    ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        '₦${item.price}',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isAvailable
+                              ? context.modeTextSecondary
+                              : context.modeTextMuted,
+                        ),
+                      ),
+                      _buildAvailabilityBadge(isAvailable),
+                    ],
                   ),
                   if (hasSpecialRequest && isAdded) ...[
                     const SizedBox(height: 4),
@@ -1411,7 +1525,19 @@ class _OrderScreenState extends State<OrderScreen>
             constraints: const BoxConstraints(),
           ),
           const SizedBox(width: 8),
-          if (!isAdded)
+          if (!isAvailable && !isAdded)
+            Container(
+              width: 34,
+              height: 34,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: context.modeSurfaceAlt,
+                borderRadius: BorderRadius.circular(100),
+                border: Border.all(color: context.modeBorder),
+              ),
+              child: Icon(Icons.block, size: 18, color: context.modeTextMuted),
+            )
+          else if (!isAdded)
             InkWell(
               onTap: () {
                 _animateToController.animateTag(item);
@@ -1448,12 +1574,10 @@ class _OrderScreenState extends State<OrderScreen>
                       width: 32,
                       height: 32,
                       alignment: Alignment.center,
-                      child: SvgPicture.asset(
-                        'assets/svg/delete.svg',
-                        colorFilter: ColorFilter.mode(
-                          context.modePrimary,
-                          BlendMode.srcIn,
-                        ),
+                      child: Icon(
+                        Icons.remove_rounded,
+                        size: 18,
+                        color: context.modePrimary,
                       ),
                     ),
                   ),
@@ -1471,10 +1595,12 @@ class _OrderScreenState extends State<OrderScreen>
                     ),
                   ),
                   InkWell(
-                    onTap: () {
-                      _addItem(item.id);
-                      _animateToController.animateTag(item);
-                    },
+                    onTap: isAvailable
+                        ? () {
+                            _addItem(item.id);
+                            _animateToController.animateTag(item);
+                          }
+                        : null,
                     child: Container(
                       width: 32,
                       height: 32,
@@ -1482,7 +1608,9 @@ class _OrderScreenState extends State<OrderScreen>
                       child: Icon(
                         Icons.add,
                         size: 18,
-                        color: context.modeTextPrimary,
+                        color: isAvailable
+                            ? context.modeTextPrimary
+                            : context.modeTextMuted,
                       ),
                     ),
                   ),

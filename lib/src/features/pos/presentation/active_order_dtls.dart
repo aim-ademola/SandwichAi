@@ -948,7 +948,7 @@ class OrderDetailScreen extends StatelessWidget {
       case OrderStatus.ready:
         return context.modeSuccess;
       case OrderStatus.served:
-        return context.modeSurfaceMuted;
+        return context.modeSuccess;
       case OrderStatus.completed:
         return context.modeTextSecondary;
       case OrderStatus.cancelled:
@@ -963,9 +963,18 @@ class OrderDetailScreen extends StatelessWidget {
       case OrderStatus.inQueue:
       case OrderStatus.preparing:
         return context.modeTextPrimary;
+      case OrderStatus.served:
+        return _textOnStatusColor(context, _getStatusColor(context, status));
       default:
         return context.modeTextInverse;
     }
+  }
+
+  Color _textOnStatusColor(BuildContext context, Color backgroundColor) {
+    final brightness = ThemeData.estimateBrightnessForColor(backgroundColor);
+    return brightness == Brightness.dark
+        ? context.modeTextInverse
+        : context.modeTextPrimary;
   }
 
   double _getHorizontalPadding(double width) {

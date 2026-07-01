@@ -50,7 +50,11 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
   }
 
   List<KitchenOrder> _activeOrders(List<KitchenOrder> orders) {
-    return orders.where(_isActiveOrder).toList();
+    return _sortNewestFirst(orders.where(_isActiveOrder).toList());
+  }
+
+  List<KitchenOrder> _sortNewestFirst(List<KitchenOrder> orders) {
+    return [...orders]..sort((a, b) => b.orderedAt.compareTo(a.orderedAt));
   }
 
   Future<ApiResponse<List<KitchenOrder>>> _getOrdersIncludingPending({
@@ -93,7 +97,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
       merged[order.id.isNotEmpty ? order.id : order.orderId] = order;
     }
 
-    return ApiResponse.success(merged.values.toList());
+    return ApiResponse.success(_sortNewestFirst(merged.values.toList()));
   }
 
   Future<void> _onLoadKitchenOrders(
@@ -132,7 +136,10 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
           // If no active orders but there are orders, show empty state
           // but store all orders so filters can work
           emit(
-            KitchenOrdersLoaded(orders: orders, filteredOrders: activeOrders),
+            KitchenOrdersLoaded(
+              orders: _sortNewestFirst(orders),
+              filteredOrders: activeOrders,
+            ),
           );
         },
         error: (error) async {
@@ -194,7 +201,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
         final activeOrders = _activeOrders(orders);
         emit(
           KitchenOrdersLoaded(
-            orders: orders,
+            orders: _sortNewestFirst(orders),
             filteredOrders: activeOrders,
             selectedStatus: currentState.selectedStatus,
             searchQuery: currentState.searchQuery,
@@ -217,7 +224,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
     if (state is! KitchenOrdersLoaded) return;
 
     final currentState = state as KitchenOrdersLoaded;
-    final orders = currentState.orders;
+    final orders = _sortNewestFirst(currentState.orders);
 
     if (event.status == null || event.status!.isEmpty) {
       final activeOrders = _activeOrders(orders);
@@ -253,7 +260,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
     if (state is! KitchenOrdersLoaded) return;
 
     final currentState = state as KitchenOrdersLoaded;
-    final orders = currentState.orders;
+    final orders = _sortNewestFirst(currentState.orders);
 
     if (event.query.isEmpty) {
       final activeOrders = _activeOrders(orders);
@@ -327,7 +334,7 @@ class KitchenOrdersBloc extends Bloc<KitchenOrdersEvent, KitchenOrdersState> {
 
         emit(
           KitchenOrdersLoaded(
-            orders: orders,
+            orders: _sortNewestFirst(orders),
             filteredOrders: activeOrders,
             selectedStatus: currentState.selectedStatus,
             searchQuery: currentState.searchQuery,

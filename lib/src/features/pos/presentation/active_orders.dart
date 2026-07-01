@@ -18,6 +18,8 @@ class ActiveOrdersScreen extends StatefulWidget {
 }
 
 class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
+  static const String _paymentPendingFilter = 'PAYMENT_PENDING';
+
   String? _selectedStatus;
 
   @override
@@ -91,7 +93,11 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                                           .currentData)
                                 .where(_isActiveOrder)
                                 .toList();
-
+                        if (_selectedStatus == _paymentPendingFilter) {
+                          orders.removeWhere(
+                            (order) => !_isPaymentPendingOrder(order),
+                          );
+                        }
                         if (orders.isEmpty) {
                           return _buildEmptyState(
                             horizontalPadding,
@@ -164,6 +170,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                 _buildFilterChip('Ready', OrderStatus.ready.value),
                 const SizedBox(width: 8),
                 _buildFilterChip('Served', OrderStatus.served.value),
+                const SizedBox(width: 8),
+                _buildFilterChip('Payment Pending', _paymentPendingFilter),
               ],
             ),
           ),
@@ -189,7 +197,9 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
           _selectedStatus = selected ? status : null;
         });
         context.read<KitchenOrdersBloc>().add(
-          FilterKitchenOrdersByStatus(status: status),
+          FilterKitchenOrdersByStatus(
+            status: status == _paymentPendingFilter ? null : status,
+          ),
         );
       },
       backgroundColor: context.modeSurfaceAlt,
@@ -205,6 +215,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
     final formattedAmount = NumberFormat('#,##0.##').format(amount);
     final isServedUnpaid =
         order.status == OrderStatus.served && !_hasPayment(order);
+    final itemCount = order.items.length;
+
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -216,135 +228,180 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       },
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
         decoration: BoxDecoration(
           color: context.modeSurface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
+          border: Border.all(
+            color: _getStatusColor(order.status).withValues(alpha: 0.38),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(
+                      order.status,
+                    ).withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    _getStatusIcon(order.status),
+                    size: 21,
+                    color: _getStatusColor(order.status),
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
-                  flex: 2,
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Flexible(
-                        child: Text(
-                          order.orderId,
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: textSize,
-                            fontWeight: FontWeight.w600,
-                            color: context.modeTextPrimary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      InkWell(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: order.orderId));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Order ID copied: ${order.orderId}',
-                                style: WorkSansAppTextStyles.medium.copyWith(
-                                  color: context.modeTextInverse,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              backgroundColor: context.modeSuccess,
-                              duration: const Duration(seconds: 2),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              order.orderId,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: textSize + 1,
+                                fontWeight: FontWeight.w800,
+                                color: context.modeTextPrimary,
                               ),
                             ),
-                          );
-                        },
-                        child: Icon(
-                          Icons.copy,
-                          size: 16,
-                          color: context.modePrimary,
-                        ),
+                          ),
+                          const SizedBox(width: 6),
+                          InkWell(
+                            onTap: () => _copyOrderId(order.orderId),
+                            borderRadius: BorderRadius.circular(6),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.copy_rounded,
+                                size: 15,
+                                color: context.modeTextMuted,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          _buildInfoChip(
+                            icon: order.orderType == OrderType.dineIn
+                                ? Icons.table_restaurant_outlined
+                                : Icons.shopping_bag_outlined,
+                            label: _orderLocationLabel(order),
+                            textSize: textSize,
+                          ),
+                          _buildInfoChip(
+                            icon: Icons.schedule_rounded,
+                            label: _formatTimeAgo(order.orderedAt),
+                            textSize: textSize,
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    order.tableNumber ?? order.orderType.value,
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: textSize,
-                      fontWeight: FontWeight.w500,
-                      color: context.modeTextPrimary,
-                    ),
-                    textAlign: TextAlign.center,
+                const SizedBox(width: 10),
+                _buildStatusPill(order.status, textSize),
+              ],
+            ),
+            if ((order.customerName ?? '').trim().isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(
+                    Icons.person_outline_rounded,
+                    size: 16,
+                    color: context.modeTextMuted,
                   ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(order.status),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                  const SizedBox(width: 6),
+                  Expanded(
                     child: Text(
-                      order.status.displayName,
+                      order.customerName!.trim(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: textSize - 1,
                         fontWeight: FontWeight.w600,
-                        color: _getStatusTextColor(order.status),
+                        color: context.modeTextSecondary,
                       ),
-                      textAlign: TextAlign.center,
                     ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 12),
+            Divider(height: 1, color: context.modeDivider),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '$itemCount item${itemCount == 1 ? '' : 's'}',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: textSize - 1,
+                      fontWeight: FontWeight.w600,
+                      color: context.modeTextMuted,
+                    ),
+                  ),
+                ),
+                Text(
+                  '\u20A6$formattedAmount',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: textSize + 1,
+                    fontWeight: FontWeight.w900,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              order.customerName ?? '',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: textSize - 1,
-                fontWeight: FontWeight.w500,
-                color: context.modeTextSecondary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${order.items.length} item${order.items.length > 1 ? 's' : ''} • ₦$formattedAmount',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: textSize - 2,
-                fontWeight: FontWeight.w500,
-                color: context.modeTextMuted,
-              ),
-            ),
             if (isServedUnpaid) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 6,
+                  vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: context.modeWarning.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'Served - payment pending',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: textSize - 2,
-                    fontWeight: FontWeight.w600,
-                    color: context.modeWarning,
+                  color: context.modeWarning.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: context.modeWarning.withValues(alpha: 0.42),
                   ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.payments_outlined,
+                      size: 17,
+                      color: context.modeWarning,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Served - payment pending',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: textSize - 2,
+                          fontWeight: FontWeight.w800,
+                          color: context.modeTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -352,6 +409,123 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildStatusPill(OrderStatus status, double textSize) {
+    final background = _getStatusColor(status);
+    return Container(
+      constraints: const BoxConstraints(minWidth: 82),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        status.displayName,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: textSize - 2,
+          fontWeight: FontWeight.w800,
+          color: _getStatusTextColor(status),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip({
+    required IconData icon,
+    required String label,
+    required double textSize,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: context.modeSurfaceAlt,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.36)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: context.modeTextMuted),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: textSize - 2,
+              fontWeight: FontWeight.w700,
+              color: context.modeTextSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _copyOrderId(String orderId) {
+    Clipboard.setData(ClipboardData(text: orderId));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Order ID copied: $orderId',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            color: context.modeTextInverse,
+            fontSize: 14,
+          ),
+        ),
+        backgroundColor: context.modeSuccess,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  String _orderLocationLabel(KitchenOrder order) {
+    final table = order.tableNumber?.trim();
+    if (table != null && table.isNotEmpty) return table;
+
+    switch (order.orderType) {
+      case OrderType.dineIn:
+        return 'Dine in';
+      case OrderType.takeaway:
+        return 'Takeaway';
+      case OrderType.online:
+        return 'Online';
+      case OrderType.delivery:
+        return 'Delivery';
+    }
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final diff = DateTime.now().difference(dateTime.toLocal());
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} min';
+    if (diff.inHours < 24) return '${diff.inHours} hr';
+    return '${diff.inDays} day';
+  }
+
+  IconData _getStatusIcon(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.pending:
+        return Icons.pending_actions_rounded;
+      case OrderStatus.confirmed:
+        return Icons.verified_outlined;
+      case OrderStatus.inQueue:
+        return Icons.queue_rounded;
+      case OrderStatus.preparing:
+        return Icons.restaurant_menu_rounded;
+      case OrderStatus.ready:
+        return Icons.done_all_rounded;
+      case OrderStatus.served:
+        return Icons.room_service_outlined;
+      case OrderStatus.completed:
+        return Icons.check_circle_outline_rounded;
+      case OrderStatus.cancelled:
+        return Icons.cancel_outlined;
+    }
   }
 
   Widget _buildEmptyState(double horizontalPadding, double screenWidth) {
@@ -511,7 +685,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       case OrderStatus.ready:
         return context.modeSuccess;
       case OrderStatus.served:
-        return context.modeSurfaceMuted;
+        return context.modeSuccess;
       case OrderStatus.completed:
         return context.modeTextSecondary;
       case OrderStatus.cancelled:
@@ -526,9 +700,18 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       case OrderStatus.inQueue:
       case OrderStatus.preparing:
         return context.modeTextPrimary;
+      case OrderStatus.served:
+        return _textOnStatusColor(_getStatusColor(status));
       default:
         return context.modeTextInverse;
     }
+  }
+
+  Color _textOnStatusColor(Color backgroundColor) {
+    final brightness = ThemeData.estimateBrightnessForColor(backgroundColor);
+    return brightness == Brightness.dark
+        ? context.modeTextInverse
+        : context.modeTextPrimary;
   }
 
   double _getHorizontalPadding(double width) {
@@ -558,6 +741,10 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
     return amountPaid > 0 || (method != null && method.isNotEmpty);
   }
 
+  bool _isPaymentPendingOrder(KitchenOrder order) {
+    return order.status == OrderStatus.served && !_hasPayment(order);
+  }
+
   bool _isActiveOrder(KitchenOrder order) {
     if (order.status == OrderStatus.cancelled ||
         order.status == OrderStatus.completed) {
@@ -565,7 +752,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
     }
 
     if (order.status == OrderStatus.served) {
-      return !_hasPayment(order);
+      return _isPaymentPendingOrder(order);
     }
 
     return true;

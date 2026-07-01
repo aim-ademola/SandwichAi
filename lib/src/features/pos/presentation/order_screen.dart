@@ -330,7 +330,7 @@ class _OrderScreenState extends State<OrderScreen>
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: context.modeTextPrimary,
+                    color: sheetContext.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -338,24 +338,24 @@ class _OrderScreenState extends State<OrderScreen>
                   controller: controller,
                   maxLines: 4,
                   autofocus: true,
-                  cursorColor: context.modePrimary,
+                  cursorColor: sheetContext.modePrimary,
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    color: context.modeTextPrimary,
+                    color: sheetContext.modeTextPrimary,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Add kitchen or service notes...',
                     hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                      color: context.modeTextMuted,
+                      color: sheetContext.modeTextMuted,
                     ),
                     filled: true,
-                    fillColor: context.modeSurfaceAlt,
+                    fillColor: sheetContext.modeSurfaceAlt,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: context.modeBorder),
+                      borderSide: BorderSide(color: sheetContext.modeBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: context.modePrimary),
+                      borderSide: BorderSide(color: sheetContext.modePrimary),
                     ),
                   ),
                 ),
@@ -368,7 +368,7 @@ class _OrderScreenState extends State<OrderScreen>
                         child: Text(
                           'Clear',
                           style: WorkSansAppTextStyles.medium.copyWith(
-                            color: context.modeError,
+                            color: sheetContext.modeError,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -379,7 +379,7 @@ class _OrderScreenState extends State<OrderScreen>
                       child: Text(
                         'Cancel',
                         style: WorkSansAppTextStyles.medium.copyWith(
-                          color: context.modeTextSecondary,
+                          color: sheetContext.modeTextSecondary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -390,8 +390,8 @@ class _OrderScreenState extends State<OrderScreen>
                         sheetContext,
                       ).pop(controller.text.trim()),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: context.modePrimary,
-                        foregroundColor: context.modeTextInverse,
+                        backgroundColor: sheetContext.modePrimary,
+                        foregroundColor: sheetContext.modeTextInverse,
                       ),
                       child: const Text('Save'),
                     ),
@@ -1151,7 +1151,7 @@ class _OrderScreenState extends State<OrderScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -1160,7 +1160,7 @@ class _OrderScreenState extends State<OrderScreen>
               ListTile(
                 leading: Icon(
                   Icons.sticky_note_2_outlined,
-                  color: context.modePrimary,
+                  color: sheetContext.modePrimary,
                 ),
                 title: Text(
                   _orderNoteController.text.trim().isEmpty
@@ -1168,77 +1168,82 @@ class _OrderScreenState extends State<OrderScreen>
                       : 'Edit Order Note',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: context.modeTextPrimary,
+                    color: sheetContext.modeTextPrimary,
                   ),
                 ),
                 onTap: () {
-                  Navigator.pop(context);
-                  _editOrderNote();
+                  Navigator.pop(sheetContext);
+                  Future<void>.delayed(const Duration(milliseconds: 120), () {
+                    if (mounted) _editOrderNote();
+                  });
                 },
               ),
-              Divider(height: 0, color: context.modeDivider),
+              Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
                 leading: Icon(
                   Icons.pause_circle_outline,
-                  color: context.modeWarning,
+                  color: sheetContext.modeWarning,
                 ),
                 title: Text(
                   'Hold Order',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: context.modeTextPrimary,
+                    color: sheetContext.modeTextPrimary,
                   ),
                 ),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(sheetContext);
                   _parkOrder();
                 },
               ),
-              Divider(height: 0, color: context.modeDivider),
+              Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
                 leading: SvgPicture.asset(
                   'assets/svg/delete.svg',
                   // ignore: deprecated_member_use
-                  color: context.modePrimary,
+                  color: sheetContext.modePrimary,
                 ),
                 title: Text(
                   'Clear Items',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: context.modeError,
+                    color: sheetContext.modeError,
                   ),
                 ),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(sheetContext);
                   _clearAllItems();
                 },
               ),
-              Divider(height: 0, color: context.modeDivider),
+              Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
                 leading: Icon(
                   Icons.delete_forever_outlined,
-                  color: context.modeError,
+                  color: sheetContext.modeError,
                 ),
                 title: Text(
                   'Discard Order',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: context.modeError,
+                    color: sheetContext.modeError,
                   ),
                 ),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(sheetContext);
                   _confirmDiscardActiveOrder();
                 },
               ),
-              Divider(height: 0, color: context.modeDivider),
+              Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
-                leading: Icon(Icons.close, color: context.modeTextSecondary),
+                leading: Icon(
+                  Icons.close,
+                  color: sheetContext.modeTextSecondary,
+                ),
                 title: Text(
                   'Cancel',
-                  style: TextStyle(color: context.modeTextPrimary),
+                  style: TextStyle(color: sheetContext.modeTextPrimary),
                 ),
-                onTap: () => Navigator.pop(context),
+                onTap: () => Navigator.pop(sheetContext),
               ),
             ],
           ),

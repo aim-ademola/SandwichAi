@@ -140,14 +140,12 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               return _buildLoadedState(
                 state.dashboardData,
                 state.filteredOrders,
-                state.currentFilter,
               );
             }
             if (state is DashboardRefreshing) {
               return _buildLoadedState(
                 state.currentData,
                 state.currentData.recentOrders,
-                OrderFilter.all,
                 isRefreshing: true,
               );
             }
@@ -198,13 +196,11 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
 
   Widget _buildLoadedState(
     KitchenDashboardData data,
-    List<KitchenOrder> orders,
-    OrderFilter currentFilter, {
+    List<KitchenOrder> orders, {
     bool isRefreshing = false,
   }) {
-    final visible = orders
-        .where((o) => o.status.toUpperCase() != 'PENDING')
-        .toList();
+    final sortedOrders = [...orders]
+      ..sort((a, b) => b.orderedAt.compareTo(a.orderedAt));
 
     return Stack(
       children: [
@@ -219,12 +215,10 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
             children: [
               _buildStatsRow(data),
               const SizedBox(height: 14),
-              _buildFilterChips(currentFilter),
-              const SizedBox(height: 14),
-              if (visible.isEmpty)
-                _buildNoOrdersForFilter(currentFilter)
+              if (sortedOrders.isEmpty)
+                _buildNoOrdersForFilter(OrderFilter.all)
               else
-                ...visible.map(
+                ...sortedOrders.map(
                   (order) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: _buildOrderCard(order),
@@ -332,66 +326,15 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     );
   }
 
-  // ── Filter chips ───────────────────────────────────────────────────────────
-
-  Widget _buildFilterChips(OrderFilter currentFilter) {
-    const filters = [
-      (OrderFilter.all, 'All'),
-      (OrderFilter.newOrder, 'New'),
-      (OrderFilter.inProgress, 'In Progress'),
-      (OrderFilter.completed, 'Done'),
-    ];
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: filters.map((entry) {
-          final (filter, label) = entry;
-          final selected = currentFilter == filter;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => _dispatch(FilterOrders(filter)),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: selected ? context.modePrimary : context.modeSurface,
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(
-                    color: selected ? context.modePrimary : context.modeBorder,
-                  ),
-                ),
-                child: Text(
-                  label,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: selected
-                        ? context.modeTextInverse
-                        : context.modeTextSecondary,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
   // ── Order card ─────────────────────────────────────────────────────────────
 
   Widget _buildOrderCard(KitchenOrder order) {
     final cfg = _statusConfig(order.status);
-    if (cfg.hidden) return const SizedBox.shrink();
 
     // ✅ Use realActions — not cfg.actions (which has empty stubs)
     final actions = _resolveActions(order);
     final isUpdating = _updatingOrderId == order.id;
+    final kitchenNote = _kitchenNotePreview(order.specialInstructions);
 
     return GestureDetector(
       onTap: () => context.pushNamed(
@@ -543,7 +486,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                       ),
 
                       // Special instructions
-                      if (order.specialInstructions != null) ...[
+                      if (kitchenNote.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
@@ -567,7 +510,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                               const SizedBox(width: 5),
                               Expanded(
                                 child: Text(
-                                  order.specialInstructions!,
+                                  kitchenNote,
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 12,
                                     color: context.modeWarning,
@@ -654,10 +597,9 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     switch (status.toUpperCase()) {
       case 'PENDING':
         return const _StatusConfig(
-          hidden: true,
-          color: Colors.grey,
-          icon: Icons.circle,
-          label: '',
+          color: Color(0xFFF59E0B),
+          icon: Icons.receipt_long_rounded,
+          label: 'PENDING',
         );
       case 'IN_QUEUE':
         return const _StatusConfig(
@@ -714,6 +656,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
 
   List<_OrderAction> _resolveActions(KitchenOrder order) {
     switch (order.status.toUpperCase()) {
+      case 'PENDING':
       case 'IN_QUEUE':
         return [
           _OrderAction(
@@ -785,6 +728,27 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
   }
 
   // ── Empty / Error / Loading ────────────────────────────────────────────────
+
+  String _kitchenNotePreview(String? value) {
+    final note = value?.trim();
+    if (note == null || note.isEmpty) return '';
+
+    return note
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty && !_looksLikeAddress(line))
+        .join('\n');
+  }
+
+  bool _looksLikeAddress(String line) {
+    final lower = line.toLowerCase();
+    final startsWithHouseNumber = RegExp(r'^(no\.?\s*)?\d+\s+').hasMatch(lower);
+    final hasAddressWord = RegExp(
+      r'\b(street|st\.?|road|rd\.?|avenue|ave\.?|close|crescent|lane|estate|drive|dr\.?|block|plot|house|flat)\b',
+    ).hasMatch(lower);
+
+    return startsWithHouseNumber && hasAddressWord;
+  }
 
   Widget _buildLoadingState() {
     return Center(
@@ -1004,12 +968,10 @@ class _OrderAction {
 
 class _StatusConfig {
   const _StatusConfig({
-    this.hidden = false,
     required this.color,
     required this.icon,
     required this.label,
   });
-  final bool hidden;
   final Color color;
   final IconData icon;
   final String label;

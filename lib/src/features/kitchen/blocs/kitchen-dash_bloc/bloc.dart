@@ -353,11 +353,9 @@ class KitchenDashboardBloc
     }
   }
 
-  /// Fires a notification for each order not yet seen, skipping PENDING.
+  /// Fires a notification for each order not yet seen.
   void _notifyNewOrders(List<KitchenOrder> orders) {
     for (final order in orders) {
-      final status = order.status.toUpperCase();
-      if (status == 'PENDING') continue; // hidden from kitchen
       if (_notifiedOrders.contains(order.id)) continue;
 
       _notifiedOrders.add(order.id);
@@ -370,48 +368,17 @@ class KitchenDashboardBloc
     }
   }
 
-  List<KitchenOrder> _applyFilter(
-    List<KitchenOrder> orders,
-    OrderFilter filter,
-  ) {
-    // Always strip PENDING regardless of filter
-    final visible = orders
-        .where((o) => o.status.toUpperCase() != 'PENDING')
-        .toList();
-
-    switch (filter) {
-      case OrderFilter.all:
-        return visible;
-      case OrderFilter.newOrder:
-        return visible
-            .where(
-              (o) =>
-                  o.status.toUpperCase() == 'IN_QUEUE' ||
-                  o.status.toUpperCase() == 'CONFIRMED',
-            )
-            .toList();
-      case OrderFilter.inProgress:
-        return visible
-            .where((o) => o.status.toUpperCase() == 'PREPARING')
-            .toList();
-      case OrderFilter.completed:
-        return visible
-            .where(
-              (o) =>
-                  o.status.toUpperCase() == 'READY' ||
-                  o.status.toUpperCase() == 'SERVED' ||
-                  o.status.toUpperCase() == 'COMPLETED',
-            )
-            .toList();
-    }
+  List<KitchenOrder> _applyFilter(List<KitchenOrder> orders, OrderFilter _) {
+    return orders;
   }
 
   DashboardErrorType _determineErrorType(String error) {
     final e = error.toLowerCase();
     if (e.contains('network') ||
         e.contains('connection') ||
-        e.contains('internet'))
+        e.contains('internet')) {
       return DashboardErrorType.network;
+    }
     if (e.contains('timeout')) return DashboardErrorType.timeout;
     if (e.contains('not found') || e.contains('404')) {
       return DashboardErrorType.notFound;

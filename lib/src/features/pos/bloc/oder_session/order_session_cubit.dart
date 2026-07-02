@@ -153,10 +153,6 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
       id,
       (s) => s.copyWith(
         orderDetails: details,
-        orderNote: details.specialInstructions,
-        clearOrderNote:
-            details.specialInstructions == null ||
-            details.specialInstructions!.trim().isEmpty,
         label: newLabel ?? s.label,
         status: SessionStatus.detailsConfirmed,
       ),

@@ -26,6 +26,8 @@ import 'package:sandwich_ai/src/features/pos/presentation/pos_order_dtls_dialoge
 import 'package:sandwich_ai/src/features/pos/presentation/session_manager.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/special_req_dialogue.dart';
 
+enum _OrderAction { editNote, park, clearItems, discard }
+
 class OrderScreen extends StatefulWidget {
   const OrderScreen({super.key});
 
@@ -83,8 +85,7 @@ class _OrderScreenState extends State<OrderScreen>
       _itemSpecialRequests
         ..clear()
         ..addAll(session.specialRequests);
-      _orderNoteController.text =
-          session.orderNote ?? session.orderDetails?.specialInstructions ?? '';
+      _orderNoteController.text = session.orderNote ?? '';
       _lastKnownSessionId = session.sessionId;
     });
 
@@ -305,7 +306,6 @@ class _OrderScreenState extends State<OrderScreen>
   }
 
   Future<void> _editOrderNote() async {
-    final controller = TextEditingController(text: _orderNoteController.text);
     final result = await showModalBottomSheet<String?>(
       context: context,
       isScrollControlled: true,
@@ -313,98 +313,8 @@ class _OrderScreenState extends State<OrderScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 18,
-              right: 18,
-              top: 18,
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 18,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Order Notes',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: sheetContext.modeTextPrimary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: controller,
-                  maxLines: 4,
-                  autofocus: true,
-                  cursorColor: sheetContext.modePrimary,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    color: sheetContext.modeTextPrimary,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Add kitchen or service notes...',
-                    hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                      color: sheetContext.modeTextMuted,
-                    ),
-                    filled: true,
-                    fillColor: sheetContext.modeSurfaceAlt,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: sheetContext.modeBorder),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: sheetContext.modePrimary),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    if (controller.text.trim().isNotEmpty)
-                      TextButton(
-                        onPressed: () => Navigator.of(sheetContext).pop(''),
-                        child: Text(
-                          'Clear',
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            color: sheetContext.modeError,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () => Navigator.of(sheetContext).pop(null),
-                      child: Text(
-                        'Cancel',
-                        style: WorkSansAppTextStyles.medium.copyWith(
-                          color: sheetContext.modeTextSecondary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(
-                        sheetContext,
-                      ).pop(controller.text.trim()),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: sheetContext.modePrimary,
-                        foregroundColor: sheetContext.modeTextInverse,
-                      ),
-                      child: const Text('Save'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      builder: (_) => _OrderNoteSheet(initialNote: _orderNoteController.text),
     );
-    controller.dispose();
 
     if (result == null) return;
     if (!mounted) return;
@@ -538,9 +448,6 @@ class _OrderScreenState extends State<OrderScreen>
     final orderDetails = await context.showPosOrderDetailsDialog(
       orderItems: _orderItems,
       totalAmount: totalAmount,
-      initialSpecialInstructions: _orderNoteController.text.trim().isEmpty
-          ? null
-          : _orderNoteController.text.trim(),
     );
 
     if (orderDetails != null) {
@@ -556,6 +463,10 @@ class _OrderScreenState extends State<OrderScreen>
       });
 
       final sessionId = context.read<OrderSessionCubit>().state.activeSessionId;
+      final orderNote = _orderNoteController.text.trim();
+      final specialInstructions = orderNote.isNotEmpty
+          ? orderNote
+          : orderDetails.specialInstructions;
 
       Navigator.push(
         context,
@@ -570,7 +481,7 @@ class _OrderScreenState extends State<OrderScreen>
               customerName: orderDetails.customerName,
               customerPhone: orderDetails.customerPhone,
               discount: orderDetails.discount,
-              specialInstructions: orderDetails.specialInstructions,
+              specialInstructions: specialInstructions,
               sessionId: sessionId,
             ),
           ),
@@ -1154,8 +1065,8 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
-  void _showOrderActions() {
-    showModalBottomSheet(
+  Future<void> _showOrderActions() async {
+    final action = await showModalBottomSheet<_OrderAction>(
       context: context,
       backgroundColor: context.modeSurface,
       shape: const RoundedRectangleBorder(
@@ -1181,12 +1092,7 @@ class _OrderScreenState extends State<OrderScreen>
                     color: sheetContext.modeTextPrimary,
                   ),
                 ),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  Future<void>.delayed(const Duration(milliseconds: 120), () {
-                    if (mounted) _editOrderNote();
-                  });
-                },
+                onTap: () => Navigator.pop(sheetContext, _OrderAction.editNote),
               ),
               Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
@@ -1201,10 +1107,7 @@ class _OrderScreenState extends State<OrderScreen>
                     color: sheetContext.modeTextPrimary,
                   ),
                 ),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  _parkOrder();
-                },
+                onTap: () => Navigator.pop(sheetContext, _OrderAction.park),
               ),
               Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
@@ -1220,10 +1123,8 @@ class _OrderScreenState extends State<OrderScreen>
                     color: sheetContext.modeError,
                   ),
                 ),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  _clearAllItems();
-                },
+                onTap: () =>
+                    Navigator.pop(sheetContext, _OrderAction.clearItems),
               ),
               Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
@@ -1238,10 +1139,7 @@ class _OrderScreenState extends State<OrderScreen>
                     color: sheetContext.modeError,
                   ),
                 ),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  _confirmDiscardActiveOrder();
-                },
+                onTap: () => Navigator.pop(sheetContext, _OrderAction.discard),
               ),
               Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
@@ -1260,6 +1158,23 @@ class _OrderScreenState extends State<OrderScreen>
         ),
       ),
     );
+
+    if (!mounted || action == null) return;
+
+    switch (action) {
+      case _OrderAction.editNote:
+        await _editOrderNote();
+        break;
+      case _OrderAction.park:
+        _parkOrder();
+        break;
+      case _OrderAction.clearItems:
+        _clearAllItems();
+        break;
+      case _OrderAction.discard:
+        _confirmDiscardActiveOrder();
+        break;
+    }
   }
 
   Widget _buildAvailabilityToggle() {
@@ -1676,6 +1591,116 @@ class _OrderScreenState extends State<OrderScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _OrderNoteSheet extends StatefulWidget {
+  final String initialNote;
+
+  const _OrderNoteSheet({required this.initialNote});
+
+  @override
+  State<_OrderNoteSheet> createState() => _OrderNoteSheetState();
+}
+
+class _OrderNoteSheetState extends State<_OrderNoteSheet> {
+  late String _draftNote;
+
+  @override
+  void initState() {
+    super.initState();
+    _draftNote = widget.initialNote;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 18,
+          right: 18,
+          top: 18,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 18,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Order Notes',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: context.modeTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              initialValue: widget.initialNote,
+              maxLines: 4,
+              autofocus: true,
+              cursorColor: context.modePrimary,
+              onChanged: (value) => setState(() => _draftNote = value),
+              style: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modeTextPrimary,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Add kitchen or service notes...',
+                hintStyle: WorkSansAppTextStyles.medium.copyWith(
+                  color: context.modeTextMuted,
+                ),
+                filled: true,
+                fillColor: context.modeSurfaceAlt,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: context.modeBorder),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: context.modePrimary),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                if (_draftNote.trim().isNotEmpty)
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(''),
+                    child: Text(
+                      'Clear',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        color: context.modeError,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(null),
+                  child: Text(
+                    'Cancel',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      color: context.modeTextSecondary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(_draftNote.trim()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.modePrimary,
+                    foregroundColor: context.modeTextInverse,
+                  ),
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

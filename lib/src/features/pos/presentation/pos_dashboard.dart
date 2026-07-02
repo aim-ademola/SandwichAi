@@ -140,7 +140,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
               const SizedBox(height: 24),
               _buildSectionHeader(
                 title: "Today's Performance",
-                subtitle: 'Primary business metrics from BE2 dashboard.',
+                subtitle: 'Key business metrics for today.',
               ),
               const SizedBox(height: 14),
               _buildKpiGrid(summary, constraints.maxWidth),

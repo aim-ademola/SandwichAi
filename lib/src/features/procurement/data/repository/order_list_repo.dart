@@ -12,7 +12,7 @@ abstract class PurchaseOrdersRepositoryInterface {
     String? deliveryStatus,
     String? paymentStatus,
     String? supplierId,
-    String buyerBranchId,
+    String? buyerBranchId,
     String? priority,
     String? primaryCategory,
     String? search,
@@ -109,18 +109,28 @@ class PurchaseOrdersRepository extends BaseRepository
             },
           );
 
-      // Check for error response
-      if (response.data is Map && response.data['statusCode'] != null) {
-        final statusCode = response.data['statusCode'];
-        if (statusCode >= 400) {
-          return ApiResponse.errorMessage(
-            _parseErrorFromResponse(response.data),
-          );
-        }
-      }
+      return response.when(
+        success: (data) {
+          if (data is Map && data['statusCode'] != null) {
+            final statusCode = data['statusCode'];
+            if (statusCode is num && statusCode >= 400) {
+              return ApiResponse.errorMessage(
+                _parseErrorFromResponse(Map<String, dynamic>.from(data)),
+              );
+            }
+          }
 
-      final ordersResponse = OrdersListResponse.fromJson(response.data);
-      return ApiResponse.success(ordersResponse);
+          if (data is! Map) {
+            return ApiResponse.errorMessage('Invalid response from server');
+          }
+
+          final ordersResponse = OrdersListResponse.fromJson(
+            Map<String, dynamic>.from(data),
+          );
+          return ApiResponse.success(ordersResponse);
+        },
+        error: (error) => ApiResponse.error(error),
+      );
     } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',

@@ -18,6 +18,49 @@ class PosOrderDetails {
     this.discount = 0,
     this.specialInstructions,
   });
+
+  factory PosOrderDetails.fromJson(Map<String, dynamic> json) {
+    return PosOrderDetails(
+      orderType: json['orderType']?.toString() ?? 'DINE_IN',
+      tableNumber: json['tableNumber']?.toString(),
+      customerName: json['customerName']?.toString(),
+      customerPhone: json['customerPhone']?.toString(),
+      discount: (json['discount'] as num?)?.toDouble() ?? 0,
+      specialInstructions: json['specialInstructions']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'orderType': orderType,
+      'tableNumber': tableNumber,
+      'customerName': customerName,
+      'customerPhone': customerPhone,
+      'discount': discount,
+      'specialInstructions': specialInstructions,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PosOrderDetails &&
+          other.orderType == orderType &&
+          other.tableNumber == tableNumber &&
+          other.customerName == customerName &&
+          other.customerPhone == customerPhone &&
+          other.discount == discount &&
+          other.specialInstructions == specialInstructions;
+
+  @override
+  int get hashCode => Object.hash(
+    orderType,
+    tableNumber,
+    customerName,
+    customerPhone,
+    discount,
+    specialInstructions,
+  );
 }
 
 extension PosOrderDetailsDialogExtension on BuildContext {

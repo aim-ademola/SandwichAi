@@ -111,7 +111,10 @@ class KitchenOrder {
       preparedBy: json['preparedBy'] as String?,
       deliveredBy: json['deliveredBy'] as String?,
       specialInstructions: json['specialInstructions'] as String?,
-      cancellationReason: json['cancellationReason'] as String?,
+      cancellationReason:
+          json['rejectReason'] as String? ??
+          json['rejectionReason'] as String? ??
+          json['cancellationReason'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
@@ -163,6 +166,7 @@ class KitchenOrder {
       'preparedBy': preparedBy,
       'deliveredBy': deliveredBy,
       'specialInstructions': specialInstructions,
+      'rejectReason': cancellationReason,
       'cancellationReason': cancellationReason,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),

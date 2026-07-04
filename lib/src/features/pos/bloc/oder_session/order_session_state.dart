@@ -8,7 +8,15 @@ class OrderSessionState extends Equatable {
   /// The session currently being worked on in OrderScreen.
   final String? activeSessionId;
 
-  const OrderSessionState({this.sessions = const [], this.activeSessionId});
+  /// Monotonic value used to make every controller mutation visible to Bloc
+  /// listeners/builders, including nested cart map changes inside sessions.
+  final int revision;
+
+  const OrderSessionState({
+    this.sessions = const [],
+    this.activeSessionId,
+    this.revision = 0,
+  });
 
   OrderSession? get activeSession {
     if (activeSessionId == null) return null;
@@ -27,15 +35,17 @@ class OrderSessionState extends Equatable {
     List<OrderSession>? sessions,
     String? activeSessionId,
     bool clearActiveSession = false,
+    bool bumpRevision = true,
   }) {
     return OrderSessionState(
       sessions: sessions ?? this.sessions,
       activeSessionId: clearActiveSession
           ? null
           : (activeSessionId ?? this.activeSessionId),
+      revision: bumpRevision ? revision + 1 : revision,
     );
   }
 
   @override
-  List<Object?> get props => [sessions, activeSessionId];
+  List<Object?> get props => [sessions, activeSessionId, revision];
 }

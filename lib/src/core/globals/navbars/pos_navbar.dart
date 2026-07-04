@@ -5,7 +5,7 @@ import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/active_orders.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/order_screen.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/order_session_entry.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_dashboard.dart';
 
 class PosBottomNavBar extends StatefulWidget {
@@ -238,7 +238,7 @@ class POSMainScreen extends StatelessWidget {
       pages: [
         const PosDashboardScreen(),
         // TableManagementScreen(),
-        const OrderScreen(),
+        const OrderSessionEntryScreen(),
         const ActiveOrdersScreen(),
         ChatRoomsScreen(
           showNavBarCallback: () {

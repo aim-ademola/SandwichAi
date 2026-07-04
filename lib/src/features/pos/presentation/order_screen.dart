@@ -36,8 +36,9 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
+  late final OrderSessionCubit _sessionCubit;
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _orderNoteController = TextEditingController();
   final _animateToController = AnimateToController();
@@ -51,9 +52,20 @@ class _OrderScreenState extends State<OrderScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _sessionCubit = context.read<OrderSessionCubit>();
     _tabController = TabController(length: 1, vsync: this);
     context.read<MenuItemsBloc>().add(const LoadMenuItems());
     _ensureActiveSession();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _syncToCubit();
+    }
   }
 
   @override
@@ -67,7 +79,7 @@ class _OrderScreenState extends State<OrderScreen>
   }
 
   void _ensureActiveSession() {
-    final cubit = context.read<OrderSessionCubit>();
+    final cubit = _sessionCubit;
     if (!cubit.state.hasActiveSession) {
       cubit.createSession();
     }
@@ -99,7 +111,7 @@ class _OrderScreenState extends State<OrderScreen>
 
   /// Navigate back to whichever screen the cashier minimized from.
   void _resumeMinimizedSession(OrderSession session) {
-    final cubit = context.read<OrderSessionCubit>();
+    final cubit = _sessionCubit;
     final payment = session.paymentState;
     final details = session.orderDetails;
 
@@ -226,7 +238,7 @@ class _OrderScreenState extends State<OrderScreen>
   }
 
   void _syncToCubit() {
-    context.read<OrderSessionCubit>().updateActiveSessionItems(
+    _sessionCubit.updateActiveSessionItems(
       orderItems: Map.from(_orderItems),
       specialRequests: Map.from(_itemSpecialRequests),
       orderNote: _orderNoteController.text.trim(),
@@ -234,13 +246,19 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
-  Future<void> _openSessionManager() async {
+  Future<void> _syncToLocalStorage() async {
     _syncToCubit();
+    await _sessionCubit.saveSessionsToLocalStorage();
+  }
+
+  Future<void> _openSessionManager() async {
+    await _syncToLocalStorage();
+    if (!mounted) return;
 
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
-          value: context.read<OrderSessionCubit>(),
+          value: _sessionCubit,
           child: const SessionManagerScreen(),
         ),
       ),
@@ -408,6 +426,8 @@ class _OrderScreenState extends State<OrderScreen>
 
   @override
   void dispose() {
+    _syncToCubit();
+    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     _searchDebounce?.cancel();
     _searchController.dispose();
@@ -435,8 +455,9 @@ class _OrderScreenState extends State<OrderScreen>
   double _calculateTotal(List<ApiMenuItem> allItems) {
     double total = 0;
     _orderItems.forEach((itemId, quantity) {
-      final item = allItems.firstWhere((i) => i.id == itemId);
-      total += double.parse(item.price) * quantity;
+      final item = allItems.where((i) => i.id == itemId).firstOrNull;
+      if (item == null) return;
+      total += (double.tryParse(item.price) ?? 0) * quantity;
     });
     return total;
   }
@@ -458,8 +479,10 @@ class _OrderScreenState extends State<OrderScreen>
 
       final orderedItemsMap = <ApiMenuItem, int>{};
       _orderItems.forEach((itemId, quantity) {
-        final item = allItems.firstWhere((i) => i.id == itemId);
-        orderedItemsMap[item] = quantity;
+        final item = allItems.where((i) => i.id == itemId).firstOrNull;
+        if (item != null) {
+          orderedItemsMap[item] = quantity;
+        }
       });
 
       final sessionId = context.read<OrderSessionCubit>().state.activeSessionId;
@@ -756,6 +779,7 @@ class _OrderScreenState extends State<OrderScreen>
       ..sort();
     final orderedItems = _getOrderedItems(menuItems);
     final hasOrders = orderedItems.isNotEmpty;
+    final isSearching = _searchController.text.trim().isNotEmpty;
 
     return Column(
       children: [
@@ -825,7 +849,7 @@ class _OrderScreenState extends State<OrderScreen>
             ],
           ),
         ),
-        if (categories.isNotEmpty)
+        if (categories.isNotEmpty && !isSearching)
           Container(
             color: context.modeSurface,
             child: TabBar(
@@ -856,6 +880,8 @@ class _OrderScreenState extends State<OrderScreen>
                     ),
                   ),
                 )
+              : isSearching
+              ? _buildMenuList(filteredItems, null)
               : TabBarView(
                   physics: const NeverScrollableScrollPhysics(),
                   controller: _tabController,
@@ -1225,15 +1251,17 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
-  Widget _buildMenuList(List<ApiMenuItem> items, String category) {
+  Widget _buildMenuList(List<ApiMenuItem> items, String? category) {
     final categoryItems = items
-        .where((item) => item.category == category)
+        .where((item) => category == null || item.category == category)
         .where((item) => _showUnavailableItems || item.isAvailable)
         .toList();
     if (categoryItems.isEmpty) {
       return Center(
         child: Text(
-          _showUnavailableItems
+          category == null
+              ? 'No menu items found'
+              : _showUnavailableItems
               ? 'No items in this category'
               : 'No available items in this category',
           style: WorkSansAppTextStyles.medium.copyWith(
@@ -1251,7 +1279,7 @@ class _OrderScreenState extends State<OrderScreen>
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Text(
-              category,
+              category ?? 'Search Results',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,

@@ -255,11 +255,11 @@ class ProcessingTaskBloc
     emit(const ProcessingTaskInitial());
   }
 
-  /// Filter tasks by status and assigned staff
+  /// Filter tasks by status and free-text query.
   List<ProcessingTask> _filterTasks(
     List<ProcessingTask> tasks,
     String? status,
-    String? assignedStaff,
+    String? query,
   ) {
     var filtered = tasks;
 
@@ -267,14 +267,22 @@ class ProcessingTaskBloc
       filtered = filtered.where((task) => task.status == status).toList();
     }
 
-    if (assignedStaff != null && assignedStaff.isNotEmpty) {
-      filtered = filtered
-          .where(
-            (task) => task.assignedStaff.toLowerCase().contains(
-              assignedStaff.toLowerCase(),
-            ),
-          )
-          .toList();
+    final normalizedQuery = query?.trim().toLowerCase();
+    if (normalizedQuery != null && normalizedQuery.isNotEmpty) {
+      filtered = filtered.where((task) {
+        final searchableText = [
+          task.assignedStaff,
+          task.recipeName,
+          task.statusDisplay,
+          task.priorityDisplay,
+          task.notes ?? '',
+          task.id,
+          task.recipeId,
+          task.menuItemId,
+        ].join(' ').toLowerCase();
+
+        return searchableText.contains(normalizedQuery);
+      }).toList();
     }
 
     return filtered;

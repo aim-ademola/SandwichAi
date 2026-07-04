@@ -39,6 +39,9 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
   ) async {
     try {
       emit(const OrdersLoading());
+      if (branchId.isEmpty) {
+        branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+      }
 
       final response = await _repository.getPurchaseOrders(
         status: event.status,
@@ -130,6 +133,9 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
 
     try {
       emit(OrdersLoadingMore(currentState.orders));
+      if (branchId.isEmpty) {
+        branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+      }
 
       final nextPage = _currentPage + 1;
 
@@ -138,6 +144,7 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
         priority: _currentPriority,
         primaryCategory: _currentCategory,
         search: _currentSearch,
+        buyerBranchId: branchId,
         page: nextPage,
       );
 

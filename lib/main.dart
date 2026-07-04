@@ -24,6 +24,7 @@ void main() async {
   await Hive.openBox('onboarding_box');
   await Hive.openBox('pending_requests');
   await Hive.openBox('settings_box');
+  await Hive.openBox('order_sessions_box');
   await ThemeController.instance.load();
 
   runApp(AppBlocProviders(child: AppInitializer(child: const MyApp())));

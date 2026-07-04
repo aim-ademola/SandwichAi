@@ -758,7 +758,7 @@ class OrderDetailScreen extends StatelessWidget {
               Icon(Icons.cancel_outlined, color: context.modeError, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Cancellation Reason',
+                'Reject Reason',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: textSize,
                   fontWeight: FontWeight.w600,

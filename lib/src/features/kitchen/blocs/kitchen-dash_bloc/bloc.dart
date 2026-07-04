@@ -85,6 +85,7 @@ class KitchenDashboardBloc
       (e, emit) => _onUpdateOrderStatus(
         orderId: e.orderId,
         newStatus: 'CANCELLED',
+        rejectReason: e.reason,
         successMessage: 'Order cancelled',
         notificationTitle: 'Order Cancelled',
         notificationBody: 'Order has been cancelled',
@@ -259,6 +260,7 @@ class KitchenDashboardBloc
     required String notificationBody,
     required String notificationPayloadPrefix,
     required Emitter<KitchenDashboardState> emit,
+    String? rejectReason,
   }) async {
     AppLogger.log('DEBUG BLOC: Updating order $orderId → $newStatus');
 
@@ -269,6 +271,7 @@ class KitchenDashboardBloc
         orderId: orderId,
         status: newStatus,
         updatedBy: employeeId,
+        rejectReason: rejectReason,
       );
 
       if (response.isSuccess) {

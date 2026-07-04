@@ -57,20 +57,31 @@ class KitchenShiftRepository extends BaseRepository
         queryParams['employeeId'] = employeeId;
       }
 
-      final listResponse = await handleListResponse<KitchenShift>(
-        _apiClient
-            .get('kitchen/shifts', queryParameters: queryParams)
-            .timeout(
-              const Duration(seconds: 30),
-              onTimeout: () {
-                throw TimeoutException('Request timed out. Please try again.');
-              },
-            )
-            .then((response) => ApiResponse.success(response.data)),
-        (json) => KitchenShift.fromJson(json),
-      );
+      final response = await _apiClient
+          .get('kitchen/shifts', queryParameters: queryParams)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
 
-      return listResponse;
+      return response.when(
+        success: (body) {
+          final shiftList = _extractList(body);
+          if (shiftList == null) {
+            return ApiResponse.errorMessage('Invalid response from server');
+          }
+
+          final shifts = shiftList
+              .whereType<Map>()
+              .map((e) => KitchenShift.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
+
+          return ApiResponse.success(shifts);
+        },
+        error: (error) => ApiResponse.error(error),
+      );
     } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
@@ -104,11 +115,16 @@ class KitchenShiftRepository extends BaseRepository
             },
           );
 
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Invalid response from server');
-      }
-
-      return ApiResponse.success(KitchenShift.fromJson(response.data));
+      return response.when(
+        success: (data) {
+          final shiftJson = _extractObject(data);
+          if (shiftJson == null) {
+            return ApiResponse.errorMessage('Invalid response from server');
+          }
+          return ApiResponse.success(KitchenShift.fromJson(shiftJson));
+        },
+        error: (error) => ApiResponse.error(error),
+      );
     } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
@@ -147,11 +163,16 @@ class KitchenShiftRepository extends BaseRepository
             },
           );
 
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Invalid response from server');
-      }
-
-      return ApiResponse.success(KitchenShift.fromJson(response.data));
+      return response.when(
+        success: (data) {
+          final shiftJson = _extractObject(data);
+          if (shiftJson == null) {
+            return ApiResponse.errorMessage('Invalid response from server');
+          }
+          return ApiResponse.success(KitchenShift.fromJson(shiftJson));
+        },
+        error: (error) => ApiResponse.error(error),
+      );
     } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
@@ -200,7 +221,6 @@ class KitchenShiftRepository extends BaseRepository
   }
 
   @override
-  @override
   Future<ApiResponse<List<Employee>>> getKitchenEmployees({
     required String branchId,
   }) async {
@@ -219,17 +239,22 @@ class KitchenShiftRepository extends BaseRepository
             },
           );
 
-      final body = response.data;
+      return response.when(
+        success: (body) {
+          final employeeList = _extractList(body);
+          if (employeeList == null) {
+            return ApiResponse.errorMessage('Invalid response from server');
+          }
 
-      if (body == null || body['data'] == null) {
-        return ApiResponse.errorMessage('Invalid response from server');
-      }
+          final employees = employeeList
+              .whereType<Map>()
+              .map((e) => Employee.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
 
-      final employees = (body['data'] as List)
-          .map((e) => Employee.fromJson(e))
-          .toList();
-
-      return ApiResponse.success(employees);
+          return ApiResponse.success(employees);
+        },
+        error: (error) => ApiResponse.error(error),
+      );
     } catch (e) {
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
@@ -258,6 +283,38 @@ class KitchenShiftRepository extends BaseRepository
     } catch (e) {
       throw FormatException('Invalid time format');
     }
+  }
+
+  Map<String, dynamic>? _extractObject(dynamic body) {
+    if (body is Map<String, dynamic>) {
+      final nested = body['data'] ?? body['shift'];
+      if (nested is Map<String, dynamic>) return nested;
+      if (nested is Map) return Map<String, dynamic>.from(nested);
+      return body;
+    }
+    if (body is Map) return Map<String, dynamic>.from(body);
+    return null;
+  }
+
+  List<dynamic>? _extractList(dynamic body) {
+    if (body is List) return body;
+    if (body is! Map) return null;
+
+    dynamic current = body;
+    for (final key in const ['data', 'employees', 'items', 'results']) {
+      if (current is Map && current[key] is List) {
+        return current[key] as List;
+      }
+    }
+
+    final data = body['data'];
+    if (data is Map) {
+      for (final key in const ['employees', 'items', 'results', 'data']) {
+        if (data[key] is List) return data[key] as List;
+      }
+    }
+
+    return null;
   }
 
   String _parseErrorMessage(String error) {

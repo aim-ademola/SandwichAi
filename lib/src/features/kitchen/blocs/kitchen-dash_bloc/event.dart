@@ -63,6 +63,10 @@ class MarkOrderAsCompleted extends KitchenDashboardEvent {
 }
 
 class CancelOrder extends KitchenDashboardEvent {
-  const CancelOrder(this.orderId);
+  const CancelOrder(this.orderId, {required this.reason});
   final String orderId;
+  final String reason;
+
+  @override
+  List<Object?> get props => [orderId, reason];
 }

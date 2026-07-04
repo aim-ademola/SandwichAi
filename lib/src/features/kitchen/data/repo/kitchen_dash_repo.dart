@@ -17,6 +17,7 @@ abstract class KitchenDashboardRepositoryInterface {
     required String orderId,
     required String status,
     required String updatedBy,
+    String? rejectReason,
   });
 }
 
@@ -113,13 +114,19 @@ class KitchenDashboardRepository extends BaseRepository
     required String orderId,
     required String status,
     required String updatedBy,
+    String? rejectReason,
   }) async {
     try {
       _validateOrderId(orderId);
       _validateStatus(status);
       _validateUpdatedBy(updatedBy);
 
-      final requestBody = {'status': status, 'updatedBy': updatedBy};
+      final requestBody = {
+        'status': status,
+        'updatedBy': updatedBy,
+        if (rejectReason != null && rejectReason.trim().isNotEmpty)
+          'rejectReason': rejectReason.trim(),
+      };
 
       AppLogger.log(
         'DEBUG REPO: Updating order $orderId to status $status by $updatedBy',

@@ -194,7 +194,10 @@ class KitchenOrder {
       discount: json['discount'] ?? '0',
       totalAmount: json['totalAmount'] ?? '0',
       specialInstructions: json['specialInstructions'],
-      cancellationReason: json['cancellationReason'],
+      cancellationReason:
+          json['rejectReason'] ??
+          json['rejectionReason'] ??
+          json['cancellationReason'],
       items:
           (json['items'] as List?)
               ?.map((item) => OrderItem.fromJson(item))
@@ -227,6 +230,7 @@ class KitchenOrder {
       'discount': discount,
       'totalAmount': totalAmount,
       'specialInstructions': specialInstructions,
+      'rejectReason': cancellationReason,
       'cancellationReason': cancellationReason,
       'items': items.map((item) => item.toJson()).toList(),
     };

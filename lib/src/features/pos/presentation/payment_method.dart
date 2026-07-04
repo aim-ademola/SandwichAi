@@ -589,6 +589,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         items: items,
         discount: widget.discount,
         specialInstructions: widget.specialInstructions,
+        confirmForKitchen: true,
       ),
     );
   }

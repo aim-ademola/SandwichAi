@@ -31,20 +31,38 @@ class GoodsReceivedRepository extends BaseRepository
     required String organizationId,
   }) async {
     try {
-      final listResponse = await handleListResponse<InventoryItem>(
-        _apiClient
-            .get('/inventory-items')
-            .timeout(
-              const Duration(seconds: 30),
-              onTimeout: () {
-                throw TimeoutException('Request timed out. Please try again.');
-              },
-            )
-            .then((response) => ApiResponse.success(response.data)),
-        (json) => InventoryItem.fromJson(json),
-      );
+      final response = await _apiClient
+          .get(
+            '/inventory-items',
+            queryParameters: {
+              'page': 1,
+              'limit': 1000,
+              if (organizationId.isNotEmpty) 'organizationId': organizationId,
+            },
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
 
-      return listResponse;
+      return response.when(
+        success: (body) {
+          final items = _extractList(body);
+          if (items == null) {
+            return ApiResponse.errorMessage('Invalid response from server');
+          }
+
+          final inventoryItems = items
+              .whereType<Map>()
+              .map((e) => InventoryItem.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
+
+          return ApiResponse.success(inventoryItems);
+        },
+        error: (error) => ApiResponse.error(error),
+      );
     } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
@@ -198,5 +216,23 @@ class GoodsReceivedRepository extends BaseRepository
     }
 
     return 'Failed to process request. Please try again later.';
+  }
+
+  List<dynamic>? _extractList(dynamic body) {
+    if (body is List) return body;
+    if (body is! Map) return null;
+
+    for (final key in const ['data', 'items', 'results']) {
+      if (body[key] is List) return body[key] as List;
+    }
+
+    final data = body['data'];
+    if (data is Map) {
+      for (final key in const ['items', 'data', 'results', 'inventoryItems']) {
+        if (data[key] is List) return data[key] as List;
+      }
+    }
+
+    return null;
   }
 }

@@ -441,6 +441,7 @@ class _ProcessingTaskHistoryScreenState
     return TextField(
       controller: _searchController,
       onChanged: (value) {
+        setState(() {});
         context.read<ProcessingTaskBloc>().add(
           FilterProcessingTasks(
             status: _selectedStatus == 'ALL' ? null : _selectedStatus,
@@ -453,7 +454,7 @@ class _ProcessingTaskHistoryScreenState
         color: kprimaryTextColor1,
       ),
       decoration: InputDecoration(
-        hintText: 'Search by staff name...',
+        hintText: 'Search tasks...',
         hintStyle: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getInputFontSize(screenWidth),
           color: kprimaryTextColor2,
@@ -472,6 +473,7 @@ class _ProcessingTaskHistoryScreenState
                 ),
                 onPressed: () {
                   _searchController.clear();
+                  setState(() {});
                   context.read<ProcessingTaskBloc>().add(
                     FilterProcessingTasks(
                       status: _selectedStatus == 'ALL' ? null : _selectedStatus,

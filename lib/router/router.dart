@@ -23,7 +23,7 @@ import 'package:sandwich_ai/src/features/pos/presentation/compaints.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/customer_base.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/customer_details.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/my_task.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/order_screen.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/order_session_entry.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/order_summary.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_dashboard.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_requisition.dart';
@@ -228,7 +228,10 @@ class AppRouter {
         path: '/order-screen',
         name: 'order-screen',
         pageBuilder: (context, state) {
-          return CupertinoPage(key: state.pageKey, child: const OrderScreen());
+          return CupertinoPage(
+            key: state.pageKey,
+            child: const OrderSessionEntryScreen(),
+          );
         },
       ),
       GoRoute(

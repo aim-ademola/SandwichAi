@@ -26,50 +26,87 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
   }
 
   Future<void> _confirmCancel(KitchenOrder order) async {
-    final confirmed = await showDialog<bool>(
+    final reasonController = TextEditingController();
+    String? errorText;
+    final reason = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Cancel Order',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontWeight: FontWeight.w700,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
-        content: Text(
-          'Cancel order ${order.orderId} for ${order.customerName}?',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            color: const Color(0xFF555555),
+          title: Text(
+            'Cancel Order',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              'Keep',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                color: const Color(0xFF888888),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Cancel order ${order.orderId} for ${order.customerName}?',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  color: const Color(0xFF555555),
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: reasonController,
+                minLines: 3,
+                maxLines: 5,
+                textInputAction: TextInputAction.newline,
+                decoration: InputDecoration(
+                  labelText: 'Reason',
+                  hintText: 'Explain why this order is being cancelled',
+                  errorText: errorText,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'Keep',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  color: const Color(0xFF888888),
+                ),
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFE57373),
-            ),
-            child: Text(
-              'Yes, Cancel',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontWeight: FontWeight.w600,
+            TextButton(
+              onPressed: () {
+                final trimmedReason = reasonController.text.trim();
+                if (trimmedReason.isEmpty) {
+                  setDialogState(() {
+                    errorText = 'Cancellation reason is required';
+                  });
+                  return;
+                }
+                Navigator.pop(ctx, trimmedReason);
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFFE57373),
+              ),
+              child: Text(
+                'Yes, Cancel',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
-    if (confirmed == true && mounted) {
+    reasonController.dispose();
+    if (reason != null && mounted) {
       setState(() => _updatingOrderId = order.id);
-      _dispatch(CancelOrder(order.id));
+      _dispatch(CancelOrder(order.id, reason: reason));
     }
   }
 

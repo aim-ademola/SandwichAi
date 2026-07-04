@@ -306,16 +306,44 @@ class OrdersListResponse {
   });
 
   factory OrdersListResponse.fromJson(Map<String, dynamic> json) {
+    final data = json['data'];
+    final payload = data is Map ? Map<String, dynamic>.from(data) : json;
+    final rawOrders =
+        (data is List ? data : payload['items'] ?? payload['orders'])
+            as List? ??
+        const [];
+    final meta = Map<String, dynamic>.from(
+      (json['meta'] as Map?) ?? (payload['meta'] as Map?) ?? payload,
+    );
+    final total = _parseInt(
+      meta['total'] ?? meta['totalItems'],
+      rawOrders.length,
+    );
+    final page = _parseInt(meta['page'] ?? meta['currentPage'], 1);
+    final limit = _parseInt(meta['limit'] ?? meta['perPage'], rawOrders.length);
+    final totalPages = _parseInt(meta['totalPages'] ?? meta['lastPage'], 1);
+
     return OrdersListResponse(
-      orders: (json['data'] as List)
-          .map((order) => PurchaseOrder.fromJson(order as Map<String, dynamic>))
+      orders: rawOrders
+          .whereType<Map>()
+          .map(
+            (order) => PurchaseOrder.fromJson(Map<String, dynamic>.from(order)),
+          )
           .toList(),
-      total: json['meta']['total'] as int,
-      page: json['meta']['page'] as int,
-      limit: json['meta']['limit'] as int,
-      totalPages: json['meta']['totalPages'] as int,
-      hasNextPage: json['meta']['hasNextPage'] as bool,
-      hasPreviousPage: json['meta']['hasPreviousPage'] as bool,
+      total: total,
+      page: page,
+      limit: limit,
+      totalPages: totalPages,
+      hasNextPage:
+          meta['hasNextPage'] as bool? ?? (totalPages > 0 && page < totalPages),
+      hasPreviousPage: meta['hasPreviousPage'] as bool? ?? page > 1,
     );
   }
+}
+
+int _parseInt(dynamic value, int fallback) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? fallback;
+  return fallback;
 }

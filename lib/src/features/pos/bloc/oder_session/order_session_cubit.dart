@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_order_dtls_dialoge.dart';
 import 'package:uuid/uuid.dart';
@@ -7,9 +10,54 @@ import 'order_session_state.dart';
 
 class OrderSessionCubit extends Cubit<OrderSessionState> {
   static const int _maxSessions = 10;
+  static const String _boxName = 'order_sessions_box';
+  static const String _sessionsKey = 'sessions';
+  static const String _activeSessionKey = 'active_session_id';
   final _uuid = const Uuid();
 
-  OrderSessionCubit() : super(const OrderSessionState());
+  OrderSessionCubit() : super(const OrderSessionState()) {
+    loadSessionsFromLocalStorage();
+  }
+
+  void loadSessionsFromLocalStorage() {
+    final box = Hive.box(_boxName);
+    final rawSessions = box.get(_sessionsKey);
+    final activeSessionId = box.get(_activeSessionKey) as String?;
+
+    if (rawSessions is! List) return;
+
+    final sessions =
+        rawSessions
+            .whereType<Map>()
+            .map(
+              (json) => OrderSession.fromJson(Map<String, dynamic>.from(json)),
+            )
+            .where((session) => session.sessionId.isNotEmpty)
+            .toList()
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+    final restoredActiveId =
+        sessions.any((session) => session.sessionId == activeSessionId)
+        ? activeSessionId
+        : (sessions.isNotEmpty ? sessions.first.sessionId : null);
+
+    emit(
+      OrderSessionState(sessions: sessions, activeSessionId: restoredActiveId),
+    );
+  }
+
+  Future<void> saveSessionsToLocalStorage() async {
+    final box = Hive.box(_boxName);
+    await box.put(
+      _sessionsKey,
+      state.sessions.map((session) => session.toJson()).toList(),
+    );
+    if (state.activeSessionId == null) {
+      await box.delete(_activeSessionKey);
+    } else {
+      await box.put(_activeSessionKey, state.activeSessionId);
+    }
+  }
 
   // ─── Session lifecycle ────────────────────────────────────────────────────
 
@@ -33,13 +81,20 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
         activeSessionId: id,
       ),
     );
+    _save();
 
     return id;
+  }
+
+  void switchSession(int index) {
+    if (index < 0 || index >= state.sessions.length) return;
+    switchToSession(state.sessions[index].sessionId);
   }
 
   void switchToSession(String sessionId) {
     assert(state.sessions.any((s) => s.sessionId == sessionId));
     emit(state.copyWith(activeSessionId: sessionId));
+    _save();
   }
 
   void closeSession(String sessionId) {
@@ -58,6 +113,7 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
     }
 
     emit(state.copyWith(sessions: remaining, activeSessionId: nextActiveId));
+    _save();
   }
 
   void discardSession(String sessionId) {
@@ -69,6 +125,60 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
 
   void renameSession(String sessionId, String newLabel) {
     _updateSession(sessionId, (s) => s.copyWith(label: newLabel));
+  }
+
+  void updateSessionSupportNotes(String sessionId, String? notes) {
+    final trimmed = notes?.trim();
+    _updateSession(
+      sessionId,
+      (s) => s.copyWith(
+        supportNotes: trimmed == null || trimmed.isEmpty ? null : trimmed,
+        clearSupportNotes: trimmed == null || trimmed.isEmpty,
+      ),
+    );
+  }
+
+  void updateSession(OrderSession session) {
+    _updateSession(session.sessionId, (_) => session.copyWith());
+  }
+
+  void addItemToSession(String sessionId, String itemId, {int quantity = 1}) {
+    _updateSession(sessionId, (session) {
+      final items = Map<String, int>.from(session.orderItems);
+      items[itemId] = (items[itemId] ?? 0) + quantity;
+      return session.copyWith(orderItems: items);
+    });
+  }
+
+  void removeItemFromSession(String sessionId, String itemId) {
+    _updateSession(sessionId, (session) {
+      final items = Map<String, int>.from(session.orderItems)..remove(itemId);
+      final requests = Map<String, String>.from(session.specialRequests)
+        ..remove(itemId);
+      return session.copyWith(orderItems: items, specialRequests: requests);
+    });
+  }
+
+  void markAsPaid(String sessionId) {
+    _updateSession(sessionId, (s) => s.copyWith(status: SessionStatus.paid));
+  }
+
+  void sendToKitchen(String sessionId) {
+    _updateSession(
+      sessionId,
+      (s) => s.copyWith(status: SessionStatus.sentToKitchen),
+    );
+  }
+
+  void completeSession(String sessionId) {
+    markSessionCompleted(sessionId);
+  }
+
+  void deleteSession(String sessionId) {
+    closeSession(sessionId);
+    if (state.sessions.isEmpty) {
+      createSession();
+    }
   }
 
   // ─── Minimize / resume ────────────────────────────────────────────────────
@@ -256,6 +366,11 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
     }).toList();
 
     emit(state.copyWith(sessions: updated));
+    _save();
+  }
+
+  void _save() {
+    unawaited(saveSessionsToLocalStorage());
   }
 
   String _generateLabel() {

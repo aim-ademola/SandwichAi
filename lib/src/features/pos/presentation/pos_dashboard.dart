@@ -6,12 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_dashboard_state_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_dashboard_state_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_dashboard_state_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/pos_dashboard_summary.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_drawer.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 class PosDashboardScreen extends StatefulWidget {
   const PosDashboardScreen({super.key});
@@ -22,11 +24,39 @@ class PosDashboardScreen extends StatefulWidget {
 
 class _PosDashboardScreenState extends State<PosDashboardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey _activeOrdersTourKey = GlobalKey();
+  late final ShowcaseView _showcaseView;
+  bool _activeOrdersTourQueued = false;
 
   @override
   void initState() {
     super.initState();
+    _showcaseView = ShowcaseView.register(
+      onFinish:
+          DrawerOnboardingCache.instance.markPosDashboardActiveOrdersTourSeen,
+      blurValue: 1,
+    );
     context.read<DashboardBloc>().add(const LoadDashboardSummary());
+  }
+
+  @override
+  void dispose() {
+    _showcaseView.unregister();
+    super.dispose();
+  }
+
+  Future<void> _queueActiveOrdersTour() async {
+    if (_activeOrdersTourQueued) return;
+    _activeOrdersTourQueued = true;
+
+    final hasSeenTour = await DrawerOnboardingCache.instance
+        .hasSeenPosDashboardActiveOrdersTour();
+    if (hasSeenTour || !mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showcaseView.startShowCase([_activeOrdersTourKey]);
+    });
   }
 
   @override
@@ -87,6 +117,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             }
 
             if (state is DashboardLoaded || state is DashboardRefreshing) {
+              _queueActiveOrdersTour();
               final summary = state is DashboardLoaded
                   ? state.summary
                   : (state as DashboardRefreshing).currentSummary;
@@ -179,6 +210,9 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
           icon: Icons.receipt_long_outlined,
           label: 'Active Orders',
           onTap: () => context.goNamed('Pos-nav', extra: 2),
+          showcaseKey: _activeOrdersTourKey,
+          showcaseDescription:
+              'Use Active Orders to continue orders already sent to kitchen, take payment, and check completion status.',
         ),
       ],
     );
@@ -188,8 +222,10 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    GlobalKey? showcaseKey,
+    String? showcaseDescription,
   }) {
-    return Material(
+    final card = Material(
       color: context.modePrimary,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
@@ -228,6 +264,18 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
           ),
         ),
       ),
+    );
+
+    if (showcaseKey == null || showcaseDescription == null) return card;
+
+    return Showcase(
+      key: showcaseKey,
+      description: showcaseDescription,
+      targetBorderRadius: BorderRadius.circular(14),
+      tooltipBackgroundColor: context.modePrimary,
+      textColor: context.modeTextInverse,
+      targetPadding: const EdgeInsets.all(8),
+      child: card,
     );
   }
 

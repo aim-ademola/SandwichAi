@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_state.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 class SessionManagerScreen extends StatefulWidget {
   final void Function(BuildContext context, OrderSession session)?
@@ -18,7 +20,12 @@ class SessionManagerScreen extends StatefulWidget {
 
 class _SessionManagerScreenState extends State<SessionManagerScreen> {
   late final PageController _pageController;
+  late final ShowcaseView _showcaseView;
+  final GlobalKey _tabsTourKey = GlobalKey();
+  final GlobalKey _swipeTourKey = GlobalKey();
+  final GlobalKey _newOrderTourKey = GlobalKey();
   String? _activeSessionId;
+  bool _startingNewOrder = false;
 
   @override
   void initState() {
@@ -30,12 +37,25 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
       initialPage: initialPage,
       viewportFraction: 0.94,
     );
+    _showcaseView = ShowcaseView.register(
+      onFinish: DrawerOnboardingCache.instance.markPosSessionTourSeen,
+      blurValue: 1,
+    );
   }
 
   @override
   void dispose() {
+    _showcaseView.unregister();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _startSessionTour() {
+    _showcaseView.startShowCase([
+      _tabsTourKey,
+      _swipeTourKey,
+      _newOrderTourKey,
+    ]);
   }
 
   @override
@@ -78,9 +98,19 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
               centerTitle: true,
               actions: [
                 IconButton(
-                  tooltip: 'New session',
+                  tooltip: 'Session tour',
+                  onPressed: state.sessions.isEmpty ? null : _startSessionTour,
+                  icon: Icon(
+                    Icons.help_outline,
+                    color: state.sessions.isEmpty
+                        ? context.modeTextMuted
+                        : context.modeTextSecondary,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'New order',
                   onPressed: state.canAddSession
-                      ? () => _createSession(context)
+                      ? () => _startNewOrder(context)
                       : null,
                   icon: Icon(
                     Icons.add_circle_outline,
@@ -92,58 +122,73 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
               ],
             ),
             body: state.sessions.isEmpty
-                ? _EmptySessions(onCreate: () => _createSession(context))
+                ? _AutoStartNewOrder(onStart: () => _startNewOrder(context))
                 : Column(
                     children: [
                       _SessionOverview(state: state),
                       _SessionTabs(
+                        tourKey: _tabsTourKey,
+                        newOrderTourKey: _newOrderTourKey,
                         state: state,
                         onSessionTap: (index) => _goToSession(context, index),
                         onCreate: state.canAddSession
-                            ? () => _createSession(context)
+                            ? () => _startNewOrder(context)
                             : null,
                       ),
                       Expanded(
-                        child: PageView.builder(
-                          controller: _pageController,
-                          itemCount: state.sessions.length,
-                          onPageChanged: (index) {
-                            final sessionId = state.sessions[index].sessionId;
-                            if (sessionId == _activeSessionId) return;
-                            context.read<OrderSessionCubit>().switchSession(
-                              index,
-                            );
-                          },
-                          itemBuilder: (context, index) {
-                            final session = state.sessions[index];
-                            return _SessionPage(
-                              session: session,
-                              isActive:
-                                  session.sessionId == state.activeSessionId,
-                              onResume: () {
-                                context
+                        child: Showcase(
+                          key: _swipeTourKey,
+                          description:
+                              'Swipe left or right here to move between customer sessions without losing each order.',
+                          targetBorderRadius: BorderRadius.circular(8),
+                          tooltipBackgroundColor: context.modePrimary,
+                          textColor: context.modeTextInverse,
+                          targetPadding: const EdgeInsets.all(8),
+                          child: PageView.builder(
+                            controller: _pageController,
+                            itemCount: state.sessions.length + 1,
+                            onPageChanged: (index) {
+                              if (index == state.sessions.length) {
+                                _startNewOrder(context);
+                                return;
+                              }
+                              final sessionId = state.sessions[index].sessionId;
+                              if (sessionId == _activeSessionId) return;
+                              context.read<OrderSessionCubit>().switchSession(
+                                index,
+                              );
+                            },
+                            itemBuilder: (context, index) {
+                              if (index == state.sessions.length) {
+                                return _NewOrderPage(
+                                  enabled: state.canAddSession,
+                                  onStart: () => _startNewOrder(context),
+                                );
+                              }
+
+                              final session = state.sessions[index];
+                              return _SessionPage(
+                                session: session,
+                                isActive:
+                                    session.sessionId == state.activeSessionId,
+                                onResume: () =>
+                                    _resumeSession(context, session),
+                                onMarkPaid: () => context
                                     .read<OrderSessionCubit>()
-                                    .switchToSession(session.sessionId);
-                                if (widget.onResumeSession != null) {
-                                  widget.onResumeSession!(context, session);
-                                } else {
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              onMarkPaid: () => context
-                                  .read<OrderSessionCubit>()
-                                  .markAsPaid(session.sessionId),
-                              onSendToKitchen: () => context
-                                  .read<OrderSessionCubit>()
-                                  .sendToKitchen(session.sessionId),
-                              onComplete: () => context
-                                  .read<OrderSessionCubit>()
-                                  .completeSession(session.sessionId),
-                              onEditSupportNotes: () =>
-                                  _editSupportNotes(context, session),
-                              onDelete: () => _confirmDelete(context, session),
-                            );
-                          },
+                                    .markAsPaid(session.sessionId),
+                                onSendToKitchen: () => context
+                                    .read<OrderSessionCubit>()
+                                    .sendToKitchen(session.sessionId),
+                                onComplete: () => context
+                                    .read<OrderSessionCubit>()
+                                    .completeSession(session.sessionId),
+                                onEditSupportNotes: () =>
+                                    _editSupportNotes(context, session),
+                                onDelete: () =>
+                                    _confirmDelete(context, session),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ],
@@ -162,10 +207,30 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
     return index < 0 ? 0 : index;
   }
 
-  void _createSession(BuildContext context) {
+  void _startNewOrder(BuildContext context) {
+    if (_startingNewOrder) return;
     final cubit = context.read<OrderSessionCubit>();
     if (!cubit.state.canAddSession) return;
-    cubit.createSession();
+
+    _startingNewOrder = true;
+    final sessionId = cubit.createSession();
+    final session = cubit.state.sessions.firstWhere(
+      (session) => session.sessionId == sessionId,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _resumeSession(context, session);
+      _startingNewOrder = false;
+    });
+  }
+
+  void _resumeSession(BuildContext context, OrderSession session) {
+    context.read<OrderSessionCubit>().switchToSession(session.sessionId);
+    if (widget.onResumeSession != null) {
+      widget.onResumeSession!(context, session);
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   void _goToSession(BuildContext context, int index) {
@@ -297,11 +362,15 @@ class _SessionOverview extends StatelessWidget {
 }
 
 class _SessionTabs extends StatelessWidget {
+  final GlobalKey tourKey;
+  final GlobalKey newOrderTourKey;
   final OrderSessionState state;
   final ValueChanged<int> onSessionTap;
   final VoidCallback? onCreate;
 
   const _SessionTabs({
+    required this.tourKey,
+    required this.newOrderTourKey,
     required this.state,
     required this.onSessionTap,
     required this.onCreate,
@@ -309,61 +378,162 @@ class _SessionTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 62,
-      color: context.modeSurface,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        scrollDirection: Axis.horizontal,
-        itemCount: state.sessions.length + 1,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          if (index == state.sessions.length) {
-            return ActionChip(
-              onPressed: onCreate,
-              avatar: Icon(Icons.add, size: 18, color: context.modePrimary),
-              label: const Text('New Order'),
+    return Showcase(
+      key: tourKey,
+      description:
+          'These chips show each active customer session. Tap any customer to jump back to that order.',
+      targetBorderRadius: BorderRadius.circular(8),
+      tooltipBackgroundColor: context.modePrimary,
+      textColor: context.modeTextInverse,
+      targetPadding: const EdgeInsets.all(6),
+      child: Container(
+        height: 62,
+        color: context.modeSurface,
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          scrollDirection: Axis.horizontal,
+          itemCount: state.sessions.length + 1,
+          separatorBuilder: (context, index) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            if (index == state.sessions.length) {
+              return Showcase(
+                key: newOrderTourKey,
+                description:
+                    'Tap New Order, or swipe to the final page, to start another customer without closing the current one.',
+                targetBorderRadius: BorderRadius.circular(20),
+                tooltipBackgroundColor: context.modePrimary,
+                textColor: context.modeTextInverse,
+                targetPadding: const EdgeInsets.all(6),
+                child: ActionChip(
+                  onPressed: onCreate,
+                  avatar: Icon(Icons.add, size: 18, color: context.modePrimary),
+                  label: const Text('New Order'),
+                  backgroundColor: context.modeSurfaceAlt,
+                  side: BorderSide(color: context.modeBorder),
+                  labelStyle: WorkSansAppTextStyles.medium.copyWith(
+                    color: onCreate == null
+                        ? context.modeTextMuted
+                        : context.modeTextPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              );
+            }
+
+            final session = state.sessions[index];
+            final isActive = session.sessionId == state.activeSessionId;
+            final status = _statusInfo(context, session.status);
+            return ChoiceChip(
+              selected: isActive,
+              onSelected: (_) => onSessionTap(index),
+              avatar: Container(
+                width: 9,
+                height: 9,
+                decoration: BoxDecoration(
+                  color: status.color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              label: Text(
+                session.totalItemCount == 0
+                    ? session.label
+                    : '${session.label} (${session.totalItemCount})',
+              ),
+              selectedColor: context.modePrimary.withValues(alpha: 0.14),
               backgroundColor: context.modeSurfaceAlt,
-              side: BorderSide(color: context.modeBorder),
+              side: BorderSide(
+                color: isActive ? context.modePrimary : context.modeBorder,
+              ),
               labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                color: onCreate == null
-                    ? context.modeTextMuted
-                    : context.modeTextPrimary,
-                fontWeight: FontWeight.w700,
+                color: isActive
+                    ? context.modePrimary
+                    : context.modeTextSecondary,
+                fontWeight: FontWeight.w800,
               ),
             );
-          }
+          },
+        ),
+      ),
+    );
+  }
+}
 
-          final session = state.sessions[index];
-          final isActive = session.sessionId == state.activeSessionId;
-          final status = _statusInfo(context, session.status);
-          return ChoiceChip(
-            selected: isActive,
-            onSelected: (_) => onSessionTap(index),
-            avatar: Container(
-              width: 9,
-              height: 9,
-              decoration: BoxDecoration(
-                color: status.color,
-                shape: BoxShape.circle,
+class _NewOrderPage extends StatelessWidget {
+  final bool enabled;
+  final VoidCallback onStart;
+
+  const _NewOrderPage({required this.enabled, required this.onStart});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 14, 6, 18),
+      child: Center(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: context.modeSurface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: context.modePrimary.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 62,
+                height: 62,
+                decoration: BoxDecoration(
+                  color: context.modePrimary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.add_shopping_cart_rounded,
+                  color: context.modePrimary,
+                  size: 30,
+                ),
               ),
-            ),
-            label: Text(
-              session.totalItemCount == 0
-                  ? session.label
-                  : '${session.label} (${session.totalItemCount})',
-            ),
-            selectedColor: context.modePrimary.withValues(alpha: 0.14),
-            backgroundColor: context.modeSurfaceAlt,
-            side: BorderSide(
-              color: isActive ? context.modePrimary : context.modeBorder,
-            ),
-            labelStyle: WorkSansAppTextStyles.medium.copyWith(
-              color: isActive ? context.modePrimary : context.modeTextSecondary,
-              fontWeight: FontWeight.w800,
-            ),
-          );
-        },
+              const SizedBox(height: 16),
+              Text(
+                'New Order',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: context.modeTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                enabled
+                    ? 'Swipe here or tap below to start another customer order.'
+                    : 'Maximum active sessions reached.',
+                textAlign: TextAlign.center,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  height: 1.4,
+                  color: context.modeTextSecondary,
+                ),
+              ),
+              const SizedBox(height: 22),
+              ElevatedButton.icon(
+                onPressed: enabled ? onStart : null,
+                icon: const Icon(Icons.add),
+                label: const Text('Start New Order'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.modePrimary,
+                  foregroundColor: context.modeTextInverse,
+                  disabledBackgroundColor: context.modeSurfaceAlt,
+                  disabledForegroundColor: context.modeTextMuted,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -920,10 +1090,23 @@ class _SupportNotesSheetState extends State<_SupportNotesSheet> {
   }
 }
 
-class _EmptySessions extends StatelessWidget {
-  final VoidCallback onCreate;
+class _AutoStartNewOrder extends StatefulWidget {
+  final VoidCallback onStart;
 
-  const _EmptySessions({required this.onCreate});
+  const _AutoStartNewOrder({required this.onStart});
+
+  @override
+  State<_AutoStartNewOrder> createState() => _AutoStartNewOrderState();
+}
+
+class _AutoStartNewOrderState extends State<_AutoStartNewOrder> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onStart();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -949,7 +1132,7 @@ class _EmptySessions extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Start a new session to take an order.',
+              'Starting a new order...',
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
@@ -957,18 +1140,7 @@ class _EmptySessions extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: onCreate,
-              icon: const Icon(Icons.add),
-              label: const Text('New Session'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.modePrimary,
-                foregroundColor: context.modeTextInverse,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+            CircularProgressIndicator(color: context.modePrimary),
           ],
         ),
       ),

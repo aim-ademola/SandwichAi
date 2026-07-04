@@ -10,7 +10,12 @@ abstract class MenuItemsEvent extends Equatable {
 }
 
 class LoadMenuItems extends MenuItemsEvent {
-  const LoadMenuItems();
+  final bool forceRefresh;
+
+  const LoadMenuItems({this.forceRefresh = false});
+
+  @override
+  List<Object?> get props => [forceRefresh];
 }
 
 class RefreshMenuItems extends MenuItemsEvent {

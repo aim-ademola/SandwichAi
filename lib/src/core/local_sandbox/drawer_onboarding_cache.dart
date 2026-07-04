@@ -13,6 +13,9 @@ class DrawerOnboardingCache {
       'stock_control_drawer_onboarding_seen';
   static const String _keyProcurementDrawerOnboarding =
       'procurement_drawer_onboarding_seen';
+  static const String _keyPosSessionTour = 'pos_session_tour_seen';
+  static const String _keyPosDashboardActiveOrdersTour =
+      'pos_dashboard_active_orders_tour_seen';
 
   Box<dynamic> get _box => Hive.box(_onboardingBox);
 
@@ -53,5 +56,29 @@ class DrawerOnboardingCache {
 
   Future<void> resetProcurementDrawerOnboarding() async {
     await _box.delete(_keyProcurementDrawerOnboarding);
+  }
+
+  Future<bool> hasSeenPosSessionTour() async {
+    return _box.get(_keyPosSessionTour, defaultValue: false);
+  }
+
+  Future<void> markPosSessionTourSeen() async {
+    await _box.put(_keyPosSessionTour, true);
+  }
+
+  Future<void> resetPosSessionTour() async {
+    await _box.delete(_keyPosSessionTour);
+  }
+
+  Future<bool> hasSeenPosDashboardActiveOrdersTour() async {
+    return _box.get(_keyPosDashboardActiveOrdersTour, defaultValue: false);
+  }
+
+  Future<void> markPosDashboardActiveOrdersTourSeen() async {
+    await _box.put(_keyPosDashboardActiveOrdersTour, true);
+  }
+
+  Future<void> resetPosDashboardActiveOrdersTour() async {
+    await _box.delete(_keyPosDashboardActiveOrdersTour);
   }
 }

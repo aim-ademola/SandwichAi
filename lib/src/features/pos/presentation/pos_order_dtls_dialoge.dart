@@ -153,12 +153,58 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
     }
   }
 
+  TextStyle _labelStyle(BuildContext context) {
+    return WorkSansAppTextStyles.medium.copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+      color: context.modeTextPrimary,
+    );
+  }
+
+  TextStyle _fieldTextStyle(BuildContext context) {
+    return WorkSansAppTextStyles.medium.copyWith(
+      fontSize: 14,
+      color: context.modeTextPrimary,
+      fontWeight: FontWeight.w600,
+    );
+  }
+
+  OutlineInputBorder _fieldBorder(BuildContext context, Color color) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(color: color),
+    );
+  }
+
+  InputDecoration _fieldDecoration(
+    BuildContext context, {
+    required String hintText,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: 14,
+        color: context.modeTextMuted,
+        fontWeight: FontWeight.w600,
+      ),
+      filled: true,
+      fillColor: context.modeSurfaceAlt,
+      border: _fieldBorder(context, context.modeBorder),
+      enabledBorder: _fieldBorder(context, context.modeBorder),
+      focusedBorder: _fieldBorder(context, context.modePrimary),
+      errorBorder: _fieldBorder(context, context.modeError),
+      focusedErrorBorder: _fieldBorder(context, context.modeError),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final discountedTotal =
         widget.totalAmount - (double.tryParse(_discountController.text) ?? 0);
 
     return Dialog(
+      backgroundColor: context.modeSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
@@ -180,12 +226,12 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: Icon(Icons.close, color: context.modeTextPrimary),
                         onPressed: () => Navigator.of(context).pop(),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -195,18 +241,12 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                   const SizedBox(height: 24),
 
                   // Order Type
-                  Text(
-                    'Order Type *',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
-                    ),
-                  ),
+                  Text('Order Type *', style: _labelStyle(context)),
                   const SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300]!),
+                      color: context.modeSurfaceAlt,
+                      border: Border.all(color: context.modeBorder),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DropdownButtonFormField<String>(
@@ -218,7 +258,9 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                           vertical: 12,
                         ),
                       ),
-                      dropdownColor: Colors.white,
+                      dropdownColor: context.modeSurface,
+                      iconEnabledColor: context.modeTextSecondary,
+                      style: _fieldTextStyle(context),
                       items: _orderTypes.map((type) {
                         return DropdownMenuItem(
                           value: type['value'],
@@ -226,7 +268,8 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                             type['label']!,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
-                              color: kprimaryTextColor1,
+                              color: context.modeTextPrimary,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         );
@@ -242,142 +285,48 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
 
                   // Table Number (only for Dine In)
                   if (_selectedOrderType == 'DINE_IN') ...[
-                    Text(
-                      'Table Number',
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
-                      ),
-                    ),
+                    Text('Table Number', style: _labelStyle(context)),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _tableController,
-                      decoration: InputDecoration(
+                      decoration: _fieldDecoration(
+                        context,
                         hintText: 'e.g., Table 5',
-                        hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: 14,
-                          color: kprimaryTextColor2,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: kPrimary),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
                       ),
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        color: kprimaryTextColor1,
-                      ),
+                      style: _fieldTextStyle(context),
                     ),
                     const SizedBox(height: 16),
                   ],
 
                   // Customer Name
-                  Text(
-                    'Customer Name',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
-                    ),
-                  ),
+                  Text('Customer Name', style: _labelStyle(context)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _customerNameController,
-                    decoration: InputDecoration(
+                    decoration: _fieldDecoration(
+                      context,
                       hintText: 'Enter customer name',
-                      hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        color: kprimaryTextColor2,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: kPrimary),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
                     ),
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      color: kprimaryTextColor1,
-                    ),
+                    style: _fieldTextStyle(context),
                   ),
                   const SizedBox(height: 16),
 
                   // Customer Phone
-                  Text(
-                    'Customer Phone',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
-                    ),
-                  ),
+                  Text('Customer Phone', style: _labelStyle(context)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _customerPhoneController,
                     keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
+                    decoration: _fieldDecoration(
+                      context,
                       hintText: '+234 803 123 4567',
-                      hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        color: kprimaryTextColor2,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: kPrimary),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
                     ),
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      color: kprimaryTextColor1,
-                    ),
+                    style: _fieldTextStyle(context),
                   ),
                   const SizedBox(height: 16),
 
                   // Discount
-                  Text(
-                    'Discount (₦)',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
-                    ),
-                  ),
+                  Text('Discount (N)', style: _labelStyle(context)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _discountController,
@@ -385,33 +334,8 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                     onChanged: (value) {
                       setState(() {}); // Rebuild to update total
                     },
-                    decoration: InputDecoration(
-                      hintText: '0',
-                      hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        color: kprimaryTextColor2,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: kPrimary),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      color: kprimaryTextColor1,
-                    ),
+                    decoration: _fieldDecoration(context, hintText: '0'),
+                    style: _fieldTextStyle(context),
                     validator: (value) {
                       if (value != null && value.isNotEmpty) {
                         final discount = double.tryParse(value);
@@ -431,45 +355,16 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                   const SizedBox(height: 16),
 
                   // Special Instructions
-                  Text(
-                    'Special Instructions',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
-                    ),
-                  ),
+                  Text('Special Instructions', style: _labelStyle(context)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _specialInstructionsController,
                     maxLines: 3,
-                    decoration: InputDecoration(
+                    decoration: _fieldDecoration(
+                      context,
                       hintText: 'Any special instructions for this order...',
-                      hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        color: kprimaryTextColor2,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: kPrimary),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
                     ),
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      color: kprimaryTextColor1,
-                    ),
+                    style: _fieldTextStyle(context),
                   ),
                   const SizedBox(height: 24),
 
@@ -477,8 +372,9 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8F6F6),
+                      color: context.modeSurfaceAlt,
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: context.modeBorder),
                     ),
                     child: Column(
                       children: [
@@ -489,14 +385,14 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                               'Subtotal:',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor2,
+                                color: context.modeTextSecondary,
                               ),
                             ),
                             Text(
-                              '₦${widget.totalAmount.toStringAsFixed(2)}',
+                              'N${widget.totalAmount.toStringAsFixed(2)}',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                           ],
@@ -509,19 +405,19 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                               'Discount:',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor2,
+                                color: context.modeTextSecondary,
                               ),
                             ),
                             Text(
-                              '- ₦${(double.tryParse(_discountController.text) ?? 0).toStringAsFixed(2)}',
+                              '- N${(double.tryParse(_discountController.text) ?? 0).toStringAsFixed(2)}',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: Colors.red,
+                                color: context.modeError,
                               ),
                             ),
                           ],
                         ),
-                        const Divider(height: 24),
+                        Divider(height: 24, color: context.modeDivider),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -530,15 +426,15 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                             Text(
-                              '₦${discountedTotal.toStringAsFixed(2)}',
+                              'N${discountedTotal.toStringAsFixed(2)}',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: kPrimary,
+                                color: context.modePrimary,
                               ),
                             ),
                           ],
@@ -556,7 +452,7 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                           onPressed: () => Navigator.of(context).pop(),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: BorderSide(color: Colors.grey[300]!),
+                            side: BorderSide(color: context.modeBorder),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -566,7 +462,7 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: kprimaryTextColor1,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                         ),
@@ -576,7 +472,8 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                         child: ElevatedButton(
                           onPressed: _submitOrder,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: kPrimary,
+                            backgroundColor: context.modePrimary,
+                            foregroundColor: context.modeTextInverse,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -587,7 +484,7 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: context.modeTextInverse,
                             ),
                           ),
                         ),

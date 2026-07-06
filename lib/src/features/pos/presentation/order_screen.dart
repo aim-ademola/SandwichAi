@@ -29,7 +29,9 @@ import 'package:sandwich_ai/src/features/pos/presentation/special_req_dialogue.d
 enum _OrderAction { editNote, park, clearItems, discard }
 
 class OrderScreen extends StatefulWidget {
-  const OrderScreen({super.key});
+  final Future<void> Function()? onOpenSessionManager;
+
+  const OrderScreen({super.key, this.onOpenSessionManager});
 
   @override
   State<OrderScreen> createState() => _OrderScreenState();
@@ -254,6 +256,12 @@ class _OrderScreenState extends State<OrderScreen>
   Future<void> _openSessionManager() async {
     await _syncToLocalStorage();
     if (!mounted) return;
+
+    final openInTab = widget.onOpenSessionManager;
+    if (openInTab != null) {
+      await openInTab();
+      return;
+    }
 
     await Navigator.of(context).push(
       MaterialPageRoute(

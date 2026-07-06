@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
@@ -13,12 +15,15 @@ import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/customer_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/payment_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/repository/customer_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/pos_order_repo.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/cash_approval_waiting.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/minimze.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/online_qr.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/rich_email_editor.dart';
 
 enum _PaymentMethod { cash, cardOrBankTransfer }
 
@@ -74,6 +79,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   String? _createdOrderId;
   String _branchId = '';
   String? _customerEmail;
+  String? _emailSubject;
+  String? _emailHtmlBody;
   String? _mainOrderId;
 
   /// Prefer the sessionId passed from the parent. Falls back to the
@@ -520,14 +527,15 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     );
   }
 
-  void _handleProcessOrder() {
+  Future<void> _handleProcessOrder() async {
     if (_selectedMethod == null) return;
     if (_isExistingOrderPayment) {
       _payExistingOrder();
       return;
     }
     if (_selectedMethod == _PaymentMethod.cardOrBankTransfer) {
-      // _showEmailDialog();
+      final confirmed = await _showEmailComposer();
+      if (!confirmed) return;
       _createOrderAndPay();
     } else {
       _createOrderAndPay();
@@ -632,10 +640,50 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             orderId: _mainOrderId,
             description: 'Payment for Order #$_createdOrderId',
             sessionId: '',
+            metadata: _emailMetadata,
           ),
         ),
       );
     }
+  }
+
+  Map<String, dynamic>? get _emailMetadata {
+    final subject = _emailSubject?.trim();
+    final htmlBody = _emailHtmlBody?.trim();
+
+    if ((subject == null || subject.isEmpty) &&
+        (htmlBody == null || htmlBody.isEmpty)) {
+      return null;
+    }
+
+    return {
+      if (subject != null && subject.isNotEmpty) 'emailSubject': subject,
+      if (htmlBody != null && htmlBody.isNotEmpty) 'emailHtmlBody': htmlBody,
+    };
+  }
+
+  Future<bool> _showEmailComposer() async {
+    final result = await showDialog<_EmailComposerResult>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => _EmailComposerDialog(
+        initialEmail: _customerEmail,
+        initialSubject:
+            _emailSubject ??
+            (_createdOrderId == null
+                ? 'Payment instructions'
+                : 'Payment for Order #$_createdOrderId'),
+        initialHtmlBody: _emailHtmlBody,
+      ),
+    );
+
+    if (result == null) return false;
+    setState(() {
+      _customerEmail = result.email;
+      _emailSubject = result.subject;
+      _emailHtmlBody = result.htmlBody;
+    });
+    return true;
   }
 
   void _showLoading(String message) {
@@ -699,5 +747,392 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     if (w < 600) return 16;
     if (w < 900) return 18;
     return 20;
+  }
+}
+
+class _EmailComposerResult {
+  const _EmailComposerResult({
+    required this.email,
+    required this.subject,
+    required this.htmlBody,
+  });
+
+  final String email;
+  final String subject;
+  final String htmlBody;
+}
+
+class _EmailComposerDialog extends StatefulWidget {
+  const _EmailComposerDialog({
+    required this.initialEmail,
+    required this.initialSubject,
+    required this.initialHtmlBody,
+  });
+
+  final String? initialEmail;
+  final String initialSubject;
+  final String? initialHtmlBody;
+
+  @override
+  State<_EmailComposerDialog> createState() => _EmailComposerDialogState();
+}
+
+class _EmailComposerDialogState extends State<_EmailComposerDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final CustomerRepositoryInterface _customerRepository = CustomerRepository();
+  late final TextEditingController _emailController;
+  late final TextEditingController _subjectController;
+  late String _htmlBody;
+  Timer? _customerSearchDebounce;
+  List<CustomerModel> _customerMatches = [];
+  bool _isSearchingCustomers = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController(text: widget.initialEmail ?? '');
+    _subjectController = TextEditingController(text: widget.initialSubject);
+    _emailController.addListener(_queueCustomerSearch);
+    _htmlBody =
+        widget.initialHtmlBody ??
+        '<p>Hello,</p>\n<p>Please complete your payment using the secure payment link.</p>';
+  }
+
+  @override
+  void dispose() {
+    _customerSearchDebounce?.cancel();
+    _emailController.removeListener(_queueCustomerSearch);
+    _emailController.dispose();
+    _subjectController.dispose();
+    super.dispose();
+  }
+
+  void _queueCustomerSearch() {
+    final query = _emailController.text.trim();
+    _customerSearchDebounce?.cancel();
+
+    if (query.length < 2) {
+      if (_customerMatches.isNotEmpty || _isSearchingCustomers) {
+        setState(() {
+          _customerMatches = [];
+          _isSearchingCustomers = false;
+        });
+      }
+      return;
+    }
+
+    _customerSearchDebounce = Timer(const Duration(milliseconds: 350), () {
+      _searchCustomers(query);
+    });
+  }
+
+  Future<void> _searchCustomers(String query) async {
+    if (!mounted) return;
+    setState(() => _isSearchingCustomers = true);
+
+    final response = await _customerRepository.getCustomers(
+      page: 1,
+      limit: 6,
+      search: query,
+    );
+
+    if (!mounted || _emailController.text.trim() != query) return;
+
+    await response.when(
+      success: (customersResponse) async {
+        if (!mounted) return;
+        setState(() {
+          _customerMatches = customersResponse.data;
+          _isSearchingCustomers = false;
+        });
+      },
+      error: (_) async {
+        if (!mounted) return;
+        setState(() {
+          _customerMatches = [];
+          _isSearchingCustomers = false;
+        });
+      },
+    );
+  }
+
+  void _selectCustomer(CustomerModel customer) {
+    _customerSearchDebounce?.cancel();
+    setState(() {
+      _emailController.text = customer.email;
+      _customerMatches = [];
+      _isSearchingCustomers = false;
+    });
+  }
+
+  String? _validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+    if (email.isEmpty) return 'Email is required';
+    final emailRegex = RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,}$');
+    if (!emailRegex.hasMatch(email)) return 'Enter a valid email address';
+    return null;
+  }
+
+  void _submit() {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final htmlBody = _htmlBody.trim();
+    if (htmlBody.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Email body is required',
+            style: WorkSansAppTextStyles.medium,
+          ),
+          backgroundColor: context.modeError,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    Navigator.of(context).pop(
+      _EmailComposerResult(
+        email: _emailController.text.trim(),
+        subject: _subjectController.text.trim(),
+        htmlBody: htmlBody,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+
+    return Dialog(
+      backgroundColor: context.modeSurface,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: width < 520 ? 14 : 32,
+        vertical: 20,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Email Message',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: context.modeTextPrimary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Close',
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(Icons.close, color: context.modeTextSecondary),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: _validateEmail,
+                  cursorColor: context.modePrimary,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    color: context.modeTextPrimary,
+                  ),
+                  decoration: _inputDecoration(context, 'Recipient email'),
+                ),
+                _CustomerSearchResults(
+                  isLoading: _isSearchingCustomers,
+                  customers: _customerMatches,
+                  onSelect: _selectCustomer,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _subjectController,
+                  cursorColor: context.modePrimary,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    color: context.modeTextPrimary,
+                  ),
+                  decoration: _inputDecoration(context, 'Subject'),
+                  validator: (value) {
+                    if ((value ?? '').trim().isEmpty) {
+                      return 'Subject is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                RichEmailEditor(
+                  initialHtml: _htmlBody,
+                  onHtmlChanged: (value) => _htmlBody = value,
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: context.modeTextPrimary,
+                          side: BorderSide(color: context.modeBorder),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _submit,
+                        icon: const Icon(Icons.check, size: 18),
+                        label: const Text('Continue'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.modePrimary,
+                          foregroundColor: context.modeTextInverse,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(BuildContext context, String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: WorkSansAppTextStyles.medium.copyWith(
+        color: context.modeTextSecondary,
+      ),
+      filled: true,
+      fillColor: context.modeSurfaceAlt,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: context.modeBorder),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: context.modeBorder),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: context.modePrimary),
+      ),
+    );
+  }
+}
+
+class _CustomerSearchResults extends StatelessWidget {
+  const _CustomerSearchResults({
+    required this.isLoading,
+    required this.customers,
+    required this.onSelect,
+  });
+
+  final bool isLoading;
+  final List<CustomerModel> customers;
+  final ValueChanged<CustomerModel> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isLoading && customers.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: context.modeSurfaceAlt,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.modeBorder),
+      ),
+      child: isLoading
+          ? Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: context.modePrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Searching customers...',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 13,
+                      color: context.modeTextSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: customers.length,
+              separatorBuilder: (context, index) =>
+                  Divider(height: 1, color: context.modeBorder),
+              itemBuilder: (context, index) {
+                final customer = customers[index];
+                return ListTile(
+                  dense: true,
+                  leading: CircleAvatar(
+                    backgroundColor: context.modePrimary.withValues(
+                      alpha: 0.12,
+                    ),
+                    child: Text(
+                      customer.name.isEmpty
+                          ? '?'
+                          : customer.name.characters.first.toUpperCase(),
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        color: context.modePrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    customer.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: context.modeTextPrimary,
+                    ),
+                  ),
+                  subtitle: Text(
+                    customer.email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 12,
+                      color: context.modeTextSecondary,
+                    ),
+                  ),
+                  onTap: () => onSelect(customer),
+                );
+              },
+            ),
+    );
   }
 }

@@ -229,6 +229,7 @@ class SessionPaymentState {
   final dynamic onlinePaymentInitData;
   final dynamic cashTransaction;
   final bool isProcessing;
+  final bool isPaid;
   final String? errorMessage;
 
   const SessionPaymentState.none()
@@ -237,6 +238,7 @@ class SessionPaymentState {
       onlinePaymentInitData = null,
       cashTransaction = null,
       isProcessing = false,
+      isPaid = false,
       errorMessage = null;
 
   const SessionPaymentState({
@@ -245,6 +247,7 @@ class SessionPaymentState {
     this.onlinePaymentInitData,
     this.cashTransaction,
     this.isProcessing = false,
+    this.isPaid = false,
     this.errorMessage,
   });
 
@@ -257,6 +260,7 @@ class SessionPaymentState {
       ),
       createdOrderId: json['createdOrderId']?.toString(),
       isProcessing: json['isProcessing'] == true,
+      isPaid: json['isPaid'] == true,
       errorMessage: json['errorMessage']?.toString(),
     );
   }
@@ -269,6 +273,7 @@ class SessionPaymentState {
     dynamic onlinePaymentInitData,
     dynamic cashTransaction,
     bool? isProcessing,
+    bool? isPaid,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -279,6 +284,7 @@ class SessionPaymentState {
           onlinePaymentInitData ?? this.onlinePaymentInitData,
       cashTransaction: cashTransaction ?? this.cashTransaction,
       isProcessing: isProcessing ?? this.isProcessing,
+      isPaid: isPaid ?? this.isPaid,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -288,6 +294,7 @@ class SessionPaymentState {
       'method': method.name,
       'createdOrderId': createdOrderId,
       'isProcessing': isProcessing,
+      'isPaid': isPaid,
       'errorMessage': errorMessage,
     };
   }
@@ -301,6 +308,7 @@ class SessionPaymentState {
           other.onlinePaymentInitData == onlinePaymentInitData &&
           other.cashTransaction == cashTransaction &&
           other.isProcessing == isProcessing &&
+          other.isPaid == isPaid &&
           other.errorMessage == errorMessage;
 
   @override
@@ -310,6 +318,7 @@ class SessionPaymentState {
     onlinePaymentInitData,
     cashTransaction,
     isProcessing,
+    isPaid,
     errorMessage,
   );
 }

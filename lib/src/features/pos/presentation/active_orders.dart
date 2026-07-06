@@ -21,6 +21,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
   static const String _paymentPendingFilter = 'PAYMENT_PENDING';
 
   String? _selectedStatus;
+  KitchenOrder? _selectedOrder;
 
   @override
   void initState() {
@@ -30,6 +31,14 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedOrder = _selectedOrder;
+    if (selectedOrder != null) {
+      return OrderDetailScreen(
+        order: selectedOrder,
+        onBack: () => setState(() => _selectedOrder = null),
+      );
+    }
+
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
@@ -219,12 +228,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
 
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OrderDetailScreen(order: order),
-          ),
-        );
+        setState(() => _selectedOrder = order);
       },
       borderRadius: BorderRadius.circular(8),
       child: Container(

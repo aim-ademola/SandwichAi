@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -6,13 +8,15 @@ import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_state.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/pos_showcase_scope.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 class SessionManagerScreen extends StatefulWidget {
   final void Function(BuildContext context, OrderSession session)?
   onResumeSession;
+  final VoidCallback? onClose;
 
-  const SessionManagerScreen({super.key, this.onResumeSession});
+  const SessionManagerScreen({super.key, this.onResumeSession, this.onClose});
 
   @override
   State<SessionManagerScreen> createState() => _SessionManagerScreenState();
@@ -20,7 +24,6 @@ class SessionManagerScreen extends StatefulWidget {
 
 class _SessionManagerScreenState extends State<SessionManagerScreen> {
   late final PageController _pageController;
-  late final ShowcaseView _showcaseView;
   final GlobalKey _tabsTourKey = GlobalKey();
   final GlobalKey _swipeTourKey = GlobalKey();
   final GlobalKey _newOrderTourKey = GlobalKey();
@@ -37,25 +40,19 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
       initialPage: initialPage,
       viewportFraction: 0.94,
     );
-    _showcaseView = ShowcaseView.register(
-      onFinish: DrawerOnboardingCache.instance.markPosSessionTourSeen,
-      blurValue: 1,
-    );
   }
 
   @override
   void dispose() {
-    _showcaseView.unregister();
     _pageController.dispose();
     super.dispose();
   }
 
   void _startSessionTour() {
-    _showcaseView.startShowCase([
-      _tabsTourKey,
-      _swipeTourKey,
-      _newOrderTourKey,
-    ]);
+    ShowcaseView.getNamed(
+      posShowcaseScope,
+    ).startShowCase([_tabsTourKey, _swipeTourKey, _newOrderTourKey]);
+    unawaited(DrawerOnboardingCache.instance.markPosSessionTourSeen());
   }
 
   @override
@@ -85,7 +82,7 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: widget.onClose ?? () => Navigator.of(context).pop(),
               ),
               title: Text(
                 'Order Sessions',
@@ -330,26 +327,39 @@ class _SessionOverview extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: context.modeSurface,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+      child: Row(
         children: [
-          _SummaryChip(
-            label: '${state.sessions.length} Active',
-            color: context.modePrimary,
+          Expanded(
+            child: _SummaryChip(
+              label: 'Active',
+              value: '${state.sessions.length}',
+              color: context.modePrimary,
+            ),
           ),
-          _SummaryChip(
-            label: '${_count(SessionStatus.paymentInProgress)} Awaiting',
-            color: context.modeWarning,
+          const SizedBox(width: 8),
+          Expanded(
+            child: _SummaryChip(
+              label: 'Awaiting',
+              value: '${_count(SessionStatus.paymentInProgress)}',
+              color: context.modeWarning,
+            ),
           ),
-          _SummaryChip(
-            label: '${_count(SessionStatus.paid)} Paid',
-            color: context.modeSuccess,
+          const SizedBox(width: 8),
+          Expanded(
+            child: _SummaryChip(
+              label: 'Paid',
+              value: '${_count(SessionStatus.paid)}',
+              color: context.modeSuccess,
+            ),
           ),
-          _SummaryChip(
-            label: '${_count(SessionStatus.completed)} Done',
-            color: context.modeInfo,
+          const SizedBox(width: 8),
+          Expanded(
+            child: _SummaryChip(
+              label: 'Done',
+              value: '${_count(SessionStatus.completed)}',
+              color: context.modeInfo,
+            ),
           ),
         ],
       ),
@@ -387,10 +397,10 @@ class _SessionTabs extends StatelessWidget {
       textColor: context.modeTextInverse,
       targetPadding: const EdgeInsets.all(6),
       child: Container(
-        height: 62,
+        height: 72,
         color: context.modeSurface,
         child: ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 12),
           scrollDirection: Axis.horizontal,
           itemCount: state.sessions.length + 1,
           separatorBuilder: (context, index) => const SizedBox(width: 8),
@@ -404,18 +414,13 @@ class _SessionTabs extends StatelessWidget {
                 tooltipBackgroundColor: context.modePrimary,
                 textColor: context.modeTextInverse,
                 targetPadding: const EdgeInsets.all(6),
-                child: ActionChip(
-                  onPressed: onCreate,
-                  avatar: Icon(Icons.add, size: 18, color: context.modePrimary),
-                  label: const Text('New Order'),
-                  backgroundColor: context.modeSurfaceAlt,
-                  side: BorderSide(color: context.modeBorder),
-                  labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                    color: onCreate == null
-                        ? context.modeTextMuted
-                        : context.modeTextPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: _SessionTabChip(
+                  selected: false,
+                  label: 'New Order',
+                  subtitle: 'Start',
+                  color: context.modePrimary,
+                  icon: Icons.add,
+                  onTap: onCreate,
                 ),
               );
             }
@@ -423,33 +428,14 @@ class _SessionTabs extends StatelessWidget {
             final session = state.sessions[index];
             final isActive = session.sessionId == state.activeSessionId;
             final status = _statusInfo(context, session.status);
-            return ChoiceChip(
+            return _SessionTabChip(
               selected: isActive,
-              onSelected: (_) => onSessionTap(index),
-              avatar: Container(
-                width: 9,
-                height: 9,
-                decoration: BoxDecoration(
-                  color: status.color,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              label: Text(
-                session.totalItemCount == 0
-                    ? session.label
-                    : '${session.label} (${session.totalItemCount})',
-              ),
-              selectedColor: context.modePrimary.withValues(alpha: 0.14),
-              backgroundColor: context.modeSurfaceAlt,
-              side: BorderSide(
-                color: isActive ? context.modePrimary : context.modeBorder,
-              ),
-              labelStyle: WorkSansAppTextStyles.medium.copyWith(
-                color: isActive
-                    ? context.modePrimary
-                    : context.modeTextSecondary,
-                fontWeight: FontWeight.w800,
-              ),
+              label: session.label,
+              subtitle:
+                  '${session.totalItemCount} item${session.totalItemCount == 1 ? '' : 's'}',
+              color: status.color,
+              icon: status.icon,
+              onTap: () => onSessionTap(index),
             );
           },
         ),
@@ -539,6 +525,98 @@ class _NewOrderPage extends StatelessWidget {
   }
 }
 
+class _SessionTabChip extends StatelessWidget {
+  final bool selected;
+  final String label;
+  final String subtitle;
+  final Color color;
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _SessionTabChip({
+    required this.selected,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final foreground = selected ? context.modePrimary : context.modeTextPrimary;
+    return SizedBox(
+      width: 150,
+      child: Material(
+        color: selected
+            ? context.modePrimary.withValues(alpha: 0.10)
+            : context.modeSurfaceAlt,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: selected
+                    ? context.modePrimary
+                    : context.modeBorder.withValues(alpha: 0.75),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.13),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 16, color: color),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 13,
+                          height: 1.1,
+                          fontWeight: FontWeight.w800,
+                          color: foreground,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 11,
+                          height: 1.1,
+                          fontWeight: FontWeight.w600,
+                          color: context.modeTextMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _SessionPage extends StatelessWidget {
   final OrderSession session;
   final bool isActive;
@@ -565,164 +643,186 @@ class _SessionPage extends StatelessWidget {
     final status = _statusInfo(context, session.status);
     final payment = _paymentInfo(context, session);
     final details = session.orderDetails;
+    final orderType = _orderTypeLabel(details?.orderType);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 14, 6, 18),
+      padding: const EdgeInsets.fromLTRB(6, 12, 6, 18),
       child: SingleChildScrollView(
-        child: Container(
-          decoration: BoxDecoration(
-            color: context.modeSurface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isActive ? context.modePrimary : context.modeBorder,
-              width: isActive ? 2 : 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(
-                  alpha: Theme.of(context).brightness == Brightness.dark
-                      ? 0.22
-                      : 0.05,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: context.modeSurface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isActive
+                      ? context.modePrimary.withValues(alpha: 0.8)
+                      : context.modeBorder.withValues(alpha: 0.75),
+                  width: isActive ? 1.4 : 1,
                 ),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: Theme.of(context).brightness == Brightness.dark
+                          ? 0.20
+                          : 0.06,
+                    ),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: status.color.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(status.icon, color: status.color, size: 26),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              session.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: context.modeTextPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.schedule,
+                                  size: 14,
+                                  color: context.modeTextMuted,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    'Updated ${_timeAgo(session.lastUpdatedAt)}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: WorkSansAppTextStyles.medium
+                                        .copyWith(
+                                          fontSize: 12,
+                                          color: context.modeTextMuted,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Delete session',
+                        onPressed: onDelete,
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color: context.modeError,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _StatusPill(label: status.label, color: status.color),
+                      _StatusPill(label: payment.label, color: payment.color),
+                      if (session.isMinimized)
+                        const _StatusPill(
+                          label: 'Paused mid-flow',
+                          color: Colors.deepOrange,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _ActionBar(
+                    session: session,
+                    onResume: onResume,
+                    onMarkPaid: onMarkPaid,
+                    onSendToKitchen: onSendToKitchen,
+                    onComplete: onComplete,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            _InfoGrid(
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: status.color.withValues(alpha: 0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(status.icon, color: status.color),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            session.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: context.modeTextPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'Updated ${_timeAgo(session.lastUpdatedAt)}',
-                            style: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 12,
-                              color: context.modeTextMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Delete session',
-                      onPressed: onDelete,
-                      icon: Icon(
-                        Icons.delete_outline,
-                        color: context.modeError,
-                      ),
-                    ),
-                  ],
+                _InfoTile(
+                  icon: Icons.person_outline,
+                  label: 'Customer',
+                  value: details?.customerName ?? 'Guest',
                 ),
-                const SizedBox(height: 18),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _StatusPill(label: status.label, color: status.color),
-                    _StatusPill(label: payment.label, color: payment.color),
-                    if (session.isMinimized)
-                      const _StatusPill(
-                        label: 'Paused mid-flow',
-                        color: Colors.deepOrange,
-                      ),
-                  ],
+                _InfoTile(
+                  icon: Icons.restaurant_menu,
+                  label: 'Items',
+                  value:
+                      '${session.totalItemCount} item${session.totalItemCount == 1 ? '' : 's'}',
                 ),
-                const SizedBox(height: 20),
-                _InfoGrid(
-                  children: [
-                    _InfoTile(
-                      icon: Icons.person_outline,
-                      label: 'Customer',
-                      value: details?.customerName ?? 'Guest',
-                    ),
-                    _InfoTile(
-                      icon: Icons.phone_outlined,
-                      label: 'Phone',
-                      value: details?.customerPhone ?? 'Not added',
-                    ),
-                    _InfoTile(
-                      icon: Icons.restaurant_menu,
-                      label: 'Items',
-                      value:
-                          '${session.totalItemCount} item${session.totalItemCount == 1 ? '' : 's'}',
-                    ),
-                    _InfoTile(
-                      icon: Icons.receipt_long_outlined,
-                      label: 'Order type',
-                      value: _orderTypeLabel(details?.orderType),
-                    ),
-                  ],
+                _InfoTile(
+                  icon: Icons.phone_outlined,
+                  label: 'Phone',
+                  value: details?.customerPhone ?? 'Not added',
                 ),
-                if (details?.tableNumber != null) ...[
-                  const SizedBox(height: 10),
-                  _InlineInfo(
+                _InfoTile(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Order type',
+                  value: orderType,
+                ),
+                if (details?.tableNumber != null)
+                  _InfoTile(
                     icon: Icons.table_restaurant_outlined,
                     label: 'Table',
                     value: details!.tableNumber!,
                   ),
-                ],
-                const SizedBox(height: 18),
-                _NotesBlock(
-                  title: 'Order Note',
-                  value: session.orderNote,
-                  emptyText: 'No kitchen/service note yet.',
-                ),
-                const SizedBox(height: 10),
-                _NotesBlock(
-                  title: 'Special Requests',
-                  value: _specialRequestSummary(session),
-                  emptyText: 'No item special requests.',
-                ),
-                const SizedBox(height: 10),
-                _NotesBlock(
-                  title: 'Support Notes',
-                  value: session.supportNotes,
-                  emptyText: 'No support notes yet.',
-                  trailing: TextButton.icon(
-                    onPressed: onEditSupportNotes,
-                    icon: const Icon(Icons.edit_note, size: 18),
-                    label: const Text('Edit'),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _ActionBar(
-                  session: session,
-                  onResume: onResume,
-                  onMarkPaid: onMarkPaid,
-                  onSendToKitchen: onSendToKitchen,
-                  onComplete: onComplete,
-                ),
               ],
             ),
-          ),
+            const SizedBox(height: 12),
+            _NotesBlock(
+              title: 'Order Note',
+              icon: Icons.sticky_note_2_outlined,
+              value: session.orderNote,
+              emptyText: 'No kitchen/service note yet.',
+            ),
+            const SizedBox(height: 8),
+            _NotesBlock(
+              title: 'Special Requests',
+              icon: Icons.tune,
+              value: _specialRequestSummary(session),
+              emptyText: 'No item special requests.',
+            ),
+            const SizedBox(height: 8),
+            _NotesBlock(
+              title: 'Support Notes',
+              icon: Icons.support_agent,
+              value: session.supportNotes,
+              emptyText: 'No support notes yet.',
+              trailing: TextButton.icon(
+                onPressed: onEditSupportNotes,
+                icon: const Icon(Icons.edit_note, size: 18),
+                label: const Text('Edit'),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -751,38 +851,80 @@ class _ActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+    final secondaryActions = [
+      _SessionAction(
+        label: 'Mark Paid',
+        icon: Icons.payments_outlined,
+        onPressed: _canMarkPaid(session.status) ? onMarkPaid : null,
+      ),
+      _SessionAction(
+        label: 'Send Kitchen',
+        icon: Icons.soup_kitchen_outlined,
+        onPressed: _canSendToKitchen(session.status) ? onSendToKitchen : null,
+      ),
+      _SessionAction(
+        label: 'Complete',
+        icon: Icons.task_alt,
+        onPressed:
+            _canComplete(session) && session.status != SessionStatus.completed
+            ? onComplete
+            : null,
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ElevatedButton.icon(
-          onPressed: onResume,
-          icon: const Icon(Icons.open_in_new, size: 18),
-          label: const Text('Resume Order'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: context.modePrimary,
-            foregroundColor: context.modeTextInverse,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        SizedBox(
+          height: 46,
+          child: ElevatedButton.icon(
+            onPressed: onResume,
+            icon: const Icon(Icons.open_in_new, size: 18),
+            label: const Text('Resume Order'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.modePrimary,
+              foregroundColor: context.modeTextInverse,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ),
-        OutlinedButton.icon(
-          onPressed: _canMarkPaid(session.status) ? onMarkPaid : null,
-          icon: const Icon(Icons.payments_outlined, size: 18),
-          label: const Text('Mark Paid'),
-        ),
-        OutlinedButton.icon(
-          onPressed: _canSendToKitchen(session.status) ? onSendToKitchen : null,
-          icon: const Icon(Icons.soup_kitchen_outlined, size: 18),
-          label: const Text('Send Kitchen'),
-        ),
-        OutlinedButton.icon(
-          onPressed: session.status == SessionStatus.completed
-              ? null
-              : onComplete,
-          icon: const Icon(Icons.task_alt, size: 18),
-          label: const Text('Complete'),
+        const SizedBox(height: 10),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final itemWidth = (constraints.maxWidth - 8) / 2;
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final action in secondaryActions)
+                  SizedBox(
+                    width: itemWidth,
+                    height: 42,
+                    child: OutlinedButton.icon(
+                      onPressed: action.onPressed,
+                      icon: Icon(action.icon, size: 17),
+                      label: Text(
+                        action.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: action.onPressed == null
+                            ? context.modeTextMuted
+                            : context.modeTextPrimary,
+                        side: BorderSide(color: context.modeBorder),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -795,9 +937,25 @@ class _ActionBar extends StatelessWidget {
   }
 
   bool _canSendToKitchen(SessionStatus status) {
-    return status == SessionStatus.paid ||
-        status == SessionStatus.paymentInProgress;
+    return status == SessionStatus.paid;
   }
+
+  bool _canComplete(OrderSession session) {
+    return _isPaymentPaid(session) ||
+        session.status == SessionStatus.sentToKitchen;
+  }
+}
+
+class _SessionAction {
+  final String label;
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  const _SessionAction({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
 }
 
 class _InfoGrid extends StatelessWidget {
@@ -809,14 +967,14 @@ class _InfoGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = constraints.maxWidth > 520 ? 2 : 1;
+        final columns = constraints.maxWidth > 340 ? 2 : 1;
         return GridView.count(
           crossAxisCount: columns,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: columns == 2 ? 3.8 : 4.9,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
+          childAspectRatio: columns == 2 ? 2.45 : 4.7,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
           children: children,
         );
       },
@@ -838,16 +996,24 @@ class _InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.all(11),
       decoration: BoxDecoration(
-        color: context.modeSurfaceAlt,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: context.modeBorder),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.72)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: context.modePrimary, size: 20),
-          const SizedBox(width: 10),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: context.modePrimary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: context.modePrimary, size: 18),
+          ),
+          const SizedBox(width: 9),
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -859,19 +1025,19 @@ class _InfoTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 11,
-                    height: 1.15,
+                    height: 1.05,
                     color: context.modeTextMuted,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 4),
                 Text(
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    height: 1.15,
+                    height: 1.1,
                     color: context.modeTextPrimary,
                     fontWeight: FontWeight.w800,
                   ),
@@ -885,53 +1051,16 @@ class _InfoTile extends StatelessWidget {
   }
 }
 
-class _InlineInfo extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _InlineInfo({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: context.modeTextMuted),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            color: context.modeTextMuted,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            overflow: TextOverflow.ellipsis,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              color: context.modeTextPrimary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _NotesBlock extends StatelessWidget {
   final String title;
+  final IconData icon;
   final String? value;
   final String emptyText;
   final Widget? trailing;
 
   const _NotesBlock({
     required this.title,
+    required this.icon,
     required this.value,
     required this.emptyText,
     this.trailing,
@@ -942,23 +1071,33 @@ class _NotesBlock extends StatelessWidget {
     final hasValue = value != null && value!.trim().isNotEmpty;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: context.modeSurfaceAlt,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: context.modeBorder),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.72)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: context.modePrimary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 17, color: context.modePrimary),
+              ),
+              const SizedBox(width: 9),
               Expanded(
                 child: Text(
                   title,
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 12,
-                    color: context.modeTextMuted,
+                    fontSize: 13,
+                    color: context.modeTextPrimary,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -966,8 +1105,11 @@ class _NotesBlock extends StatelessWidget {
               ?trailing,
             ],
           ),
+          const SizedBox(height: 8),
           Text(
             hasValue ? value! : emptyText,
+            maxLines: hasValue ? 3 : 1,
+            overflow: TextOverflow.ellipsis,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 13,
               color: hasValue ? context.modeTextPrimary : context.modeTextMuted,
@@ -1177,25 +1319,52 @@ class _StatusPill extends StatelessWidget {
 
 class _SummaryChip extends StatelessWidget {
   final String label;
+  final String value;
   final Color color;
 
-  const _SummaryChip({required this.label, required this.color});
+  const _SummaryChip({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      height: 54,
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.12)),
       ),
-      child: Text(
-        label,
-        style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 15,
+              height: 1,
+              fontWeight: FontWeight.w900,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 10,
+              height: 1,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1267,9 +1436,7 @@ _StatusInfo _statusInfo(BuildContext context, SessionStatus status) {
 }
 
 _StatusInfo _paymentInfo(BuildContext context, OrderSession session) {
-  if (session.status == SessionStatus.paid ||
-      session.status == SessionStatus.sentToKitchen ||
-      session.status == SessionStatus.completed) {
+  if (_isPaymentPaid(session)) {
     return _StatusInfo(
       label: 'Payment paid',
       icon: Icons.verified_outlined,
@@ -1301,6 +1468,12 @@ _StatusInfo _paymentInfo(BuildContext context, OrderSession session) {
         color: context.modeWarning,
       );
   }
+}
+
+bool _isPaymentPaid(OrderSession session) {
+  return session.paymentState.isPaid ||
+      session.status == SessionStatus.paid ||
+      session.status == SessionStatus.sentToKitchen;
 }
 
 String _orderTypeLabel(String? type) {

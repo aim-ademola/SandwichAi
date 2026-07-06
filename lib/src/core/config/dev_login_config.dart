@@ -2,34 +2,39 @@ class DevLoginConfig {
   const DevLoginConfig._();
 
   // Turn this off before production builds.
-  static const bool enabled = false;
-  static const String organizationCode = 'ORG-003';
+  static const bool enabled = true;
+  static const String organizationCode = 'ORG-006';
 
   static const users = <DevLoginUser>[
     DevLoginUser(
-      department: 'Kitchen department',
-      email: 'adewuyieniola00@gmail.com',
-      password: 'Eniola@Onboarding',
+      department: 'Inventory Manager',
+      email: 'ogochukwu@gmail.com',
+      password: 'password@1',
     ),
     DevLoginUser(
-      department: 'Inventory department',
-      email: 'orjianichristian@gmail.com',
-      password: 'Christian@Onboarding',
+      department: 'Stock Keeper',
+      email: 'Farouq@gmail.com',
+      password: 'password@1',
     ),
     DevLoginUser(
-      department: 'Procurement department',
-      email: 'henrietta.apata@rubelsandangels.com',
-      password: 'Henrietta@Onboarding',
+      department: 'Payment Manager',
+      email: 'jide@gmail.com',
+      password: 'password@1',
     ),
     DevLoginUser(
-      department: 'Processing department',
-      email: 'aituayuwaosas@gmail.com',
-      password: 'David@Onboarding',
+      department: 'Inventory Manager',
+      email: 'bashorun@gmail.com',
+      password: 'password@1',
     ),
     DevLoginUser(
-      department: 'Customer service',
-      email: 'joel@mailinator.com',
-      password: 'John@Onboarding',
+      department: 'Customer Service',
+      email: 'omobabafufu@gmail.com',
+      password: 'password@1',
+    ),
+    DevLoginUser(
+      department: 'Branch Manager',
+      email: 'bendestiny259@gmail.com',
+      password: 'password@1',
     ),
   ];
 }

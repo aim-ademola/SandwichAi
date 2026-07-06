@@ -32,7 +32,12 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
             .map(
               (json) => OrderSession.fromJson(Map<String, dynamic>.from(json)),
             )
-            .where((session) => session.sessionId.isNotEmpty)
+            .where(
+              (session) =>
+                  session.sessionId.isNotEmpty &&
+                  session.status != SessionStatus.completed &&
+                  session.status != SessionStatus.cancelled,
+            )
             .toList()
           ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
@@ -160,18 +165,38 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
   }
 
   void markAsPaid(String sessionId) {
-    _updateSession(sessionId, (s) => s.copyWith(status: SessionStatus.paid));
+    _updateSession(
+      sessionId,
+      (s) => s.copyWith(
+        status: SessionStatus.paid,
+        paymentState: s.paymentState.copyWith(
+          isPaid: true,
+          isProcessing: false,
+          clearError: true,
+        ),
+      ),
+    );
   }
 
   void sendToKitchen(String sessionId) {
     _updateSession(
       sessionId,
-      (s) => s.copyWith(status: SessionStatus.sentToKitchen),
+      (s) => s.paymentState.isPaid || s.status == SessionStatus.paid
+          ? s.copyWith(status: SessionStatus.sentToKitchen)
+          : s,
     );
   }
 
   void completeSession(String sessionId) {
-    markSessionCompleted(sessionId);
+    final session = state.sessions
+        .where((session) => session.sessionId == sessionId)
+        .firstOrNull;
+    if (session == null || !_canCompleteSession(session)) return;
+
+    closeSession(sessionId);
+    if (state.sessions.isEmpty) {
+      createSession();
+    }
   }
 
   void deleteSession(String sessionId) {
@@ -328,14 +353,26 @@ class OrderSessionCubit extends Cubit<OrderSessionState> {
   }
 
   void markSessionCompleted(String sessionId) {
-    _updateSession(
-      sessionId,
-      (s) => s.copyWith(
+    _updateSession(sessionId, (s) {
+      if (!_canCompleteSession(s)) return s;
+
+      return s.copyWith(
         status: SessionStatus.completed,
-        paymentState: s.paymentState.copyWith(isProcessing: false),
+        paymentState: s.paymentState.copyWith(
+          isPaid: true,
+          isProcessing: false,
+          clearError: true,
+        ),
         clearMinimizedScreen: true,
-      ),
-    );
+      );
+    });
+  }
+
+  bool _canCompleteSession(OrderSession session) {
+    return session.paymentState.isPaid ||
+        session.paymentState.method != PaymentMethod.none ||
+        session.status == SessionStatus.paid ||
+        session.status == SessionStatus.sentToKitchen;
   }
 
   void markPaymentError(String errorMessage) {

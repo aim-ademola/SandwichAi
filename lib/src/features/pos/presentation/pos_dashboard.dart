@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -13,6 +14,7 @@ import 'package:sandwich_ai/src/features/pos/bloc/pos_dashboard_state_bloc/event
 import 'package:sandwich_ai/src/features/pos/bloc/pos_dashboard_state_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/pos_dashboard_summary.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_drawer.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/pos_showcase_scope.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 class PosDashboardScreen extends StatefulWidget {
@@ -25,24 +27,12 @@ class PosDashboardScreen extends StatefulWidget {
 class _PosDashboardScreenState extends State<PosDashboardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey _activeOrdersTourKey = GlobalKey();
-  late final ShowcaseView _showcaseView;
   bool _activeOrdersTourQueued = false;
 
   @override
   void initState() {
     super.initState();
-    _showcaseView = ShowcaseView.register(
-      onFinish:
-          DrawerOnboardingCache.instance.markPosDashboardActiveOrdersTourSeen,
-      blurValue: 1,
-    );
     context.read<DashboardBloc>().add(const LoadDashboardSummary());
-  }
-
-  @override
-  void dispose() {
-    _showcaseView.unregister();
-    super.dispose();
   }
 
   Future<void> _queueActiveOrdersTour() async {
@@ -55,7 +45,12 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _showcaseView.startShowCase([_activeOrdersTourKey]);
+      ShowcaseView.getNamed(
+        posShowcaseScope,
+      ).startShowCase([_activeOrdersTourKey]);
+      unawaited(
+        DrawerOnboardingCache.instance.markPosDashboardActiveOrdersTourSeen(),
+      );
     });
   }
 

@@ -8,8 +8,9 @@ import 'package:sandwich_ai/src/features/pos/presentation/payment_method.dart';
 
 class OrderDetailScreen extends StatelessWidget {
   final KitchenOrder order;
+  final VoidCallback? onBack;
 
-  const OrderDetailScreen({super.key, required this.order});
+  const OrderDetailScreen({super.key, required this.order, this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,7 @@ class OrderDetailScreen extends StatelessWidget {
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
-            onPressed: () => Navigator.pop(context),
+            onPressed: onBack ?? () => Navigator.pop(context),
           ),
           title: Text(
             'Order Details',

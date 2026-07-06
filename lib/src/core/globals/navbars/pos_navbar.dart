@@ -7,6 +7,8 @@ import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/active_orders.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/order_session_entry.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_dashboard.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/pos_showcase_scope.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 class PosBottomNavBar extends StatefulWidget {
   final int initialIndex;
@@ -25,21 +27,21 @@ class PosBottomNavBar extends StatefulWidget {
 class PosBottomNavBarState extends State<PosBottomNavBar> {
   late int _currentIndex;
   late List<Widget> _pages;
+  late final ShowcaseView _showcaseView;
 
-  bool _isNavBarVisible = true;
   Timer? _hideTimer;
 
   @override
   void initState() {
     super.initState();
+    _showcaseView = ShowcaseView.register(
+      scope: posShowcaseScope,
+      blurValue: 1,
+    );
     _currentIndex = widget.initialIndex;
     _pages = widget.pages.map((page) => KeepAliveWrapper(child: page)).toList();
-
-    // Hide navbar if starting on chat screen
-    if (_isChatScreen) _isNavBarVisible = false;
   }
 
-  bool get _isChatScreen => _currentIndex == 3; // Chat screen index
   @override
   void didUpdateWidget(covariant PosBottomNavBar oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -52,23 +54,16 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
   }
 
   void showNavBarTemporarily({int durationSeconds = 3}) {
-    setState(() {
-      _isNavBarVisible = true;
-    });
-
     _hideTimer?.cancel();
     _hideTimer = Timer(Duration(seconds: durationSeconds), () {
-      if (_isChatScreen) {
-        setState(() {
-          _isNavBarVisible = false;
-        });
-      }
+      if (mounted) setState(() {});
     });
   }
 
   @override
   void dispose() {
     _hideTimer?.cancel();
+    _showcaseView.unregister();
     super.dispose();
   }
 
@@ -77,7 +72,7 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _pages),
       backgroundColor: context.modeBackground,
-      bottomNavigationBar: _isNavBarVisible ? _buildBottomNavBar() : null,
+      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
@@ -166,12 +161,6 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? activeColor.withValues(alpha: 0.1)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,

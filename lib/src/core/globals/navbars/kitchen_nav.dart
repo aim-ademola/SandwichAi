@@ -4,7 +4,7 @@ import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 
 import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_dash.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/active_orders.dart';
+import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_order_history.dart';
 
 class KitchenBottomNavBar extends StatefulWidget {
   final int initialIndex;
@@ -70,7 +70,7 @@ class _KitchenBottomNavBarState extends State<KitchenBottomNavBar> {
                 _buildNavItem(
                   icon: 'assets/svg/bx_cart.svg',
                   activeIcon: 'assets/svg/bx_cart.svg',
-                  label: 'Active Orders',
+                  label: 'Order History',
                   index: 1,
                 ),
                 // _buildNavItem(
@@ -230,7 +230,7 @@ class KitchenMainScreen extends StatelessWidget {
       initialIndex: 0, // Starting index
       pages: [
         KitchenDashboardScreen(),
-        ActiveOrdersScreen(),
+        KitchenOrderHistoryScreen(),
         // OrderScreen(),
         ChatRoomsScreen(
           showNavBarCallback: () {

@@ -101,7 +101,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
     context.read<LoginBloc>().add(ValidateEmail(email: user.email));
     context.read<LoginBloc>().add(ValidatePassword(password: user.password));
     context.read<LoginBloc>().add(
-      const ValidateOrgCode(orgCode: DevLoginConfig.organizationCode),
+      ValidateOrgCode(orgCode: DevLoginConfig.organizationCode),
     );
   }
 

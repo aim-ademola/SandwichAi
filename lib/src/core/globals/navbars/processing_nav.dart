@@ -4,6 +4,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
+import 'package:sandwich_ai/src/core/globals/feature_unavailable_screen.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 
@@ -247,8 +249,18 @@ class ProcessingControlMainScreen extends StatelessWidget {
       initialIndex: 0,
       pages: [
         ProcessingDashboardScreen(),
-        RecipeCalculatorScreen(),
-        WastageAnalysisScreen(isFromStock: false),
+        AppEnvironment.current.isFeatureEnabled(AppFeature.aiForecast)
+            ? RecipeCalculatorScreen()
+            : const FeatureUnavailableScreen(
+                feature: AppFeature.aiForecast,
+                title: 'AI Recipe Calculator',
+              ),
+        AppEnvironment.current.isFeatureEnabled(AppFeature.wastageAnalysis)
+            ? WastageAnalysisScreen(isFromStock: false)
+            : const FeatureUnavailableScreen(
+                feature: AppFeature.wastageAnalysis,
+                title: 'AI Wastage Analysis',
+              ),
         ChatRoomsScreen(
           showNavBarCallback: () {
             // optional navbar callback

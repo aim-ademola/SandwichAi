@@ -286,7 +286,12 @@ class NotificationService {
       );
 
       await _notifications.show(id, title, body, details, payload: payload);
-      await NotificationBadgeController.instance.increment();
+      await NotificationBadgeController.instance.recordNotification(
+        id: id,
+        title: title,
+        body: body,
+        payload: payload,
+      );
 
       AppLogger.log(' Notification sent: $title');
     } catch (e) {

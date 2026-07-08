@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -529,6 +530,13 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   Future<void> _handleProcessOrder() async {
     if (_selectedMethod == null) return;
+    if (!AppEnvironment.current.isFeatureEnabled(AppFeature.payment)) {
+      _showSnack(
+        AppEnvironment.current.disabledFeatureMessage(AppFeature.payment),
+        Colors.red,
+      );
+      return;
+    }
     if (_isExistingOrderPayment) {
       _payExistingOrder();
       return;
@@ -604,6 +612,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   Future<void> _processPayment() async {
     _dismissLoading();
+    if (!AppEnvironment.current.isFeatureEnabled(AppFeature.payment)) {
+      _showSnack(
+        AppEnvironment.current.disabledFeatureMessage(AppFeature.payment),
+        Colors.red,
+      );
+      return;
+    }
+
     _showLoading('Processing payment…');
     AppLogger.log('=== PROCESS PAYMENT ===');
     AppLogger.log('orderType: ${widget.orderType}');

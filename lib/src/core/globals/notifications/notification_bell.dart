@@ -1,7 +1,63 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/globals/notifications/notifications_screen.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
+
+class NotificationLogItem {
+  const NotificationLogItem({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.createdAt,
+    this.payload,
+    this.isRead = false,
+  });
+
+  final int id;
+  final String title;
+  final String body;
+  final String? payload;
+  final DateTime createdAt;
+  final bool isRead;
+
+  NotificationLogItem copyWith({bool? isRead}) {
+    return NotificationLogItem(
+      id: id,
+      title: title,
+      body: body,
+      payload: payload,
+      createdAt: createdAt,
+      isRead: isRead ?? this.isRead,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'body': body,
+      'payload': payload,
+      'createdAt': createdAt.toIso8601String(),
+      'isRead': isRead,
+    };
+  }
+
+  factory NotificationLogItem.fromJson(Map<String, dynamic> json) {
+    return NotificationLogItem(
+      id: json['id'] as int? ?? 0,
+      title: json['title'] as String? ?? 'Notification',
+      body: json['body'] as String? ?? '',
+      payload: json['payload'] as String?,
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+      isRead: json['isRead'] as bool? ?? false,
+    );
+  }
+}
 
 class NotificationBadgeController extends ChangeNotifier {
   NotificationBadgeController._();
@@ -10,16 +66,21 @@ class NotificationBadgeController extends ChangeNotifier {
       NotificationBadgeController._();
 
   static const _storageKey = 'notification_unread_count';
+  static const _historyStorageKey = 'notification_history';
+  static const _maxHistoryItems = 80;
 
   int _unreadCount = 0;
+  List<NotificationLogItem> _items = const [];
   bool _loaded = false;
 
   int get unreadCount => _unreadCount;
+  List<NotificationLogItem> get items => List.unmodifiable(_items);
 
   Future<void> load() async {
     if (_loaded) return;
     final prefs = await SharedPreferences.getInstance();
     _unreadCount = prefs.getInt(_storageKey) ?? 0;
+    _items = _readItems(prefs);
     _loaded = true;
     notifyListeners();
   }
@@ -32,13 +93,72 @@ class NotificationBadgeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> clear() async {
+  Future<void> recordNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
     await load();
-    if (_unreadCount == 0) return;
-    _unreadCount = 0;
+    final item = NotificationLogItem(
+      id: id,
+      title: _cleanTitle(title),
+      body: body,
+      payload: payload,
+      createdAt: DateTime.now(),
+    );
+    _items = [item, ..._items].take(_maxHistoryItems).toList();
+    _unreadCount++;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_storageKey, _unreadCount);
+    await _writeItems(prefs);
     notifyListeners();
+  }
+
+  Future<void> clear() async {
+    await load();
+    if (_unreadCount == 0 && !_items.any((item) => !item.isRead)) return;
+    _unreadCount = 0;
+    _items = _items.map((item) => item.copyWith(isRead: true)).toList();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_storageKey, _unreadCount);
+    await _writeItems(prefs);
+    notifyListeners();
+  }
+
+  List<NotificationLogItem> _readItems(SharedPreferences prefs) {
+    final raw = prefs.getString(_historyStorageKey);
+    if (raw == null || raw.isEmpty) return const [];
+
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const [];
+
+      return decoded
+          .whereType<Map>()
+          .map(
+            (item) => NotificationLogItem.fromJson(
+              item.map((key, value) => MapEntry(key.toString(), value)),
+            ),
+          )
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<void> _writeItems(SharedPreferences prefs) {
+    return prefs.setString(
+      _historyStorageKey,
+      jsonEncode(_items.map((item) => item.toJson()).toList()),
+    );
+  }
+
+  String _cleanTitle(String title) {
+    return title
+        .replaceAll(RegExp(r'^[^\w\s]+'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
   }
 }
 
@@ -100,7 +220,7 @@ class _NotificationBellActionState extends State<NotificationBellAction> {
                       tooltip: 'Notifications',
                       icon: Icon(Icons.notifications_none_rounded),
                       color: iconColor,
-                      onPressed: () => _showNotificationsSheet(context, count),
+                      onPressed: () => _openNotificationsScreen(context),
                     ),
                   ),
                 ),
@@ -142,118 +262,9 @@ class _NotificationBellActionState extends State<NotificationBellAction> {
     );
   }
 
-  Future<void> _showNotificationsSheet(BuildContext context, int count) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: context.modeSurface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: context.modePrimary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.notifications_active_outlined,
-                        color: context.modePrimary,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Notifications',
-                            style: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: context.modeTextPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            count == 0
-                                ? 'No unread notifications'
-                                : '$count unread notification${count == 1 ? '' : 's'}',
-                            style: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: context.modeTextMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: context.modeSurfaceAlt,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: context.modeBorder.withValues(alpha: 0.45),
-                    ),
-                  ),
-                  child: Text(
-                    count == 0
-                        ? 'New stock and order alerts will appear here.'
-                        : 'You have new stock or order alerts waiting in the notification tray.',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 13,
-                      height: 1.45,
-                      color: context.modeTextSecondary,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Close'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: count == 0
-                            ? null
-                            : () async {
-                                await _controller.clear();
-                                if (context.mounted) Navigator.pop(context);
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.modePrimary,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Mark read'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+  void _openNotificationsScreen(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const NotificationsScreen()),
     );
   }
 }

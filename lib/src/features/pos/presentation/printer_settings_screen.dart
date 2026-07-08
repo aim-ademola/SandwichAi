@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/service/printer_service.dart';
@@ -216,6 +217,10 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
   }
 
   Widget _buildScanSection() {
+    final scannerEnabled = AppEnvironment.current.isFeatureEnabled(
+      AppFeature.scanner,
+    );
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -252,7 +257,11 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Find printers via Network, Bluetooth, USB',
+                      scannerEnabled
+                          ? 'Find printers via Network, Bluetooth, USB'
+                          : AppEnvironment.current.disabledFeatureMessage(
+                              AppFeature.scanner,
+                            ),
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
                         color: context.modeTextSecondary,
@@ -299,7 +308,9 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isScanning ? null : _scanForPrinters,
+              onPressed: _isScanning || !scannerEnabled
+                  ? null
+                  : _scanForPrinters,
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,
                 foregroundColor: context.modeTextInverse,

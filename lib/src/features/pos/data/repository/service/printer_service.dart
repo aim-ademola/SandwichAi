@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/pos_order_model.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -34,6 +35,13 @@ class PrinterService {
     PosOrderResponseModel order,
   ) async {
     final results = <String, bool>{};
+
+    if (!_isPrinterEnabled) {
+      AppLogger.log(
+        AppEnvironment.current.disabledFeatureMessage(AppFeature.printer),
+      );
+      return results;
+    }
 
     for (final printer in _printers.where((p) => p.isKitchenPrinter)) {
       try {
@@ -108,6 +116,13 @@ class PrinterService {
   static Future<List<PrinterDiscoveryResult>>
   discoverPrintersOnNetwork() async {
     final List<PrinterDiscoveryResult> devices = [];
+
+    if (!_isScannerEnabled) {
+      AppLogger.log(
+        AppEnvironment.current.disabledFeatureMessage(AppFeature.scanner),
+      );
+      return devices;
+    }
 
     try {
       final interfaces = await NetworkInterface.list();
@@ -244,6 +259,13 @@ class PrinterService {
   discoverBluetoothPrinters() async {
     final List<PrinterDiscoveryResult> devices = [];
 
+    if (!_isScannerEnabled) {
+      AppLogger.log(
+        AppEnvironment.current.disabledFeatureMessage(AppFeature.scanner),
+      );
+      return devices;
+    }
+
     try {
       // This requires flutter_blue_plus package
 
@@ -361,6 +383,13 @@ class PrinterService {
   static Future<List<PrinterDiscoveryResult>> discoverUSBPrinters() async {
     final List<PrinterDiscoveryResult> devices = [];
 
+    if (!_isScannerEnabled) {
+      AppLogger.log(
+        AppEnvironment.current.disabledFeatureMessage(AppFeature.scanner),
+      );
+      return devices;
+    }
+
     try {
       // This requires usb_serial package
 
@@ -411,6 +440,13 @@ class PrinterService {
   static Future<List<PrinterDiscoveryResult>> discoverAllPrinters() async {
     final allPrinters = <PrinterDiscoveryResult>[];
 
+    if (!_isScannerEnabled) {
+      AppLogger.log(
+        AppEnvironment.current.disabledFeatureMessage(AppFeature.scanner),
+      );
+      return allPrinters;
+    }
+
     // Discover network printers
     final networkPrinters = await discoverPrintersOnNetwork();
     allPrinters.addAll(networkPrinters);
@@ -429,6 +465,13 @@ class PrinterService {
   // ==================== TEST CONNECTION ====================
 
   Future<bool> testPrinterConnection(PrinterConfig config) async {
+    if (!_isPrinterEnabled) {
+      AppLogger.log(
+        AppEnvironment.current.disabledFeatureMessage(AppFeature.printer),
+      );
+      return false;
+    }
+
     try {
       switch (config.connectionType) {
         case PrinterConnectionType.network:
@@ -448,6 +491,12 @@ class PrinterService {
       return false;
     }
   }
+
+  static bool get _isPrinterEnabled =>
+      AppEnvironment.current.isFeatureEnabled(AppFeature.printer);
+
+  static bool get _isScannerEnabled =>
+      AppEnvironment.current.isFeatureEnabled(AppFeature.scanner);
 
   Future<bool> _testNetworkConnection(String ipAddress, int port) async {
     Socket? socket;

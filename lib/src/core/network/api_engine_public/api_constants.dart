@@ -1,8 +1,8 @@
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
+
 class ApiConstants {
-  static const String baseUrl =
-      'https://sandwichai-api-3wcql.ondigitalocean.app/';
-  static const String aiBaseUrl =
-      'https://lionfish-app-o5cz2.ondigitalocean.app/api/ai/';
+  static String get baseUrl => AppEnvironment.current.apiBaseUrl;
+  static String get aiBaseUrl => AppEnvironment.current.aiBaseUrl;
 
   // Timeout configurations
   static const Duration connectTimeout = Duration(seconds: 30);

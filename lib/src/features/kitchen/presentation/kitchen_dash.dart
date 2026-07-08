@@ -648,7 +648,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
         return const _StatusConfig(
           color: Color(0xFF9C27B0),
           icon: Icons.check_circle_outline_rounded,
-          label: 'CONFIRMED',
+          label: 'NEW ORDER',
         );
       case 'PREPARING':
         return _StatusConfig(
@@ -694,6 +694,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
   List<_OrderAction> _resolveActions(KitchenOrder order) {
     switch (order.status.toUpperCase()) {
       case 'PENDING':
+        return [];
       case 'IN_QUEUE':
         return [
           _OrderAction(
@@ -712,7 +713,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
       case 'CONFIRMED':
         return [
           _OrderAction(
-            label: 'Start Prep',
+            label: 'Start Preparation',
             onPressed: () {
               setState(() => _updatingOrderId = order.id);
               _dispatch(StartOrderPreparation(order.id));

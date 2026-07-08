@@ -9,8 +9,14 @@ import 'package:sandwich_ai/src/features/pos/presentation/payment_method.dart';
 class OrderDetailScreen extends StatelessWidget {
   final KitchenOrder order;
   final VoidCallback? onBack;
+  final Future<void> Function()? onConfirmPending;
 
-  const OrderDetailScreen({super.key, required this.order, this.onBack});
+  const OrderDetailScreen({
+    super.key,
+    required this.order,
+    this.onBack,
+    this.onConfirmPending,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +68,10 @@ class OrderDetailScreen extends StatelessWidget {
                   if (_shouldShowPaymentAction()) ...[
                     SizedBox(height: verticalSpacing),
                     _buildPaymentAction(context, textSize),
+                  ],
+                  if (_shouldShowConfirmAction()) ...[
+                    SizedBox(height: verticalSpacing),
+                    _buildConfirmAction(context, textSize),
                   ],
                   SizedBox(height: verticalSpacing),
                   _buildTimeline(context, textSize),
@@ -546,6 +556,70 @@ class OrderDetailScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildConfirmAction(BuildContext context, double textSize) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
+        boxShadow: [
+          BoxShadow(
+            color: context.modeTextPrimary.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Awaiting Confirmation',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: textSize + 1,
+              fontWeight: FontWeight.w700,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Confirm this order when customer service has cleared it for kitchen.',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: textSize - 1,
+              fontWeight: FontWeight.w500,
+              color: context.modeTextSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onConfirmPending,
+              icon: const Icon(Icons.check_circle_outline),
+              label: Text(
+                'Confirm Order',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: textSize,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _openPayment(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -1007,5 +1081,9 @@ class OrderDetailScreen extends StatelessWidget {
 
   bool _shouldShowPaymentAction() {
     return order.status == OrderStatus.served && !_hasPayment();
+  }
+
+  bool _shouldShowConfirmAction() {
+    return order.status == OrderStatus.pending && onConfirmPending != null;
   }
 }

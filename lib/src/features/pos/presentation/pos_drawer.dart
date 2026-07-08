@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/globals/app_drawer.dart';
+import 'package:sandwich_ai/src/core/globals/feature_unavailable_screen.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/printer_settings_screen.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_to_stock_requisitin_tab.dart';
 
@@ -66,7 +68,15 @@ class PosAppDrawer extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              CupertinoPageRoute(builder: (_) => PrinterSettingsScreen()),
+              CupertinoPageRoute(
+                builder: (_) =>
+                    AppEnvironment.current.isFeatureEnabled(AppFeature.printer)
+                    ? const PrinterSettingsScreen()
+                    : const FeatureUnavailableScreen(
+                        feature: AppFeature.printer,
+                        title: 'Printer Settings',
+                      ),
+              ),
             );
           },
         ),

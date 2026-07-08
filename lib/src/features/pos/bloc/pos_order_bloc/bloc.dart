@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/event.dart';
@@ -160,6 +161,13 @@ class PosOrderBloc extends Bloc<PosOrderEvent, PosOrderState> {
   /// Print order to all configured kitchen printers
   /// Supports Network, Bluetooth, USB, and Serial printers
   Future<void> _printOrderToKitchen(dynamic order) async {
+    if (!AppEnvironment.current.isFeatureEnabled(AppFeature.printer)) {
+      AppLogger.log(
+        AppEnvironment.current.disabledFeatureMessage(AppFeature.printer),
+      );
+      return;
+    }
+
     if (_printerService.printers.isEmpty) {
       AppLogger.log('No printers configured - skipping print');
       return;

@@ -1,42 +1,22 @@
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
+
 class DevLoginConfig {
   const DevLoginConfig._();
 
-  // Turn this off before production builds.
-  static const bool enabled = true;
-  static const String organizationCode = 'ORG-006';
+  static bool get enabled =>
+      AppEnvironment.current.isFeatureEnabled(AppFeature.devLogin);
+  static String get organizationCode =>
+      AppEnvironment.current.devOrganizationCode;
 
-  static const users = <DevLoginUser>[
-    DevLoginUser(
-      department: 'Inventory Manager',
-      email: 'ogochukwu@gmail.com',
-      password: 'password@1',
-    ),
-    DevLoginUser(
-      department: 'Stock Keeper',
-      email: 'Farouq@gmail.com',
-      password: 'password@1',
-    ),
-    DevLoginUser(
-      department: 'Payment Manager',
-      email: 'jide@gmail.com',
-      password: 'password@1',
-    ),
-    DevLoginUser(
-      department: 'Inventory Manager',
-      email: 'bashorun@gmail.com',
-      password: 'password@1',
-    ),
-    DevLoginUser(
-      department: 'Customer Service',
-      email: 'omobabafufu@gmail.com',
-      password: 'password@1',
-    ),
-    DevLoginUser(
-      department: 'Branch Manager',
-      email: 'bendestiny259@gmail.com',
-      password: 'password@1',
-    ),
-  ];
+  static List<DevLoginUser> get users => AppEnvironment.current.devUsers
+      .map(
+        (user) => DevLoginUser(
+          department: user.department,
+          email: user.email,
+          password: user.password,
+        ),
+      )
+      .toList();
 }
 
 class DevLoginUser {

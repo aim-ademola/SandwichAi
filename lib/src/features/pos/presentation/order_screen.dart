@@ -444,16 +444,17 @@ class _OrderScreenState extends State<OrderScreen>
     super.dispose();
   }
 
-  void _recreateTabController(int length) {
+  void _recreateTabController(int length, {bool notify = true}) {
     if (!mounted) return;
+    final safeLength = length < 1 ? 1 : length;
     final oldIndex = _tabController.index;
     _tabController.dispose();
     _tabController = TabController(
-      length: length,
+      length: safeLength,
       vsync: this,
-      initialIndex: oldIndex < length ? oldIndex : 0,
+      initialIndex: oldIndex < safeLength ? oldIndex : 0,
     );
-    setState(() {});
+    if (notify) setState(() {});
   }
 
   List<ApiMenuItem> _getOrderedItems(List<ApiMenuItem> allItems) {
@@ -785,6 +786,9 @@ class _OrderScreenState extends State<OrderScreen>
         : menuItems;
     final categories = menuItems.map((item) => item.category).toSet().toList()
       ..sort();
+    if (_tabController.length != (categories.isEmpty ? 1 : categories.length)) {
+      _recreateTabController(categories.length, notify: false);
+    }
     final orderedItems = _getOrderedItems(menuItems);
     final hasOrders = orderedItems.isNotEmpty;
     final isSearching = _searchController.text.trim().isNotEmpty;

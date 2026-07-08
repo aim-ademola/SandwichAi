@@ -1,6 +1,7 @@
 // data/repo/recipe_forecast_repository.dart
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/api_constants.dart';
@@ -30,6 +31,12 @@ class RecipeForecastRepository extends BaseRepository
     required String branchId,
   }) async {
     try {
+      if (!AppEnvironment.current.isFeatureEnabled(AppFeature.aiForecast)) {
+        return ApiResponse.errorMessage(
+          AppEnvironment.current.disabledFeatureMessage(AppFeature.aiForecast),
+        );
+      }
+
       _validateInput(
         recipeId,
         dishName,

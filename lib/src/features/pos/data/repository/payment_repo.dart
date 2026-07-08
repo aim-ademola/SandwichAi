@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
@@ -32,6 +33,9 @@ class PaymentRepository extends BaseRepository
     required CashPaymentRequest request,
   }) async {
     try {
+      final disabled = _disabledPaymentResponse<CashRecordResponseModel>();
+      if (disabled != null) return disabled;
+
       _validateCashRequest(request);
 
       final response = await _apiClient
@@ -81,6 +85,9 @@ class PaymentRepository extends BaseRepository
     required String branchId,
   }) async {
     try {
+      final disabled = _disabledPaymentResponse<PendingCashListResponseModel>();
+      if (disabled != null) return disabled;
+
       final response = await _apiClient
           .get('payments/cash/pending', queryParameters: {'branchId': branchId})
           .timeout(
@@ -126,6 +133,10 @@ class PaymentRepository extends BaseRepository
     required OnlinePaymentRequest request,
   }) async {
     try {
+      final disabled =
+          _disabledPaymentResponse<OnlinePaymentInitResponseModel>();
+      if (disabled != null) return disabled;
+
       _validateOnlineRequest(request);
 
       final response = await _apiClient
@@ -174,6 +185,10 @@ class PaymentRepository extends BaseRepository
   Future<ApiResponse<OnlinePaymentStatusResponseModel>>
   checkOnlinePaymentStatus({required String reference}) async {
     try {
+      final disabled =
+          _disabledPaymentResponse<OnlinePaymentStatusResponseModel>();
+      if (disabled != null) return disabled;
+
       final response = await _apiClient
           .get('payments/status/$reference')
           .timeout(
@@ -212,6 +227,16 @@ class PaymentRepository extends BaseRepository
       }
       return ApiResponse.errorMessage(_parseError(e.toString()));
     }
+  }
+
+  ApiResponse<T>? _disabledPaymentResponse<T>() {
+    if (AppEnvironment.current.isFeatureEnabled(AppFeature.payment)) {
+      return null;
+    }
+
+    return ApiResponse.errorMessage(
+      AppEnvironment.current.disabledFeatureMessage(AppFeature.payment),
+    );
   }
 
   void _validateCashRequest(CashPaymentRequest request) {

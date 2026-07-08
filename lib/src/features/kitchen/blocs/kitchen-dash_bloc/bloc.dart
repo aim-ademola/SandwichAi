@@ -9,6 +9,13 @@ import 'package:sandwich_ai/src/features/kitchen/data/repo/kitchen_dash_repo.dar
 
 class KitchenDashboardBloc
     extends Bloc<KitchenDashboardEvent, KitchenDashboardState> {
+  static const _liveKitchenStatuses = {
+    'CONFIRMED',
+    'IN_QUEUE',
+    'PREPARING',
+    'READY',
+  };
+
   final KitchenDashboardRepositoryInterface _repository;
   String branchId = '';
   String employeeId = '';
@@ -359,6 +366,7 @@ class KitchenDashboardBloc
   /// Fires a notification for each order not yet seen.
   void _notifyNewOrders(List<KitchenOrder> orders) {
     for (final order in orders) {
+      if (!_liveKitchenStatuses.contains(order.status.toUpperCase())) continue;
       if (_notifiedOrders.contains(order.id)) continue;
 
       _notifiedOrders.add(order.id);
@@ -372,7 +380,11 @@ class KitchenDashboardBloc
   }
 
   List<KitchenOrder> _applyFilter(List<KitchenOrder> orders, OrderFilter _) {
-    return orders;
+    return orders
+        .where(
+          (order) => _liveKitchenStatuses.contains(order.status.toUpperCase()),
+        )
+        .toList();
   }
 
   DashboardErrorType _determineErrorType(String error) {

@@ -579,7 +579,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         statusTextColor = const Color(0xFF2196F3);
         break;
       case 'CONFIRMED':
-        statusText = 'Confirmed';
+        statusText = 'New Order';
         statusBgColor = context.modePrimaryAlt.withValues(alpha: 0.12);
         statusTextColor = context.modePrimaryAlt;
         break;
@@ -1080,7 +1080,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
   String _getMainButtonText(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return 'Start Preparation';
+        return 'Awaiting Confirmation';
       case 'PREPARING':
         return 'Mark as Ready';
       case 'READY':

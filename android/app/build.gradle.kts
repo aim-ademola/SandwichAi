@@ -42,6 +42,27 @@ android {
         multiDexEnabled = true
     }
 
+    flavorDimensions += "environment"
+
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "SandwichAi Dev")
+        }
+
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".staging"
+            resValue("string", "app_name", "SandwichAi Staging")
+        }
+
+        create("prod") {
+            dimension = "environment"
+            resValue("string", "app_name", "SandwichAi")
+        }
+    }
+
     signingConfigs {
         create("release") {
             if (hasReleaseKeystore) {

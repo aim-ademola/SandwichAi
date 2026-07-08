@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/order_status_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/order_status_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/order_status_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/oder_status_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/repository/pos_order_repo.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/active_order_dtls.dart';
 
 class ActiveOrdersScreen extends StatefulWidget {
@@ -22,6 +24,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
 
   String? _selectedStatus;
   KitchenOrder? _selectedOrder;
+  String? _confirmingOrderId;
 
   @override
   void initState() {
@@ -36,6 +39,14 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       return OrderDetailScreen(
         order: selectedOrder,
         onBack: () => setState(() => _selectedOrder = null),
+        onConfirmPending: selectedOrder.status == OrderStatus.pending
+            ? () async {
+                await _confirmPendingOrder(selectedOrder);
+                if (mounted) {
+                  setState(() => _selectedOrder = null);
+                }
+              }
+            : null,
       );
     }
 
@@ -409,8 +420,99 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                 ),
               ),
             ],
+            if (order.status == OrderStatus.pending) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 42,
+                child: ElevatedButton.icon(
+                  onPressed: _confirmingOrderId == order.id
+                      ? null
+                      : () => _confirmPendingOrder(order),
+                  icon: _confirmingOrderId == order.id
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: context.modeTextInverse,
+                          ),
+                        )
+                      : const Icon(Icons.check_circle_outline, size: 18),
+                  label: Text(
+                    _confirmingOrderId == order.id
+                        ? 'Confirming...'
+                        : 'Confirm Order',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.modePrimary,
+                    foregroundColor: context.modeTextInverse,
+                    disabledBackgroundColor: context.modePrimary.withValues(
+                      alpha: 0.55,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _confirmPendingOrder(KitchenOrder order) async {
+    setState(() => _confirmingOrderId = order.id);
+
+    final employeeId = await AuthCacheHelper.instance.getEmpID() ?? '';
+    if (!mounted) return;
+
+    if (employeeId.isEmpty) {
+      setState(() => _confirmingOrderId = null);
+      _showSnack(
+        'Employee ID not found. Please login again.',
+        context.modeError,
+      );
+      return;
+    }
+
+    final response = await context
+        .read<PosOrderRepositoryInterface>()
+        .updateOrderStatus(
+          orderId: order.id,
+          status: OrderStatus.confirmed.value,
+          updatedBy: employeeId,
+        );
+
+    if (!mounted) return;
+
+    setState(() => _confirmingOrderId = null);
+
+    if (response.isSuccess) {
+      _showSnack('Order confirmed and sent to kitchen.', context.modeSuccess);
+      context.read<KitchenOrdersBloc>().add(const RefreshKitchenOrders());
+    } else {
+      _showSnack(
+        response.error?.toString() ?? 'Failed to confirm order.',
+        context.modeError,
+      );
+    }
+  }
+
+  void _showSnack(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            color: context.modeTextInverse,
+          ),
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

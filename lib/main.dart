@@ -5,5 +5,5 @@ export 'package:sandwich_ai/src/core/config/app_bootstrap.dart'
     show MyApp, rootScaffoldMessengerKey, navigatorKey;
 
 Future<void> main() {
-  return bootstrapSandwichAi(AppEnvironment.prod());
+  return bootstrapSandwichAi(AppEnvironment.staging());
 }

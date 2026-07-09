@@ -68,8 +68,8 @@ class _KitchenBottomNavBarState extends State<KitchenBottomNavBar> {
                   index: 0,
                 ),
                 _buildNavItem(
-                  icon: 'assets/svg/bx_cart.svg',
-                  activeIcon: 'assets/svg/bx_cart.svg',
+                  icon: 'assets/svg/history.svg',
+                  activeIcon: 'assets/svg/history.svg',
                   label: 'Order History',
                   index: 1,
                 ),

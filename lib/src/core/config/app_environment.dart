@@ -54,18 +54,7 @@ class AppEnvironment {
       aiBaseUrl: _productionAiBaseUrl,
       docsUrl: 'https://api-staging.sandwichai.co/api/docs',
       devOrganizationCode: 'ORG-005',
-      devUsers: [
-        AppEnvironmentUser(
-          department: 'Customer Service',
-          email: 'thedanielsdev+250@gmail.com',
-          password: '12345678',
-        ),
-        AppEnvironmentUser(
-          department: 'Kitchen Manager',
-          email: 'thedanielsdev+444@gmail.com',
-          password: '12345678',
-        ),
-      ],
+      devUsers: [],
       disabledFeatures: {
         AppFeature.aiForecast,
         AppFeature.wastageAnalysis,

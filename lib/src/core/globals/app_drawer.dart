@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/account_profile_screen.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
@@ -95,14 +96,28 @@ class _PremiumDrawerHeader extends StatelessWidget {
               Container(
                 width: 44,
                 height: 44,
-                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.96),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Image.asset(
-                  'assets/img/Logo-DqvzRW6_.png',
-                  fit: BoxFit.contain,
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: SvgPicture.asset(
+                    'assets/svg/logo.svg',
+                    fit: BoxFit.contain,
+                    colorFilter: ColorFilter.mode(
+                      context.modePrimary,
+                      BlendMode.srcIn,
+                    ),
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.restaurant_menu_rounded,
+                        color: context.modePrimary,
+                        size: 24,
+                      );
+                    },
+                  ),
                 ),
               ),
               const SizedBox(width: 12),

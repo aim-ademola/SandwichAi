@@ -3,6 +3,10 @@ import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -47,13 +51,11 @@ android {
     productFlavors {
         create("dev") {
             dimension = "environment"
-            applicationIdSuffix = ".dev"
             resValue("string", "app_name", "SandwichAi Dev")
         }
 
         create("staging") {
             dimension = "environment"
-            applicationIdSuffix = ".staging"
             resValue("string", "app_name", "SandwichAi Staging")
         }
 

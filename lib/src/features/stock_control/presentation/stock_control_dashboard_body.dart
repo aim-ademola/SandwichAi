@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -274,6 +275,11 @@ class _StockControlDashboardBodyScreenState
                     isValueVisible,
                     toggleVisibility,
                   ),
+                ),
+                SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: _buildStockStatusChart(overview),
                 ),
                 SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
                 Padding(
@@ -788,5 +794,117 @@ class _StockControlDashboardBodyScreenState
     if (width < 360) return 4;
     if (width < 600) return 5;
     return 6;
+  }
+
+  Widget _buildStockStatusChart(Overview overview) {
+    final status = overview.statusBreakdown;
+    final total = status.inStock + status.expired;
+    if (total == 0) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.modeBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Stock Availability Breakdown',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                flex: 4,
+                child: SizedBox(
+                  height: 120,
+                  child: PieChart(
+                    PieChartData(
+                      sectionsSpace: 3,
+                      centerSpaceRadius: 25,
+                      sections: [
+                        PieChartSectionData(
+                          color: context.modePrimary,
+                          value: status.inStock.toDouble(),
+                          title: '${((status.inStock / total) * 100).toStringAsFixed(0)}%',
+                          radius: 25,
+                          titleStyle: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: context.modeTextInverse,
+                          ),
+                        ),
+                        PieChartSectionData(
+                          color: context.modeError,
+                          value: status.expired.toDouble(),
+                          title: '${((status.expired / total) * 100).toStringAsFixed(0)}%',
+                          radius: 25,
+                          titleStyle: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: context.modeTextInverse,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 5,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _chartIndicator(
+                      color: context.modePrimary,
+                      label: 'In Stock (${status.inStock})',
+                    ),
+                    const SizedBox(height: 8),
+                    _chartIndicator(
+                      color: context.modeError,
+                      label: 'Expired (${status.expired})',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _chartIndicator({required Color color, required String label}) {
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: context.modeTextPrimary,
+          ),
+        ),
+      ],
+    );
   }
 }

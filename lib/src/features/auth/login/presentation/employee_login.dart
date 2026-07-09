@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/config/dev_login_config.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/config/responsive_config.dart';
@@ -34,6 +35,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
   @override
   void initState() {
     super.initState();
+    AppLogger.log("INIT LOGIN: flavor = ${AppEnvironment.current.flavor}, devLoginEnabled = ${DevLoginConfig.enabled}, users count = ${DevLoginConfig.users.length}");
     _applyDefaultLoginCredentialsIfEnabled();
     _loadSavedCredentials();
   }
@@ -625,6 +627,28 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 12),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppEnvironment.current.flavor == AppFlavor.prod
+                                  ? Colors.red.withValues(alpha: 0.1)
+                                  : Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              'Environment: ${AppEnvironment.current.appName} • ${AppEnvironment.current.apiBaseUrl}',
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppEnvironment.current.flavor == AppFlavor.prod
+                                    ? Colors.red
+                                    : Colors.green,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),

@@ -236,8 +236,6 @@ class ProcessingTransferBloc
   ) {
     if (state is! ProcessingTransferListLoaded) return;
 
-    final currentState = state as ProcessingTransferListLoaded;
-
     add(LoadProcessingTransfers(branchId: branchId, status: event.status));
   }
 

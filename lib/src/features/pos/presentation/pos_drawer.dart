@@ -1,3 +1,4 @@
+import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -70,7 +71,7 @@ class PosAppDrawer extends StatelessWidget {
               context,
               CupertinoPageRoute(
                 builder: (_) =>
-                    AppEnvironment.current.isFeatureEnabled(AppFeature.printer)
+                    FeatureRegistry.isEnabled(AppFeature.printer)
                     ? const PrinterSettingsScreen()
                     : const FeatureUnavailableScreen(
                         feature: AppFeature.printer,

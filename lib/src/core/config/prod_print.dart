@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 enum LogLevel { info, warning, error }
 
@@ -19,12 +20,12 @@ class AppLogger {
     }
 
     // Release only
-    // if (kReleaseMode && level == LogLevel.error) {
-    //   FirebaseCrashlytics.instance.recordError(
-    //     message,
-    //     stackTrace ?? StackTrace.current,
-    //   );
-    // }
+    if (kReleaseMode && level == LogLevel.error) {
+      FirebaseCrashlytics.instance.recordError(
+        message,
+        stackTrace ?? StackTrace.current,
+      );
+    }
   }
 
   static String _format(Object? message, LogLevel level) {

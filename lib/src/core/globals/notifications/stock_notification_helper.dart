@@ -184,7 +184,7 @@ class StockNotificationHelper {
     _notifiedItems.remove('${itemKey}_expired');
     _notifiedItems.remove('${itemKey}_expiring');
     AppLogger.log(
-      '✅ ${itemName} marked as restocked. Notification history cleared for this item.',
+      '✅ $itemName marked as restocked. Notification history cleared for this item.',
     );
   }
 

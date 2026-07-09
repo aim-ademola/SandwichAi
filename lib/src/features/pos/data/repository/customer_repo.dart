@@ -5,7 +5,7 @@ import 'package:dio/dio.dart'; // Add this import
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
-import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/customer_model.dart';
 
 abstract class CustomerRepositoryInterface {

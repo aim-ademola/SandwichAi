@@ -9,7 +9,7 @@ import 'package:sandwich_ai/src/features/auth/data/models/forgot_pwd_model.dart'
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/event.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/state.dart';
-import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/shw-rst_snack.dart'
+import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/shw_rst_snack.dart'
     show showErrorSnackBar;
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/presentation/snackbar.dart'
     show showSuccessSnackBar;

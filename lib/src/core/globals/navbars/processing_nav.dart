@@ -1,3 +1,4 @@
+import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
@@ -249,13 +250,13 @@ class ProcessingControlMainScreen extends StatelessWidget {
       initialIndex: 0,
       pages: [
         ProcessingDashboardScreen(),
-        AppEnvironment.current.isFeatureEnabled(AppFeature.aiForecast)
+        FeatureRegistry.isEnabled(AppFeature.aiForecast)
             ? RecipeCalculatorScreen()
             : const FeatureUnavailableScreen(
                 feature: AppFeature.aiForecast,
                 title: 'AI Recipe Calculator',
               ),
-        AppEnvironment.current.isFeatureEnabled(AppFeature.wastageAnalysis)
+        FeatureRegistry.isEnabled(AppFeature.wastageAnalysis)
             ? WastageAnalysisScreen(isFromStock: false)
             : const FeatureUnavailableScreen(
                 feature: AppFeature.wastageAnalysis,

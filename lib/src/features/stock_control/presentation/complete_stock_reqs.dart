@@ -745,7 +745,7 @@ class _CompleteStockRequestDetailsScreenState
     return StatefulBuilder(
       builder: (context, setLocalState) {
         bool showAll = false;
-        final displayItems = showAll ? items : items.take(3).toList();
+        final displayItems = items.take(3).toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -834,9 +834,7 @@ class _CompleteStockRequestDetailsScreenState
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        showAll
-                            ? 'Show less'
-                            : 'Show ${items.length - 3} more item${items.length - 3 > 1 ? 's' : ''}',
+                        'Show ${items.length - 3} more item${items.length - 3 > 1 ? 's' : ''}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getCaptionFontSize(screenWidth),
                           fontWeight: FontWeight.w600,
@@ -845,9 +843,7 @@ class _CompleteStockRequestDetailsScreenState
                       ),
                       const SizedBox(width: 4),
                       Icon(
-                        showAll
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
+                        Icons.keyboard_arrow_down,
                         size: _getIconSize(screenWidth) - 4,
                         color: kPrimary,
                       ),

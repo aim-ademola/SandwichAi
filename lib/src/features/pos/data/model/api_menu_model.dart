@@ -217,8 +217,6 @@ class Branch {
         dvaCreatedAt: _parseDateTimeOrNull(json['dvaCreatedAt']),
       );
     } catch (e) {
-      print('Error parsing Branch: $e');
-      print('JSON data: $json');
       rethrow;
     }
   }
@@ -438,8 +436,6 @@ class InventoryItem {
         updatedAt: _parseDateTime(json['updatedAt']),
       );
     } catch (e) {
-      print('Error parsing InventoryItem: $e');
-      print('JSON data: $json');
       rethrow;
     }
   }
@@ -448,7 +444,6 @@ class InventoryItem {
     if (value == null) return '';
     if (value is String) return value;
     if (value is Map) {
-      print('Warning: Expected String but got Map: $value');
       return '';
     }
     return value.toString();
@@ -514,8 +509,6 @@ class RecipeIngredient {
             : null,
       );
     } catch (e) {
-      print('Error parsing RecipeIngredient: $e');
-      print('JSON data: $json');
       rethrow;
     }
   }
@@ -524,7 +517,6 @@ class RecipeIngredient {
     if (value == null) return '';
     if (value is String) return value;
     if (value is Map) {
-      print('Warning: Expected String but got Map: $value');
       return '';
     }
     return value.toString();

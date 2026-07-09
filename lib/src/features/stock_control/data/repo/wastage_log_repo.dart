@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
-import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/wastage_log.dart';
 
 abstract class WasteLogsRepositoryInterface {

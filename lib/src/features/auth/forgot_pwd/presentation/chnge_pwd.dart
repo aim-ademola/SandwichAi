@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/config/responsive_config.dart';
-import 'package:sandwich_ai/src/features/auth/data/models/chnage-pwd-res.dart';
+import 'package:sandwich_ai/src/features/auth/data/models/chnage_pwd_res.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/cnage_pwd_blocs/bloc.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/cnage_pwd_blocs/event.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/cnage_pwd_blocs/state.dart';

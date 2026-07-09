@@ -1,10 +1,11 @@
+import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
-import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/payment_model.dart';
 
 abstract class PaymentRepositoryInterface {
@@ -230,7 +231,7 @@ class PaymentRepository extends BaseRepository
   }
 
   ApiResponse<T>? _disabledPaymentResponse<T>() {
-    if (AppEnvironment.current.isFeatureEnabled(AppFeature.payment)) {
+    if (FeatureRegistry.isEnabled(AppFeature.payment)) {
       return null;
     }
 

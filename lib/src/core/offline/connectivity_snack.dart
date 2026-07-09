@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sandwich_ai/main.dart';
+import 'package:sandwich_ai/src/core/config/app_bootstrap.dart';
 
 /// Triggered when retry/sync starts
 void showSyncStartSnackBar(BuildContext context, String message) {

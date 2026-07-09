@@ -47,11 +47,13 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
         if (currentState is! SupplierListLoaded ||
             (currentState.suppliers.isEmpty)) {
           context.read<SupplierBloc>().add(LoadSuppliers());
-        } else // Cache the existing suppliers
+        } else {
+          // Cache the existing suppliers
           setState(() {
             _cachedSuppliers = currentState.suppliers;
             _hasLoadedOnce = true;
           });
+        }
       }
     });
   }
@@ -552,162 +554,47 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
     );
   }
 
-  void _showFilterSheet() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Filter Suppliers',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildFilterDropdown(
-                    label: 'Status',
-                    value: _selectedStatus,
-                    items: [
-                      'ACTIVE',
-                      'INACTIVE',
-                      'SUSPENDED',
-                      'PENDING_APPROVAL',
-                      'BLACKLISTED',
-                    ],
-                    onChanged: (value) {
-                      setModalState(() => _selectedStatus = value);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildFilterDropdown(
-                    label: 'Supplier Type',
-                    value: _selectedType,
-                    items: [
-                      'MANUFACTURER',
-                      'DISTRIBUTOR',
-                      'WHOLESALER',
-                      'IMPORTER',
-                      'LOCAL_PRODUCER',
-                      'BROKER',
-                    ],
-                    onChanged: (value) {
-                      setModalState(() => _selectedType = value);
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              _selectedStatus = null;
-                              _selectedType = null;
-                            });
-                            context.read<SupplierBloc>().add(LoadSuppliers());
-                            Navigator.pop(context);
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            'Clear',
-                            style: TextStyle(color: context.modeTextPrimary),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {});
-                            context.read<SupplierBloc>().add(
-                              FilterSuppliers(
-                                status: _selectedStatus,
-                                supplierType: _selectedType,
-                              ),
-                            );
-                            Navigator.pop(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: context.modePrimary,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            'Apply',
-                            style: TextStyle(color: context.modeTextInverse),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildFilterDropdown({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          initialValue: value,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: context.modeSurfaceAlt,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-          ),
-          hint: Text('Select $label'),
-          items: items
-              .map(
-                (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(item.replaceAll('_', ' ')),
-                ),
-              )
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ],
-    );
-  }
+  // Widget _buildFilterDropdown({
+  //   required String label,
+  //   required String? value,
+  //   required List<String> items,
+  //   required ValueChanged<String?> onChanged,
+  // }) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         label,
+  //         style: WorkSansAppTextStyles.medium.copyWith(
+  //           fontSize: 14,
+  //           fontWeight: FontWeight.w600,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 8),
+  //       DropdownButtonFormField<String>(
+  //         initialValue: value,
+  //         decoration: InputDecoration(
+  //           filled: true,
+  //           fillColor: context.modeSurfaceAlt,
+  //           border: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //             borderSide: BorderSide.none,
+  //           ),
+  //         ),
+  //         hint: Text('Select $label'),
+  //         items: items
+  //             .map(
+  //               (item) => DropdownMenuItem(
+  //                 value: item,
+  //                 child: Text(item.replaceAll('_', ' ')),
+  //               ),
+  //             )
+  //             .toList(),
+  //         onChanged: onChanged,
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Color _getStatusColor(String status) {
     switch (status.toUpperCase()) {

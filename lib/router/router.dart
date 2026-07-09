@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:sandwich_ai/router/notfound.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/navbars/kitchen_nav.dart';
@@ -45,6 +46,9 @@ class AppRouter {
     initialLocation: '/splash',
     debugLogDiagnostics: true,
     errorBuilder: (context, state) => const NotFoundScreen(),
+    observers: [
+      FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+    ],
 
     routes: [
       GoRoute(

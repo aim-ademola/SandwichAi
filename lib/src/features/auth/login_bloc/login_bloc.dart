@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/globals/analytics/analytics_service.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/login_repo.dart';
 import 'package:sandwich_ai/src/features/auth/login_bloc/login_event.dart';
@@ -81,6 +82,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
               await _authCacheHelper.setRememberMe(true);
               // Credentials are already stored in the screen's _saveCredentials method
             }
+
+            // Log successful login to Firebase Analytics
+            await AnalyticsService.instance.logLogin(
+              email: event.request.email,
+              orgCode: event.request.organizationCode,
+            );
 
             emit(
               LoginSuccess(
@@ -244,6 +251,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   /// Handles logout
   Future<void> _onLogoutUser(LogoutUser event, Emitter<LoginState> emit) async {
     try {
+      // Log logout to Firebase Analytics
+      await AnalyticsService.instance.logLogout();
       await _authCacheHelper.clearAuthData();
       emit(const LoginInitial());
     } catch (e) {

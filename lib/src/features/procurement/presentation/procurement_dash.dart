@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
@@ -26,7 +27,6 @@ class ProcurementDashboardScreen extends StatefulWidget {
 
 class _ProcurementDashboardScreenState
     extends State<ProcurementDashboardScreen> {
-  final int _selectedIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -344,15 +344,19 @@ class _ProcurementDashboardScreenState
             const SizedBox(height: 16),
             if (state is SupplierStatsError)
               _buildErrorState(state.error, width, context)
-            else if (state is SupplierStatsLoaded)
+            else if (state is SupplierStatsLoaded) ...[
+              _buildSupplierChart(state.stats),
+              const SizedBox(height: 16),
               _buildSupplierStatsCards(
                 state.stats,
                 cardHeight,
                 width,
                 supplierNumberSize,
                 supplierLabelSize,
-              )
-            else
+              ),
+            ] else ...[
+              _buildSupplierChart(SupplierStats.empty),
+              const SizedBox(height: 16),
               _buildSupplierStatsCards(
                 SupplierStats.empty,
                 cardHeight,
@@ -360,6 +364,7 @@ class _ProcurementDashboardScreenState
                 supplierNumberSize,
                 supplierLabelSize,
               ),
+            ],
           ],
         );
       },
@@ -429,7 +434,7 @@ class _ProcurementDashboardScreenState
             Expanded(
               child: _buildSupplierStatCard(
                 height: cardHeight,
-                value: stats.onTimeDeliveryPercentage.toStringAsFixed(0) + '%',
+                value: '${stats.onTimeDeliveryPercentage.toStringAsFixed(0)}%',
                 label: 'On-Time Delivery',
                 width: width,
                 numberSize: supplierNumberSize,
@@ -833,5 +838,135 @@ class _ProcurementDashboardScreenState
     if (width < 360) return 14;
     if (width < 600) return 15;
     return 16;
+  }
+
+  Widget _buildSupplierChart(SupplierStats stats) {
+    final total =
+        stats.activeSuppliers +
+        stats.pendingSuppliers +
+        stats.verifiedSuppliers;
+    if (total == 0) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.modeBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Supplier Status Breakdown',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                flex: 4,
+                child: SizedBox(
+                  height: 120,
+                  child: PieChart(
+                    PieChartData(
+                      sectionsSpace: 3,
+                      centerSpaceRadius: 25,
+                      sections: [
+                        PieChartSectionData(
+                          color: context.modePrimary,
+                          value: stats.activeSuppliers.toDouble(),
+                          title:
+                              '${((stats.activeSuppliers / total) * 100).toStringAsFixed(0)}%',
+                          radius: 25,
+                          titleStyle: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: context.modeTextInverse,
+                          ),
+                        ),
+                        PieChartSectionData(
+                          color: context.modeWarning,
+                          value: stats.pendingSuppliers.toDouble(),
+                          title:
+                              '${((stats.pendingSuppliers / total) * 100).toStringAsFixed(0)}%',
+                          radius: 25,
+                          titleStyle: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: context.modeTextInverse,
+                          ),
+                        ),
+                        PieChartSectionData(
+                          color: context.modeSuccess,
+                          value: stats.verifiedSuppliers.toDouble(),
+                          title:
+                              '${((stats.verifiedSuppliers / total) * 100).toStringAsFixed(0)}%',
+                          radius: 25,
+                          titleStyle: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: context.modeTextInverse,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 5,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _chartIndicator(
+                      color: context.modePrimary,
+                      label: 'Active (${stats.activeSuppliers})',
+                    ),
+                    const SizedBox(height: 8),
+                    _chartIndicator(
+                      color: context.modeWarning,
+                      label: 'Pending (${stats.pendingSuppliers})',
+                    ),
+                    const SizedBox(height: 8),
+                    _chartIndicator(
+                      color: context.modeSuccess,
+                      label: 'Verified (${stats.verifiedSuppliers})',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _chartIndicator({required Color color, required String label}) {
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: context.modeTextPrimary,
+          ),
+        ),
+      ],
+    );
   }
 }

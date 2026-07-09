@@ -45,16 +45,10 @@ class _ValidateStockTransferToProcessingcreenState
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
 
-  String? _selectedItemId;
-  String? _selectedItemName;
   String branchId = '';
   String employeeId = '';
-  bool _isSearching = false;
-  bool _isOpened = false;
-  bool _isInitialized = false;
 
   final List<RequisitionItem> _requisitionItems = [];
-  List<CatalogItem> _filteredItems = [];
   List<CatalogItem> _allItems = [];
 
   @override
@@ -70,9 +64,7 @@ class _ValidateStockTransferToProcessingcreenState
     await _getBranchAndEmployeeData();
 
     if (mounted) {
-      setState(() {
-        _isInitialized = true;
-      });
+      setState(() {});
 
       if (branchId.isNotEmpty) {
         context.read<ProcessingTransferBloc>().add(
@@ -110,16 +102,7 @@ class _ValidateStockTransferToProcessingcreenState
   void _onSearchChanged() {
     setState(() {
       if (_searchController.text.isEmpty) {
-        _filteredItems = _allItems;
-      } else {
-        _filteredItems = _allItems
-            .where(
-              (item) => item.name.toLowerCase().contains(
-                _searchController.text.toLowerCase(),
-              ),
-            )
-            .toList();
-      }
+      } else {}
     });
   }
 
@@ -204,7 +187,6 @@ class _ValidateStockTransferToProcessingcreenState
         builder: (context, stockState) {
           if (stockState is BranchStockLoaded && _allItems.isEmpty) {
             _allItems = stockState.filteredItems;
-            _filteredItems = stockState.filteredItems;
           }
 
           return DefaultTextStyle.merge(

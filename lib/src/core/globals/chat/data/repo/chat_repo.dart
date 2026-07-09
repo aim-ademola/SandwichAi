@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:sandwich_ai/src/core/globals/chat/data/model/cht_model.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
-import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
 
 abstract class ChatRepositoryInterface {
   /// GET /chat/rooms
@@ -72,8 +72,8 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
           .get(
             'chat/rooms',
             queryParameters: {
-              if (type != null) 'type': type,
-              if (branchId != null) 'branchId': branchId,
+              'type': ?type,
+              'branchId': ?branchId,
               'includeArchived': includeArchived,
               'starredOnly': starredOnly,
             },
@@ -88,8 +88,9 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
       // ✅ Use .when() like KitchenDashboardRepository does
       return response.when(
         success: (data) {
-          if (data == null)
+          if (data == null) {
             return ApiResponse.errorMessage('Failed to fetch chat rooms');
+          }
           final list = (data as List<dynamic>)
               .map((e) => ChatRoomModel.fromJson(e as Map<String, dynamic>))
               .toList();
@@ -128,8 +129,9 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
 
       return response.when(
         success: (data) {
-          if (data == null)
+          if (data == null) {
             return ApiResponse.errorMessage('Failed to fetch chat room');
+          }
           return ApiResponse.success(
             ChatRoomModel.fromJson(data as Map<String, dynamic>),
           );
@@ -165,8 +167,9 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
 
       return response.when(
         success: (data) {
-          if (data == null)
+          if (data == null) {
             return ApiResponse.errorMessage('Failed to fetch unread counts');
+          }
           final list = (data as List<dynamic>)
               .map((e) => UnreadCountModel.fromJson(e as Map<String, dynamic>))
               .toList();
@@ -202,8 +205,8 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
             'chat/messages/search',
             queryParameters: {
               'query': query,
-              if (chatRoomId != null) 'chatRoomId': chatRoomId,
-              if (senderId != null) 'senderId': senderId,
+              'chatRoomId': ?chatRoomId,
+              'senderId': ?senderId,
               'limit': limit,
             },
           )
@@ -253,8 +256,8 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
             queryParameters: {
               'chatRoomId': chatRoomId,
               'limit': limit,
-              if (cursor != null) 'cursor': cursor,
-              if (parentMessageId != null) 'parentMessageId': parentMessageId,
+              'cursor': ?cursor,
+              'parentMessageId': ?parentMessageId,
             },
           )
           .timeout(
@@ -266,8 +269,9 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
 
       return response.when(
         success: (data) {
-          if (data == null)
+          if (data == null) {
             return ApiResponse.errorMessage('Failed to load messages');
+          }
           final list = (data as List<dynamic>)
               .map((e) => ChatMessageModel.fromJson(e as Map<String, dynamic>))
               .toList();
@@ -306,8 +310,9 @@ class ChatRepository extends BaseRepository implements ChatRepositoryInterface {
 
       return response.when(
         success: (data) {
-          if (data == null)
+          if (data == null) {
             return ApiResponse.errorMessage('Failed to send message');
+          }
           return ApiResponse.success(
             ChatMessageModel.fromJson(data as Map<String, dynamic>),
           );

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
-import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/processing_transfer_model.dart';
 
 abstract class ProcessingTransferRepositoryInterface {
@@ -163,11 +163,6 @@ class ProcessingTransferRepository extends BaseRepository
           return ApiResponse.errorMessage(_parseErrorMessage(error.toString()));
         },
       );
-
-      return handleObjectResponse(
-        Future.value(response),
-        (json) => ProcessingTransferResponse.fromJson(json),
-      );
     } on SocketException catch (e) {
       AppLogger.log('SocketException: $e');
       return ApiResponse.errorMessage(
@@ -274,11 +269,6 @@ class ProcessingTransferRepository extends BaseRepository
       );
 
       // If response is raw data (Map), wrap it
-      AppLogger.log('=== RESPONSE IS RAW DATA ===');
-      return handleObjectResponse(
-        Future.value(response),
-        (json) => ProcessingTransferResponse.fromJson(json),
-      );
     } on SocketException catch (e) {
       AppLogger.log('SocketException: $e');
       return ApiResponse.errorMessage(
@@ -356,10 +346,6 @@ class ProcessingTransferRepository extends BaseRepository
       );
 
       // If response is raw data, wrap it
-      return handleListResponse(
-        Future.value(response),
-        (json) => ProcessingTransferResponse.fromJson(json),
-      );
     } on SocketException catch (e) {
       AppLogger.log('SocketException: $e');
       return ApiResponse.errorMessage(

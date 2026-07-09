@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:sandwich_ai/src/features/auth/data/models/chnage-pwd-res.dart';
+import 'package:sandwich_ai/src/features/auth/data/models/chnage_pwd_res.dart';
 
 abstract class ChangePasswordEvent extends Equatable {
   const ChangePasswordEvent();

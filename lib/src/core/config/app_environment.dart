@@ -15,17 +15,20 @@ class AppEnvironment {
     required this.appName,
     required this.apiBaseUrl,
     required this.aiBaseUrl,
+    required this.docsUrl,
     required this.devOrganizationCode,
     required this.devUsers,
     required this.disabledFeatures,
   });
+  static const _stagingApiBaseUrl = 'https://api-staging.sandwichai.co/';
 
   factory AppEnvironment.dev() {
     return const AppEnvironment(
       flavor: AppFlavor.dev,
       appName: 'SandwichAi Dev',
-      apiBaseUrl: _productionApiBaseUrl,
+      apiBaseUrl: _stagingApiBaseUrl,
       aiBaseUrl: _productionAiBaseUrl,
+      docsUrl: 'https://api-staging.sandwichai.co/api/docs',
       devOrganizationCode: 'ORG-005',
       devUsers: [
         AppEnvironmentUser(
@@ -47,8 +50,9 @@ class AppEnvironment {
     return const AppEnvironment(
       flavor: AppFlavor.staging,
       appName: 'SandwichAi Staging',
-      apiBaseUrl: _productionApiBaseUrl,
+      apiBaseUrl: _stagingApiBaseUrl,
       aiBaseUrl: _productionAiBaseUrl,
+      docsUrl: 'https://api-staging.sandwichai.co/api/docs',
       devOrganizationCode: 'ORG-005',
       devUsers: [
         AppEnvironmentUser(
@@ -78,6 +82,7 @@ class AppEnvironment {
       appName: 'SandwichAi',
       apiBaseUrl: _productionApiBaseUrl,
       aiBaseUrl: _productionAiBaseUrl,
+      docsUrl: 'https://sandwichai-api-3wcql.ondigitalocean.app/api/docs',
       devOrganizationCode: '',
       devUsers: [],
       disabledFeatures: {AppFeature.devLogin},
@@ -95,6 +100,7 @@ class AppEnvironment {
   final String appName;
   final String apiBaseUrl;
   final String aiBaseUrl;
+  final String docsUrl;
   final String devOrganizationCode;
   final List<AppEnvironmentUser> devUsers;
   final Set<AppFeature> disabledFeatures;
@@ -123,6 +129,18 @@ class AppEnvironment {
 
   static void configure(AppEnvironment environment) {
     current = environment;
+  }
+
+  static AppEnvironment fromFlavor(String? flavorName) {
+    switch (flavorName) {
+      case 'staging':
+        return AppEnvironment.staging();
+      case 'prod':
+        return AppEnvironment.prod();
+      case 'dev':
+      default:
+        return AppEnvironment.dev();
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -530,7 +531,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   Future<void> _handleProcessOrder() async {
     if (_selectedMethod == null) return;
-    if (!AppEnvironment.current.isFeatureEnabled(AppFeature.payment)) {
+    if (!FeatureRegistry.isEnabled(AppFeature.payment)) {
       _showSnack(
         AppEnvironment.current.disabledFeatureMessage(AppFeature.payment),
         Colors.red,
@@ -612,7 +613,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   Future<void> _processPayment() async {
     _dismissLoading();
-    if (!AppEnvironment.current.isFeatureEnabled(AppFeature.payment)) {
+    if (!FeatureRegistry.isEnabled(AppFeature.payment)) {
       _showSnack(
         AppEnvironment.current.disabledFeatureMessage(AppFeature.payment),
         Colors.red,

@@ -57,7 +57,7 @@ class BranchStockSummaryBloc
         },
         error: (error) async {
           // Extract error message from NetworkException
-          final errorMessage = error.message ?? 'An unexpected error occurred';
+          final errorMessage = error.message;
           final errorType = _determineErrorType(errorMessage);
 
           emit(
@@ -112,7 +112,7 @@ class BranchStockSummaryBloc
       },
       error: (error) async {
         // Extract error message from NetworkException
-        final errorMessage = error.message ?? 'An unexpected error occurred';
+        final errorMessage = error.message;
         final errorType = _determineErrorType(errorMessage);
 
         emit(

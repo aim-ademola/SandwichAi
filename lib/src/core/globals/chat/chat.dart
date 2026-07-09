@@ -159,7 +159,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   //  Send image ─
 
   Future<void> _sendImageMessage(File imageFile) async {
-    // TODO: upload file first, get URL back, then send attachment URL in request
     context.read<ChatBloc>().add(
       SendMessage(
         request: SendMessageRequest(
@@ -1030,7 +1029,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               ),
             ),
             onTap: () {
-              // TODO: scroll to message in list
               _toggleSearch();
             },
           );

@@ -1,3 +1,4 @@
+import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -493,10 +494,10 @@ class PrinterService {
   }
 
   static bool get _isPrinterEnabled =>
-      AppEnvironment.current.isFeatureEnabled(AppFeature.printer);
+      FeatureRegistry.isEnabled(AppFeature.printer);
 
   static bool get _isScannerEnabled =>
-      AppEnvironment.current.isFeatureEnabled(AppFeature.scanner);
+      FeatureRegistry.isEnabled(AppFeature.scanner);
 
   Future<bool> _testNetworkConnection(String ipAddress, int port) async {
     Socket? socket;

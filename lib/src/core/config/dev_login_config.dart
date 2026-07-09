@@ -1,10 +1,11 @@
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
+import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 
 class DevLoginConfig {
   const DevLoginConfig._();
 
   static bool get enabled =>
-      AppEnvironment.current.isFeatureEnabled(AppFeature.devLogin);
+      FeatureRegistry.isEnabled(AppFeature.devLogin);
   static String get organizationCode =>
       AppEnvironment.current.devOrganizationCode;
 

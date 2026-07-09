@@ -138,9 +138,7 @@ class BranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
     await response.when(
       success: (data) async {
         final categories = ['All', ...data.categories];
-        final catalogItems = data.data
-            .map((item) => item.toCatalogItem())
-            .toList();
+        data.data.map((item) => item.toCatalogItem()).toList();
 
         final filteredItems = _filterItems(
           data,

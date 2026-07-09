@@ -1,3 +1,4 @@
+import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
@@ -5,7 +6,7 @@ import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/api_constants.dart';
-import 'package:sandwich_ai/src/core/network/api_engine_public/base-repo.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
 import 'package:sandwich_ai/src/features/processing/data/model/wastage_analysis_model.dart';
 
 abstract class WastageAnalysisRepositoryInterface {
@@ -27,7 +28,7 @@ class WastageAnalysisRepository extends BaseRepository
     int daysBack = 30,
   }) async {
     try {
-      if (!AppEnvironment.current.isFeatureEnabled(
+      if (!FeatureRegistry.isEnabled(
         AppFeature.wastageAnalysis,
       )) {
         return ApiResponse.errorMessage(

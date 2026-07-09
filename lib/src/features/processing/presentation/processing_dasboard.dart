@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -316,87 +317,136 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
     final total = tasks.pending + tasks.inProcess + tasks.completedToday;
 
     return Container(
-      padding: const EdgeInsets.all(0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.modeBorder, width: 1),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 20),
-            child: Text(
-              'Daily Processing Tasks',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: context.modeTextPrimary,
-              ),
+          Text(
+            'Daily Processing Tasks',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: context.modeTextPrimary,
             ),
           ),
-          _buildTaskProgressRow(
-            label: 'Pending',
-            value: tasks.pending,
-            total: total,
-            color: context.modeTextMuted,
-          ),
-          const SizedBox(height: 28),
-          _buildTaskProgressRow(
-            label: 'In Process',
-            value: tasks.inProcess,
-            total: total,
-            color: context.modeWarning,
-          ),
-          const SizedBox(height: 28),
-          _buildTaskProgressRow(
-            label: 'Completed',
-            value: tasks.completedToday,
-            total: total,
-            color: context.modeSuccess,
-          ),
+          const SizedBox(height: 18),
+          if (total == 0)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'No tasks today',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 14,
+                    color: context.modeTextSecondary,
+                  ),
+                ),
+              ),
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: SizedBox(
+                    height: 120,
+                    child: PieChart(
+                      PieChartData(
+                        sectionsSpace: 3,
+                        centerSpaceRadius: 25,
+                        sections: [
+                          PieChartSectionData(
+                            color: context.modeTextMuted,
+                            value: tasks.pending.toDouble(),
+                            title: '${((tasks.pending / total) * 100).toStringAsFixed(0)}%',
+                            radius: 25,
+                            titleStyle: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: context.modeTextInverse,
+                            ),
+                          ),
+                          PieChartSectionData(
+                            color: context.modeWarning,
+                            value: tasks.inProcess.toDouble(),
+                            title: '${((tasks.inProcess / total) * 100).toStringAsFixed(0)}%',
+                            radius: 25,
+                            titleStyle: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: context.modeTextInverse,
+                            ),
+                          ),
+                          PieChartSectionData(
+                            color: context.modeSuccess,
+                            value: tasks.completedToday.toDouble(),
+                            title: '${((tasks.completedToday / total) * 100).toStringAsFixed(0)}%',
+                            radius: 25,
+                            titleStyle: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: context.modeTextInverse,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 5,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _chartIndicator(
+                        color: context.modeTextMuted,
+                        label: 'Pending (${tasks.pending})',
+                      ),
+                      const SizedBox(height: 8),
+                      _chartIndicator(
+                        color: context.modeWarning,
+                        label: 'In Process (${tasks.inProcess})',
+                      ),
+                      const SizedBox(height: 8),
+                      _chartIndicator(
+                        color: context.modeSuccess,
+                        label: 'Completed (${tasks.completedToday})',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildTaskProgressRow({
-    required String label,
-    required int value,
-    required int total,
-    required Color color,
-  }) {
-    final progress = total > 0 ? value / total : 0.0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _chartIndicator({required Color color, required String label}) {
+    return Row(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: context.modeTextPrimary,
-              ),
-            ),
-            Text(
-              value.toString(),
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
-          ],
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
         ),
-        const SizedBox(height: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: progress,
-            backgroundColor: context.modeSurfaceMuted,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            color: context.modePrimary,
-            minHeight: 8,
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: context.modeTextPrimary,
           ),
         ),
       ],

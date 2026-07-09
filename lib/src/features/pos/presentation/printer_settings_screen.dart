@@ -1,3 +1,4 @@
+import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -217,7 +218,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
   }
 
   Widget _buildScanSection() {
-    final scannerEnabled = AppEnvironment.current.isFeatureEnabled(
+    final scannerEnabled = FeatureRegistry.isEnabled(
       AppFeature.scanner,
     );
 

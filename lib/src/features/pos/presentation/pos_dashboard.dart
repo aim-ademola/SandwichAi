@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:math' as math;
 
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
-import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_dashboard_state_bloc/bloc.dart';
@@ -28,11 +27,34 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey _activeOrdersTourKey = GlobalKey();
   bool _activeOrdersTourQueued = false;
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    context.read<DashboardBloc>().add(const LoadDashboardSummary());
+    context.read<DashboardBloc>().add(
+      LoadDashboardSummary(date: _dashboardDateParam),
+    );
+  }
+
+  String get _dashboardDateParam =>
+      DateFormat('yyyy-MM-dd').format(_selectedDate);
+
+  bool get _isSelectedDateToday {
+    final now = DateTime.now();
+    return _selectedDate.year == now.year &&
+        _selectedDate.month == now.month &&
+        _selectedDate.day == now.day;
+  }
+
+  String get _selectedDateLabel {
+    if (_isSelectedDateToday) return 'Today';
+    return DateFormat('MMM d').format(_selectedDate);
+  }
+
+  String get _snapshotTitle {
+    if (_isSelectedDateToday) return "Today's Snapshot";
+    return DateFormat('MMM d Snapshot').format(_selectedDate);
   }
 
   Future<void> _queueActiveOrdersTour() async {
@@ -54,6 +76,39 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
     });
   }
 
+  Future<void> _pickDashboardDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(now.year - 2),
+      lastDate: now,
+      helpText: 'Select dashboard date',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: context.modePrimary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked == null || !mounted) return;
+    setState(() => _selectedDate = picked);
+    context.read<DashboardBloc>().add(
+      LoadDashboardSummary(date: DateFormat('yyyy-MM-dd').format(picked)),
+    );
+  }
+
+  void _refreshDashboard() {
+    context.read<DashboardBloc>().add(
+      RefreshDashboardSummary(date: _dashboardDateParam),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
@@ -62,43 +117,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
         key: _scaffoldKey,
         backgroundColor: context.modeBackground,
         drawer: const PosAppDrawer(),
-        appBar: AppBar(
-          backgroundColor: context.modeSurface,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            icon: Icon(Icons.menu, color: context.modeTextPrimary),
-            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          ),
-          title: Text(
-            'SandwichAI',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          actions: [
-            const NotificationBellAction(margin: EdgeInsets.zero),
-            BlocBuilder<DashboardBloc, DashboardState>(
-              builder: (context, state) {
-                return IconButton(
-                  icon: Icon(
-                    Icons.refresh,
-                    color: state is DashboardRefreshing
-                        ? context.modeTextMuted
-                        : context.modeTextPrimary,
-                  ),
-                  onPressed: state is DashboardRefreshing
-                      ? null
-                      : () => context.read<DashboardBloc>().add(
-                          const RefreshDashboardSummary(),
-                        ),
-                );
-              },
-            ),
-          ],
-        ),
+        appBar: _buildAppBar(),
         body: BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
             if (state is DashboardLoading) {
@@ -121,11 +140,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                 children: [
                   RefreshIndicator(
                     color: context.modePrimary,
-                    onRefresh: () async {
-                      context.read<DashboardBloc>().add(
-                        const RefreshDashboardSummary(),
-                      );
-                    },
+                    onRefresh: () async => _refreshDashboard(),
                     child: _buildDashboardContent(summary),
                   ),
                   if (state is DashboardRefreshing)
@@ -151,6 +166,70 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
     );
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: context.modeBackground,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      toolbarHeight: 86,
+      leadingWidth: 72,
+      leading: Center(
+        child: IconButton(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedMenu01,
+            color: context.modeTextPrimary,
+            size: 28,
+            strokeWidth: 1.8,
+          ),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+          tooltip: 'Menu',
+        ),
+      ),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/img/Logo-DqvzRW6_.png',
+            width: 28,
+            height: 28,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            'SandwichAI',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: context.modeTextPrimary,
+            ),
+          ),
+        ],
+      ),
+      centerTitle: true,
+      actions: [
+        BlocBuilder<DashboardBloc, DashboardState>(
+          builder: (context, state) {
+            return IconButton(
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedRefresh,
+                color: state is DashboardRefreshing
+                    ? context.modeTextMuted
+                    : context.modeTextPrimary,
+                size: 28,
+                strokeWidth: 1.8,
+              ),
+              onPressed: state is DashboardRefreshing
+                  ? null
+                  : _refreshDashboard,
+              tooltip: 'Refresh',
+            );
+          },
+        ),
+        const SizedBox(width: 14),
+      ],
+    );
+  }
+
   Widget _buildDashboardContent(DashboardSummaryModel summary) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -158,27 +237,29 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
 
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(padding, 18, padding, 28),
+          padding: EdgeInsets.fromLTRB(padding, 20, padding, 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildActionGrid(constraints.maxWidth),
-              const SizedBox(height: 24),
-              _buildSectionHeader(
-                title: "Today's Performance",
-                subtitle: 'Key business metrics for today.',
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _snapshotTitle,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: context.modeTextPrimary,
+                      ),
+                    ),
+                  ),
+                  _buildDateChip(),
+                ],
               ),
-              const SizedBox(height: 14),
-              _buildKpiGrid(summary, constraints.maxWidth),
-              const SizedBox(height: 24),
-              _buildSectionHeader(
-                title: 'Operational Intelligence',
-                subtitle: 'Conversion flow and order movement at a glance.',
-              ),
-              const SizedBox(height: 14),
-              _buildSalesFunnelCard(summary),
-              const SizedBox(height: 14),
-              _buildOperationalSummary(summary),
+              const SizedBox(height: 22),
+              _buildSnapshotList(summary),
             ],
           ),
         );
@@ -194,17 +275,21 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
       crossAxisCount: 2,
       crossAxisSpacing: spacing,
       mainAxisSpacing: spacing,
-      childAspectRatio: width < 360 ? 1.08 : 1.18,
+      childAspectRatio: width < 360 ? 0.88 : 0.94,
       children: [
         _buildActionCard(
-          icon: Icons.shopping_cart_outlined,
+          icon: HugeIcons.strokeRoundedShoppingCart02,
           label: 'New Order',
+          subtitle: 'Create a new order',
           onTap: () => context.goNamed('Pos-nav', extra: 1),
+          colors: const [Color(0xFFFF4B0B), Color(0xFFFF6B18)],
         ),
         _buildActionCard(
-          icon: Icons.receipt_long_outlined,
+          icon: HugeIcons.strokeRoundedInvoice03,
           label: 'Active Orders',
+          subtitle: 'View ongoing orders',
           onTap: () => context.goNamed('Pos-nav', extra: 2),
+          colors: const [Color(0xFFFF9C2B), Color(0xFFFF8D24)],
           showcaseKey: _activeOrdersTourKey,
           showcaseDescription:
               'Use Active Orders to continue orders already sent to kitchen, take payment, and check completion status.',
@@ -214,46 +299,131 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
   }
 
   Widget _buildActionCard({
-    required IconData icon,
+    required List<List<dynamic>> icon,
     required String label,
+    required String subtitle,
     required VoidCallback onTap,
+    required List<Color> colors,
     GlobalKey? showcaseKey,
     String? showcaseDescription,
   }) {
     final card = Material(
-      color: context.modePrimary,
-      borderRadius: BorderRadius.circular(14),
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: colors,
+            ),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: colors.last.withValues(alpha: 0.24),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Stack(
             children: [
-              Icon(icon, size: 38, color: context.modeTextInverse),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Flexible(
-                    child: Text(
+              Positioned(
+                right: -12,
+                bottom: -16,
+                child: Container(
+                  width: 110,
+                  height: 110,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: HugeIcon(
+                          icon: icon,
+                          color: colors.first,
+                          size: 38,
+                          strokeWidth: 1.9,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    Text(
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: context.modeTextInverse,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
                       ),
                     ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 22,
-                    color: context.modeTextInverse,
-                  ),
-                ],
+                    const SizedBox(height: 5),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 12,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedArrowRight02,
+                          color: colors.first,
+                          size: 27,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -266,7 +436,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
     return Showcase(
       key: showcaseKey,
       description: showcaseDescription,
-      targetBorderRadius: BorderRadius.circular(14),
+      targetBorderRadius: BorderRadius.circular(18),
       tooltipBackgroundColor: context.modePrimary,
       textColor: context.modeTextInverse,
       targetPadding: const EdgeInsets.all(8),
@@ -274,365 +444,177 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
     );
   }
 
-  Widget _buildSectionHeader({
-    required String title,
-    required String subtitle,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: context.modeTextPrimary,
+  Widget _buildDateChip() {
+    return Material(
+      color: context.modeSurface,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: _pickDashboardDate,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          height: 38,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: context.modeBorder.withValues(alpha: 0.5),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedCalendar03,
+                color: context.modeTextPrimary,
+                size: 18,
+                strokeWidth: 1.8,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _selectedDateLabel,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: context.modeTextPrimary,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 18,
+                color: context.modeTextMuted,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          subtitle,
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 12,
-            color: context.modeTextSecondary,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildKpiGrid(DashboardSummaryModel summary, double width) {
-    final cards = [
-      _KpiData(
-        label: 'Revenue',
-        value: summary.formattedSales,
-        icon: Icons.payments_outlined,
-        color: context.modeSuccess,
-      ),
-      _KpiData(
-        label: 'Orders',
+  Widget _buildSnapshotList(DashboardSummaryModel summary) {
+    final rows = [
+      _SnapshotData(
+        title: 'Orders',
+        subtitle: _isSelectedDateToday
+            ? 'Total orders today'
+            : 'Total orders on ${DateFormat('MMM d').format(_selectedDate)}',
         value: '${summary.totalOrders}',
-        icon: Icons.receipt_long_outlined,
-        color: context.modeInfo,
+        icon: HugeIcons.strokeRoundedShoppingCart02,
+        color: const Color(0xFF1F75FF),
       ),
-      _KpiData(
-        label: 'Avg Order',
-        value: summary.formattedAvgOrder,
-        icon: Icons.trending_up_rounded,
-        color: context.modePrimary,
+      _SnapshotData(
+        title: 'Sales',
+        subtitle: _isSelectedDateToday
+            ? 'Total sales today'
+            : 'Total sales on ${DateFormat('MMM d').format(_selectedDate)}',
+        value: summary.formattedSales,
+        icon: HugeIcons.strokeRoundedChartIncrease,
+        color: const Color(0xFF0F9B69),
       ),
-      _KpiData(
-        label: 'Pending Pay',
+      _SnapshotData(
+        title: 'Pending Orders',
+        subtitle: 'Awaiting processing',
         value: '${summary.pendingOrders}',
-        icon: Icons.hourglass_bottom_rounded,
-        color: context.modeWarning,
+        icon: HugeIcons.strokeRoundedHourglass,
+        color: const Color(0xFFE5A600),
+      ),
+      _SnapshotData(
+        title: 'Completed Orders',
+        subtitle: 'Successfully delivered',
+        value: '${summary.completedOrders}',
+        icon: HugeIcons.strokeRoundedCheckmarkSquare02,
+        color: const Color(0xFF0C8D7B),
       ),
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: cards.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: _getSpacing(width),
-        mainAxisSpacing: _getSpacing(width),
-        childAspectRatio: width < 360 ? 1.18 : 1.34,
-      ),
-      itemBuilder: (context, index) => _buildKpiCard(cards[index]),
+    return Column(
+      children: rows
+          .map(
+            (row) => Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: _buildSnapshotRow(row),
+            ),
+          )
+          .toList(),
     );
   }
 
-  Widget _buildKpiCard(_KpiData data) {
+  Widget _buildSnapshotRow(_SnapshotData data) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      constraints: const BoxConstraints(minHeight: 110),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
       decoration: BoxDecoration(
         color: context.modeSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modeBorder.withValues(alpha: 0.55)),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: 68,
+            height: 68,
             decoration: BoxDecoration(
-              color: data.color.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(10),
+              color: data.color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(data.icon, color: data.color, size: 21),
+            child: Center(
+              child: HugeIcon(
+                icon: data.icon,
+                color: data.color,
+                size: 35,
+                strokeWidth: 1.8,
+              ),
+            ),
           ),
-          const Spacer(),
+          const SizedBox(width: 22),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  data.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  data.subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: context.modeTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
           Text(
             data.value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            data.label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextSecondary,
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: data.color,
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSalesFunnelCard(DashboardSummaryModel summary) {
-    final stages = summary.funnelOrFallback;
-    final maxValue = stages.fold<double>(
-      0,
-      (previous, stage) => math.max(previous, stage.value),
-    );
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modeBorder.withValues(alpha: 0.55)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: context.modePrimary.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.filter_alt_outlined,
-                  color: context.modePrimary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Sales Funnel',
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: context.modeTextPrimary,
-                      ),
-                    ),
-                    Text(
-                      'Stage-by-stage order conversion',
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 12,
-                        color: context.modeTextSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          if (stages.isEmpty || maxValue <= 0)
-            _buildNoFunnelData()
-          else ...[
-            SizedBox(
-              height: 190,
-              child: BarChart(
-                BarChartData(
-                  minY: 0,
-                  maxY: maxValue * 1.2,
-                  alignment: BarChartAlignment.spaceAround,
-                  gridData: const FlGridData(show: false),
-                  borderData: FlBorderData(show: false),
-                  titlesData: const FlTitlesData(show: false),
-                  barTouchData: BarTouchData(enabled: false),
-                  barGroups: [
-                    for (var i = 0; i < stages.length; i++)
-                      BarChartGroupData(
-                        x: i,
-                        barRods: [
-                          BarChartRodData(
-                            toY: stages[i].value,
-                            width: 24,
-                            borderRadius: BorderRadius.circular(6),
-                            color: _funnelColor(i),
-                            backDrawRodData: BackgroundBarChartRodData(
-                              show: true,
-                              toY: maxValue * 1.2,
-                              color: context.modeSurfaceMuted.withValues(
-                                alpha: 0.55,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            ...stages.asMap().entries.map(
-              (entry) => _buildFunnelStageRow(
-                stage: entry.value,
-                color: _funnelColor(entry.key),
-                maxValue: maxValue,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoFunnelData() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
-      decoration: BoxDecoration(
-        color: context.modeSurfaceAlt,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        'No funnel data available yet',
-        textAlign: TextAlign.center,
-        style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 13,
-          color: context.modeTextSecondary,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFunnelStageRow({
-    required SalesFunnelStageModel stage,
-    required Color color,
-    required double maxValue,
-  }) {
-    final percentage = maxValue <= 0 ? 0 : ((stage.value / maxValue) * 100);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              stage.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: context.modeTextPrimary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            '${stage.value.toStringAsFixed(stage.value % 1 == 0 ? 0 : 1)} (${percentage.toStringAsFixed(0)}%)',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: context.modeTextSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOperationalSummary(DashboardSummaryModel summary) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modeBorder.withValues(alpha: 0.55)),
-      ),
-      child: Column(
-        children: [
-          _buildOperationalRow(
-            icon: Icons.timelapse_rounded,
-            label: 'Active orders',
-            value: '${summary.activeOrders}',
-            color: context.modePrimaryBlue,
-          ),
-          Divider(height: 22, color: context.modeDivider),
-          _buildOperationalRow(
-            icon: Icons.check_circle_outline_rounded,
-            label: 'Completed orders',
-            value: '${summary.completedOrders}',
-            color: context.modeSuccess,
-          ),
-          Divider(height: 22, color: context.modeDivider),
-          _buildOperationalRow(
-            icon: Icons.support_agent_rounded,
-            label: 'Complaints today',
-            value: '${summary.complaintsToday}',
-            color: context.modeError,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOperationalRow({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Row(
-      children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(9),
-          ),
-          child: Icon(icon, color: color, size: 19),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextPrimary,
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            color: context.modeTextPrimary,
-          ),
-        ),
-      ],
     );
   }
 
@@ -643,7 +625,11 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: context.modeError),
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedAlert02,
+              size: 64,
+              color: context.modeError,
+            ),
             const SizedBox(height: 16),
             Text(
               'Oops! Something went wrong',
@@ -666,7 +652,9 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<DashboardBloc>().add(const LoadDashboardSummary());
+                context.read<DashboardBloc>().add(
+                  LoadDashboardSummary(date: _dashboardDateParam),
+                );
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
@@ -685,18 +673,6 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
     );
   }
 
-  Color _funnelColor(int index) {
-    final colors = [
-      context.modePrimary,
-      context.modePrimaryBlue,
-      context.modeWarning,
-      context.modeSuccess,
-      context.modePrimaryAlt,
-      context.modeInfo,
-    ];
-    return colors[index % colors.length];
-  }
-
   double _getHorizontalPadding(double width) {
     if (width < 360) return 16;
     if (width < 600) return 20;
@@ -705,23 +681,25 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
   }
 
   double _getSpacing(double width) {
-    if (width < 360) return 12;
-    if (width < 600) return 14;
-    if (width < 900) return 16;
-    return 18;
+    if (width < 360) return 14;
+    if (width < 600) return 18;
+    if (width < 900) return 20;
+    return 22;
   }
 }
 
-class _KpiData {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  const _KpiData({
-    required this.label,
+class _SnapshotData {
+  const _SnapshotData({
+    required this.title,
+    required this.subtitle,
     required this.value,
     required this.icon,
     required this.color,
   });
+
+  final String title;
+  final String subtitle;
+  final String value;
+  final List<List<dynamic>> icon;
+  final Color color;
 }

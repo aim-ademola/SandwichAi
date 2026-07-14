@@ -21,25 +21,32 @@ class AppEnvironment {
     required this.disabledFeatures,
   });
   static const _stagingApiBaseUrl = 'https://api-staging.sandwichai.co/';
+  static const _stagingAiBaseUrl = 'https://ai-staging.sandwichai.co/api/ai/';
+  static const _stagingAiDocsUrl = 'https://ai-staging.sandwichai.co/docs';
 
   factory AppEnvironment.dev() {
     return const AppEnvironment(
       flavor: AppFlavor.dev,
       appName: 'SandwichAi Dev',
       apiBaseUrl: _stagingApiBaseUrl,
-      aiBaseUrl: _productionAiBaseUrl,
-      docsUrl: 'https://api-staging.sandwichai.co/api/docs',
-      devOrganizationCode: 'ORG-005',
+      aiBaseUrl: _stagingAiBaseUrl,
+      docsUrl: _stagingAiDocsUrl,
+      devOrganizationCode: 'ORG-001',
       devUsers: [
         AppEnvironmentUser(
           department: 'Customer Service',
-          email: 'thedanielsdev+250@gmail.com',
+          email: 'thedanielsdev+6060@gmail.com',
           password: '12345678',
         ),
         AppEnvironmentUser(
           department: 'Kitchen Manager',
-          email: 'thedanielsdev+444@gmail.com',
-          password: '12345678',
+          email: 'hybiekay2@gmail.com',
+          password: 'password@1',
+        ),
+        AppEnvironmentUser(
+          department: 'Processing Manager',
+          email: 'Onlyonedemmy0@gmail.com',
+          password: 'password@1',
         ),
       ],
       disabledFeatures: {},
@@ -51,8 +58,8 @@ class AppEnvironment {
       flavor: AppFlavor.staging,
       appName: 'SandwichAi Staging',
       apiBaseUrl: _stagingApiBaseUrl,
-      aiBaseUrl: _productionAiBaseUrl,
-      docsUrl: 'https://api-staging.sandwichai.co/api/docs',
+      aiBaseUrl: _stagingAiBaseUrl,
+      docsUrl: _stagingAiDocsUrl,
       devOrganizationCode: 'ORG-005',
       devUsers: [],
       disabledFeatures: {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/theme/app_text_styles.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 
 class AppTheme {
@@ -35,7 +36,7 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: brightness,
-      fontFamily: 'Work_Sans',
+      fontFamily: AppTextStyles.fontFamily,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colors.background,
       extensions: const <ThemeExtension<dynamic>>[SandwichThemeColors.light],
@@ -60,12 +61,12 @@ class AppTheme {
           color: colors.textPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          fontFamily: 'Work_Sans',
+          fontFamily: AppTextStyles.fontFamily,
         ),
         contentTextStyle: TextStyle(
           color: colors.textSecondary,
           fontSize: 14,
-          fontFamily: 'Work_Sans',
+          fontFamily: AppTextStyles.fontFamily,
         ),
       ),
       dividerTheme: DividerThemeData(color: colors.divider),
@@ -81,7 +82,7 @@ class AppTheme {
       textTheme: base.textTheme.apply(
         bodyColor: colors.textPrimary,
         displayColor: colors.textPrimary,
-        fontFamily: 'Work_Sans',
+        fontFamily: AppTextStyles.fontFamily,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

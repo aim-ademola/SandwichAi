@@ -22,11 +22,9 @@ class RecipeComplianceRepository extends BaseRepository
   @override
   Future<ApiResponse<MenuItemsResponse>> getMenuItems(String branchId) async {
     try {
-      _validateBranchId(branchId);
-
       // Make the API call and wrap it in ApiResponse
       final apiCall = _apiClient
-          .get('kitchen/menu-items', queryParameters: {'branchId': branchId})
+          .get('kitchen/menu-items')
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -108,13 +106,6 @@ class RecipeComplianceRepository extends BaseRepository
     }
   }
 
-  /// Validates branch ID
-  void _validateBranchId(String branchId) {
-    if (branchId.isEmpty) {
-      throw FormatException('Branch ID cannot be empty');
-    }
-  }
-
   /// Validates recipe compliance request fields
   void _validateRecipeComplianceRequest(RecipeComplianceRequest request) {
     if (request.menuItemId.isEmpty) {
@@ -139,21 +130,6 @@ class RecipeComplianceRepository extends BaseRepository
 
     if (request.actualInput < 0) {
       throw FormatException('Actual input cannot be negative');
-    }
-  }
-
-  /// Parse menu items response with error handling
-  MenuItemsResponse _parseMenuItemsResponse(Map<String, dynamic> json) {
-    try {
-      final response = MenuItemsResponse.fromJson(json);
-
-      if (!response.isValid) {
-        throw FormatException('No menu items found for this branch');
-      }
-
-      return response;
-    } catch (e) {
-      throw FormatException('Unable to process menu items: ${e.toString()}');
     }
   }
 

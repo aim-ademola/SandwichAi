@@ -153,9 +153,7 @@ class StockRequestRepository extends BaseRepository
       }
 
       final responseData = response.data is Map<String, dynamic>
-          ? (response.data.containsKey('data')
-                ? response.data['data'] as Map<String, dynamic>
-                : response.data as Map<String, dynamic>)
+          ? _extractStockRequestObject(response.data as Map<String, dynamic>)
           : throw const FormatException('Invalid response format');
 
       return ApiResponse.success(StockRequest.fromJson(responseData));
@@ -227,10 +225,19 @@ class StockRequestRepository extends BaseRepository
 
   StockRequest _parseStockRequestDetails(Map<String, dynamic> json) {
     try {
-      return StockRequest.fromJson(json['data'] ?? json);
+      return StockRequest.fromJson(_extractStockRequestObject(json));
     } catch (e) {
       throw FormatException('Unable to process response: ${e.toString()}');
     }
+  }
+
+  Map<String, dynamic> _extractStockRequestObject(Map<String, dynamic> json) {
+    final data = json['data'];
+    if (data is Map<String, dynamic>) return data;
+    if (data is List && data.isNotEmpty && data.first is Map<String, dynamic>) {
+      return data.first as Map<String, dynamic>;
+    }
+    return json;
   }
 
   String _parseErrorMessage(String error) {

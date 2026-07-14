@@ -8,10 +8,7 @@ import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 
 abstract class MenuItemsRepositoryInterface {
-  Future<ApiResponse<List<ApiMenuItem>>> getMenuItems({
-    required String branchId,
-    String? search,
-  });
+  Future<ApiResponse<List<ApiMenuItem>>> getMenuItems({String? search});
 }
 
 class MenuItemsRepository extends BaseRepository
@@ -19,14 +16,9 @@ class MenuItemsRepository extends BaseRepository
   final ApiClient _apiClient = ApiClient.instance;
 
   @override
-  Future<ApiResponse<List<ApiMenuItem>>> getMenuItems({
-    required String branchId,
-    String? search,
-  }) async {
+  Future<ApiResponse<List<ApiMenuItem>>> getMenuItems({String? search}) async {
     try {
-      _validateBranchId(branchId);
-
-      final queryParams = <String, dynamic>{'branchId': branchId};
+      final queryParams = <String, dynamic>{};
       final trimmedSearch = search?.trim() ?? '';
       if (trimmedSearch.isNotEmpty) {
         queryParams['search'] = trimmedSearch;
@@ -61,12 +53,6 @@ class MenuItemsRepository extends BaseRepository
     }
   }
 
-  void _validateBranchId(String branchId) {
-    if (branchId.isEmpty) {
-      throw FormatException('Branch ID cannot be empty');
-    }
-  }
-
   String _parseErrorMessage(String error) {
     final lowercaseError = error.toLowerCase();
 
@@ -82,7 +68,7 @@ class MenuItemsRepository extends BaseRepository
 
     if (lowercaseError.contains('404') ||
         lowercaseError.contains('not found')) {
-      return 'No menu items found for this branch.';
+      return 'No menu items found for this organization.';
     }
 
     if (lowercaseError.contains('500') ||

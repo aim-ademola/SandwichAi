@@ -65,12 +65,20 @@ class RecipeForecastRepository extends BaseRepository
             },
           );
 
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to calculate recipe');
-      }
+      return response.when(
+        success: (body) {
+          final forecastJson = _extractForecastJson(body);
+          if (forecastJson == null) {
+            return ApiResponse.errorMessage(
+              'Invalid recipe response from AI service',
+            );
+          }
 
-      final forecast = RecipeForecastResponse.fromJson(response.data);
-      return ApiResponse.success(forecast);
+          final forecast = RecipeForecastResponse.fromJson(forecastJson);
+          return ApiResponse.success(forecast);
+        },
+        error: (error) => ApiResponse.error(error),
+      );
     } on SocketException {
       return ApiResponse.errorMessage(
         'No internet connection. Please check your network settings.',
@@ -84,6 +92,19 @@ class RecipeForecastRepository extends BaseRepository
     } catch (e) {
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
+  }
+
+  Map<String, dynamic>? _extractForecastJson(dynamic body) {
+    if (body is Map<String, dynamic>) {
+      final nested =
+          body['data'] ?? body['forecast'] ?? body['result'] ?? body['recipe'];
+      if (nested is Map<String, dynamic>) return nested;
+      if (nested is Map) return Map<String, dynamic>.from(nested);
+      return body;
+    }
+
+    if (body is Map) return Map<String, dynamic>.from(body);
+    return null;
   }
 
   void _validateInput(

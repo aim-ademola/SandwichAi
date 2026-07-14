@@ -4,7 +4,7 @@ import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen_shift_bloc/event.dart';
 import 'package:sandwich_ai/src/features/kitchen/blocs/kitchen_shift_bloc/state.dart';
 import 'package:sandwich_ai/src/features/kitchen/data/model/kitchen_shift_model.dart'
-    show Employee, KitchenShift;
+    show CreateKitchenShiftRequest, Employee, KitchenShift;
 import 'package:sandwich_ai/src/features/kitchen/data/repo/kitchn_shift_repo.dart';
 
 class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
@@ -37,10 +37,21 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
   ) async {
     try {
       emit(const KitchenShiftLoading());
+      final resolvedBranchId = await _resolveBranchId();
+
+      if (resolvedBranchId.isEmpty) {
+        emit(
+          const KitchenShiftError(
+            error: 'Branch ID not found. Please login again.',
+            errorType: KitchenShiftErrorType.validation,
+          ),
+        );
+        return;
+      }
 
       // Load employees first
       final employeesResponse = await _repository.getKitchenEmployees(
-        branchId: branchId,
+        branchId: resolvedBranchId,
       );
 
       List<Employee> employees = [];
@@ -55,7 +66,7 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
 
       // Load shifts
       final shiftsResponse = await _repository.getKitchenShifts(
-        branchId: branchId,
+        branchId: resolvedBranchId,
         startDate: event.startDate,
         endDate: event.endDate,
         employeeId: event.employeeId,
@@ -105,7 +116,15 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
     LoadKitchenEmployees event,
     Emitter<KitchenShiftState> emit,
   ) async {
-    final response = await _repository.getKitchenEmployees(branchId: branchId);
+    final resolvedBranchId = await _resolveBranchId();
+
+    if (resolvedBranchId.isEmpty) {
+      return;
+    }
+
+    final response = await _repository.getKitchenEmployees(
+      branchId: resolvedBranchId,
+    );
 
     await response.when(
       success: (employees) async {
@@ -140,10 +159,31 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
     Emitter<KitchenShiftState> emit,
   ) async {
     emit(const KitchenShiftOperationInProgress());
+    final resolvedBranchId = await _resolveBranchId();
 
-    final response = await _repository.createKitchenShift(
-      request: event.request,
-    );
+    if (resolvedBranchId.isEmpty) {
+      emit(
+        const KitchenShiftError(
+          error: 'Branch ID not found. Please login again.',
+          errorType: KitchenShiftErrorType.validation,
+        ),
+      );
+      return;
+    }
+
+    final request = event.request.branchId.isEmpty
+        ? CreateKitchenShiftRequest(
+            employeeId: event.request.employeeId,
+            branchId: resolvedBranchId,
+            date: event.request.date,
+            shiftType: event.request.shiftType,
+            startTime: event.request.startTime,
+            endTime: event.request.endTime,
+            notes: event.request.notes,
+          )
+        : event.request;
+
+    final response = await _repository.createKitchenShift(request: request);
 
     await response.when(
       success: (shift) async {
@@ -275,9 +315,20 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
 
     final currentState = state as KitchenShiftLoaded;
     emit(KitchenShiftRefreshing(currentData: currentState.allShifts));
+    final resolvedBranchId = await _resolveBranchId();
+
+    if (resolvedBranchId.isEmpty) {
+      emit(
+        const KitchenShiftError(
+          error: 'Branch ID not found. Please login again.',
+          errorType: KitchenShiftErrorType.validation,
+        ),
+      );
+      return;
+    }
 
     final response = await _repository.getKitchenShifts(
-      branchId: branchId,
+      branchId: resolvedBranchId,
       startDate: currentState.startDate,
       endDate: currentState.endDate,
       employeeId: currentState.selectedEmployeeId,
@@ -351,7 +402,8 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
 
     if (startDate != null) {
       filtered = filtered.where((s) {
-        final shiftDate = DateTime.parse(s.date);
+        final shiftDate = _parseShiftDate(s.date);
+        if (shiftDate == null) return false;
         return shiftDate.isAfter(startDate) ||
             shiftDate.isAtSameMomentAs(startDate);
       }).toList();
@@ -359,13 +411,28 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
 
     if (endDate != null) {
       filtered = filtered.where((s) {
-        final shiftDate = DateTime.parse(s.date);
+        final shiftDate = _parseShiftDate(s.date);
+        if (shiftDate == null) return false;
         return shiftDate.isBefore(endDate) ||
             shiftDate.isAtSameMomentAs(endDate);
       }).toList();
     }
 
     return filtered;
+  }
+
+  Future<String> _resolveBranchId() async {
+    if (branchId.isNotEmpty) return branchId;
+
+    branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    return branchId;
+  }
+
+  DateTime? _parseShiftDate(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) return null;
+
+    return DateTime.tryParse(normalized);
   }
 
   Map<String, List<KitchenShift>> _groupShiftsByEmployee(

@@ -36,7 +36,18 @@ class BranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
     try {
       emit(const BranchStockLoading());
 
-      final response = await _repository.getBranchStock(branchId);
+      final resolvedBranchId = await _resolveBranchId(event.branchId);
+      if (resolvedBranchId.isEmpty) {
+        emit(
+          const BranchStockError(
+            error: 'Branch ID not found. Please login again.',
+            errorType: BranchStockErrorType.general,
+          ),
+        );
+        return;
+      }
+
+      final response = await _repository.getBranchStock(resolvedBranchId);
 
       await response.when(
         success: (data) async {
@@ -126,14 +137,25 @@ class BranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
     Emitter<BranchStockState> emit,
   ) async {
     if (state is! BranchStockLoaded) {
-      add(LoadBranchStock(branchId: branchId));
+      add(LoadBranchStock(branchId: event.branchId ?? branchId));
       return;
     }
 
     final currentState = state as BranchStockLoaded;
     emit(BranchStockRefreshing(currentData: currentState.response));
 
-    final response = await _repository.getBranchStock(branchId);
+    final resolvedBranchId = await _resolveBranchId(event.branchId);
+    if (resolvedBranchId.isEmpty) {
+      emit(
+        const BranchStockError(
+          error: 'Branch ID not found. Please login again.',
+          errorType: BranchStockErrorType.general,
+        ),
+      );
+      return;
+    }
+
+    final response = await _repository.getBranchStock(resolvedBranchId);
 
     await response.when(
       success: (data) async {
@@ -177,6 +199,19 @@ class BranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
     );
 
     emit(currentState.copyWith(searchQuery: '', filteredItems: filteredItems));
+  }
+
+  Future<String> _resolveBranchId(String? requestedBranchId) async {
+    final requested = requestedBranchId?.trim() ?? '';
+    if (requested.isNotEmpty) {
+      branchId = requested;
+      return requested;
+    }
+
+    if (branchId.isNotEmpty) return branchId;
+
+    branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    return branchId;
   }
 
   /// Filter items based on category and search query

@@ -68,36 +68,15 @@ class CreateMenuItem extends MenuItemsEvent {
 
 class UpdateMenuItem extends MenuItemsEvent {
   final String menuItemId;
-  final String dishName;
-  final String description;
-  final String category;
-  final int price;
-  final int preparationTime;
   final bool isAvailable;
-  final String? imageUrl;
 
   const UpdateMenuItem({
     required this.menuItemId,
-    required this.dishName,
-    required this.description,
-    required this.category,
-    required this.price,
-    required this.preparationTime,
     required this.isAvailable,
-    this.imageUrl,
   });
 
   @override
-  List<Object?> get props => [
-    menuItemId,
-    dishName,
-    description,
-    category,
-    price,
-    preparationTime,
-    isAvailable,
-    imageUrl,
-  ];
+  List<Object?> get props => [menuItemId, isAvailable];
 }
 
 class DeleteMenuItem extends MenuItemsEvent {

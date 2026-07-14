@@ -25,12 +25,19 @@ class InventoryBody extends StatefulWidget {
 
 class _InventoryBodyState extends State<InventoryBody> {
   final _stockNotificationHelper = StockNotificationHelper();
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     // Load branch stock on init
     context.read<BranchStockBloc>().add(LoadBranchStock());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   /// Check stock levels and trigger notifications
@@ -185,6 +192,10 @@ class _InventoryBodyState extends State<InventoryBody> {
                     ),
                     child: Column(
                       children: [
+                        _buildSearchField(context, constraints.maxWidth, state),
+                        SizedBox(
+                          height: _getSearchToTabSpacing(constraints.maxWidth),
+                        ),
                         _buildCategoryTabs(
                           context,
                           constraints.maxWidth,
@@ -236,8 +247,11 @@ class _InventoryBodyState extends State<InventoryBody> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No items found',
+              state.searchQuery.trim().isEmpty
+                  ? 'No items found'
+                  : 'No items match "${state.searchQuery}"',
               style: TextStyle(fontSize: 16, color: context.modeTextSecondary),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -431,6 +445,77 @@ class _InventoryBodyState extends State<InventoryBody> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildSearchField(
+    BuildContext context,
+    double screenWidth,
+    BranchStockLoaded state,
+  ) {
+    if (_searchController.text != state.searchQuery) {
+      _searchController.value = TextEditingValue(
+        text: state.searchQuery,
+        selection: TextSelection.collapsed(offset: state.searchQuery.length),
+      );
+    }
+
+    return TextField(
+      controller: _searchController,
+      textInputAction: TextInputAction.search,
+      style: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: _getSearchFontSize(screenWidth),
+        color: context.modeTextPrimary,
+      ),
+      onChanged: (value) {
+        context.read<BranchStockBloc>().add(SearchItems(query: value));
+      },
+      decoration: InputDecoration(
+        hintText: 'Search stock items...',
+        hintStyle: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: _getSearchFontSize(screenWidth),
+          color: context.modeTextMuted,
+        ),
+        prefixIcon: Icon(
+          Icons.search_rounded,
+          color: context.modeTextSecondary,
+          size: _getSearchIconSize(screenWidth),
+        ),
+        suffixIcon: state.searchQuery.isEmpty
+            ? null
+            : IconButton(
+                tooltip: 'Clear search',
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: context.modeTextSecondary,
+                  size: _getSearchIconSize(screenWidth),
+                ),
+                onPressed: () {
+                  _searchController.clear();
+                  context.read<BranchStockBloc>().add(const ClearSearch());
+                },
+              ),
+        filled: true,
+        fillColor: context.modeSurface,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: _getSearchHorizontalPadding(screenWidth),
+          vertical: _getSearchVerticalPadding(screenWidth),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(_getSearchRadius(screenWidth)),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(_getSearchRadius(screenWidth)),
+          borderSide: BorderSide(
+            color: context.modeBorder.withValues(alpha: 0.4),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(_getSearchRadius(screenWidth)),
+          borderSide: BorderSide(color: context.modePrimary, width: 1.5),
+        ),
       ),
     );
   }
@@ -932,6 +1017,42 @@ class _InventoryBodyState extends State<InventoryBody> {
     if (width < 360) return 12;
     if (width < 600) return 14;
     return 16;
+  }
+
+  double _getSearchToTabSpacing(double width) {
+    if (width < 360) return 10;
+    if (width < 600) return 12;
+    return 14;
+  }
+
+  double _getSearchFontSize(double width) {
+    if (width < 360) return 13;
+    if (width < 600) return 14;
+    return 15;
+  }
+
+  double _getSearchIconSize(double width) {
+    if (width < 360) return 19;
+    if (width < 600) return 20;
+    return 22;
+  }
+
+  double _getSearchHorizontalPadding(double width) {
+    if (width < 360) return 12;
+    if (width < 600) return 14;
+    return 16;
+  }
+
+  double _getSearchVerticalPadding(double width) {
+    if (width < 360) return 10;
+    if (width < 600) return 12;
+    return 14;
+  }
+
+  double _getSearchRadius(double width) {
+    if (width < 360) return 10;
+    if (width < 600) return 12;
+    return 14;
   }
 
   double _getTabSpacing(double width) {

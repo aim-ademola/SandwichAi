@@ -15,9 +15,8 @@ import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_sta
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/addtomenu.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/pos_menu_categories.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/cash_approval_waiting.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/delete_menu.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/edit_menu.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/online_qr.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/order_summary.dart';
@@ -461,6 +460,19 @@ class _OrderScreenState extends State<OrderScreen>
     return allItems.where((item) => _orderItems.containsKey(item.id)).toList();
   }
 
+  List<String> _orderedCategoriesFor(List<ApiMenuItem> menuItems) {
+    final availableCategories = menuItems.map((item) => item.category).toSet();
+    final ordered = PosMenuCategories.names
+        .where(availableCategories.contains)
+        .toList();
+    final customCategories =
+        availableCategories
+            .where((category) => !PosMenuCategories.names.contains(category))
+            .toList()
+          ..sort();
+    return [...ordered, ...customCategories];
+  }
+
   double _calculateTotal(List<ApiMenuItem> allItems) {
     double total = 0;
     _orderItems.forEach((itemId, quantity) {
@@ -553,9 +565,7 @@ class _OrderScreenState extends State<OrderScreen>
             },
             listener: (context, state) {
               if (state is MenuItemsLoaded) {
-                final categories =
-                    state.menuItems.map((e) => e.category).toSet().toList()
-                      ..sort();
+                final categories = _orderedCategoriesFor(state.menuItems);
                 if (_tabController.length != categories.length) {
                   _recreateTabController(categories.length);
                 }
@@ -595,31 +605,30 @@ class _OrderScreenState extends State<OrderScreen>
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: context.modeSurface,
+      backgroundColor: context.modeBackground,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
+      toolbarHeight: 86,
       title: BlocBuilder<OrderSessionCubit, OrderSessionState>(
         builder: (context, sessionState) {
-          final label = sessionState.activeSession?.label ?? 'New Order';
-          return Column(
+          final label = sessionState.activeSession?.label ?? 'Customer 1';
+          return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 label,
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
                   color: context.modeTextPrimary,
                 ),
               ),
-              if (sessionState.sessions.length > 1)
-                Text(
-                  '${sessionState.sessions.length} sessions open',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 11,
-                    color: context.modeTextMuted,
-                  ),
-                ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 22,
+                color: context.modeTextPrimary,
+              ),
             ],
           );
         },
@@ -630,18 +639,18 @@ class _OrderScreenState extends State<OrderScreen>
           return Stack(
             alignment: Alignment.center,
             children: [
-              IconButton(
-                icon: Icon(
-                  Icons.layers_outlined,
-                  color: context.modeTextPrimary,
+              Padding(
+                padding: const EdgeInsets.only(left: 14),
+                child: _buildHeaderIconButton(
+                  icon: Icons.layers_outlined,
+                  onTap: _openSessionManager,
+                  tooltip: 'Sessions',
                 ),
-                onPressed: _openSessionManager,
-                tooltip: 'Sessions',
               ),
               if (sessionState.sessions.length > 1)
                 Positioned(
-                  top: 8,
-                  right: 8,
+                  top: 14,
+                  right: 4,
                   child: Container(
                     width: 17,
                     height: 17,
@@ -666,17 +675,60 @@ class _OrderScreenState extends State<OrderScreen>
           );
         },
       ),
+      leadingWidth: 78,
       actions: [
-        IconButton(
-          icon: Icon(Icons.refresh, color: context.modeTextPrimary),
-          onPressed: () =>
+        _buildHeaderIconButton(
+          icon: Icons.refresh_rounded,
+          onTap: () =>
               context.read<MenuItemsBloc>().add(const RefreshMenuItems()),
+          tooltip: 'Refresh menu',
         ),
-        IconButton(
-          icon: Icon(Icons.add, color: context.modeTextPrimary),
-          onPressed: context.showAddMenuItemDialog,
-        ),
+        const SizedBox(width: 20),
       ],
+    );
+  }
+
+  Widget _buildHeaderIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    required String tooltip,
+    bool isPrimary = false,
+  }) {
+    final bgColor = isPrimary
+        ? context.modePrimary.withValues(alpha: 0.1)
+        : context.modeSurface;
+    final iconColor = isPrimary ? context.modePrimary : context.modeTextPrimary;
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: context.modeBorder.withValues(alpha: 0.55),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(
+                    alpha: context.isDarkMode ? 0.2 : 0.04,
+                  ),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(icon, size: 24, color: iconColor),
+          ),
+        ),
+      ),
     );
   }
 
@@ -784,8 +836,7 @@ class _OrderScreenState extends State<OrderScreen>
     final filteredItems = state is MenuItemsLoaded
         ? state.filteredItems
         : menuItems;
-    final categories = menuItems.map((item) => item.category).toSet().toList()
-      ..sort();
+    final categories = _orderedCategoriesFor(menuItems);
     if (_tabController.length != (categories.isEmpty ? 1 : categories.length)) {
       _recreateTabController(categories.length, notify: false);
     }
@@ -795,88 +846,18 @@ class _OrderScreenState extends State<OrderScreen>
 
     return Column(
       children: [
-        Container(
-          color: context.modeSurface,
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
           child: Column(
             children: [
-              TextField(
-                cursorColor: context.modePrimary,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  color: context.modeTextPrimary,
-                ),
-                controller: _searchController,
-                onChanged: (value) {
-                  setState(() {});
-                  _searchDebounce?.cancel();
-                  _searchDebounce = Timer(
-                    const Duration(milliseconds: 450),
-                    () {
-                      if (!mounted) return;
-                      context.read<MenuItemsBloc>().add(
-                        SearchMenuItems(query: value),
-                      );
-                    },
-                  );
-                },
-                decoration: InputDecoration(
-                  hintText: 'Search menu',
-                  hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 14,
-                    color: context.modeTextMuted,
-                  ),
-                  prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.clear, color: context.modeTextMuted),
-                          onPressed: () {
-                            _searchDebounce?.cancel();
-                            _searchController.clear();
-                            setState(() {});
-                            context.read<MenuItemsBloc>().add(
-                              const SearchMenuItems(query: ''),
-                            );
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: context.modeSurfaceAlt,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: context.modeBorder),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: context.modeBorder),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: context.modePrimary),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildAvailabilityToggle(),
+              _buildSearchCard(),
+              if (categories.isNotEmpty && !isSearching) ...[
+                const SizedBox(height: 24),
+                _buildCategoryTabs(categories),
+              ],
             ],
           ),
         ),
-        if (categories.isNotEmpty && !isSearching)
-          Container(
-            color: context.modeSurface,
-            child: TabBar(
-              controller: _tabController,
-              onTap: (index) => context.read<MenuItemsBloc>().add(
-                FilterMenuItemsByCategory(category: categories[index]),
-              ),
-              labelColor: context.modePrimary,
-              unselectedLabelColor: context.modeTextMuted,
-              indicatorColor: context.modePrimary,
-              indicatorWeight: 3,
-              isScrollable: categories.length > 4,
-              tabs: categories.map((cat) => Tab(text: cat)).toList(),
-            ),
-          ),
         if (state is MenuItemsRefreshing)
           LinearProgressIndicator(color: context.modePrimary),
         if (hasOrders || _orderNoteController.text.trim().isNotEmpty)
@@ -1073,18 +1054,6 @@ class _OrderScreenState extends State<OrderScreen>
                     context.showEditMenuItemDialog(item);
                   },
                 ),
-                const SizedBox(height: 8),
-                _BottomSheetAction(
-                  icon: Icons.delete_outline,
-                  label: 'Delete Menu Item',
-                  iconColor: context.modeError,
-                  textColor: context.modeError,
-                  isDestructive: true,
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.showDeleteMenuItemDialog(item);
-                  },
-                ),
                 const SizedBox(height: 12),
                 Divider(height: 1, color: context.modeDivider),
                 const SizedBox(height: 4),
@@ -1215,50 +1184,143 @@ class _OrderScreenState extends State<OrderScreen>
     }
   }
 
-  Widget _buildAvailabilityToggle() {
+  Widget _buildSearchCard() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      height: 62,
       decoration: BoxDecoration(
-        color: context.modeSurfaceAlt,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            _showUnavailableItems
-                ? Icons.visibility_outlined
-                : Icons.check_circle_outline_rounded,
-            size: 19,
-            color: _showUnavailableItems
-                ? context.modeWarning
-                : context.modeSuccess,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              _showUnavailableItems
-                  ? 'Showing unavailable items'
-                  : 'Available items only',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: context.modeTextPrimary,
-              ),
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.55)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.22 : 0.05,
             ),
-          ),
-          Switch.adaptive(
-            value: _showUnavailableItems,
-            activeThumbColor: context.modePrimary,
-            onChanged: (value) {
-              setState(() {
-                _showUnavailableItems = value;
-              });
-            },
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
+      ),
+      child: TextField(
+        cursorColor: context.modePrimary,
+        style: WorkSansAppTextStyles.medium.copyWith(
+          color: context.modeTextPrimary,
+        ),
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {});
+          _searchDebounce?.cancel();
+          _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+            if (!mounted) return;
+            context.read<MenuItemsBloc>().add(SearchMenuItems(query: value));
+          });
+        },
+        decoration: InputDecoration(
+          hintText: 'Search menu items...',
+          hintStyle: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: context.modeTextMuted,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: context.modeTextPrimary,
+            size: 26,
+          ),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.close_rounded, color: context.modeTextMuted),
+                  onPressed: () {
+                    _searchDebounce?.cancel();
+                    _searchController.clear();
+                    setState(() {});
+                    context.read<MenuItemsBloc>().add(
+                      const SearchMenuItems(query: ''),
+                    );
+                  },
+                )
+              : IconButton(
+                  tooltip: _showUnavailableItems
+                      ? 'Available items only'
+                      : 'Show unavailable items',
+                  icon: Icon(
+                    Icons.tune_rounded,
+                    color: context.modeTextPrimary,
+                    size: 22,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _showUnavailableItems = !_showUnavailableItems;
+                    });
+                  },
+                ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryTabs(List<String> categories) {
+    return Container(
+      height: 78,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.55)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.2 : 0.04,
+            ),
+            blurRadius: 14,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: TabBar(
+        controller: _tabController,
+        onTap: (index) {
+          setState(() {});
+          context.read<MenuItemsBloc>().add(
+            FilterMenuItemsByCategory(category: categories[index]),
+          );
+        },
+        labelColor: context.modePrimary,
+        unselectedLabelColor: context.modeTextMuted,
+        indicatorColor: context.modePrimary,
+        indicatorWeight: 3,
+        dividerColor: Colors.transparent,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+        isScrollable: true,
+        tabs: categories.asMap().entries.map((entry) {
+          final index = entry.key;
+          final cat = entry.value;
+          final isSelected = _tabController.index == index;
+          final tabColor = isSelected
+              ? context.modePrimary
+              : context.modeTextMuted;
+          return Tab(
+            height: 72,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                PosMenuCategoryIcon(category: cat, color: tabColor, size: 25),
+                const SizedBox(height: 6),
+                Text(
+                  cat,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: tabColor,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -1284,19 +1346,55 @@ class _OrderScreenState extends State<OrderScreen>
       );
     }
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
       itemCount: categoryItems.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Text(
-              category ?? 'Search Results',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: context.modeTextPrimary,
-              ),
+            padding: const EdgeInsets.only(bottom: 18),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        category ?? 'Search Results',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: context.modeTextPrimary,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.modePrimary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${categoryItems.length} item${categoryItems.length == 1 ? '' : 's'}',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: context.modePrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildSectionActionButton(
+                  icon: Icons.grid_view_rounded,
+                  label: 'Reorder',
+                  onTap: _showOrderActions,
+                ),
+              ],
             ),
           );
         }
@@ -1307,27 +1405,87 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
+  Widget _buildSectionActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool isPrimary = false,
+  }) {
+    return Material(
+      color: isPrimary
+          ? context.modePrimary.withValues(alpha: 0.08)
+          : context.modeSurface,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 38,
+          padding: const EdgeInsets.symmetric(horizontal: 11),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: context.modeBorder.withValues(alpha: 0.6),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 17,
+                color: isPrimary
+                    ? context.modePrimary
+                    : context.modeTextPrimary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: isPrimary
+                      ? context.modePrimary
+                      : context.modeTextPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildAvailabilityBadge(bool isAvailable) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isAvailable
             ? context.modeSuccess.withValues(alpha: 0.12)
             : context.modeError.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: isAvailable
-              ? context.modeSuccess.withValues(alpha: 0.35)
-              : context.modeError.withValues(alpha: 0.35),
-        ),
+        borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
-        isAvailable ? 'Available' : 'Unavailable',
-        style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-          color: isAvailable ? context.modeSuccess : context.modeError,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(
+              color: isAvailable ? context.modeSuccess : context.modeError,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            isAvailable ? 'Available' : 'Unavailable',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: isAvailable ? context.modeSuccess : context.modeError,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1336,66 +1494,64 @@ class _OrderScreenState extends State<OrderScreen>
     final hasSpecialRequest = _itemSpecialRequests.containsKey(item.id);
     final isAvailable = item.isAvailable;
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.45)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.22 : 0.06,
+            ),
+            blurRadius: 18,
+            offset: const Offset(0, 9),
+          ),
+        ],
+      ),
       child: Row(
         children: [
           GestureDetector(
             onLongPress: () => _showMenuItemOptions(item),
             child: Container(
-              width: 80,
-              height: 80,
+              width: 76,
+              height: 76,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: context.isDarkMode ? 0.24 : 0.08,
-                    ),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                color: context.modePrimary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    KeyedSubtree(
-                      key: ValueKey(item.id),
-                      child: AnimateFrom(
-                        key: _animateToController.tag(item),
-                        child: Image.network(
-                          item.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: context.modeSurfaceAlt,
-                                child: Icon(
-                                  Icons.restaurant,
-                                  size: 40,
-                                  color: context.modeTextMuted,
-                                ),
-                              ),
-                        ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  AnimateFrom(
+                    key: _animateToController.tag(item),
+                    child: Icon(
+                      Icons.restaurant_menu_rounded,
+                      size: 38,
+                      color: isAvailable
+                          ? context.modePrimary
+                          : context.modeTextMuted,
+                    ),
+                  ),
+                  if (!isAvailable)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.block_rounded,
+                        color: Colors.white.withValues(alpha: 0.92),
+                        size: 24,
                       ),
                     ),
-                    if (!isAvailable)
-                      Container(
-                        color: Colors.black.withValues(alpha: 0.42),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.block_rounded,
-                          color: Colors.white.withValues(alpha: 0.92),
-                          size: 24,
-                        ),
-                      ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: GestureDetector(
               onLongPress: () => _showMenuItemOptions(item),
@@ -1408,8 +1564,8 @@ class _OrderScreenState extends State<OrderScreen>
                         child: Text(
                           item.dishName,
                           style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
                             color: isAvailable
                                 ? context.modeTextPrimary
                                 : context.modeTextMuted,
@@ -1443,10 +1599,10 @@ class _OrderScreenState extends State<OrderScreen>
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        '₦${item.price}',
+                        'N${item.price}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w800,
                           color: isAvailable
                               ? context.modeTextSecondary
                               : context.modeTextMuted,
@@ -1474,7 +1630,11 @@ class _OrderScreenState extends State<OrderScreen>
           ),
           const SizedBox(width: 12),
           IconButton(
-            icon: Icon(Icons.more_vert, color: context.modeTextMuted, size: 20),
+            icon: Icon(
+              Icons.more_vert_rounded,
+              color: context.modeTextPrimary,
+              size: 24,
+            ),
             onPressed: () => _showMenuItemOptions(item),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -1499,17 +1659,19 @@ class _OrderScreenState extends State<OrderScreen>
                 _addItem(item.id);
               },
               child: Container(
-                width: 30,
-                height: 30,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: context.modeSurface,
                   borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: context.modeBorder),
+                  border: Border.all(
+                    color: context.modePrimary.withValues(alpha: 0.18),
+                  ),
                 ),
                 child: Icon(
-                  Icons.add,
-                  size: 20,
-                  color: context.modeTextPrimary,
+                  Icons.add_rounded,
+                  size: 28,
+                  color: context.modePrimary,
                 ),
               ),
             )
@@ -1751,7 +1913,6 @@ class _BottomSheetAction extends StatelessWidget {
   final String label;
   final Color iconColor;
   final Color textColor;
-  final bool isDestructive;
   final VoidCallback onTap;
 
   const _BottomSheetAction({
@@ -1759,7 +1920,6 @@ class _BottomSheetAction extends StatelessWidget {
     required this.label,
     required this.iconColor,
     required this.textColor,
-    this.isDestructive = false,
     required this.onTap,
   });
 
@@ -1772,9 +1932,7 @@ class _BottomSheetAction extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isDestructive
-                ? context.modeError.withValues(alpha: 0.2)
-                : context.modeBorder,
+            color: context.modeBorder,
           ),
           borderRadius: BorderRadius.circular(12),
         ),

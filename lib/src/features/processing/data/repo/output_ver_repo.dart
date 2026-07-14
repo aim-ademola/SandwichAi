@@ -30,11 +30,9 @@ class OutputVerificationRepository extends BaseRepository
     required String branchId,
   }) async {
     try {
-      _validateBranchId(branchId);
-
       final listResponse = await handleListResponse<MenuItem>(
         _apiClient
-            .get('kitchen/menu-items', queryParameters: {'branchId': branchId})
+            .get('kitchen/menu-items')
             .timeout(
               const Duration(seconds: 30),
               onTimeout: () {

@@ -236,6 +236,11 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
     final isServedUnpaid =
         order.status == OrderStatus.served && !_hasPayment(order);
     final itemCount = order.items.length;
+    final cancellationReason = order.cancellationReason?.trim();
+    final hasCancellationReason =
+        order.status == OrderStatus.cancelled &&
+        cancellationReason != null &&
+        cancellationReason.isNotEmpty;
 
     return InkWell(
       onTap: () {
@@ -356,6 +361,44 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                     ),
                   ),
                 ],
+              ),
+            ],
+            if (hasCancellationReason) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: context.modeError.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: context.modeError.withValues(alpha: 0.34),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 17,
+                      color: context.modeError,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Cancellation reason: $cancellationReason',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: textSize - 2,
+                          fontWeight: FontWeight.w700,
+                          color: context.modeTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
             const SizedBox(height: 12),

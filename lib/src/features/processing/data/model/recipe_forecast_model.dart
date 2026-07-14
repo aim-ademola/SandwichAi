@@ -1,3 +1,25 @@
+String _parseString(dynamic value) {
+  if (value == null) return '';
+  if (value is String) return value;
+  if (value is num || value is bool) return value.toString();
+  return '';
+}
+
+int _parseInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
+double _parseDouble(dynamic value) {
+  if (value == null) return 0;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0;
+  return 0;
+}
+
 class RecipeForecastResponse {
   final String recipeId;
   final String dishName;
@@ -20,21 +42,39 @@ class RecipeForecastResponse {
   });
 
   factory RecipeForecastResponse.fromJson(Map<String, dynamic> json) {
+    final ingredientsJson =
+        json['ingredients'] ??
+        json['scaledIngredients'] ??
+        json['scaled_ingredients'];
+
     return RecipeForecastResponse(
-      recipeId: json['recipe_id'] ?? '',
-      dishName: json['dish_name'] ?? '',
-      originalServings: json['original_servings'] ?? 0,
-      targetServings: json['target_servings'] ?? 0,
-      scalingFactor: (json['scaling_factor'] ?? 0.0).toDouble(),
-      ingredients:
-          (json['ingredients'] as List<dynamic>?)
-              ?.map((e) => ScaledIngredient.fromJson(e))
-              .toList() ??
-          [],
-      estimatedCost: json['estimated_cost'] != null
-          ? (json['estimated_cost'] as num).toDouble()
+      recipeId: _parseString(json['recipe_id'] ?? json['recipeId']),
+      dishName: _parseString(json['dish_name'] ?? json['dishName']),
+      originalServings: _parseInt(
+        json['original_servings'] ?? json['originalServings'],
+      ),
+      targetServings: _parseInt(
+        json['target_servings'] ?? json['targetServings'],
+      ),
+      scalingFactor: _parseDouble(
+        json['scaling_factor'] ?? json['scalingFactor'],
+      ),
+      ingredients: ingredientsJson is List
+          ? ingredientsJson
+                .whereType<Map>()
+                .map(
+                  (e) =>
+                      ScaledIngredient.fromJson(Map<String, dynamic>.from(e)),
+                )
+                .toList()
+          : [],
+      estimatedCost:
+          json['estimated_cost'] != null || json['estimatedCost'] != null
+          ? _parseDouble(json['estimated_cost'] ?? json['estimatedCost'])
           : null,
-      preparationNotes: json['preparation_notes'] ?? '',
+      preparationNotes: _parseString(
+        json['preparation_notes'] ?? json['preparationNotes'],
+      ),
     );
   }
 
@@ -73,13 +113,21 @@ class ScaledIngredient {
 
   factory ScaledIngredient.fromJson(Map<String, dynamic> json) {
     return ScaledIngredient(
-      ingredientId: json['ingredient_id'] ?? '',
-      ingredientName: json['ingredient_name'] ?? '',
-      originalQuantity: (json['original_quantity'] ?? 0.0).toDouble(),
-      originalUnit: json['original_unit'] ?? '',
-      scaledQuantity: (json['scaled_quantity'] ?? 0.0).toDouble(),
-      scaledUnit: json['scaled_unit'] ?? '',
-      scalingFactor: (json['scaling_factor'] ?? 0.0).toDouble(),
+      ingredientId: _parseString(json['ingredient_id'] ?? json['ingredientId']),
+      ingredientName: _parseString(
+        json['ingredient_name'] ?? json['ingredientName'],
+      ),
+      originalQuantity: _parseDouble(
+        json['original_quantity'] ?? json['originalQuantity'],
+      ),
+      originalUnit: _parseString(json['original_unit'] ?? json['originalUnit']),
+      scaledQuantity: _parseDouble(
+        json['scaled_quantity'] ?? json['scaledQuantity'],
+      ),
+      scaledUnit: _parseString(json['scaled_unit'] ?? json['scaledUnit']),
+      scalingFactor: _parseDouble(
+        json['scaling_factor'] ?? json['scalingFactor'],
+      ),
     );
   }
 

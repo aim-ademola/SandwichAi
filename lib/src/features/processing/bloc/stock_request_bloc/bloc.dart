@@ -113,9 +113,7 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
   ) async {
     try {
       emit(const StockRequestCreating());
-      final response = await _repository.createStockRequest(
-        event.request as CreateStockRequestRequest,
-      );
+      final response = await _repository.createStockRequest(event.request);
 
       await response.when(
         success: (data) async {

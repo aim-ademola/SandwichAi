@@ -39,7 +39,7 @@ class RefreshStockRequests extends StockRequestEvent {
 }
 
 class CreateStockRequest extends StockRequestEvent {
-  final StockRequest request;
+  final CreateStockRequestRequest request;
 
   const CreateStockRequest({required this.request});
 

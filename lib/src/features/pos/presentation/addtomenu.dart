@@ -7,6 +7,7 @@ import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/pos_menu_categories.dart';
 
 class AddMenuItemDialog extends StatefulWidget {
   const AddMenuItemDialog({super.key});
@@ -27,12 +28,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
   bool _isAvailable = true;
   bool _isSubmitting = false;
 
-  final List<String> _categories = [
-    'Appetizers',
-    'Main Course',
-    'Desserts',
-    'Drinks',
-  ];
+  final List<String> _categories = PosMenuCategories.names;
 
   @override
   void dispose() {
@@ -315,9 +311,34 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                     items: _categories.map((category) {
                       return DropdownMenuItem<String>(
                         value: category,
-                        child: Text(category),
+                        child: Row(
+                          children: [
+                            PosMenuCategoryIcon(
+                              category: category,
+                              color: context.modePrimary,
+                              size: 22,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(category)),
+                          ],
+                        ),
                       );
                     }).toList(),
+                    selectedItemBuilder: (context) {
+                      return _categories.map((category) {
+                        return Row(
+                          children: [
+                            PosMenuCategoryIcon(
+                              category: category,
+                              color: context.modePrimary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(category)),
+                          ],
+                        );
+                      }).toList();
+                    },
                     onChanged: _isSubmitting
                         ? null
                         : (value) {

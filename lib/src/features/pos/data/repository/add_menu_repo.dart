@@ -7,9 +7,7 @@ import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 
 abstract class MenuItemsRepositoryInterface {
-  Future<ApiResponse<List<ApiMenuItem>>> getMenuItems({
-    required String branchId,
-  });
+  Future<ApiResponse<List<ApiMenuItem>>> getMenuItems();
 
   Future<ApiResponse<ApiMenuItem>> createMenuItem({
     required String branchId,
@@ -33,6 +31,11 @@ abstract class MenuItemsRepositoryInterface {
     String? imageUrl,
   });
 
+  Future<ApiResponse<ApiMenuItem>> updateMenuItemAvailability({
+    required String menuItemId,
+    required bool isAvailable,
+  });
+
   Future<ApiResponse<String>> deleteMenuItem({required String menuItemId});
 }
 
@@ -41,17 +44,11 @@ class MenuItemsRepository extends BaseRepository
   final ApiClient _apiClient = ApiClient.instance;
 
   @override
-  Future<ApiResponse<List<ApiMenuItem>>> getMenuItems({
-    required String branchId,
-  }) async {
+  Future<ApiResponse<List<ApiMenuItem>>> getMenuItems() async {
     try {
-      _validateBranchId(branchId);
-
-      final queryParams = {'branchId': branchId};
-
       final listResponse = await handleListResponse(
         _apiClient
-            .get('kitchen/menu-items', queryParameters: queryParams)
+            .get('kitchen/menu-items')
             .timeout(
               const Duration(seconds: 30),
               onTimeout: () {
@@ -173,6 +170,47 @@ class MenuItemsRepository extends BaseRepository
 
       final response = await _apiClient
           .put('kitchen/menu-items/$menuItemId', data: requestBody)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      if (response.data == null) {
+        return ApiResponse.errorMessage('Failed to update menu item');
+      }
+
+      final menuItem = ApiMenuItem.fromJson(response.data);
+      return ApiResponse.success(menuItem);
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } on FormatException catch (e) {
+      return ApiResponse.errorMessage(e.message);
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+    }
+  }
+
+  @override
+  Future<ApiResponse<ApiMenuItem>> updateMenuItemAvailability({
+    required String menuItemId,
+    required bool isAvailable,
+  }) async {
+    try {
+      _validateMenuItemId(menuItemId);
+
+      final response = await _apiClient
+          .patch(
+            'kitchen/menu-items/$menuItemId',
+            data: {'isAvailable': isAvailable},
+          )
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {

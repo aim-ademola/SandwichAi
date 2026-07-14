@@ -25,18 +25,14 @@ class StockRequestItem {
 
   factory StockRequestItem.fromJson(Map<String, dynamic> json) {
     return StockRequestItem(
-      id: json['id'] ?? '',
-      requestId: json['requestId'] ?? '',
-      itemId: json['itemId'] ?? '',
+      id: _parseString(json['id']),
+      requestId: _parseString(json['requestId']),
+      itemId: _parseString(json['itemId']),
       qtyRequested: json['qtyRequested']?.toString() ?? '0',
       qtySent: json['qtySent']?.toString(),
-      status: json['status'] ?? 'PENDING',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
-          : DateTime.now(),
+      status: _parseString(json['status'], fallback: 'PENDING'),
+      createdAt: _parseDateTime(json['createdAt']),
+      updatedAt: _parseDateTime(json['updatedAt']),
       item: json['item'] != null
           ? StockRequestItemDetails.fromJson(json['item'])
           : null,
@@ -66,8 +62,8 @@ class StockRequestItemDetails {
 
   factory StockRequestItemDetails.fromJson(Map<String, dynamic> json) {
     return StockRequestItemDetails(
-      itemName: json['itemName'] ?? '',
-      unit: json['unit'] ?? '',
+      itemName: _parseString(json['itemName'] ?? json['name']),
+      unit: _parseString(json['unit']),
     );
   }
 
@@ -84,8 +80,8 @@ class RequestingBranch {
 
   factory RequestingBranch.fromJson(Map<String, dynamic> json) {
     return RequestingBranch(
-      name: json['name'] ?? '',
-      branchCode: json['branch_code'] ?? '',
+      name: _parseString(json['name']),
+      branchCode: _parseString(json['branch_code'] ?? json['branchCode']),
     );
   }
 
@@ -143,38 +139,33 @@ class StockRequest {
 
   factory StockRequest.fromJson(Map<String, dynamic> json) {
     return StockRequest(
-      id: json['id'] ?? '',
-      requestId: json['requestId'] ?? '',
-      requestingBranchId: json['requestingBranchId'] ?? '',
+      id: _parseString(json['id']),
+      requestId: _parseString(json['requestId'] ?? json['request_id']),
+      requestingBranchId: _parseString(
+        json['requestingBranchId'] ?? json['requesting_branch_id'],
+      ),
       requestedBy: _parseUser(json['requestedBy']),
-      department: json['department'] ?? '',
-      organizationId: json['organizationId'] ?? '',
-      status: json['status'] ?? 'PENDING',
+      department: _parseString(json['department']),
+      organizationId: _parseString(
+        json['organizationId'] ?? json['organization_id'],
+      ),
+      status: _parseString(json['status'], fallback: 'PENDING'),
       approvedBy: _parseUser(json['approvedBy']),
-      approvedAt: json['approvedAt'] != null
-          ? DateTime.parse(json['approvedAt'])
-          : null,
+      approvedAt: _parseDateTimeOrNull(json['approvedAt']),
       completedBy: _parseUser(json['completedBy']),
-      completedAt: json['completedAt'] != null
-          ? DateTime.parse(json['completedAt'])
-          : null,
+      completedAt: _parseDateTimeOrNull(json['completedAt']),
       rejectedBy: _parseUser(json['rejectedBy']),
-      rejectedAt: json['rejectedAt'] != null
-          ? DateTime.parse(json['rejectedAt'])
-          : null,
-      rejectionNote: json['rejectionNote'],
-      approvalNote: json['approvalNote'],
-      cancellationNote: json['cancellationNote'],
-      notes: json['notes'] ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
-          : DateTime.now(),
+      rejectedAt: _parseDateTimeOrNull(json['rejectedAt']),
+      rejectionNote: _parseStringOrNull(json['rejectionNote']),
+      approvalNote: _parseStringOrNull(json['approvalNote']),
+      cancellationNote: _parseStringOrNull(json['cancellationNote']),
+      notes: _parseString(json['notes']),
+      createdAt: _parseDateTime(json['createdAt']),
+      updatedAt: _parseDateTime(json['updatedAt']),
       items:
           (json['items'] as List<dynamic>?)
-              ?.map((item) => StockRequestItem.fromJson(item))
+              ?.whereType<Map<String, dynamic>>()
+              .map(StockRequestItem.fromJson)
               .toList() ??
           [],
       requestingBranch: json['requestingBranch'] != null
@@ -262,13 +253,13 @@ class StockRequestResponse {
   StockRequestResponse({required this.message, required this.data});
 
   factory StockRequestResponse.fromJson(Map<String, dynamic> json) {
+    final data = _extractStockRequestList(json);
     return StockRequestResponse(
       message: json['message'] ?? '',
-      data:
-          (json['data'] as List<dynamic>?)
-              ?.map((item) => StockRequest.fromJson(item))
-              .toList() ??
-          [],
+      data: data
+          .whereType<Map<String, dynamic>>()
+          .map(StockRequest.fromJson)
+          .toList(),
     );
   }
 
@@ -300,13 +291,13 @@ class StockRequestUser {
 
   factory StockRequestUser.fromJson(Map<String, dynamic> json) {
     return StockRequestUser(
-      id: json['id'] ?? '',
-      firstName: json['firstName'] ?? '',
-      lastName: json['lastName'] ?? '',
-      email: json['email'] ?? '',
-      role: json['role'] ?? '',
-      department: json['department'] ?? '',
-      employeeId: json['employeeId'] ?? '',
+      id: _parseString(json['id']),
+      firstName: _parseString(json['firstName']),
+      lastName: _parseString(json['lastName']),
+      email: _parseString(json['email']),
+      role: _parseString(json['role']),
+      department: _parseString(json['department']),
+      employeeId: _parseString(json['employeeId']),
     );
   }
 
@@ -337,11 +328,61 @@ class CreateStockRequestResponse {
   CreateStockRequestResponse({required this.message, required this.data});
 
   factory CreateStockRequestResponse.fromJson(Map<String, dynamic> json) {
+    final data = json['data'];
+    final stockRequestJson = data is Map<String, dynamic> ? data : json;
     return CreateStockRequestResponse(
-      message: json['message'] ?? '',
-      data: StockRequest.fromJson(json['data']),
+      message: _parseString(json['message']),
+      data: StockRequest.fromJson(stockRequestJson),
     );
   }
 
   bool get isValid => data.id.isNotEmpty;
+}
+
+String _parseString(dynamic value, {String fallback = ''}) {
+  if (value == null) return fallback;
+  if (value is String) return value;
+  if (value is num || value is bool) return value.toString();
+  return fallback;
+}
+
+String? _parseStringOrNull(dynamic value) {
+  final parsed = _parseString(value);
+  return parsed.isEmpty ? null : parsed;
+}
+
+DateTime _parseDateTime(dynamic value) {
+  if (value is DateTime) return value;
+  return DateTime.tryParse(value?.toString() ?? '') ?? DateTime.now();
+}
+
+DateTime? _parseDateTimeOrNull(dynamic value) {
+  if (value == null) return null;
+  if (value is DateTime) return value;
+  return DateTime.tryParse(value.toString());
+}
+
+List<dynamic> _extractStockRequestList(Map<String, dynamic> json) {
+  final data = json['data'];
+  if (data is List) return data;
+  if (data is Map<String, dynamic>) {
+    final nestedData = data['data'];
+    if (nestedData is List) return nestedData;
+
+    final items = data['items'] ?? data['stockRequests'] ?? data['requests'];
+    if (items is List) return items;
+
+    if (data.containsKey('id') || data.containsKey('requestId')) {
+      return [data];
+    }
+  }
+
+  final items = json['items'] ?? json['stockRequests'] ?? json['requests'];
+  if (items is List) return items;
+
+  if (json.containsKey('id') || json.containsKey('requestId')) {
+    return [json];
+  }
+
+  return const [];
 }

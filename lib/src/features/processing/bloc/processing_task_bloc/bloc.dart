@@ -267,25 +267,41 @@ class ProcessingTaskBloc
       filtered = filtered.where((task) => task.status == status).toList();
     }
 
-    final normalizedQuery = query?.trim().toLowerCase();
-    if (normalizedQuery != null && normalizedQuery.isNotEmpty) {
+    final normalizedQuery = _normalizeSearchText(query ?? '');
+    if (normalizedQuery.isNotEmpty) {
       filtered = filtered.where((task) {
         final searchableText = [
           task.assignedStaff,
           task.recipeName,
+          task.recipe?.menuItem?.dishName ?? '',
+          task.recipe?.menuItem?.description ?? '',
+          task.recipe?.menuItem?.category ?? '',
           task.statusDisplay,
           task.priorityDisplay,
           task.notes ?? '',
           task.id,
           task.recipeId,
           task.menuItemId,
-        ].join(' ').toLowerCase();
+        ].join(' ');
 
-        return searchableText.contains(normalizedQuery);
+        return _containsSearchQuery(searchableText, normalizedQuery);
       }).toList();
     }
 
     return filtered;
+  }
+
+  bool _containsSearchQuery(String source, String normalizedQuery) {
+    final normalizedSource = _normalizeSearchText(source);
+    final queryTokens = normalizedQuery
+        .split(' ')
+        .where((token) => token.isNotEmpty);
+
+    return queryTokens.every(normalizedSource.contains);
+  }
+
+  String _normalizeSearchText(String value) {
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
   }
 
   /// Determine error type from error message

@@ -1,18 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/add_menu_repo.dart';
 
 class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
   final MenuItemsRepositoryInterface _repository;
-  String branchId = '';
 
   MenuItemsBloc({required MenuItemsRepositoryInterface repository})
     : _repository = repository,
       super(const MenuItemsInitial()) {
-    _getBranchId();
-
     on<LoadMenuItems>(_onLoadMenuItems);
     on<RefreshMenuItems>(_onRefreshMenuItems);
     on<SearchMenuItems>(_onSearchMenuItems);
@@ -22,11 +18,6 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     on<DeleteMenuItem>(_onDeleteMenuItem);
   }
 
-  void _getBranchId() async {
-    final id = await AuthCacheHelper.instance.getBranchID() ?? '';
-    branchId = id;
-  }
-
   Future<void> _onLoadMenuItems(
     LoadMenuItems event,
     Emitter<MenuItemsState> emit,
@@ -34,7 +25,7 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     try {
       emit(const MenuItemsLoading());
 
-      final response = await _repository.getMenuItems(branchId: branchId);
+      final response = await _repository.getMenuItems();
 
       await response.when(
         success: (menuItems) async {
@@ -72,7 +63,7 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     final currentState = state as MenuItemsLoaded;
     emit(MenuItemsRefreshing(currentData: currentState.menuItems));
 
-    final response = await _repository.getMenuItems(branchId: branchId);
+    final response = await _repository.getMenuItems();
 
     await response.when(
       success: (menuItems) async {
@@ -149,44 +140,12 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     CreateMenuItem event,
     Emitter<MenuItemsState> emit,
   ) async {
-    try {
-      emit(const MenuItemCreating());
-
-      final response = await _repository.createMenuItem(
-        branchId: branchId,
-        dishName: event.dishName,
-        description: event.description,
-        category: event.category,
-        price: event.price,
-        preparationTime: event.preparationTime,
-        isAvailable: event.isAvailable,
-        imageUrl: event.imageUrl,
-      );
-
-      await response.when(
-        success: (menuItem) async {
-          emit(MenuItemCreated(menuItem: menuItem));
-          // Reload menu items to get the updated list
-          add(const LoadMenuItems());
-        },
-        error: (error) async {
-          final errorType = _determineErrorType(error.toString());
-          emit(
-            MenuItemCreationError(
-              error: error.toString(),
-              errorType: errorType,
-            ),
-          );
-        },
-      );
-    } catch (e) {
-      emit(
-        const MenuItemCreationError(
-          error: 'Failed to create menu item. Please try again.',
-          errorType: MenuItemsErrorType.general,
-        ),
-      );
-    }
+    emit(
+      const MenuItemCreationError(
+        error: 'Menu items can only be created by the organization.',
+        errorType: MenuItemsErrorType.validation,
+      ),
+    );
   }
 
   Future<void> _onUpdateMenuItem(
@@ -196,15 +155,9 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     try {
       emit(const MenuItemUpdating());
 
-      final response = await _repository.updateMenuItem(
+      final response = await _repository.updateMenuItemAvailability(
         menuItemId: event.menuItemId,
-        dishName: event.dishName,
-        description: event.description,
-        category: event.category,
-        price: event.price,
-        preparationTime: event.preparationTime,
         isAvailable: event.isAvailable,
-        imageUrl: event.imageUrl,
       );
 
       await response.when(
@@ -234,37 +187,12 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     DeleteMenuItem event,
     Emitter<MenuItemsState> emit,
   ) async {
-    try {
-      emit(const MenuItemDeleting());
-
-      final response = await _repository.deleteMenuItem(
-        menuItemId: event.menuItemId,
-      );
-
-      await response.when(
-        success: (message) async {
-          emit(MenuItemDeleted(message: message));
-          // Reload menu items to get the updated list
-          add(const LoadMenuItems());
-        },
-        error: (error) async {
-          final errorType = _determineErrorType(error.toString());
-          emit(
-            MenuItemDeletionError(
-              error: error.toString(),
-              errorType: errorType,
-            ),
-          );
-        },
-      );
-    } catch (e) {
-      emit(
-        const MenuItemDeletionError(
-          error: 'Failed to delete menu item. Please try again.',
-          errorType: MenuItemsErrorType.general,
-        ),
-      );
-    }
+    emit(
+      const MenuItemDeletionError(
+        error: 'Menu items can only be removed by the organization.',
+        errorType: MenuItemsErrorType.validation,
+      ),
+    );
   }
 
   MenuItemsErrorType _determineErrorType(String error) {

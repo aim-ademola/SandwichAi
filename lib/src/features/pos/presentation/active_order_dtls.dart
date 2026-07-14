@@ -79,7 +79,7 @@ class OrderDetailScreen extends StatelessWidget {
                     SizedBox(height: verticalSpacing),
                     _buildSpecialInstructions(context, textSize),
                   ],
-                  if (order.cancellationReason != null) ...[
+                  if ((order.cancellationReason ?? '').trim().isNotEmpty) ...[
                     SizedBox(height: verticalSpacing),
                     _buildCancellationReason(context, textSize),
                   ],
@@ -833,7 +833,7 @@ class OrderDetailScreen extends StatelessWidget {
               Icon(Icons.cancel_outlined, color: context.modeError, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Reject Reason',
+                'Cancellation reason',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: textSize,
                   fontWeight: FontWeight.w600,
@@ -844,7 +844,7 @@ class OrderDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            order.cancellationReason!,
+            order.cancellationReason!.trim(),
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: textSize - 1,
               color: context.modeTextPrimary,

@@ -35,7 +35,9 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
   @override
   void initState() {
     super.initState();
-    AppLogger.log("INIT LOGIN: flavor = ${AppEnvironment.current.flavor}, devLoginEnabled = ${DevLoginConfig.enabled}, users count = ${DevLoginConfig.users.length}");
+    AppLogger.log(
+      "INIT LOGIN: flavor = ${AppEnvironment.current.flavor}, devLoginEnabled = ${DevLoginConfig.enabled}, users count = ${DevLoginConfig.users.length}",
+    );
     _applyDefaultLoginCredentialsIfEnabled();
     _loadSavedCredentials();
   }
@@ -627,28 +629,6 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                               ),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 12),
-                        Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppEnvironment.current.flavor == AppFlavor.prod
-                                  ? Colors.red.withValues(alpha: 0.1)
-                                  : Colors.green.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              'Environment: ${AppEnvironment.current.appName} • ${AppEnvironment.current.apiBaseUrl}',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: AppEnvironment.current.flavor == AppFlavor.prod
-                                    ? Colors.red
-                                    : Colors.green,
-                              ),
-                            ),
-                          ),
                         ),
                       ],
                     ),

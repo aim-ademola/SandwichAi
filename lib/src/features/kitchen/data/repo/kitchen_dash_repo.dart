@@ -120,12 +120,13 @@ class KitchenDashboardRepository extends BaseRepository
       _validateOrderId(orderId);
       _validateStatus(status);
       _validateUpdatedBy(updatedBy);
+      _validateCancellationReason(status, rejectReason);
 
       final requestBody = {
         'status': status,
         'updatedBy': updatedBy,
         if (rejectReason != null && rejectReason.trim().isNotEmpty)
-          'rejectReason': rejectReason.trim(),
+          'cancellationReason': rejectReason.trim(),
       };
 
       AppLogger.log(
@@ -241,6 +242,17 @@ class KitchenDashboardRepository extends BaseRepository
       throw FormatException(
         'Invalid status. Must be one of: ${validStatuses.join(", ")}',
       );
+    }
+  }
+
+  void _validateCancellationReason(String status, String? rejectReason) {
+    final normalizedStatus = status.toUpperCase();
+    final requiresReason =
+        normalizedStatus == 'CANCELLED' || normalizedStatus == 'REJECTED';
+
+    if (requiresReason &&
+        (rejectReason == null || rejectReason.trim().isEmpty)) {
+      throw FormatException('Cancellation or rejection reason is required');
     }
   }
 

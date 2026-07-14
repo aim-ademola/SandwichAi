@@ -46,11 +46,11 @@ class KitchenShiftRepository extends BaseRepository
       final queryParams = <String, dynamic>{'branchId': branchId};
 
       if (startDate != null) {
-        queryParams['startDate'] = startDate.toIso8601String();
+        queryParams['startDate'] = _formatDateParam(startDate);
       }
 
       if (endDate != null) {
-        queryParams['endDate'] = endDate.toIso8601String();
+        queryParams['endDate'] = _formatDateParam(endDate);
       }
 
       if (employeeId != null && employeeId.isNotEmpty) {
@@ -270,6 +270,12 @@ class KitchenShiftRepository extends BaseRepository
     if (employeeId.isEmpty) {
       throw FormatException('Employee ID cannot be empty');
     }
+  }
+
+  String _formatDateParam(DateTime date) {
+    return '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
   }
 
   void _validateShiftTimes(String startTime, String endTime) {

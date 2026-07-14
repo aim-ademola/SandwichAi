@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
-import 'package:sandwich_ai/src/features/processing/bloc/req_stock/req_stock_bloc.dart';
-import 'package:sandwich_ai/src/features/processing/data/model/req_stock_model.dart'
-    as req;
+import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/event.dart';
+import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/state.dart';
+import 'package:sandwich_ai/src/features/processing/data/model/stock_reuest_model.dart'
+    as stock;
 import 'package:sandwich_ai/src/features/stock_control/bloc/branch_stock_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/branch_stock_bloc/event.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/branch_stock_bloc/state.dart';
@@ -33,13 +37,15 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
   double? _reorderLevel;
   bool _isSearching = false;
   bool _isOpened = false;
+  Timer? _searchDebounce;
 
   List<InventoryItem> _filteredItems = [];
   List<InventoryItem> _allItems = [];
-  final List<req.StockRequestItemInput> _addedItems = [];
+  final List<stock.CreateStockRequestItem> _addedItems = [];
   BranchStockResponse? _branchStockData;
 
   String _branchId = '';
+  String _employeeId = '';
   String _department = '';
   String _orgID = '';
 
@@ -56,12 +62,14 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
   Future<void> _loadUserData() async {
     final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
     final orgId = await AuthCacheHelper.instance.getOrgId() ?? '';
+    final userData = await AuthCacheHelper.instance.getUserData();
     final department =
         await AuthCacheHelper.instance.getDepartmentName() ?? 'Kitchen';
 
     if (mounted) {
       setState(() {
         _branchId = branchId;
+        _employeeId = userData?.id ?? '';
         _department = department;
         _orgID = orgId;
       });
@@ -80,6 +88,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _qtyController.dispose();
     _notesController.dispose();
@@ -87,19 +96,59 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
   }
 
   void _onSearchChanged() {
+    final query = _searchController.text.trim();
     setState(() {
-      if (_searchController.text.isEmpty) {
+      if (query.isEmpty) {
         _filteredItems = _allItems;
       } else {
-        _filteredItems = _allItems
-            .where(
-              (item) => item.name.toLowerCase().contains(
-                _searchController.text.toLowerCase(),
-              ),
-            )
-            .toList();
+        _filteredItems = _filterInventoryItems(_allItems, query);
       }
     });
+
+    if (_orgID.isEmpty) return;
+
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      context.read<InventoryItemsBloc>().add(
+        LoadInventoryItems(
+          organizationId: _orgID,
+          page: 1,
+          limit: 100,
+          search: query,
+        ),
+      );
+    });
+  }
+
+  List<InventoryItem> _filterInventoryItems(
+    List<InventoryItem> items,
+    String query,
+  ) {
+    return items.where((item) {
+      final searchableText = [
+        item.name,
+        item.category,
+        item.unit,
+        item.sku,
+        item.description,
+      ].join(' ');
+
+      return _containsSearchQuery(searchableText, query);
+    }).toList();
+  }
+
+  bool _containsSearchQuery(String source, String query) {
+    final normalizedSource = _normalizeSearchText(source);
+    final queryTokens = _normalizeSearchText(
+      query,
+    ).split(' ').where((token) => token.isNotEmpty);
+
+    return queryTokens.every(normalizedSource.contains);
+  }
+
+  String _normalizeSearchText(String value) {
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
   }
 
   /// AUTO-FILL: Get stock data for selected item
@@ -218,7 +267,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
     setState(() {
       _addedItems.add(
-        req.StockRequestItemInput(
+        stock.CreateStockRequestItem(
           itemId: inventoryItem.id,
           qtyRequested: qtyNeeded,
         ),
@@ -398,7 +447,10 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
     setState(() {
       _addedItems.add(
-        req.StockRequestItemInput(itemId: _selectedItemId!, qtyRequested: qty),
+        stock.CreateStockRequestItem(
+          itemId: _selectedItemId!,
+          qtyRequested: qty,
+        ),
       );
 
       _selectedItemId = null;
@@ -437,13 +489,21 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       return;
     }
 
+    if (_employeeId.isEmpty) {
+      _showSnackBar(
+        'Employee ID not found. Please login again.',
+        isError: true,
+      );
+      return;
+    }
+
     try {
-      final request = req.CreateStockRequestRequest(
+      final request = stock.CreateStockRequestRequest(
         requestingBranchId: _branchId,
-        requestedBy: _department,
+        requestedBy: _employeeId,
         department: _department,
         notes: _notesController.text.trim().isEmpty
-            ? null
+            ? ''
             : _notesController.text.trim(),
         items: _addedItems,
       );
@@ -503,28 +563,10 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
           listener: (context, state) {
             if (state is InventoryItemsLoaded && !state.isLoadingMore) {
               setState(() {
-                _allItems =
-                    state.items; // bloc already holds full appended list
+                _allItems = state.items;
                 _filteredItems = _searchController.text.isEmpty
                     ? _allItems
-                    : _allItems
-                          .where(
-                            (item) => item.name.toLowerCase().contains(
-                              _searchController.text.toLowerCase(),
-                            ),
-                          )
-                          .toList();
-              });
-            } else if (state is InventoryItemsError) {
-              _showSnackBar(
-                'Failed to load inventory items: ${state.error}',
-                isError: true,
-              );
-            }
-            if (state is InventoryItemsLoaded) {
-              setState(() {
-                _allItems = state.items;
-                _filteredItems = state.items;
+                    : _filterInventoryItems(_allItems, _searchController.text);
               });
             } else if (state is InventoryItemsError) {
               _showSnackBar(

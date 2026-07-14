@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppTextStyles {
   AppTextStyles._();
 
-  static const String fontFamily = 'Work_Sans';
+  static const String fontFamily = 'Phluff';
 
   static TextStyle displayLarge = const TextStyle(
     fontSize: 32,

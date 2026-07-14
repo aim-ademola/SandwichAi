@@ -66,6 +66,7 @@ dependencies:
   firebase_messaging: ^16.4.1
   firebase_crashlytics: ^5.2.4
   path: ^1.9.1
+  hugeicons: ^1.1.7
 
 dev_dependencies:
   flutter_test:
@@ -115,6 +116,21 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
+  - family: Phluff
+    fonts:
+      - asset: assets/font/Phluff-Regular.otf
+        weight: 400
+      - asset: assets/font/Phluff-Medium.otf
+        weight: 500
+      - asset: assets/font/Phluff-SemiBold.otf
+        weight: 600
+      - asset: assets/font/Phluff-Bold.otf
+        weight: 700
+      - asset: assets/font/Phluff-ExtraBold.otf
+        weight: 800
+      - asset: assets/font/Phluff-Black.otf
+        weight: 900
+
   - family: Work_Sans
     fonts:
       - asset: assets/font/WorkSans-Thin.ttf

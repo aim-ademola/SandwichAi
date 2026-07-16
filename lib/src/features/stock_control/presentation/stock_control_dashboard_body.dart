@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
+import 'package:sandwich_ai/src/features/stock_control/bloc/stock_control_reports_cubit/stock_control_reports_cubit.dart';
+import 'package:sandwich_ai/src/features/stock_control/bloc/stock_control_reports_cubit/stock_control_reports_state.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_summary_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_summary_bloc/event.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_summary_bloc/state.dart';
@@ -11,9 +13,22 @@ import 'package:sandwich_ai/src/features/stock_control/bloc/stock_summary_bloc/s
 import 'package:sandwich_ai/src/features/stock_control/data/model/branch_stock_summary_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/shimmer_card.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_drawer.dart';
+import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_report_screens.dart';
 import 'package:intl/intl.dart';
 
 final NumberFormat _commaFormatter = NumberFormat('#,##0');
+
+class _ReportShortcut {
+  final IconData icon;
+  final String title;
+  final Widget screen;
+
+  const _ReportShortcut({
+    required this.icon,
+    required this.title,
+    required this.screen,
+  });
+}
 
 class StockControlDashboardBodyScreen extends StatefulWidget {
   const StockControlDashboardBodyScreen({super.key});
@@ -35,6 +50,9 @@ class _StockControlDashboardBodyScreenState
       LoadBranchStockSummary(
         branchId: context.read<BranchStockSummaryBloc>().branchId,
       ),
+    );
+    context.read<StockControlReportsCubit>().loadMovementTrends(
+      branchId: context.read<BranchStockSummaryBloc>().branchId,
     );
   }
 
@@ -269,6 +287,11 @@ class _StockControlDashboardBodyScreenState
                 SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: _buildReportsShortcutSection(constraints.maxWidth),
+                ),
+                SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   child: _buildTotalStockCard(
                     constraints.maxWidth,
                     overview.totalValue,
@@ -280,6 +303,11 @@ class _StockControlDashboardBodyScreenState
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   child: _buildStockStatusChart(overview),
+                ),
+                SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: _buildMovementTrendsChart(),
                 ),
                 SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
                 Padding(
@@ -334,6 +362,97 @@ class _StockControlDashboardBodyScreenState
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildReportsShortcutSection(double screenWidth) {
+    final shortcuts = [
+      _ReportShortcut(
+        icon: Icons.event_busy_outlined,
+        title: 'Expiry Tracking',
+        screen: const ExpiryTrackingScreen(),
+      ),
+      _ReportShortcut(
+        icon: Icons.lock_outline,
+        title: 'Locked Stock',
+        screen: const LockedStockScreen(),
+      ),
+      _ReportShortcut(
+        icon: Icons.trending_down,
+        title: 'Negative Stock',
+        screen: const NegativeStockReportScreen(),
+      ),
+      _ReportShortcut(
+        icon: Icons.assignment_returned_outlined,
+        title: 'Reorder Report',
+        screen: const ReorderReportScreen(),
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Stock Reports',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: _getSectionTitleFontSize(screenWidth),
+            fontWeight: FontWeight.w600,
+            color: context.modeTextPrimary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: shortcuts.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: screenWidth < 520 ? 2 : 4,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: screenWidth < 360 ? 1.55 : 1.8,
+          ),
+          itemBuilder: (context, index) {
+            final shortcut = shortcuts[index];
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => shortcut.screen),
+                );
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: context.modeSurface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: context.modePrimary.withValues(alpha: 0.22),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(shortcut.icon, color: context.modePrimary, size: 22),
+                    const SizedBox(height: 10),
+                    Text(
+                      shortcut.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: context.modeTextPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -834,7 +953,8 @@ class _StockControlDashboardBodyScreenState
                         PieChartSectionData(
                           color: context.modePrimary,
                           value: status.inStock.toDouble(),
-                          title: '${((status.inStock / total) * 100).toStringAsFixed(0)}%',
+                          title:
+                              '${((status.inStock / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 10,
@@ -845,7 +965,8 @@ class _StockControlDashboardBodyScreenState
                         PieChartSectionData(
                           color: context.modeError,
                           value: status.expired.toDouble(),
-                          title: '${((status.expired / total) * 100).toStringAsFixed(0)}%',
+                          title:
+                              '${((status.expired / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 10,
@@ -884,16 +1005,124 @@ class _StockControlDashboardBodyScreenState
     );
   }
 
+  Widget _buildMovementTrendsChart() {
+    return BlocBuilder<StockControlReportsCubit, StockControlReportsState>(
+      builder: (context, state) {
+        if (state.movementStatus == StockControlReportStatus.loading ||
+            state.movementStatus == StockControlReportStatus.initial) {
+          return Container(
+            height: 180,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: context.modeSurface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.modeBorder),
+            ),
+            child: CircularProgressIndicator(color: context.modePrimary),
+          );
+        }
+
+        final trends = state.movementTrends?.trends ?? const [];
+        if (state.movementStatus == StockControlReportStatus.error ||
+            trends.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: context.modeSurface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.modeBorder),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.show_chart, color: context.modeTextMuted),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    state.movementError ?? 'No movement trends available',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 13,
+                      color: context.modeTextMuted,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final visible = trends.length > 8
+            ? trends.sublist(trends.length - 8)
+            : trends;
+        final maxValue = visible
+            .map((trend) => trend.netQty.abs())
+            .fold<double>(1, (max, value) => value > max ? value : max);
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.modeSurface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: context.modeBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Stock Movement Trends',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: context.modeTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 160,
+                child: LineChart(
+                  LineChartData(
+                    minY: -maxValue,
+                    maxY: maxValue,
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      getDrawingHorizontalLine: (_) =>
+                          FlLine(color: context.modeBorder, strokeWidth: 1),
+                    ),
+                    titlesData: const FlTitlesData(show: false),
+                    borderData: FlBorderData(show: false),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: [
+                          for (var i = 0; i < visible.length; i++)
+                            FlSpot(i.toDouble(), visible[i].netQty),
+                        ],
+                        isCurved: true,
+                        color: context.modePrimary,
+                        barWidth: 3,
+                        dotData: const FlDotData(show: true),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: context.modePrimary.withValues(alpha: 0.12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _chartIndicator({required Color color, required String label}) {
     return Row(
       children: [
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
         Text(

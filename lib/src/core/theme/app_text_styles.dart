@@ -3,30 +3,31 @@ import 'package:flutter/material.dart';
 class AppTextStyles {
   AppTextStyles._();
 
-  static const String fontFamily = 'Phluff';
+  static const String fontFamily = 'Work_Sans';
+  static const String brandFontFamily = 'Phluff';
 
   static TextStyle displayLarge = const TextStyle(
-    fontSize: 32,
+    fontSize: 20.8,
     fontWeight: FontWeight.w700,
-    fontFamily: fontFamily,
+    fontFamily: brandFontFamily,
   );
 
   static TextStyle displayMedium = const TextStyle(
-    fontSize: 28,
+    fontSize: 18.2,
     fontWeight: FontWeight.w700,
-    fontFamily: fontFamily,
+    fontFamily: brandFontFamily,
   );
 
   static TextStyle heading1 = const TextStyle(
-    fontSize: 24,
+    fontSize: 15.6,
     fontWeight: FontWeight.w700,
-    fontFamily: fontFamily,
+    fontFamily: brandFontFamily,
   );
 
   static TextStyle heading2 = const TextStyle(
-    fontSize: 20,
+    fontSize: 13,
     fontWeight: FontWeight.w600,
-    fontFamily: fontFamily,
+    fontFamily: brandFontFamily,
   );
 
   static TextStyle heading3 = const TextStyle(
@@ -66,9 +67,9 @@ class AppTextStyles {
   );
 
   static TextStyle button = const TextStyle(
-    fontSize: 14,
+    fontSize: 9.1,
     fontWeight: FontWeight.w600,
-    fontFamily: fontFamily,
+    fontFamily: brandFontFamily,
   );
 
   static TextStyle caption = const TextStyle(

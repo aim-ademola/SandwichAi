@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/data/repo/employee_lookup_repo.dart';
 import 'package:sandwich_ai/src/core/globals/chat/data/repo/chat_repo.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/chnage_pwd_repo.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/forgot_pwd_repo.dart';
@@ -24,6 +25,7 @@ import 'package:sandwich_ai/src/features/processing/data/repo/req_stock.dart'
 import 'package:sandwich_ai/src/features/processing/data/repo/stock_request_repo.dart';
 import 'package:sandwich_ai/src/features/processing/data/repo/wasage_analysis_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/order_list_repo.dart';
+import 'package:sandwich_ai/src/features/procurement/data/repository/procurement_performance_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/procurement_order_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/purchase_order_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/supplier_repo.dart';
@@ -34,6 +36,8 @@ import 'package:sandwich_ai/src/features/stock_control/data/repo/bulk_inventory_
 import 'package:sandwich_ai/src/features/stock_control/data/repo/inventory_items_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/processing_transfer_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/procurement_req_repo.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/repo/reorder_repo.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/repo/stock_card_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/stock_movement.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/stock_summary_repo.dart';
 
@@ -62,6 +66,9 @@ class RepositoryProviders {
     ),
     RepositoryProvider<DashboardContractRepositoryInterface>(
       create: (context) => DashboardContractRepository(),
+    ),
+    RepositoryProvider<EmployeeLookupRepositoryInterface>(
+      create: (context) => EmployeeLookupRepository(),
     ),
     RepositoryProvider<ProcessingDashboardRepositoryInterface>(
       create: (context) => ProcessingDashboardRepository(),
@@ -108,11 +115,20 @@ class RepositoryProviders {
     RepositoryProvider<ProcurementRequestRepositoryInterface>(
       create: (context) => ProcurementRequestRepository(),
     ),
+    RepositoryProvider<StockCardRepositoryInterface>(
+      create: (context) => StockCardRepository(),
+    ),
+    RepositoryProvider<ReorderRepositoryInterface>(
+      create: (context) => ReorderRepository(),
+    ),
     RepositoryProvider<OrderRepositoryInterface>(
       create: (context) => OrderRepository(),
     ),
     RepositoryProvider<PurchaseOrdersRepositoryInterface>(
       create: (context) => PurchaseOrdersRepository(),
+    ),
+    RepositoryProvider<ProcurementPerformanceRepositoryInterface>(
+      create: (context) => ProcurementPerformanceRepository(),
     ),
     RepositoryProvider<KitchenDashboardRepositoryInterface>(
       create: (context) => KitchenDashboardRepository(),

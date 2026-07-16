@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_action_model.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_model.dart';
 
 // Repository
@@ -26,6 +27,22 @@ abstract class PurchaseOrdersRepositoryInterface {
     int limit = 10,
     String sortBy = 'createdAt',
     String sortOrder = 'desc',
+  });
+
+  Future<ApiResponse<OrdersListResponse>> getPendingApprovalOrders({
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<ApiResponse<OrdersListResponse>> getOverdueDeliveries({
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<ApiResponse<PurchaseOrderTimelineResponse>> getOrderTimeline({
+    String? orderId,
+    String? dateFrom,
+    String? dateTo,
   });
 }
 
@@ -128,6 +145,119 @@ class PurchaseOrdersRepository extends BaseRepository
             Map<String, dynamic>.from(data),
           );
           return ApiResponse.success(ordersResponse);
+        },
+        error: (error) => ApiResponse.error(error),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } on FormatException catch (e) {
+      return ApiResponse.errorMessage(e.message);
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+    }
+  }
+
+  @override
+  Future<ApiResponse<OrdersListResponse>> getPendingApprovalOrders({
+    int page = 1,
+    int limit = 10,
+  }) {
+    return _getOrders(
+      '/procurement/orders/approval/pending',
+      queryParameters: {'page': page, 'limit': limit},
+    );
+  }
+
+  @override
+  Future<ApiResponse<OrdersListResponse>> getOverdueDeliveries({
+    int page = 1,
+    int limit = 10,
+  }) {
+    return _getOrders(
+      '/procurement/orders/overdue-deliveries',
+      queryParameters: {'page': page, 'limit': limit},
+    );
+  }
+
+  @override
+  Future<ApiResponse<PurchaseOrderTimelineResponse>> getOrderTimeline({
+    String? orderId,
+    String? dateFrom,
+    String? dateTo,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{
+        if (orderId != null && orderId.isNotEmpty) 'orderId': orderId,
+        if (dateFrom != null && dateFrom.isNotEmpty) 'dateFrom': dateFrom,
+        if (dateTo != null && dateTo.isNotEmpty) 'dateTo': dateTo,
+      };
+
+      final response = await _apiClient
+          .get(
+            '/procurement/orders/timeline',
+            queryParameters: queryParameters.isNotEmpty
+                ? queryParameters
+                : null,
+          )
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      return response.when(
+        success: (data) {
+          final json = data is Map
+              ? Map<String, dynamic>.from(data)
+              : <String, dynamic>{};
+          return ApiResponse.success(
+            PurchaseOrderTimelineResponse.fromJson(json),
+          );
+        },
+        error: (error) => ApiResponse.error(error),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+    }
+  }
+
+  Future<ApiResponse<OrdersListResponse>> _getOrders(
+    String endpoint, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      final response = await _apiClient
+          .get(endpoint, queryParameters: queryParameters)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      return response.when(
+        success: (data) {
+          if (data is! Map) {
+            return ApiResponse.errorMessage('Invalid response from server');
+          }
+          return ApiResponse.success(
+            OrdersListResponse.fromJson(Map<String, dynamic>.from(data)),
+          );
         },
         error: (error) => ApiResponse.error(error),
       );

@@ -6,6 +6,7 @@ import 'package:sandwich_ai/src/features/stock_control/bloc/bulk_inventory_uploa
 import 'package:sandwich_ai/src/features/stock_control/bloc/processing_transfrer_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/procurement_req_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock-movement_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/stock_control/bloc/stock_control_reports_cubit/stock_control_reports_cubit.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_summary_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/add_branch_stock.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/branch_details_repo.dart';
@@ -14,6 +15,8 @@ import 'package:sandwich_ai/src/features/stock_control/data/repo/bulk_inventory_
 import 'package:sandwich_ai/src/features/stock_control/data/repo/inventory_items_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/processing_transfer_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/procurement_req_repo.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/repo/reorder_repo.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/repo/stock_card_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/stock_movement.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/stock_summary_repo.dart';
 
@@ -62,6 +65,14 @@ class StockProviders {
     BlocProvider<ProcurementRequestBloc>(
       create: (context) => ProcurementRequestBloc(
         repository: context.read<ProcurementRequestRepositoryInterface>(),
+      ),
+    ),
+    BlocProvider<StockControlReportsCubit>(
+      create: (context) => StockControlReportsCubit(
+        stockCardRepository: context.read<StockCardRepositoryInterface>(),
+        branchStockRepository: context
+            .read<AddBranchStockRepositoryInterface>(),
+        reorderRepository: context.read<ReorderRepositoryInterface>(),
       ),
     ),
   ];

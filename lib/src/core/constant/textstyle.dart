@@ -4,7 +4,8 @@ import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 class WorkSansAppTextStyles {
   WorkSansAppTextStyles._();
 
-  static const String fontFamily = 'Phluff';
+  static const String fontFamily = 'Work_Sans';
+  static const String brandFontFamily = 'Phluff';
 
   static TextStyle xLarge = TextStyle(
     fontSize: 32,
@@ -41,5 +42,19 @@ class WorkSansAppTextStyles {
     fontWeight: FontWeight.w300,
     color: kprimaryTextColor1,
     fontFamily: fontFamily,
+  );
+
+  static TextStyle brandTitle = TextStyle(
+    fontSize: 15.6,
+    fontWeight: FontWeight.w700,
+    color: kprimaryTextColor1,
+    fontFamily: brandFontFamily,
+  );
+
+  static TextStyle brandButton = TextStyle(
+    fontSize: 9.1,
+    fontWeight: FontWeight.w700,
+    color: kprimaryTextColor1,
+    fontFamily: brandFontFamily,
   );
 }

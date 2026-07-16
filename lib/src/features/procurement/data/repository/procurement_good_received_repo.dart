@@ -6,7 +6,14 @@ import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart'
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/procurement_good_recieved_model.dart'
-    show InventoryItem, GoodsReceived, CreateGoodsReceivedRequest;
+    show
+        InventoryItem,
+        GoodsReceived,
+        CreateGoodsReceivedRequest,
+        UpdateGoodsReceivedQcRequest,
+        GoodsReceivedPrefillResponse,
+        PurchaseOrderDeliveryStatusResponse,
+        GoodsReceivedQcStats;
 
 abstract class GoodsReceivedRepositoryInterface {
   Future<ApiResponse<List<InventoryItem>>> getInventoryItems({
@@ -20,6 +27,30 @@ abstract class GoodsReceivedRepositoryInterface {
   Future<ApiResponse<List<GoodsReceived>>> getGoodsReceived({
     required String branchId,
   });
+
+  Future<ApiResponse<GoodsReceived>> getGoodsReceivedById(String id);
+
+  Future<ApiResponse<GoodsReceived>> updateGoodsReceivedQc({
+    required String id,
+    required UpdateGoodsReceivedQcRequest request,
+  });
+
+  Future<ApiResponse<GoodsReceivedPrefillResponse>> getGoodsReceivedPrefill(
+    String poId,
+  );
+
+  Future<ApiResponse<List<GoodsReceived>>> getGoodsReceivedByPurchaseOrder(
+    String poId,
+  );
+
+  Future<ApiResponse<PurchaseOrderDeliveryStatusResponse>>
+  getPurchaseOrderDeliveryStatus(String poId);
+
+  Future<ApiResponse<Map<String, dynamic>>> markPurchaseOrderComplete(
+    String poId,
+  );
+
+  Future<ApiResponse<GoodsReceivedQcStats>> getGoodsReceivedQcStats();
 }
 
 class GoodsReceivedRepository extends BaseRepository
@@ -149,6 +180,116 @@ class GoodsReceivedRepository extends BaseRepository
     }
   }
 
+  @override
+  Future<ApiResponse<GoodsReceived>> getGoodsReceivedById(String id) async {
+    if (id.isEmpty) {
+      return ApiResponse.errorMessage('Goods received ID cannot be empty');
+    }
+    return _getObject(
+      'procurement/goods-received/$id',
+      (json) => GoodsReceived.fromJson(_unwrapData(json)),
+    );
+  }
+
+  @override
+  Future<ApiResponse<GoodsReceived>> updateGoodsReceivedQc({
+    required String id,
+    required UpdateGoodsReceivedQcRequest request,
+  }) async {
+    if (id.isEmpty) {
+      return ApiResponse.errorMessage('Goods received ID cannot be empty');
+    }
+    if (request.qcStatus.isEmpty) {
+      return ApiResponse.errorMessage('QC status cannot be empty');
+    }
+    if (request.inspectedBy.isEmpty) {
+      return ApiResponse.errorMessage('Inspected by field cannot be empty');
+    }
+
+    return _patchObject(
+      'procurement/goods-received/$id/qc',
+      request.toJson(),
+      (json) => GoodsReceived.fromJson(_unwrapData(json)),
+    );
+  }
+
+  @override
+  Future<ApiResponse<GoodsReceivedPrefillResponse>> getGoodsReceivedPrefill(
+    String poId,
+  ) {
+    if (poId.isEmpty) {
+      return Future.value(
+        ApiResponse.errorMessage('Purchase order ID cannot be empty'),
+      );
+    }
+    return _getObject(
+      'procurement/goods-received/prefill/$poId',
+      GoodsReceivedPrefillResponse.fromJson,
+    );
+  }
+
+  @override
+  Future<ApiResponse<List<GoodsReceived>>> getGoodsReceivedByPurchaseOrder(
+    String poId,
+  ) async {
+    if (poId.isEmpty) {
+      return ApiResponse.errorMessage('Purchase order ID cannot be empty');
+    }
+
+    final response = await _getRaw('goods-received/purchase-order/$poId');
+    return response.when(
+      success: (json) {
+        final list = _extractList(json);
+        return ApiResponse.success(
+          (list ?? const [])
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    GoodsReceived.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(),
+        );
+      },
+      error: (error) => ApiResponse.error(error),
+    );
+  }
+
+  @override
+  Future<ApiResponse<PurchaseOrderDeliveryStatusResponse>>
+  getPurchaseOrderDeliveryStatus(String poId) {
+    if (poId.isEmpty) {
+      return Future.value(
+        ApiResponse.errorMessage('Purchase order ID cannot be empty'),
+      );
+    }
+    return _getObject(
+      'goods-received/purchase-order/$poId/delivery-status',
+      PurchaseOrderDeliveryStatusResponse.fromJson,
+    );
+  }
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> markPurchaseOrderComplete(
+    String poId,
+  ) async {
+    if (poId.isEmpty) {
+      return ApiResponse.errorMessage('Purchase order ID cannot be empty');
+    }
+    return _patchObject(
+      'goods-received/purchase-order/$poId/mark-complete',
+      const <String, dynamic>{},
+      (json) => json,
+    );
+  }
+
+  @override
+  Future<ApiResponse<GoodsReceivedQcStats>> getGoodsReceivedQcStats() {
+    return _getObject(
+      'procurement/goods-received/stats/qc',
+      GoodsReceivedQcStats.fromJson,
+    );
+  }
+
   void _validateBranchId(String branchId) {
     if (branchId.isEmpty) {
       throw FormatException('Branch ID cannot be empty');
@@ -234,5 +375,92 @@ class GoodsReceivedRepository extends BaseRepository
     }
 
     return null;
+  }
+
+  Future<ApiResponse<T>> _getObject<T>(
+    String endpoint,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    final response = await _getRaw(endpoint);
+    return response.when(
+      success: (json) => ApiResponse.success(fromJson(json)),
+      error: (error) => ApiResponse.error(error),
+    );
+  }
+
+  Future<ApiResponse<T>> _patchObject<T>(
+    String endpoint,
+    Map<String, dynamic> body,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    try {
+      final response = await _apiClient
+          .patch(endpoint, data: body)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      return response.when(
+        success: (data) {
+          final json = data is Map
+              ? Map<String, dynamic>.from(data)
+              : <String, dynamic>{};
+          return ApiResponse.success(fromJson(json));
+        },
+        error: (error) => ApiResponse.error(error),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+    }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> _getRaw(String endpoint) async {
+    try {
+      final response = await _apiClient
+          .get(endpoint)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException('Request timed out. Please try again.');
+            },
+          );
+
+      return response.when(
+        success: (data) {
+          final json = data is Map
+              ? Map<String, dynamic>.from(data)
+              : <String, dynamic>{};
+          return ApiResponse.success(json);
+        },
+        error: (error) => ApiResponse.error(error),
+      );
+    } on SocketException {
+      return ApiResponse.errorMessage(
+        'No internet connection. Please check your network settings.',
+      );
+    } on TimeoutException {
+      return ApiResponse.errorMessage(
+        'Connection timeout. Please check your internet and try again.',
+      );
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+    }
+  }
+
+  Map<String, dynamic> _unwrapData(Map<String, dynamic> json) {
+    final data = json['data'];
+    if (data is Map) return Map<String, dynamic>.from(data);
+    return json;
   }
 }

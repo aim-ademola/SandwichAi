@@ -122,6 +122,7 @@ class BranchStockSuccess extends BranchStockState {
   final bool isUpdate;
   final bool isDelete;
   final bool isAdjustment;
+  final bool isControlAction;
 
   const BranchStockSuccess({
     this.response,
@@ -130,6 +131,7 @@ class BranchStockSuccess extends BranchStockState {
     this.isUpdate = false,
     this.isDelete = false,
     this.isAdjustment = false,
+    this.isControlAction = false,
   });
 
   @override
@@ -140,6 +142,7 @@ class BranchStockSuccess extends BranchStockState {
     isUpdate,
     isDelete,
     isAdjustment,
+    isControlAction,
   ];
 }
 

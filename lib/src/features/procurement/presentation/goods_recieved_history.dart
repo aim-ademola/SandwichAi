@@ -6,6 +6,7 @@ import 'package:sandwich_ai/src/core/theme/context_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/procurement_good_recieved_model.dart';
+import 'package:sandwich_ai/src/features/procurement/presentation/goods_received_detail.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/state.dart';
@@ -193,7 +194,17 @@ class _GoodsReceivedHistoryScreenState
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _showReceiptDetails(receipt, screenWidth),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => GoodsReceivedDetailScreen(
+                  receiptId: receipt.id,
+                  title: receipt.receiptNo,
+                ),
+              ),
+            );
+          },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: EdgeInsets.all(_getPadding(screenWidth)),
@@ -359,6 +370,7 @@ class _GoodsReceivedHistoryScreenState
     );
   }
 
+  // ignore: unused_element
   void _showReceiptDetails(GoodsReceived receipt, double screenWidth) {
     showModalBottomSheet(
       context: context,

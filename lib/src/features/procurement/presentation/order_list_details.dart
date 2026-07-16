@@ -1,9 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_action_model.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_model.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/purchase_order_actions_cubit/purchase_order_actions_cubit.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/purchase_order_actions_cubit/purchase_order_actions_state.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -29,6 +34,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    context.read<PurchaseOrderActionsCubit>().loadOrderContext(widget.order.id);
   }
 
   @override
@@ -107,6 +113,18 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
           icon: Icon(Icons.more_vert, color: context.modeTextPrimary),
           onSelected: (value) {
             switch (value) {
+              case 'edit':
+                _showEditOrderDialog();
+                break;
+              case 'submit_approval':
+                _showSubmitApprovalDialog();
+                break;
+              case 'dispatch':
+                _showDispatchDialog();
+                break;
+              case 'delete':
+                _confirmDeleteOrder();
+                break;
               case 'print':
                 _printOrder();
                 break;
@@ -116,6 +134,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
             }
           },
           itemBuilder: (context) => [
+            _buildMenuItem('edit', Icons.edit_outlined, 'Edit Order'),
+            _buildMenuItem(
+              'submit_approval',
+              Icons.approval_outlined,
+              'Submit Approval',
+            ),
+            _buildMenuItem(
+              'dispatch',
+              Icons.local_shipping_outlined,
+              'Dispatch Order',
+            ),
             PopupMenuItem(
               value: 'print',
               child: Row(
@@ -142,9 +171,40 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                 ],
               ),
             ),
+            _buildMenuItem(
+              'delete',
+              Icons.delete_outline,
+              'Delete Order',
+              isDestructive: true,
+            ),
           ],
         ),
       ],
+    );
+  }
+
+  PopupMenuItem<String> _buildMenuItem(
+    String value,
+    IconData icon,
+    String label, {
+    bool isDestructive = false,
+  }) {
+    final color = isDestructive ? context.modeError : context.modeTextPrimary;
+    return PopupMenuItem(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: color),
+          const SizedBox(width: 12),
+          Text(
+            label,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 14,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -403,7 +463,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               ),
             ],
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -711,6 +771,193 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     );
   }
 
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: context.modeTextInverse,
+          ),
+        ),
+        backgroundColor: context.modeSuccess,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _showSubmitApprovalDialog() async {
+    final noteController = TextEditingController();
+    final submittedBy = await AuthCacheHelper.instance.getEmpID() ?? '';
+    if (!mounted) return;
+    final ok = await _showTextActionDialog(
+      title: 'Submit Approval',
+      label: 'Approval note',
+      controller: noteController,
+      actionText: 'Submit',
+      onAction: () => context.read<PurchaseOrderActionsCubit>().submitApproval(
+        orderId: widget.order.id,
+        request: SubmitPurchaseOrderApprovalRequest(
+          submittedBy: submittedBy,
+          note: noteController.text.trim(),
+        ),
+      ),
+    );
+    noteController.dispose();
+    if (ok == true) _showSuccessSnackBar('Order submitted for approval.');
+  }
+
+  Future<void> _showEditOrderDialog() async {
+    final noteController = TextEditingController(
+      text: widget.order.internalNotes ?? widget.order.buyerNotes ?? '',
+    );
+    final ok = await _showTextActionDialog(
+      title: 'Edit Order Notes',
+      label: 'Internal note',
+      controller: noteController,
+      actionText: 'Save',
+      onAction: () => context.read<PurchaseOrderActionsCubit>().updateOrder(
+        orderId: widget.order.id,
+        data: {'internalNotes': noteController.text.trim()},
+      ),
+    );
+    noteController.dispose();
+    if (ok == true) _showSuccessSnackBar('Order updated.');
+  }
+
+  Future<void> _showDispatchDialog() async {
+    final trackingController = TextEditingController(
+      text: widget.order.trackingNumber ?? '',
+    );
+    final courierController = TextEditingController(
+      text: widget.order.courierName ?? '',
+    );
+    final noteController = TextEditingController();
+    final dispatchedBy = await AuthCacheHelper.instance.getEmpID() ?? '';
+    if (!mounted) return;
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Dispatch Order'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: trackingController,
+              decoration: const InputDecoration(labelText: 'Tracking number'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: courierController,
+              decoration: const InputDecoration(labelText: 'Courier name'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: noteController,
+              minLines: 2,
+              maxLines: 4,
+              decoration: const InputDecoration(labelText: 'Dispatch note'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final cubit = context.read<PurchaseOrderActionsCubit>();
+              final ok = await cubit.dispatchOrder(
+                orderId: widget.order.id,
+                request: PurchaseOrderDispatchRequest(
+                  dispatchedBy: dispatchedBy,
+                  trackingNumber: trackingController.text.trim(),
+                  courierName: courierController.text.trim(),
+                  dispatchNote: noteController.text.trim(),
+                ),
+              );
+              if (dialogContext.mounted) Navigator.pop(dialogContext, ok);
+            },
+            child: const Text('Dispatch'),
+          ),
+        ],
+      ),
+    );
+    trackingController.dispose();
+    courierController.dispose();
+    noteController.dispose();
+    if (ok == true) _showSuccessSnackBar('Order dispatched.');
+  }
+
+  Future<bool?> _showTextActionDialog({
+    required String title,
+    required String label,
+    required TextEditingController controller,
+    required String actionText,
+    required Future<bool> Function() onAction,
+  }) {
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          minLines: 2,
+          maxLines: 4,
+          decoration: InputDecoration(labelText: label),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final ok = await onAction();
+              if (dialogContext.mounted) Navigator.pop(dialogContext, ok);
+            },
+            child: Text(actionText),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteOrder() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Order'),
+        content: Text(
+          'Delete ${widget.order.orderNumber}? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: context.modeError),
+            onPressed: () async {
+              final ok = await context
+                  .read<PurchaseOrderActionsCubit>()
+                  .deleteOrder(widget.order.id);
+              if (dialogContext.mounted) Navigator.pop(dialogContext, ok);
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true && mounted) {
+      _showSuccessSnackBar('Order deleted.');
+      Navigator.pop(context, true);
+    }
+  }
+
   Widget _buildBody(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -855,6 +1102,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 16),
+          _buildApprovalBanner(),
+          const SizedBox(height: 16),
           _buildSectionCard(
             title: 'Supplier Information',
             icon: Icons.store_outlined,
@@ -925,6 +1174,67 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     );
   }
 
+  Widget _buildApprovalBanner() {
+    return BlocBuilder<PurchaseOrderActionsCubit, PurchaseOrderActionsState>(
+      builder: (context, state) {
+        if (state.approvalStatusState == PurchaseOrderActionStatus.loading) {
+          return _buildSectionCard(
+            title: 'Approval Status',
+            icon: Icons.approval_outlined,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: context.modePrimary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Loading approval status...',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    color: context.modeTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final approval = state.approvalStatus;
+        if (approval == null) {
+          return const SizedBox.shrink();
+        }
+
+        final text = approval.approvalStatus.isNotEmpty
+            ? approval.approvalStatus
+            : approval.status;
+        return _buildSectionCard(
+          title: 'Approval Status',
+          icon: Icons.approval_outlined,
+          child: Column(
+            children: [
+              _buildInfoRow('Status', text.replaceAll('_', ' ')),
+              if (approval.currentApprover.isNotEmpty) ...[
+                const Divider(height: 24),
+                _buildInfoRow('Current Approver', approval.currentApprover),
+              ],
+              if (approval.approvals.isNotEmpty) ...[
+                const Divider(height: 24),
+                _buildInfoRow(
+                  'Approval Steps',
+                  approval.approvals.length.toString(),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildItemsTab(double padding) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(padding),
@@ -932,62 +1242,60 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 16),
-          ...widget.order.items
-              .map(
-                (item) => Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: context.modeSurface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: context.modePrimary, width: 1.5),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          ...widget.order.items.map(
+            (item) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: context.modeSurface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: context.modePrimary, width: 1.5),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.productName,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: context.modeTextPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.productCode,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 12,
+                        color: context.modeTextSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          item.productName,
+                          'Qty: ${item.quantityOrdered} ${item.unit}',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          '₦${NumberFormat('#,##0.00').format(item.totalPrice)}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: context.modeTextPrimary,
+                            color: context.modePrimary,
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.productCode,
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 12,
-                            color: context.modeTextSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Qty: ${item.quantityOrdered} ${item.unit}',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(
-                              '₦${NumberFormat('#,##0.00').format(item.totalPrice)}',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: context.modePrimary,
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
-              )
-              .toList(),
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
         ],
       ),
@@ -995,28 +1303,82 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   }
 
   Widget _buildTimelineTab(double padding) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(padding),
-      child: Column(
-        children: [
-          const SizedBox(height: 16),
-          Text(
-            'Order Timeline',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: context.modeTextPrimary,
+    return BlocBuilder<PurchaseOrderActionsCubit, PurchaseOrderActionsState>(
+      builder: (context, state) {
+        if (state.timelineStatus == PurchaseOrderActionStatus.loading) {
+          return Center(
+            child: CircularProgressIndicator(color: context.modePrimary),
+          );
+        }
+        if (state.timelineStatus == PurchaseOrderActionStatus.error) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                state.timelineError ?? 'Failed to load timeline.',
+                textAlign: TextAlign.center,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  color: context.modeTextSecondary,
+                ),
+              ),
             ),
+          );
+        }
+
+        final events = state.timeline?.events ?? const [];
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(padding),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              Text(
+                'Order Timeline',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: context.modeTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (events.isEmpty)
+                _buildTimelineItem(
+                  'Order Created',
+                  DateFormat('MMM dd, yyyy').format(widget.order.createdAt),
+                )
+              else
+                ...events.map((event) {
+                  final title =
+                      (event['title'] ??
+                              event['event'] ??
+                              event['status'] ??
+                              'Timeline Event')
+                          .toString();
+                  final date =
+                      (event['date'] ??
+                              event['createdAt'] ??
+                              event['timestamp'] ??
+                              '')
+                          .toString();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildTimelineItem(
+                      title.replaceAll('_', ' '),
+                      _formatTimelineDate(date),
+                    ),
+                  );
+                }),
+              const SizedBox(height: 32),
+            ],
           ),
-          const SizedBox(height: 16),
-          _buildTimelineItem(
-            'Order Created',
-            DateFormat('MMM dd, yyyy').format(widget.order.createdAt),
-          ),
-          const SizedBox(height: 32),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  String _formatTimelineDate(String value) {
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) return value.isEmpty ? 'Date unavailable' : value;
+    return DateFormat('MMM dd, yyyy • hh:mm a').format(parsed);
   }
 
   Widget _buildTimelineItem(String title, String date) {

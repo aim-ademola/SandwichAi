@@ -21,6 +21,13 @@ abstract class AddBranchStockRepositoryInterface {
     String stockId,
     StockAdjustmentRequest request,
   );
+  Future<ApiResponse<BranchStockControlResponse>> allowNegativeStock(
+    String stockId,
+  );
+  Future<ApiResponse<BranchStockControlResponse>> lockStock(String stockId);
+  Future<ApiResponse<BranchStockControlResponse>> unlockStock(String stockId);
+  Future<ApiResponse<BranchStockControlListResponse>> getLockedStock();
+  Future<ApiResponse<BranchStockControlListResponse>> getNegativeStockReport();
 }
 
 class AddBranchStockRepository extends BaseRepository
@@ -184,6 +191,33 @@ class AddBranchStockRepository extends BaseRepository
     }
   }
 
+  @override
+  Future<ApiResponse<BranchStockControlResponse>> allowNegativeStock(
+    String stockId,
+  ) {
+    return _patchStockControl('branch-stock/$stockId/allow-negative', stockId);
+  }
+
+  @override
+  Future<ApiResponse<BranchStockControlResponse>> lockStock(String stockId) {
+    return _patchStockControl('branch-stock/$stockId/lock', stockId);
+  }
+
+  @override
+  Future<ApiResponse<BranchStockControlResponse>> unlockStock(String stockId) {
+    return _patchStockControl('branch-stock/$stockId/unlock', stockId);
+  }
+
+  @override
+  Future<ApiResponse<BranchStockControlListResponse>> getLockedStock() {
+    return _getStockControlList('branch-stock/locked');
+  }
+
+  @override
+  Future<ApiResponse<BranchStockControlListResponse>> getNegativeStockReport() {
+    return _getStockControlList('branch-stock/negative-stock-report');
+  }
+
   /// Validates branch stock request fields
   void _validateBranchStockRequest(BranchStockRequest request) {
     if (request.itemId.isEmpty) {
@@ -294,7 +328,7 @@ class AddBranchStockRepository extends BaseRepository
       // Only throw if it's a parsing error, not a validation error
       if (e is FormatException &&
           e.message == 'Invalid adjustment data received') {
-        throw e;
+        rethrow;
       }
       throw FormatException('Unable to process response: ${e.toString()}');
     }
@@ -358,6 +392,141 @@ class AddBranchStockRepository extends BaseRepository
 
     return 'Operation failed. Please try again later.';
   }
+
+  Future<ApiResponse<BranchStockControlResponse>> _patchStockControl(
+    String endpoint,
+    String stockId,
+  ) async {
+    try {
+      if (stockId.isEmpty) {
+        throw FormatException('Stock ID cannot be empty');
+      }
+
+      final online = await ConnectivityService.instance.isOnline;
+      if (!online) {
+        await OfflineQueueManager.instance.add(
+          PendingRequest(method: "PATCH", url: endpoint, body: {}),
+        );
+        return ApiResponse.errorMessage(
+          "Offline detected. Stock control request cached and will sync automatically.",
+        );
+      }
+
+      final response = await _apiClient
+          .patch(endpoint, data: const <String, dynamic>{})
+          .timeout(const Duration(seconds: 30));
+
+      return response.when(
+        success: (data) {
+          final json = data is Map
+              ? Map<String, dynamic>.from(data)
+              : <String, dynamic>{};
+          return ApiResponse.success(BranchStockControlResponse.fromJson(json));
+        },
+        error: (error) => ApiResponse.error(error),
+      );
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+    }
+  }
+
+  Future<ApiResponse<BranchStockControlListResponse>> _getStockControlList(
+    String endpoint,
+  ) async {
+    try {
+      final response = await _apiClient
+          .get(endpoint)
+          .timeout(const Duration(seconds: 30));
+
+      return response.when(
+        success: (data) {
+          final json = data is Map
+              ? Map<String, dynamic>.from(data)
+              : <String, dynamic>{};
+          return ApiResponse.success(
+            BranchStockControlListResponse.fromJson(json),
+          );
+        },
+        error: (error) => ApiResponse.error(error),
+      );
+    } catch (e) {
+      return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
+    }
+  }
+}
+
+class BranchStockControlResponse {
+  final bool success;
+  final String message;
+  final Map<String, dynamic> data;
+  final Map<String, dynamic> raw;
+
+  const BranchStockControlResponse({
+    required this.success,
+    required this.message,
+    required this.data,
+    required this.raw,
+  });
+
+  factory BranchStockControlResponse.fromJson(Map<String, dynamic> json) {
+    final data = _asMap(json['data']);
+    return BranchStockControlResponse(
+      success:
+          json['success'] == true ||
+          (json['message'] ?? '').toString().isNotEmpty,
+      message: json['message']?.toString() ?? '',
+      data: data.isNotEmpty ? data : json,
+      raw: json,
+    );
+  }
+}
+
+class BranchStockControlListResponse {
+  final String message;
+  final List<Map<String, dynamic>> items;
+  final Map<String, dynamic> summary;
+  final Map<String, dynamic> raw;
+
+  const BranchStockControlListResponse({
+    required this.message,
+    required this.items,
+    required this.summary,
+    required this.raw,
+  });
+
+  factory BranchStockControlListResponse.fromJson(Map<String, dynamic> json) {
+    final list = _extractControlList(json);
+    return BranchStockControlListResponse(
+      message: json['message']?.toString() ?? '',
+      items: list
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList(),
+      summary: _asMap(json['summary']),
+      raw: json,
+    );
+  }
+}
+
+Map<String, dynamic> _asMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return <String, dynamic>{};
+}
+
+List<dynamic> _extractControlList(Map<String, dynamic> json) {
+  for (final key in const ['data', 'items', 'results']) {
+    final value = json[key];
+    if (value is List) return value;
+  }
+  final data = json['data'];
+  if (data is Map) {
+    for (final key in const ['items', 'results', 'stocks']) {
+      final value = data[key];
+      if (value is List) return value;
+    }
+  }
+  return const [];
 }
 
 /// Stock Adjustment Request Model

@@ -49,6 +49,12 @@ class AppTheme {
         foregroundColor: colors.textPrimary,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          color: colors.textPrimary,
+          fontSize: 11.7,
+          fontWeight: FontWeight.w700,
+          fontFamily: AppTextStyles.brandFontFamily,
+        ),
       ),
       drawerTheme: DrawerThemeData(
         backgroundColor: colors.surface,
@@ -59,9 +65,9 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         titleTextStyle: TextStyle(
           color: colors.textPrimary,
-          fontSize: 20,
+          fontSize: 13,
           fontWeight: FontWeight.w700,
-          fontFamily: AppTextStyles.fontFamily,
+          fontFamily: AppTextStyles.brandFontFamily,
         ),
         contentTextStyle: TextStyle(
           color: colors.textSecondary,
@@ -108,6 +114,10 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: colors.primary,
           foregroundColor: colors.textInverse,
+          textStyle: const TextStyle(
+            fontFamily: AppTextStyles.brandFontFamily,
+            fontWeight: FontWeight.w700,
+          ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),

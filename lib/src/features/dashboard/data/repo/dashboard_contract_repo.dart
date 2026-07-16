@@ -17,7 +17,7 @@ class DashboardContractRepository
 
   static const Map<DashboardDomain, String> _endpointPlaceholders = {
     DashboardDomain.pos: 'customer-service/analytics/dashboard/summary',
-    DashboardDomain.procurement: 'procurement/dashboard',
+    DashboardDomain.procurement: 'procurement/dashboard/overview',
     DashboardDomain.processing: 'processing/dashboard',
     DashboardDomain.kitchen: 'kitchen/dashboard',
     DashboardDomain.stockControl: 'branch-stock/dashboard',

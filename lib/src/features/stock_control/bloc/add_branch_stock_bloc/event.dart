@@ -48,6 +48,33 @@ class AdjustBranchStock extends BranchStockEvent {
   List<Object?> get props => [stockId, request];
 }
 
+class AllowNegativeBranchStock extends BranchStockEvent {
+  final String stockId;
+
+  const AllowNegativeBranchStock({required this.stockId});
+
+  @override
+  List<Object?> get props => [stockId];
+}
+
+class LockBranchStock extends BranchStockEvent {
+  final String stockId;
+
+  const LockBranchStock({required this.stockId});
+
+  @override
+  List<Object?> get props => [stockId];
+}
+
+class UnlockBranchStock extends BranchStockEvent {
+  final String stockId;
+
+  const UnlockBranchStock({required this.stockId});
+
+  @override
+  List<Object?> get props => [stockId];
+}
+
 class ValidateCurrentStock extends BranchStockEvent {
   final String value;
 

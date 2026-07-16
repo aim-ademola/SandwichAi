@@ -71,6 +71,26 @@ class LoadOrders extends OrdersListEvent {
   ];
 }
 
+class LoadPendingApprovalOrders extends OrdersListEvent {
+  final int page;
+  final int limit;
+
+  const LoadPendingApprovalOrders({this.page = 1, this.limit = 10});
+
+  @override
+  List<Object?> get props => [page, limit];
+}
+
+class LoadOverdueDeliveryOrders extends OrdersListEvent {
+  final int page;
+  final int limit;
+
+  const LoadOverdueDeliveryOrders({this.page = 1, this.limit = 10});
+
+  @override
+  List<Object?> get props => [page, limit];
+}
+
 class RefreshOrders extends OrdersListEvent {
   const RefreshOrders();
 }

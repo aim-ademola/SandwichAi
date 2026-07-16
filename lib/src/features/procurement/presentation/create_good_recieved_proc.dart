@@ -6,6 +6,8 @@ import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/procurement_good_recieved_model.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/goods_received_advanced_cubit/goods_received_advanced_cubit.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/goods_received_advanced_cubit/goods_received_advanced_state.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/state.dart'
@@ -40,6 +42,80 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
   String _inspectedBy = '';
   String? _selectedSupplierId;
   String? _selectedSupplierName;
+
+  Future<void> _loadPoPrefill() async {
+    final poId = _poNumberController.text.trim();
+    if (poId.isEmpty) {
+      _showSnackBar('Enter a PO number first', isError: true);
+      return;
+    }
+    await context.read<GoodsReceivedAdvancedCubit>().loadPoPrefill(poId);
+    if (!mounted) return;
+    final state = context.read<GoodsReceivedAdvancedCubit>().state;
+    final prefill = state.prefill;
+    if (prefill == null) {
+      _showSnackBar(
+        state.prefillError ?? 'Unable to prefill PO',
+        isError: true,
+      );
+      return;
+    }
+
+    setState(() {
+      _selectedSupplierName = prefill.supplierName;
+      _poNumberController.text = prefill.poNumber.isEmpty
+          ? poId
+          : prefill.poNumber;
+      for (final item in _selectedItems) {
+        item.dispose();
+      }
+      _selectedItems = prefill.items.map((receivedItem) {
+        final selected = SelectedItem();
+        final match = _allItems.where((item) => item.id == receivedItem.itemId);
+        selected.inventoryItem = match.isNotEmpty
+            ? match.first
+            : InventoryItem(
+                id: receivedItem.itemId,
+                name: receivedItem.itemName,
+                category: '',
+                unit: '',
+                description: '',
+                sku: '',
+              );
+        selected.orderedQty = receivedItem.orderedQty;
+        selected.receivedQty = receivedItem.receivedQty;
+        selected.orderedQtyController.text = receivedItem.orderedQty.toString();
+        selected.receivedQtyController.text = receivedItem.receivedQty
+            .toString();
+        selected.qualityCheck = receivedItem.qualityCheck;
+        selected.qcStatus = receivedItem.qcStatus.isEmpty
+            ? 'PASSED'
+            : receivedItem.qcStatus;
+        selected.qcNote = receivedItem.qcNote;
+        selected.expiryDate = receivedItem.expiryDate == null
+            ? null
+            : DateTime.tryParse(receivedItem.expiryDate!);
+        return selected;
+      }).toList();
+    });
+    _showSnackBar('Purchase order prefilled');
+  }
+
+  Future<void> _markPoComplete() async {
+    final poId = _poNumberController.text.trim();
+    if (poId.isEmpty) {
+      _showSnackBar('Enter a PO number first', isError: true);
+      return;
+    }
+    final ok = await context
+        .read<GoodsReceivedAdvancedCubit>()
+        .markPurchaseOrderComplete(poId);
+    if (!mounted) return;
+    _showSnackBar(
+      ok ? 'Purchase order marked complete' : 'Failed to mark PO complete',
+      isError: !ok,
+    );
+  }
 
   @override
   void initState() {
@@ -341,7 +417,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
       return;
     }
 
-    if (_selectedSupplierId == null) {
+    if (_selectedSupplierName == null || _selectedSupplierName!.isEmpty) {
       _showSnackBar('Please select a supplier', isError: true);
       return;
     }
@@ -359,13 +435,6 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     }
 
     final items = _selectedItems.map((item) {
-      print(
-        'Item: ${item.inventoryItem?.name}, orderedQty: ${item.orderedQty}, receivedQty: ${item.receivedQty}',
-      );
-      print(
-        'Controller values: ${item.orderedQtyController.text}, ${item.receivedQtyController.text}',
-      );
-
       return GoodsReceivedItem(
         itemId: item.inventoryItem?.id ?? '',
         itemName: item.inventoryItem?.name ?? '',
@@ -397,6 +466,159 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
 
     context.read<GoodsReceivedBloc>().add(
       CreateGoodsReceived(request: request),
+    );
+  }
+
+  Widget _buildPoActions(double screenWidth) {
+    return BlocBuilder<GoodsReceivedAdvancedCubit, GoodsReceivedAdvancedState>(
+      builder: (context, state) {
+        final isLoading =
+            state.prefillStatus == GoodsReceivedAdvancedStatus.loading;
+        return Wrap(
+          spacing: 12,
+          runSpacing: 10,
+          children: [
+            OutlinedButton.icon(
+              onPressed: isLoading ? null : _loadPoPrefill,
+              icon: isLoading
+                  ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: context.modePrimary,
+                      ),
+                    )
+                  : const Icon(Icons.download_done_outlined, size: 18),
+              label: Text(
+                isLoading ? 'Loading PO...' : 'Prefill from PO',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: _getCaptionFontSize(screenWidth) + 1,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.modePrimary,
+                side: BorderSide(color: context.modePrimary),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: isLoading ? null : _markPoComplete,
+              icon: const Icon(Icons.task_alt, size: 18),
+              label: Text(
+                'Mark PO Complete',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: _getCaptionFontSize(screenWidth) + 1,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.modeSuccess,
+                disabledForegroundColor: context.modeTextSecondary,
+                side: BorderSide(color: context.modeSuccess),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPoDeliveryStatus() {
+    return BlocBuilder<GoodsReceivedAdvancedCubit, GoodsReceivedAdvancedState>(
+      builder: (context, state) {
+        final status = state.deliveryStatus;
+        final error = state.prefillError;
+
+        if (status == null && error == null) {
+          return const SizedBox.shrink();
+        }
+
+        if (status == null && error != null) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Text(
+              error,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 12,
+                color: context.modeError,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          );
+        }
+
+        final isComplete = status!.isComplete;
+        final statusColor = isComplete
+            ? context.modeSuccess
+            : context.modeWarning;
+
+        return Container(
+          margin: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: statusColor.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: statusColor.withValues(alpha: 0.24)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isComplete
+                        ? Icons.check_circle_outline
+                        : Icons.local_shipping_outlined,
+                    color: statusColor,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      status.deliveryStatus.isEmpty
+                          ? (isComplete ? 'Complete' : 'In progress')
+                          : status.deliveryStatus,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 13,
+                        color: statusColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                children: [
+                  _buildPoStatusMetric('Ordered', status.orderedQty),
+                  _buildPoStatusMetric('Received', status.receivedQty),
+                  _buildPoStatusMetric('Pending', status.pendingQty),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPoStatusMetric(String label, double value) {
+    return Text(
+      '$label: ${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)}',
+      style: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: 12,
+        color: context.modeTextPrimary,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 
@@ -515,6 +737,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                       ),
                     ],
                   ),
+                  SizedBox(height: _getSpacing(screenWidth)),
+                  _buildPoActions(screenWidth),
+                  _buildPoDeliveryStatus(),
                   SizedBox(height: _getFieldSpacing(screenWidth)),
                   _buildTextField(
                     controller: _receivedByController,
@@ -550,7 +775,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   SizedBox(height: _getSpacing(screenWidth)),
                   ..._selectedItems.asMap().entries.map((entry) {
                     return _buildItemCard(entry.key, entry.value, screenWidth);
-                  }).toList(),
+                  }),
                   SizedBox(height: _getSpacing(screenWidth)),
                   _buildAddItemButton(screenWidth, _selectedItems),
                   SizedBox(height: _getSectionSpacing(screenWidth)),
@@ -1111,51 +1336,46 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: RadioListTile<bool>(
-                        title: Text(
-                          'Passed',
-                          style: TextStyle(color: context.modeTextPrimary),
+                child: RadioGroup<bool>(
+                  groupValue: item.qualityCheck,
+                  onChanged: (value) {
+                    setState(() {
+                      item.qualityCheck = value;
+                      if (value == true) {
+                        item.qcStatus = 'PASSED';
+                      } else if (value == false) {
+                        item.qcStatus = 'FAILED';
+                      }
+                    });
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: RadioListTile<bool>(
+                          title: Text(
+                            'Passed',
+                            style: TextStyle(color: context.modeTextPrimary),
+                          ),
+                          value: true,
+                          activeColor: context.modePrimary,
+                          contentPadding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
                         ),
-                        value: true,
-                        groupValue: item.qualityCheck,
-                        onChanged: (value) {
-                          setState(() {
-                            item.qualityCheck = value;
-                            if (value == true) {
-                              item.qcStatus = 'PASSED';
-                            }
-                          });
-                        },
-                        activeColor: context.modePrimary,
-                        contentPadding: EdgeInsets.zero,
-                        visualDensity: VisualDensity.compact,
                       ),
-                    ),
-                    Expanded(
-                      child: RadioListTile<bool>(
-                        title: Text(
-                          'Failed',
-                          style: TextStyle(color: context.modeTextPrimary),
+                      Expanded(
+                        child: RadioListTile<bool>(
+                          title: Text(
+                            'Failed',
+                            style: TextStyle(color: context.modeTextPrimary),
+                          ),
+                          value: false,
+                          activeColor: context.modeError,
+                          contentPadding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
                         ),
-                        value: false,
-                        groupValue: item.qualityCheck,
-                        onChanged: (value) {
-                          setState(() {
-                            item.qualityCheck = value;
-                            if (value == false) {
-                              item.qcStatus = 'FAILED';
-                            }
-                          });
-                        },
-                        activeColor: context.modeError,
-                        contentPadding: EdgeInsets.zero,
-                        visualDensity: VisualDensity.compact,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -1420,7 +1640,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                 selectedTileColor: context.modePrimary
                                     .withValues(alpha: 0.05),
                                 onTap: () {
-                                  this.setState(() {
+                                  setState(() {
                                     item.inventoryItem = invItem;
                                   });
                                   Navigator.pop(context);
@@ -1631,14 +1851,14 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
 
   Widget _buildAddItemButton(
     double screenWidth,
-    List<SelectedItem> _selectedItems,
+    List<SelectedItem> selectedItems,
   ) {
     return SizedBox(
       height: _getButtonHeight(screenWidth),
       child: OutlinedButton.icon(
         onPressed: () {
           setState(() {
-            _selectedItems.add(SelectedItem());
+            selectedItems.add(SelectedItem());
           });
         },
         style: OutlinedButton.styleFrom(
@@ -1651,7 +1871,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
         ),
         icon: const Icon(Icons.add_circle_outline, size: 20),
         label: Text(
-          _selectedItems.length == 0 ? 'Add an Item' : ' Add Another Item',
+          selectedItems.isEmpty ? 'Add an Item' : ' Add Another Item',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w600,
@@ -1770,6 +1990,12 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     if (screenWidth < 360) return 14;
     if (screenWidth < 600) return 15;
     return 16;
+  }
+
+  double _getCaptionFontSize(double screenWidth) {
+    if (screenWidth < 360) return 11;
+    if (screenWidth < 600) return 12;
+    return 13;
   }
 
   double _getIconSize(double screenWidth) {

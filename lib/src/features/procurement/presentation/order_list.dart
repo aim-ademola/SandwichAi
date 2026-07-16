@@ -17,9 +17,11 @@ class OrdersListScreen extends StatefulWidget {
   State<OrdersListScreen> createState() => _OrdersListScreenState();
 }
 
-class _OrdersListScreenState extends State<OrdersListScreen> {
+class _OrdersListScreenState extends State<OrdersListScreen>
+    with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
+  late final TabController _tabController;
 
   String? _selectedStatus;
   String? _selectedPriority;
@@ -28,15 +30,33 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this)
+      ..addListener(_onTabChanged);
     context.read<OrdersListBloc>().add(const LoadOrders());
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
+    _tabController.dispose();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) return;
+    switch (_tabController.index) {
+      case 1:
+        context.read<OrdersListBloc>().add(const LoadPendingApprovalOrders());
+        break;
+      case 2:
+        context.read<OrdersListBloc>().add(const LoadOverdueDeliveryOrders());
+        break;
+      default:
+        context.read<OrdersListBloc>().add(const LoadOrders());
+    }
   }
 
   void _onScroll() {
@@ -148,9 +168,28 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                     ],
                   ),
                 ),
+                Container(
+                  color: context.modeSurface,
+                  child: TabBar(
+                    controller: _tabController,
+                    labelColor: context.modePrimary,
+                    unselectedLabelColor: context.modeTextSecondary,
+                    indicatorColor: context.modePrimary,
+                    labelStyle: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    tabs: const [
+                      Tab(text: 'All'),
+                      Tab(text: 'Pending Approvals'),
+                      Tab(text: 'Overdue'),
+                    ],
+                  ),
+                ),
 
                 // Active Filters
-                if (_hasActiveFilters()) _buildActiveFilters(horizontalPadding),
+                if (_hasActiveFilters() && _tabController.index == 0)
+                  _buildActiveFilters(horizontalPadding),
 
                 // Orders List
                 Expanded(
@@ -418,14 +457,16 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            // Navigate to order details
-            Navigator.push(
+          onTap: () async {
+            final changed = await Navigator.push<bool>(
               context,
               MaterialPageRoute(
                 builder: (_) => OrderDetailsScreen(order: order),
               ),
             );
+            if (changed == true && mounted) {
+              context.read<OrdersListBloc>().add(const RefreshOrders());
+            }
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -845,11 +886,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 80,
-              color: context.modeTextMuted,
-            ),
+            Icon(Icons.inbox_outlined, size: 80, color: context.modeTextMuted),
             const SizedBox(height: 24),
             Text(
               state.message,
@@ -885,9 +922,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
         return Container(
           decoration: BoxDecoration(
             color: context.modeSurface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(24),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.all(24),
           child: Column(

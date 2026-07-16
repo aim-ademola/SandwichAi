@@ -5,7 +5,10 @@ import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/procurement_good_received_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/create_good_recieved_proc.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/goods_recieved_history.dart';
+import 'package:sandwich_ai/src/features/procurement/presentation/goods_received_overview.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/goods_received_advanced_cubit/goods_received_advanced_cubit.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/repo/reorder_repo.dart';
 
 class GoodsReceivedTabScreen extends StatefulWidget {
   const GoodsReceivedTabScreen({super.key});
@@ -21,7 +24,7 @@ class _GoodsReceivedTabScreenState extends State<GoodsReceivedTabScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -32,9 +35,19 @@ class _GoodsReceivedTabScreenState extends State<GoodsReceivedTabScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          GoodsReceivedBloc(repository: GoodsReceivedRepository()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              GoodsReceivedBloc(repository: GoodsReceivedRepository()),
+        ),
+        BlocProvider(
+          create: (context) => GoodsReceivedAdvancedCubit(
+            goodsReceivedRepository: GoodsReceivedRepository(),
+            reorderRepository: ReorderRepository(),
+          ),
+        ),
+      ],
       child: DefaultTextStyle.merge(
         style: WorkSansAppTextStyles.medium,
         child: Scaffold(
@@ -75,6 +88,7 @@ class _GoodsReceivedTabScreenState extends State<GoodsReceivedTabScreen>
                     fontWeight: FontWeight.w500,
                   ),
                   tabs: const [
+                    Tab(text: 'Overview'),
                     Tab(text: 'Log Receipt'),
                     Tab(text: 'History'),
                   ],
@@ -85,6 +99,7 @@ class _GoodsReceivedTabScreenState extends State<GoodsReceivedTabScreen>
           body: TabBarView(
             controller: _tabController,
             children: const [
+              GoodsReceivedOverviewScreen(),
               CreateGoodsReceivedScreen(),
               GoodsReceivedHistoryScreen(),
             ],

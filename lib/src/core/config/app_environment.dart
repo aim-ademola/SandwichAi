@@ -44,9 +44,19 @@ class AppEnvironment {
           password: 'password@1',
         ),
         AppEnvironmentUser(
-          department: 'Processing Manager',
-          email: 'Onlyonedemmy0@gmail.com',
+          department: 'Customer Service',
+          email: 'thedanielsdev+222@gmail.com',
+          password: '12345678',
+        ),
+        AppEnvironmentUser(
+          department: '	Procurement Department',
+          email: 'hybiekay2+2@gmail.com',
           password: 'password@1',
+        ),
+        AppEnvironmentUser(
+          department: 'STOCK CONTROL',
+          email: 'hybiekay2+3@gmail.com',
+          password: 'SecurePass123!',
         ),
       ],
       disabledFeatures: {},

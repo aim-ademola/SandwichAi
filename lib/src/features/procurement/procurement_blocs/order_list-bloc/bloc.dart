@@ -15,6 +15,7 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
   String? _currentCategory;
   String? _currentSearch;
   int _currentPage = 1;
+  OrdersListMode _currentMode = OrdersListMode.all;
   String branchId = '';
 
   OrdersListBloc({required PurchaseOrdersRepositoryInterface repository})
@@ -22,6 +23,8 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
       super(const OrdersInitial()) {
     _getBranchId();
     on<LoadOrders>(_onLoadOrders);
+    on<LoadPendingApprovalOrders>(_onLoadPendingApprovalOrders);
+    on<LoadOverdueDeliveryOrders>(_onLoadOverdueDeliveryOrders);
     on<RefreshOrders>(_onRefreshOrders);
     on<LoadMoreOrders>(_onLoadMoreOrders);
     on<FilterOrders>(_onFilterOrders);
@@ -67,6 +70,7 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
       await response.when(
         success: (data) async {
           _currentPage = event.page;
+          _currentMode = OrdersListMode.all;
           _currentStatus = event.status;
           _currentPriority = event.priority;
           _currentCategory = event.primaryCategory;
@@ -110,7 +114,15 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
     RefreshOrders event,
     Emitter<OrdersListState> emit,
   ) async {
-    // Reset to page 1 and reload with current filters
+    if (_currentMode == OrdersListMode.pendingApprovals) {
+      add(const LoadPendingApprovalOrders(page: 1));
+      return;
+    }
+    if (_currentMode == OrdersListMode.overdueDeliveries) {
+      add(const LoadOverdueDeliveryOrders(page: 1));
+      return;
+    }
+
     add(
       LoadOrders(
         status: _currentStatus,
@@ -120,6 +132,82 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
         page: 1,
       ),
     );
+  }
+
+  Future<void> _onLoadPendingApprovalOrders(
+    LoadPendingApprovalOrders event,
+    Emitter<OrdersListState> emit,
+  ) async {
+    await _loadSpecialOrders(
+      emit: emit,
+      mode: OrdersListMode.pendingApprovals,
+      page: event.page,
+      request: () => _repository.getPendingApprovalOrders(
+        page: event.page,
+        limit: event.limit,
+      ),
+      emptyMessage: 'No pending approvals found',
+    );
+  }
+
+  Future<void> _onLoadOverdueDeliveryOrders(
+    LoadOverdueDeliveryOrders event,
+    Emitter<OrdersListState> emit,
+  ) async {
+    await _loadSpecialOrders(
+      emit: emit,
+      mode: OrdersListMode.overdueDeliveries,
+      page: event.page,
+      request: () => _repository.getOverdueDeliveries(
+        page: event.page,
+        limit: event.limit,
+      ),
+      emptyMessage: 'No overdue deliveries found',
+    );
+  }
+
+  Future<void> _loadSpecialOrders({
+    required Emitter<OrdersListState> emit,
+    required OrdersListMode mode,
+    required int page,
+    required Future<dynamic> Function() request,
+    required String emptyMessage,
+  }) async {
+    try {
+      emit(const OrdersLoading());
+      final response = await request();
+      await response.when(
+        success: (data) async {
+          _currentMode = mode;
+          _currentPage = page;
+          if (data.orders.isEmpty) {
+            emit(OrdersEmpty(message: emptyMessage));
+          } else {
+            emit(
+              OrdersLoaded(
+                orders: data.orders,
+                total: data.total,
+                currentPage: data.page,
+                totalPages: data.totalPages,
+                hasNextPage: data.hasNextPage,
+                hasPreviousPage: data.hasPreviousPage,
+              ),
+            );
+          }
+        },
+        error: (error) async {
+          final errorType = _determineErrorType(error.toString());
+          emit(OrdersError(error: error.toString(), errorType: errorType));
+        },
+      );
+    } catch (e) {
+      emit(
+        OrdersError(
+          error: 'An unexpected error occurred: ${e.toString()}',
+          errorType: OrdersErrorType.general,
+        ),
+      );
+    }
   }
 
   Future<void> _onLoadMoreOrders(
@@ -133,6 +221,21 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
 
     try {
       emit(OrdersLoadingMore(currentState.orders));
+      if (_currentMode == OrdersListMode.pendingApprovals) {
+        final nextPage = _currentPage + 1;
+        final response = await _repository.getPendingApprovalOrders(
+          page: nextPage,
+        );
+        await _appendOrders(response, currentState, nextPage, emit);
+        return;
+      }
+      if (_currentMode == OrdersListMode.overdueDeliveries) {
+        final nextPage = _currentPage + 1;
+        final response = await _repository.getOverdueDeliveries(page: nextPage);
+        await _appendOrders(response, currentState, nextPage, emit);
+        return;
+      }
+
       if (branchId.isEmpty) {
         branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
       }
@@ -148,37 +251,43 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
         page: nextPage,
       );
 
-      await response.when(
-        success: (data) async {
-          _currentPage = nextPage;
-
-          final updatedOrders = List<PurchaseOrder>.from(currentState.orders)
-            ..addAll(data.orders);
-
-          emit(
-            OrdersLoaded(
-              orders: updatedOrders,
-              total: data.total,
-              currentPage: data.page,
-              totalPages: data.totalPages,
-              hasNextPage: data.hasNextPage,
-              hasPreviousPage: data.hasPreviousPage,
-              activeStatus: _currentStatus,
-              activePriority: _currentPriority,
-              activeCategory: _currentCategory,
-              searchQuery: _currentSearch,
-            ),
-          );
-        },
-        error: (error) async {
-          // Revert to previous state on error
-          emit(currentState);
-        },
-      );
+      await _appendOrders(response, currentState, nextPage, emit);
     } catch (e) {
       // Revert to previous state on error
       emit(currentState);
     }
+  }
+
+  Future<void> _appendOrders(
+    dynamic response,
+    OrdersLoaded currentState,
+    int nextPage,
+    Emitter<OrdersListState> emit,
+  ) async {
+    await response.when(
+      success: (data) async {
+        _currentPage = nextPage;
+        final updatedOrders = List<PurchaseOrder>.from(currentState.orders)
+          ..addAll(data.orders);
+        emit(
+          OrdersLoaded(
+            orders: updatedOrders,
+            total: data.total,
+            currentPage: data.page,
+            totalPages: data.totalPages,
+            hasNextPage: data.hasNextPage,
+            hasPreviousPage: data.hasPreviousPage,
+            activeStatus: _currentStatus,
+            activePriority: _currentPriority,
+            activeCategory: _currentCategory,
+            searchQuery: _currentSearch,
+          ),
+        );
+      },
+      error: (error) async {
+        emit(currentState);
+      },
+    );
   }
 
   Future<void> _onFilterOrders(
@@ -245,3 +354,5 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
     return OrdersErrorType.general;
   }
 }
+
+enum OrdersListMode { all, pendingApprovals, overdueDeliveries }

@@ -157,9 +157,9 @@ class AuthCacheHelper {
       jsonData['branch'] = {
         'id': branchId,
         'name': branchName,
-        'branch_code': ?branchCode,
-        'branchCode': ?branchCode,
-        'city': ?city,
+        if (branchCode != null) 'branch_code': branchCode,
+        if (branchCode != null) 'branchCode': branchCode,
+        if (city != null) 'city': city,
       };
       await _box.put(_keyUserData, jsonEncode(jsonData));
     } catch (_) {

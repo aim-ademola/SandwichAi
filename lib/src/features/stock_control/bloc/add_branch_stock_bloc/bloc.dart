@@ -14,6 +14,9 @@ class AddBranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
     on<UpdateBranchStock>(_onUpdateBranchStock);
     on<DeleteBranchStock>(_onDeleteBranchStock);
     on<AdjustBranchStock>(_onAdjustBranchStock);
+    on<AllowNegativeBranchStock>(_onAllowNegativeBranchStock);
+    on<LockBranchStock>(_onLockBranchStock);
+    on<UnlockBranchStock>(_onUnlockBranchStock);
     on<ValidateCurrentStock>(_onValidateCurrentStock);
     on<ValidateReorderLevel>(_onValidateReorderLevel);
     on<ValidateMaxLevel>(_onValidateMaxLevel);
@@ -21,6 +24,72 @@ class AddBranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
     on<ValidateExpiryDate>(_onValidateExpiryDate);
     on<ValidateAdjustmentQuantity>(_onValidateAdjustmentQuantity);
     on<ResetBranchStockState>(_onResetBranchStockState);
+  }
+
+  Future<void> _onAllowNegativeBranchStock(
+    AllowNegativeBranchStock event,
+    Emitter<BranchStockState> emit,
+  ) async {
+    await _runControlAction(
+      emit,
+      () => _repository.allowNegativeStock(event.stockId),
+      fallbackMessage: 'Negative stock is now allowed for this item',
+    );
+  }
+
+  Future<void> _onLockBranchStock(
+    LockBranchStock event,
+    Emitter<BranchStockState> emit,
+  ) async {
+    await _runControlAction(
+      emit,
+      () => _repository.lockStock(event.stockId),
+      fallbackMessage: 'Stock item locked successfully',
+    );
+  }
+
+  Future<void> _onUnlockBranchStock(
+    UnlockBranchStock event,
+    Emitter<BranchStockState> emit,
+  ) async {
+    await _runControlAction(
+      emit,
+      () => _repository.unlockStock(event.stockId),
+      fallbackMessage: 'Stock item unlocked successfully',
+    );
+  }
+
+  Future<void> _runControlAction(
+    Emitter<BranchStockState> emit,
+    Future<dynamic> Function() call, {
+    required String fallbackMessage,
+  }) async {
+    try {
+      emit(const BranchStockLoading());
+      final response = await call();
+      await response.when(
+        success: (data) async {
+          final message = data.message?.toString() ?? '';
+          emit(
+            BranchStockSuccess(
+              message: message.isNotEmpty ? message : fallbackMessage,
+              isControlAction: true,
+            ),
+          );
+        },
+        error: (error) async {
+          final errorType = _determineErrorType(error.toString());
+          emit(BranchStockError(error: error.toString(), errorType: errorType));
+        },
+      );
+    } catch (e) {
+      emit(
+        const BranchStockError(
+          error: 'Failed to update stock control setting. Please try again.',
+          errorType: BranchStockErrorType.general,
+        ),
+      );
+    }
   }
 
   /// Handles creating branch stock

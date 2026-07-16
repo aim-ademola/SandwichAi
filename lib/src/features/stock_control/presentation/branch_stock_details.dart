@@ -165,6 +165,60 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
     );
   }
 
+  void _showStockControlConfirmation({
+    required String title,
+    required String message,
+    required IconData icon,
+    required VoidCallback onConfirm,
+  }) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(icon, color: kPrimary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: kprimaryTextColor1,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: kprimaryTextColor2,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              onConfirm();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kPrimary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
@@ -204,6 +258,47 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                         case 'adjust':
                           _showAdjustmentDialog(state.details);
                           break;
+                        case 'allow_negative':
+                          _showStockControlConfirmation(
+                            title: 'Allow Negative Stock?',
+                            message:
+                                'This permits stock quantity for "${state.details.item.itemName}" to go below zero. Use only when stock movement must continue before reconciliation.',
+                            icon: Icons.exposure_minus_1,
+                            onConfirm: () {
+                              context.read<AddBranchStockBloc>().add(
+                                AllowNegativeBranchStock(
+                                  stockId: widget.stockId,
+                                ),
+                              );
+                            },
+                          );
+                          break;
+                        case 'lock':
+                          _showStockControlConfirmation(
+                            title: 'Lock Stock Item?',
+                            message:
+                                'This locks "${state.details.item.itemName}" from normal stock movement until it is unlocked.',
+                            icon: Icons.lock_outline,
+                            onConfirm: () {
+                              context.read<AddBranchStockBloc>().add(
+                                LockBranchStock(stockId: widget.stockId),
+                              );
+                            },
+                          );
+                          break;
+                        case 'unlock':
+                          _showStockControlConfirmation(
+                            title: 'Unlock Stock Item?',
+                            message:
+                                'This unlocks "${state.details.item.itemName}" and allows normal stock movement again.',
+                            icon: Icons.lock_open_outlined,
+                            onConfirm: () {
+                              context.read<AddBranchStockBloc>().add(
+                                UnlockBranchStock(stockId: widget.stockId),
+                              );
+                            },
+                          );
+                          break;
                         case 'delete':
                           _showDeleteConfirmation(state.details);
                           break;
@@ -218,6 +313,62 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                             const SizedBox(width: 12),
                             Text(
                               'Adjust Stock',
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 14,
+                                color: kprimaryTextColor1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'allow_negative',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.exposure_minus_1,
+                              size: 20,
+                              color: kPrimary,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Allow Negative Stock',
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 14,
+                                color: kprimaryTextColor1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'lock',
+                        child: Row(
+                          children: [
+                            Icon(Icons.lock_outline, size: 20, color: kPrimary),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Lock Item',
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 14,
+                                color: kprimaryTextColor1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'unlock',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.lock_open_outlined,
+                              size: 20,
+                              color: kPrimary,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Unlock Item',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
                                 color: kprimaryTextColor1,
@@ -291,7 +442,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                   if (state.isDelete) {
                     // Navigate back after successful delete
                     Navigator.of(context).pop();
-                  } else if (state.isAdjustment) {
+                  } else if (state.isAdjustment || state.isControlAction) {
                     // Reload details after adjustment
                     context.read<BranchStockDetailsBloc>().add(
                       RefreshBranchStockDetails(stockId: widget.stockId),
@@ -926,7 +1077,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                 const Icon(
                   Icons.warning_rounded,
                   size: 16,
-                  color: const Color(0xFFF59E0B),
+                  color: Color(0xFFF59E0B),
                 ),
                 const SizedBox(width: 4),
               ],

@@ -3,16 +3,21 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/features/dashboard/bloc/dashboard_contract_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/dashboard/bloc/dashboard_contract_bloc/event.dart';
+import 'package:sandwich_ai/src/features/dashboard/bloc/dashboard_contract_bloc/state.dart';
+import 'package:sandwich_ai/src/features/dashboard/data/model/dashboard_contract_model.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/procurement_performance_model.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/supplier_stat_model.dart';
-import 'package:sandwich_ai/src/features/procurement/data/repository/procurement_order_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/supplier_stat_repo.dart';
 
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_drawer.dart';
-import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_order_blocs/bloc.dart';
-import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_order_blocs/event.dart';
-import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_order_blocs/state.dart';
+import 'package:sandwich_ai/src/features/procurement/presentation/supplier_list.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_performance_cubit/procurement_performance_cubit.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_performance_cubit/procurement_performance_state.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/supplier_stat_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/supplier_stat_bloc/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/supplier_stat_bloc/state.dart';
@@ -28,6 +33,45 @@ class ProcurementDashboardScreen extends StatefulWidget {
 class _ProcurementDashboardScreenState
     extends State<ProcurementDashboardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String _branchId = '';
+  String? _dashboardSetupError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData({bool refresh = false}) async {
+    final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    final organizationId = await AuthCacheHelper.instance.getOrgId() ?? '';
+
+    if (!mounted) return;
+
+    setState(() {
+      _branchId = branchId;
+      _dashboardSetupError = organizationId.isEmpty
+          ? 'Organization ID not found. Please login again.'
+          : null;
+    });
+
+    if (organizationId.isEmpty) return;
+
+    final request = DashboardFilterRequest(
+      domain: DashboardDomain.procurement,
+      organizationId: organizationId,
+      branchId: branchId.isEmpty ? null : branchId,
+    );
+
+    context.read<DashboardContractBloc>().add(
+      refresh
+          ? RefreshDashboardContract(request: request)
+          : LoadDashboardContract(request: request),
+    );
+    await context.read<ProcurementPerformanceCubit>().loadDashboardPerformance(
+      branchId: branchId.isEmpty ? null : branchId,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +81,6 @@ class _ProcurementDashboardScreenState
           create: (context) =>
               SupplierStatsBloc(repository: SupplierStatsRepository())
                 ..add(const LoadSupplierStats()),
-        ),
-        BlocProvider(
-          create: (context) =>
-              ProcurementBloc(repository: ProcurementRepository())
-                ..add(LoadProcurementOrders(branchId: '')),
         ),
       ],
       child: DefaultTextStyle.merge(
@@ -91,9 +130,7 @@ class _ProcurementDashboardScreenState
           color: context.modePrimary,
           onRefresh: () async {
             context.read<SupplierStatsBloc>().add(const RefreshSupplierStats());
-            context.read<ProcurementBloc>().add(RefreshProcurementOrders());
-
-            await Future.delayed(const Duration(milliseconds: 500));
+            await _loadDashboardData(refresh: true);
           },
           child: Center(
             child: ConstrainedBox(
@@ -106,12 +143,13 @@ class _ProcurementDashboardScreenState
                   children: [
                     const SizedBox(height: 24),
                     _buildStatusCards(constraints.maxWidth),
-                    // const SizedBox(height: 32),
-                    // _buildBudgetSection(constraints.maxWidth),
+                    const SizedBox(height: 32),
+                    _buildPerformanceSection(constraints.maxWidth),
+                    const SizedBox(height: 32),
+                    _buildSupplierRankingsSection(constraints.maxWidth),
                     const SizedBox(height: 32),
                     _buildSuppliersSection(constraints.maxWidth),
 
-                    // _buildRecentActivity(constraints.maxWidth),
                     const SizedBox(height: 60),
                     _buildActionButtons(constraints.maxWidth),
                     const SizedBox(height: 50),
@@ -130,80 +168,120 @@ class _ProcurementDashboardScreenState
     final fontSize = _getStatusCardFontSize(width);
     final numberFontSize = _getStatusCardNumberSize(width);
 
-    return BlocBuilder<ProcurementBloc, ProcurementState>(
-      builder: (context, state) {
-        int pendingCount = 0;
-        int approvedCount = 0;
-        int receivedCount = 0;
+    if (_dashboardSetupError != null) {
+      return _buildErrorState(
+        _dashboardSetupError!,
+        width,
+        context,
+        title: 'Dashboard unavailable',
+        onRetry: () => _loadDashboardData(refresh: true),
+      );
+    }
 
-        if (state is ProcurementLoaded) {
-          final allOrders = state.response.data;
-          pendingCount = allOrders
-              .where((order) => order.status == 'PENDING')
-              .length;
-          approvedCount = allOrders
-              .where((order) => order.status == 'APPROVED')
-              .length;
-          receivedCount = allOrders
-              .where((order) => order.status == 'RECEIVED')
-              .length;
-        } else if (state is ProcurementRefreshing) {
-          final allOrders = state.currentData.data;
-          pendingCount = allOrders
-              .where((order) => order.status == 'PENDING')
-              .length;
-          approvedCount = allOrders
-              .where((order) => order.status == 'APPROVED')
-              .length;
-          receivedCount = allOrders
-              .where((order) => order.status == 'RECEIVED')
-              .length;
+    return BlocBuilder<DashboardContractBloc, DashboardContractState>(
+      builder: (context, state) {
+        final isLoading =
+            state is DashboardContractLoading ||
+            state is DashboardContractRefreshing;
+        DashboardResponse? data;
+        if (state is DashboardContractLoaded) {
+          data = state.data;
+        } else if (state is DashboardContractRefreshing) {
+          data = state.currentData;
         }
+
+        if (state is DashboardContractError) {
+          return _buildErrorState(
+            state.message,
+            width,
+            context,
+            title: 'Failed to load dashboard overview',
+            onRetry: () => _loadDashboardData(refresh: true),
+          );
+        }
+
+        final cards = _overviewCards(data);
 
         return Row(
           children: [
             Expanded(
               child: _buildStatusCard(
                 height: cardHeight,
-                number: pendingCount.toString(),
-                label: 'Pending',
+                number: cards[0].value,
+                label: cards[0].label,
                 color: context.modePrimary.withValues(alpha: 0.12),
                 numberColor: context.modePrimary,
                 fontSize: fontSize,
                 numberFontSize: numberFontSize,
-                isLoading: state is ProcurementLoading,
+                isLoading: isLoading,
               ),
             ),
             SizedBox(width: _getCardSpacing(width)),
             Expanded(
               child: _buildStatusCard(
                 height: cardHeight,
-                number: approvedCount.toString(),
-                label: 'Approved',
+                number: cards[1].value,
+                label: cards[1].label,
                 color: context.modePrimary.withValues(alpha: 0.12),
                 numberColor: context.modePrimary,
                 fontSize: fontSize,
                 numberFontSize: numberFontSize,
-                isLoading: state is ProcurementLoading,
+                isLoading: isLoading,
               ),
             ),
             SizedBox(width: _getCardSpacing(width)),
             Expanded(
               child: _buildStatusCard(
                 height: cardHeight,
-                number: receivedCount.toString(),
-                label: 'Received',
+                number: cards[2].value,
+                label: cards[2].label,
                 color: context.modePrimary.withValues(alpha: 0.12),
                 numberColor: context.modePrimary,
                 fontSize: fontSize,
                 numberFontSize: numberFontSize,
-                isLoading: state is ProcurementLoading,
+                isLoading: isLoading,
               ),
             ),
           ],
         );
       },
     );
+  }
+
+  List<_OverviewCardData> _overviewCards(DashboardResponse? data) {
+    final metrics = data?.metrics ?? const <DashboardMetric>[];
+    final pending = _metricByTerms(metrics, const ['pending']);
+    final approved = _metricByTerms(metrics, const ['approved']);
+    final received = _metricByTerms(metrics, const ['received', 'completed']);
+
+    if (pending != null || approved != null || received != null) {
+      return [
+        _OverviewCardData.fromMetric(pending, fallbackLabel: 'Pending'),
+        _OverviewCardData.fromMetric(approved, fallbackLabel: 'Approved'),
+        _OverviewCardData.fromMetric(received, fallbackLabel: 'Received'),
+      ];
+    }
+
+    if (metrics.length >= 3) {
+      return metrics.take(3).map(_OverviewCardData.fromMetric).toList();
+    }
+
+    return const [
+      _OverviewCardData(label: 'Pending', value: '0'),
+      _OverviewCardData(label: 'Approved', value: '0'),
+      _OverviewCardData(label: 'Received', value: '0'),
+    ];
+  }
+
+  DashboardMetric? _metricByTerms(
+    List<DashboardMetric> metrics,
+    List<String> terms,
+  ) {
+    for (final metric in metrics) {
+      final searchable = '${metric.key} ${metric.label}'.toLowerCase();
+      if (terms.any(searchable.contains)) return metric;
+    }
+    return null;
   }
 
   Widget _buildStatusCard({
@@ -257,6 +335,7 @@ class _ProcurementDashboardScreenState
     );
   }
 
+  // ignore: unused_element
   Widget _buildBudgetSection(double width) {
     final titleFontSize = _getSectionTitleSize(width);
     final budgetFontSize = _getBudgetFontSize(width);
@@ -371,7 +450,274 @@ class _ProcurementDashboardScreenState
     );
   }
 
-  Widget _buildErrorState(String error, double width, BuildContext context) {
+  Widget _buildPerformanceSection(double width) {
+    final titleFontSize = _getSectionTitleSize(width);
+    final cardHeight = _getSupplierCardHeight(width);
+    final numberSize = _getSupplierNumberSize(width);
+    final labelSize = _getSupplierLabelSize(width);
+
+    return BlocBuilder<
+      ProcurementPerformanceCubit,
+      ProcurementPerformanceState
+    >(
+      builder: (context, state) {
+        final isLoading =
+            state.performanceStatus == ProcurementPerformanceStatus.loading;
+        final performance = state.performance;
+
+        if (state.performanceStatus == ProcurementPerformanceStatus.error) {
+          return _buildErrorState(
+            state.performanceError ?? 'Failed to load procurement performance.',
+            width,
+            context,
+            title: 'Failed to load procurement performance',
+            onRetry: () => context
+                .read<ProcurementPerformanceCubit>()
+                .loadDashboardPerformance(
+                  branchId: _branchId.isEmpty ? null : _branchId,
+                ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Procurement Performance',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.bold,
+                color: context.modeTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSupplierStatCard(
+                    height: cardHeight,
+                    value: isLoading
+                        ? '-'
+                        : _formatMoney(performance?.totalSpend ?? 0),
+                    label: 'Total Spend',
+                    width: width,
+                    numberSize: numberSize,
+                    labelSize: labelSize,
+                    valueColor: context.modePrimary,
+                  ),
+                ),
+                SizedBox(width: _getCardSpacing(width)),
+                Expanded(
+                  child: _buildSupplierStatCard(
+                    height: cardHeight,
+                    value: isLoading
+                        ? '-'
+                        : '${(performance?.averageDeliveryDays ?? 0).toStringAsFixed(1)}d',
+                    label: 'Avg Delivery',
+                    width: width,
+                    numberSize: numberSize,
+                    labelSize: labelSize,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: _getCardSpacing(width)),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSupplierStatCard(
+                    height: cardHeight,
+                    value: isLoading
+                        ? '-'
+                        : _formatPercent(performance?.onTimeDeliveryRate ?? 0),
+                    label: 'On-Time Rate',
+                    width: width,
+                    numberSize: numberSize,
+                    labelSize: labelSize,
+                    valueColor: context.modeSuccess,
+                  ),
+                ),
+                SizedBox(width: _getCardSpacing(width)),
+                Expanded(
+                  child: _buildSupplierStatCard(
+                    height: cardHeight,
+                    value: isLoading
+                        ? '-'
+                        : _formatPercent(performance?.qualityPassRate ?? 0),
+                    label: 'QC Pass Rate',
+                    width: width,
+                    numberSize: numberSize,
+                    labelSize: labelSize,
+                    valueColor: context.modeSuccess,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSupplierRankingsSection(double width) {
+    final titleFontSize = _getSectionTitleSize(width);
+
+    return BlocBuilder<
+      ProcurementPerformanceCubit,
+      ProcurementPerformanceState
+    >(
+      builder: (context, state) {
+        final rankings = state.rankings?.rankings ?? const [];
+
+        return Container(
+          padding: EdgeInsets.all(_getContainerPadding(width)),
+          decoration: BoxDecoration(
+            color: context.modeSurface,
+            border: Border.all(color: context.modeBorder),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Supplier Rankings',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.bold,
+                        color: context.modeTextPrimary,
+                      ),
+                    ),
+                  ),
+                  if (state.rankingsStatus ==
+                      ProcurementPerformanceStatus.loading)
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          context.modePrimary,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (state.rankingsStatus == ProcurementPerformanceStatus.error)
+                Text(
+                  state.rankingsError ?? 'Failed to load supplier rankings.',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 13,
+                    color: context.modeError,
+                  ),
+                )
+              else if (rankings.isEmpty)
+                Text(
+                  'No supplier rankings available yet.',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 13,
+                    color: context.modeTextSecondary,
+                  ),
+                )
+              else
+                ...rankings
+                    .take(5)
+                    .map((ranking) => _buildRankingRow(ranking, width)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRankingRow(ProcurementPerformanceRanking ranking, double width) {
+    final rank = ranking.rank > 0 ? ranking.rank : 0;
+    final score = ranking.score > 0 ? ranking.score.toStringAsFixed(1) : '-';
+
+    return InkWell(
+      onTap: () {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const SupplierListWrapper()));
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: context.modePrimary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                rank == 0 ? '-' : '#$rank',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: context.modePrimary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ranking.supplierName.isEmpty
+                        ? 'Unknown supplier'
+                        : ranking.supplierName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: _getSupplierLabelSize(width) + 1,
+                      fontWeight: FontWeight.w600,
+                      color: context.modeTextPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'On-time ${_formatPercent(ranking.onTimeDeliveryRate)} | QC ${_formatPercent(ranking.qualityPassRate)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: _getSupplierLabelSize(width) - 1,
+                      color: context.modeTextSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              score,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: _getSupplierLabelSize(width) + 1,
+                fontWeight: FontWeight.w700,
+                color: context.modeTextPrimary,
+              ),
+            ),
+            Icon(Icons.chevron_right, color: context.modeTextMuted, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(
+    String error,
+    double width,
+    BuildContext context, {
+    String title = 'Failed to load supplier stats',
+    VoidCallback? onRetry,
+  }) {
     return Container(
       padding: EdgeInsets.all(_getContainerPadding(width)),
       decoration: BoxDecoration(
@@ -391,7 +737,7 @@ class _ProcurementDashboardScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Failed to load supplier stats',
+                  title,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -411,9 +757,13 @@ class _ProcurementDashboardScreenState
           ),
           IconButton(
             icon: Icon(Icons.refresh, color: context.modeError),
-            onPressed: () {
-              context.read<SupplierStatsBloc>().add(const LoadSupplierStats());
-            },
+            onPressed:
+                onRetry ??
+                () {
+                  context.read<SupplierStatsBloc>().add(
+                    const LoadSupplierStats(),
+                  );
+                },
           ),
         ],
       ),
@@ -561,6 +911,7 @@ class _ProcurementDashboardScreenState
     );
   }
 
+  // ignore: unused_element
   Widget _buildRecentActivity(double width) {
     final titleFontSize = _getSectionTitleSize(width);
     final activityTitleSize = _getActivityTitleSize(width);
@@ -967,6 +1318,44 @@ class _ProcurementDashboardScreenState
           ),
         ),
       ],
+    );
+  }
+
+  String _formatMoney(double value) {
+    if (value >= 1000000) return 'N${(value / 1000000).toStringAsFixed(1)}m';
+    if (value >= 1000) return 'N${(value / 1000).toStringAsFixed(1)}k';
+    return 'N${value.toStringAsFixed(0)}';
+  }
+
+  String _formatPercent(double value) {
+    final normalized = value > 0 && value <= 1 ? value * 100 : value;
+    return '${normalized.toStringAsFixed(0)}%';
+  }
+}
+
+class _OverviewCardData {
+  final String label;
+  final String value;
+
+  const _OverviewCardData({required this.label, required this.value});
+
+  factory _OverviewCardData.fromMetric(
+    DashboardMetric? metric, {
+    String? fallbackLabel,
+  }) {
+    if (metric == null) {
+      return _OverviewCardData(label: fallbackLabel ?? 'Metric', value: '0');
+    }
+
+    final value = metric.unit == null || metric.unit!.isEmpty
+        ? metric.value.toString()
+        : '${metric.value}${metric.unit}';
+
+    return _OverviewCardData(
+      label: metric.label.isEmpty
+          ? (fallbackLabel ?? metric.key)
+          : metric.label,
+      value: value,
     );
   }
 }

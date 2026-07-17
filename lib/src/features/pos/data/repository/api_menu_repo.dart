@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
@@ -19,6 +20,10 @@ class MenuItemsRepository extends BaseRepository
   Future<ApiResponse<List<ApiMenuItem>>> getMenuItems({String? search}) async {
     try {
       final queryParams = <String, dynamic>{};
+      final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+      if (branchId.trim().isNotEmpty) {
+        queryParams['branchId'] = branchId.trim();
+      }
       final trimmedSearch = search?.trim() ?? '';
       if (trimmedSearch.isNotEmpty) {
         queryParams['search'] = trimmedSearch;

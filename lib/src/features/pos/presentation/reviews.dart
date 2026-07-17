@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/customer_service_feedback_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/customer_service_feedback_repo.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/widgets/pos_design_system.dart';
 
 class ReviewsScreen extends StatefulWidget {
   const ReviewsScreen({super.key});
@@ -205,39 +207,34 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.modeBackground,
-      appBar: AppBar(
-        backgroundColor: context.modeSurface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Reviews',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: context.modeTextPrimary,
-          ),
-        ),
-        centerTitle: true,
-      ),
+    return PosPageScaffold(
+      title: 'Reviews',
       body: RefreshIndicator(
+        color: context.modePrimary,
         onRefresh: _loadReviews,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             _buildCreateReviewCard(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 22),
+            PosSectionHeader(
+              title: 'Customer Reviews',
+              countLabel:
+                  '${_reviews.length} item${_reviews.length == 1 ? '' : 's'}',
+            ),
+            const SizedBox(height: 12),
             if (_isLoading)
-              const Center(child: CircularProgressIndicator())
+              Center(
+                child: CircularProgressIndicator(color: context.modePrimary),
+              )
             else if (_error != null)
-              _buildMessage(_error!)
+              _buildMessage('Failed to load reviews', _error!)
             else if (_reviews.isEmpty)
-              _buildMessage('No reviews yet')
+              const PosEmptyState(
+                icon: HugeIcons.strokeRoundedStar,
+                title: 'No reviews yet',
+                message: 'Submitted customer reviews will appear here.',
+              )
             else
               ..._reviews.map(_buildReviewCard),
           ],
@@ -247,21 +244,15 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   }
 
   Widget _buildCreateReviewCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modeBorder),
-      ),
+    return PosSurfaceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Add Review',
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
               color: context.modeTextPrimary,
             ),
           ),
@@ -269,6 +260,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           DropdownButtonFormField<int>(
             initialValue: _rating,
             decoration: const InputDecoration(labelText: 'Rating'),
+            dropdownColor: context.modeSurface,
             items: List.generate(
               5,
               (index) => DropdownMenuItem(
@@ -297,8 +289,18 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,
                 foregroundColor: context.modeTextInverse,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: Text(_isSubmitting ? 'Saving...' : 'Submit Review'),
+              child: Text(
+                _isSubmitting ? 'Saving...' : 'Submit Review',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: context.modeTextInverse,
+                ),
+              ),
             ),
           ),
         ],
@@ -307,20 +309,19 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   }
 
   Widget _buildReviewCard(CustomerServiceRecord review) {
-    return Container(
+    return PosSurfaceCard(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modeBorder),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.star, color: Colors.amber.shade700, size: 18),
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedStar,
+                color: Colors.amber.shade700,
+                size: 18,
+                strokeWidth: 1.9,
+              ),
               const SizedBox(width: 6),
               Text(
                 '${review.rating ?? 0}/5',
@@ -330,14 +331,18 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 ),
               ),
               const Spacer(),
-              IconButton(
+              PosIconActionButton(
+                icon: HugeIcons.strokeRoundedEdit02,
+                color: context.modePrimary,
+                tooltip: 'Edit review',
                 onPressed: () => _showEditReview(review),
-                icon: const Icon(Icons.edit_outlined),
               ),
-              IconButton(
-                onPressed: () => _deleteReview(review),
-                icon: const Icon(Icons.delete_outline),
+              const SizedBox(width: 8),
+              PosIconActionButton(
+                icon: HugeIcons.strokeRoundedDelete02,
                 color: context.modeError,
+                tooltip: 'Delete review',
+                onPressed: () => _deleteReview(review),
               ),
             ],
           ),
@@ -362,16 +367,36 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     );
   }
 
-  Widget _buildMessage(String message) {
+  Widget _buildMessage(String title, String message) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 48),
       child: Center(
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: WorkSansAppTextStyles.medium.copyWith(
-            color: context.modeTextSecondary,
-          ),
+        child: Column(
+          children: [
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedAlert02,
+              color: context.modeError,
+              size: 32,
+              strokeWidth: 1.9,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontWeight: FontWeight.w800,
+                color: context.modeTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modeTextSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -511,56 +511,92 @@ class _StockControlDashboardBodyScreenState
     return Container(
       padding: EdgeInsets.all(_getTotalStockPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: context.modeSurfaceAlt,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.modePrimary.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.18
+                  : 0.05,
+            ),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: CustomPaint(
-        child: Container(
-          padding: const EdgeInsets.all(4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total Stock Value',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: labelFontSize,
-                      fontWeight: FontWeight.w400,
-                      color: context.modeTextSecondary,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: _getTotalStockValueSpacing(screenWidth)),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.2),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  );
-                },
-                child: Text(
-                  isValueVisible ? _formatCurrency(totalValue) : '••••••',
-                  key: ValueKey(isValueVisible),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: context.modePrimary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.account_balance_wallet_outlined,
+              color: context.modePrimary,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total Stock Value',
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: valueFontSize,
-                    fontWeight: FontWeight.bold,
-                    color: context.modeTextPrimary,
+                    fontSize: labelFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: context.modeTextSecondary,
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: _getTotalStockValueSpacing(screenWidth)),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.2),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Text(
+                    isValueVisible ? _formatCurrency(totalValue) : '••••••',
+                    key: ValueKey(isValueVisible),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: valueFontSize,
+                      fontWeight: FontWeight.bold,
+                      color: context.modeTextPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          const SizedBox(width: 8),
+          IconButton(
+            tooltip: isValueVisible ? 'Hide value' : 'Show value',
+            onPressed: onToggleVisibility,
+            icon: Icon(
+              isValueVisible
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              color: context.modeTextMuted,
+              size: 20,
+            ),
+          ),
+        ],
       ),
     );
   }

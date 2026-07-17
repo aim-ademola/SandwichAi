@@ -7,6 +7,10 @@ import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/bloc.dart';
+import 'package:sandwich_ai/src/features/pos/bloc/api_menu_blocs/bloc.dart'
+    as api_menu;
+import 'package:sandwich_ai/src/features/pos/bloc/api_menu_blocs/event.dart'
+    as api_menu_event;
 import 'package:sandwich_ai/src/features/pos/data/model/pos_menu_categories.dart';
 
 class AddMenuItemDialog extends StatefulWidget {
@@ -177,6 +181,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
     return BlocListener<MenuItemsBloc, MenuItemsState>(
       listener: (context, state) {
         if (state is MenuItemCreated) {
+          context.read<api_menu.MenuItemsBloc>().add(
+            const api_menu_event.RefreshMenuItems(),
+          );
+
           setState(() {
             _isSubmitting = false;
           });

@@ -331,9 +331,11 @@ class AppRouter {
         path: '/Procurement-nav',
         name: 'procuremnt-nav',
         pageBuilder: (context, state) {
+          final tab = state.uri.queryParameters['tab'];
+          final initialIndex = tab == 'suppliers' ? 2 : 0;
           return CupertinoPage(
             key: state.pageKey,
-            child: const ProcurementMainScreen(),
+            child: ProcurementMainScreen(initialIndex: initialIndex),
           );
         },
       ),

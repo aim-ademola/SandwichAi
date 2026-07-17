@@ -5,7 +5,7 @@ class WorkSansAppTextStyles {
   WorkSansAppTextStyles._();
 
   static const String fontFamily = 'Work_Sans';
-  static const String brandFontFamily = 'Phluff';
+  static const String brandFontFamily = fontFamily;
 
   static TextStyle xLarge = TextStyle(
     fontSize: 32,

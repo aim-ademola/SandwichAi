@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:sandwich_ai/src/core/globals/sandwich_app_bar.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -47,13 +46,24 @@ class _StockCatalogScreenState extends State<StockCatalogScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return SandwichAppBar(
-      title: 'Stock Catalog',
+    return AppBar(
+      backgroundColor: context.modePrimary,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      centerTitle: true,
+      title: Text(
+        'Stock Catalog',
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: context.modeTextInverse,
+        ),
+      ),
       actions: [
         IconButton(
           icon: Icon(
             _isTableView ? Icons.grid_view : Icons.table_chart,
-            color: context.modeTextPrimary,
+            color: context.modeTextInverse,
           ),
           onPressed: () {
             setState(() {
@@ -63,7 +73,7 @@ class _StockCatalogScreenState extends State<StockCatalogScreen> {
           tooltip: _isTableView ? 'Card View' : 'Table View',
         ),
         IconButton(
-          icon: Icon(Icons.add, color: context.modeTextPrimary),
+          icon: Icon(Icons.add, color: context.modeTextInverse),
           onPressed: () async {
             Navigator.push(
               context,

@@ -1,6 +1,7 @@
 // data/repo/menu_items_repository.dart
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
@@ -46,9 +47,13 @@ class MenuItemsRepository extends BaseRepository
   @override
   Future<ApiResponse<List<ApiMenuItem>>> getMenuItems() async {
     try {
+      final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+      final queryParams = <String, dynamic>{
+        if (branchId.trim().isNotEmpty) 'branchId': branchId.trim(),
+      };
       final listResponse = await handleListResponse(
         _apiClient
-            .get('kitchen/menu-items')
+            .get('kitchen/menu-items', queryParameters: queryParams)
             .timeout(
               const Duration(seconds: 30),
               onTimeout: () {

@@ -5,6 +5,9 @@ import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/customer_service_feedback_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/customer_service_feedback_repo.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/widgets/pos_design_system.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/widgets/pos_icon_tile.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -311,33 +314,16 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle.merge(
-      style: WorkSansAppTextStyles.medium,
-      child: Scaffold(
-        backgroundColor: context.modeBackground,
-        appBar: AppBar(
-          backgroundColor: context.modeSurface,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            'Complaints',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          centerTitle: true,
-        ),
-        body: Column(
-          children: [
-            // Tab bar
-            Container(
-              color: context.modeSurface,
+    return PosPageScaffold(
+      title: 'Complaints',
+      body: Column(
+        children: [
+          // Tab bar
+          Container(
+            color: context.modeBackground,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: PosSurfaceCard(
+              padding: EdgeInsets.zero,
               child: TabBar(
                 controller: _tabController,
                 labelColor: context.modePrimary,
@@ -346,11 +332,11 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                 indicatorWeight: 3,
                 labelStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w800,
                 ),
                 unselectedLabelStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 15,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
                 tabs: const [
                   Tab(text: 'Lodge Complaint'),
@@ -358,15 +344,16 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                 ],
               ),
             ),
-            // Content
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [_buildLodgeComplaintTab(), _buildMyComplaintsTab()],
-              ),
+          ),
+          const SizedBox(height: 8),
+          // Content
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [_buildLodgeComplaintTab(), _buildMyComplaintsTab()],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -872,10 +859,11 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(
-                      Icons.calendar_today,
-                      size: 14,
-                      color: context.modeTextSecondary,
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedCalendar03,
+                      size: 15,
+                      color: context.modeTextMuted,
+                      strokeWidth: 1.8,
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -886,15 +874,18 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                       ),
                     ),
                     const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined, size: 20),
+                    _ComplaintActionButton(
+                      icon: HugeIcons.strokeRoundedEdit02,
                       color: context.modePrimary,
+                      tooltip: 'Edit complaint',
                       onPressed: () => _showEditComplaintDialog(complaint),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 20),
+                    const SizedBox(width: 8),
+                    _ComplaintActionButton(
+                      icon: HugeIcons.strokeRoundedDelete02,
                       color: context.modeError,
-                      onPressed: () => _deleteComplaint(complaint),
+                      tooltip: 'Delete complaint',
+                      onPressed: () => _confirmDeleteComplaint(complaint),
                     ),
                   ],
                 ),
@@ -925,6 +916,81 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
   String _formatRecordDate(String? value) {
     if (value == null || value.isEmpty) return 'Not available';
     return value.split('T').first;
+  }
+
+  Future<void> _confirmDeleteComplaint(CustomerServiceRecord complaint) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.modeSurface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            PosIconTile(
+              icon: HugeIcons.strokeRoundedDelete02,
+              color: context.modeError,
+              size: 38,
+              iconSize: 21,
+              borderRadius: 10,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Delete complaint?',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: context.modeTextPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to delete "${complaint.title}"? This action cannot be undone.',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: context.modeTextSecondary,
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(
+              'Cancel',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontWeight: FontWeight.w700,
+                color: context.modeTextSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.modeError,
+              foregroundColor: context.modeTextInverse,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              'Delete',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontWeight: FontWeight.w700,
+                color: context.modeTextInverse,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true && mounted) {
+      await _deleteComplaint(complaint);
+    }
   }
 
   Future<void> _deleteComplaint(CustomerServiceRecord complaint) async {
@@ -1137,6 +1203,47 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ComplaintActionButton extends StatelessWidget {
+  final List<List<dynamic>> icon;
+  final Color color;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const _ComplaintActionButton({
+    required this.icon,
+    required this.color,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(10),
+          child: SizedBox(
+            width: 38,
+            height: 38,
+            child: Center(
+              child: HugeIcon(
+                icon: icon,
+                color: color,
+                size: 20,
+                strokeWidth: 1.9,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -157,6 +157,7 @@ class ReorderReportScreen extends StatefulWidget {
 
 class _ReorderReportScreenState extends State<ReorderReportScreen> {
   String _branchId = '';
+  final Set<String> _acknowledgingIds = {};
 
   @override
   void initState() {
@@ -171,17 +172,25 @@ class _ReorderReportScreenState extends State<ReorderReportScreen> {
   }
 
   Future<void> _acknowledge(ReorderSuggestion item) async {
+    if (_acknowledgingIds.contains(item.branchStockId)) return;
+    setState(() {
+      _acknowledgingIds.add(item.branchStockId);
+    });
+
     final ok = await context
         .read<StockControlReportsCubit>()
         .acknowledgeReorder(item.branchStockId);
     if (!mounted) return;
+    setState(() {
+      _acknowledgingIds.remove(item.branchStockId);
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(ok ? 'Reorder acknowledged.' : 'Failed to acknowledge.'),
         backgroundColor: ok ? kGreen : const Color(0xFFE53935),
       ),
     );
-    if (ok) _load();
   }
 
   @override
@@ -201,6 +210,9 @@ class _ReorderReportScreenState extends State<ReorderReportScreen> {
               padding: const EdgeInsets.all(16),
               itemBuilder: (context, index) => _ReorderCard(
                 item: items[index],
+                isAcknowledging: _acknowledgingIds.contains(
+                  items[index].branchStockId,
+                ),
                 onAcknowledge: () => _acknowledge(items[index]),
               ),
               separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -498,9 +510,14 @@ class _RawStockList extends StatelessWidget {
 
 class _ReorderCard extends StatelessWidget {
   final ReorderSuggestion item;
+  final bool isAcknowledging;
   final VoidCallback onAcknowledge;
 
-  const _ReorderCard({required this.item, required this.onAcknowledge});
+  const _ReorderCard({
+    required this.item,
+    required this.isAcknowledging,
+    required this.onAcknowledge,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -508,9 +525,37 @@ class _ReorderCard extends StatelessWidget {
       title: item.itemName.isEmpty ? 'Stock item' : item.itemName,
       subtitle:
           'Current: ${item.currentStock} | Reorder: ${item.reorderLevel} | Suggested: ${item.suggestedQty}',
-      trailing: TextButton(
-        onPressed: onAcknowledge,
-        child: const Text('Acknowledge'),
+      trailing: ElevatedButton.icon(
+        onPressed: isAcknowledging ? null : onAcknowledge,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: context.modePrimary,
+          foregroundColor: context.modeTextInverse,
+          disabledBackgroundColor: context.modePrimary.withValues(alpha: 0.45),
+          disabledForegroundColor: context.modeTextInverse,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        icon: isAcknowledging
+            ? SizedBox(
+                width: 13,
+                height: 13,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: context.modeTextInverse,
+                ),
+              )
+            : const Icon(Icons.check_circle_outline, size: 15),
+        label: Text(
+          isAcknowledging ? 'Saving' : 'Acknowledge',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: context.modeTextInverse,
+          ),
+        ),
       ),
     );
   }

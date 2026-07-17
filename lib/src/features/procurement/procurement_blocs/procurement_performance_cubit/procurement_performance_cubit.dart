@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/procurement_performance_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_performance_cubit/procurement_performance_state.dart';
 
@@ -78,9 +79,59 @@ class ProcurementPerformanceCubit extends Cubit<ProcurementPerformanceState> {
       error: (error) => emit(
         state.copyWith(
           rankingsStatus: ProcurementPerformanceStatus.error,
-          rankingsError: error.message,
+          rankingsError: _backendVisibleError(error),
         ),
       ),
     );
+  }
+
+  String _backendVisibleError(NetworkException error) {
+    final message = error.message.trim();
+    if (!_isGenericServerError(message) || error.data == null) {
+      return message.isEmpty ? 'Failed to load supplier rankings.' : message;
+    }
+
+    final backendDetails = _flattenBackendDetails(error.data)
+        .where((detail) => detail.trim().isNotEmpty)
+        .where((detail) => !_isGenericServerError(detail))
+        .toSet()
+        .join('\n');
+
+    if (backendDetails.isEmpty) return message;
+    return backendDetails;
+  }
+
+  bool _isGenericServerError(String message) {
+    final normalized = message.trim().toLowerCase();
+    return normalized == 'internal server error' ||
+        normalized == 'internal server error. please try again later.';
+  }
+
+  Iterable<String> _flattenBackendDetails(dynamic data) sync* {
+    if (data == null) return;
+    if (data is String) {
+      yield data;
+      return;
+    }
+    if (data is List) {
+      for (final item in data) {
+        yield* _flattenBackendDetails(item);
+      }
+      return;
+    }
+    if (data is Map) {
+      final map = data.cast<dynamic, dynamic>();
+      for (final key in const [
+        'message',
+        'error',
+        'detail',
+        'details',
+        'reason',
+        'errorMessage',
+        'description',
+      ]) {
+        yield* _flattenBackendDetails(map[key]);
+      }
+    }
   }
 }

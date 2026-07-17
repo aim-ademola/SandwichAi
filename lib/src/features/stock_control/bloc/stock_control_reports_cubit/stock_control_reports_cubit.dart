@@ -1,10 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_control_reports_cubit/stock_control_reports_state.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/model/stock_card_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/add_branch_stock.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/reorder_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/stock_card_repo.dart';
-import 'package:sandwich_ai/src/features/stock_control/data/model/stock_card_model.dart';
 
 class StockControlReportsCubit extends Cubit<StockControlReportsState> {
   final StockCardRepositoryInterface _stockCardRepository;
@@ -196,7 +197,30 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
 
   Future<bool> acknowledgeReorder(String branchStockId) async {
     final response = await _reorderRepository.acknowledgeReorder(branchStockId);
-    return response.isSuccess;
+    if (!response.isSuccess) return false;
+
+    final report = state.reorderReport;
+    if (report != null) {
+      final remainingItems = report.items
+          .where((item) => item.branchStockId != branchStockId)
+          .toList();
+      emit(
+        state.copyWith(
+          reorderStatus: remainingItems.isEmpty
+              ? StockControlReportStatus.empty
+              : StockControlReportStatus.loaded,
+          reorderReport: ReorderReportResponse(
+            branchId: report.branchId,
+            items: remainingItems,
+            summary: report.summary,
+            raw: report.raw,
+          ),
+          clearReorderError: true,
+        ),
+      );
+    }
+
+    return true;
   }
 
   Future<void> loadMovementTrends({String? branchId}) async {

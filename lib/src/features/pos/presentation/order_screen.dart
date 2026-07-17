@@ -19,6 +19,7 @@ import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/pos_menu_categories.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/addtomenu.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/cash_approval_waiting.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/edit_menu.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/online_qr.dart';
@@ -1076,6 +1077,7 @@ class _OrderScreenState extends State<OrderScreen>
 
   void _showMenuItemOptions(ApiMenuItem item) {
     final isInOrder = _orderItems.containsKey(item.id);
+    final isGlobalItem = item.isGlobal;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -1127,16 +1129,25 @@ class _OrderScreenState extends State<OrderScreen>
                   ),
                   const SizedBox(height: 8),
                 ],
-                _BottomSheetAction(
-                  icon: Icons.edit_outlined,
-                  label: 'Edit Menu Item',
-                  iconColor: context.modePrimary,
-                  textColor: context.modeTextPrimary,
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.showEditMenuItemDialog(item);
-                  },
-                ),
+                if (isGlobalItem)
+                  _BottomSheetAction(
+                    icon: Icons.public,
+                    label: 'Global item - cannot edit from branch',
+                    iconColor: context.modeTextMuted,
+                    textColor: context.modeTextMuted,
+                    onTap: () => Navigator.pop(context),
+                  )
+                else
+                  _BottomSheetAction(
+                    icon: Icons.edit_outlined,
+                    label: 'Edit Menu Item',
+                    iconColor: context.modePrimary,
+                    textColor: context.modeTextPrimary,
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.showEditMenuItemDialog(item);
+                    },
+                  ),
                 const SizedBox(height: 12),
                 Divider(height: 1, color: context.modeDivider),
                 const SizedBox(height: 4),
@@ -1363,6 +1374,7 @@ class _OrderScreenState extends State<OrderScreen>
       ),
       child: TabBar(
         controller: _tabController,
+        padding: EdgeInsets.zero,
         onTap: (index) {
           setState(() {});
           context.read<MenuItemsBloc>().add(
@@ -1376,6 +1388,7 @@ class _OrderScreenState extends State<OrderScreen>
         dividerColor: Colors.transparent,
         labelPadding: const EdgeInsets.symmetric(horizontal: 8),
         isScrollable: true,
+        tabAlignment: TabAlignment.start,
         tabs: categories.asMap().entries.map((entry) {
           final index = entry.key;
           final cat = entry.value;
@@ -1417,16 +1430,21 @@ class _OrderScreenState extends State<OrderScreen>
       category,
     );
     if (categoryItems.isEmpty) {
-      return Center(
-        child: Text(
-          category == null
-              ? 'No menu items found'
-              : _showUnavailableItems
-              ? 'No items in this category'
-              : 'No available items in this category',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 16,
-            color: context.modeTextSecondary,
+      return Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 28, 16, 0),
+          child: Text(
+            category == null
+                ? 'No menu items found'
+                : _showUnavailableItems
+                ? 'No items in this category'
+                : 'No available items in this category',
+            textAlign: TextAlign.center,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 16,
+              color: context.modeTextSecondary,
+            ),
           ),
         ),
       );
@@ -1473,6 +1491,30 @@ class _OrderScreenState extends State<OrderScreen>
                 ),
               ),
               Icon(Icons.drag_handle, size: 20, color: context.modeTextMuted),
+              const SizedBox(width: 10),
+              TextButton.icon(
+                onPressed: () => context.showAddMenuItemDialog(),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.modePrimary,
+                  backgroundColor: context.modePrimary.withValues(alpha: 0.08),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(
+                  'Add Item',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: context.modePrimary,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -1582,6 +1624,79 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
+  Widget _buildGlobalBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: context.modeSurfaceAlt,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: context.modeBorder),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.public_rounded, size: 12, color: context.modeTextMuted),
+          const SizedBox(width: 5),
+          Text(
+            'Global',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: context.modeTextMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItemImage(ApiMenuItem item, bool isAvailable) {
+    final imageUrl = item.imageUrl.trim();
+    if (imageUrl.isEmpty) {
+      return Icon(
+        Icons.restaurant_menu_rounded,
+        size: 30,
+        color: isAvailable ? context.modePrimary : context.modeTextMuted,
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: context.modePrimary.withValues(alpha: 0.08),
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.restaurant_menu_rounded,
+            size: 30,
+            color: isAvailable ? context.modePrimary : context.modeTextMuted,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderPreviewImage(ApiMenuItem item) {
+    final imageUrl = item.imageUrl.trim();
+    if (imageUrl.isEmpty) {
+      return Container(
+        color: context.modeSurfaceAlt,
+        child: Icon(Icons.restaurant, size: 24, color: context.modeTextMuted),
+      );
+    }
+
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Container(
+        color: context.modeSurfaceAlt,
+        child: Icon(Icons.restaurant, size: 24, color: context.modeTextMuted),
+      ),
+    );
+  }
+
   Widget _buildMenuItem(
     ApiMenuItem item,
     int quantity,
@@ -1624,13 +1739,7 @@ class _OrderScreenState extends State<OrderScreen>
                 children: [
                   AnimateFrom(
                     key: _animateToController.tag(item),
-                    child: Icon(
-                      Icons.restaurant_menu_rounded,
-                      size: 30,
-                      color: isAvailable
-                          ? context.modePrimary
-                          : context.modeTextMuted,
-                    ),
+                    child: _buildMenuItemImage(item, isAvailable),
                   ),
                   if (!isAvailable)
                     Container(
@@ -1707,6 +1816,7 @@ class _OrderScreenState extends State<OrderScreen>
                         ),
                       ),
                       _buildAvailabilityBadge(isAvailable),
+                      if (item.isGlobal) _buildGlobalBadge(),
                     ],
                   ),
                   if (hasSpecialRequest && isAdded) ...[
@@ -1863,18 +1973,7 @@ class _OrderScreenState extends State<OrderScreen>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(100),
-              child: Image.network(
-                item.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: context.modeSurfaceAlt,
-                  child: Icon(
-                    Icons.restaurant,
-                    size: 24,
-                    color: context.modeTextMuted,
-                  ),
-                ),
-              ),
+              child: _buildOrderPreviewImage(item),
             ),
           ),
           Positioned(

@@ -27,6 +27,7 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
   late final TextEditingController _descriptionController;
   late final TextEditingController _priceController;
   late final TextEditingController _preparationTimeController;
+  late String _selectedCategory;
 
   bool _isAvailable = true;
   bool _isSubmitting = false;
@@ -47,6 +48,10 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
     );
 
     _isAvailable = widget.menuItem.isAvailable;
+    _selectedCategory =
+        PosMenuCategories.names.contains(widget.menuItem.category)
+        ? widget.menuItem.category
+        : PosMenuCategories.names.first;
   }
 
   @override
@@ -70,6 +75,11 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
       context.read<MenuItemsBloc>().add(
         UpdateMenuItem(
           menuItemId: widget.menuItem.id,
+          dishName: _nameController.text.trim(),
+          description: _descriptionController.text.trim(),
+          category: _selectedCategory,
+          price: int.parse(_priceController.text.trim()),
+          preparationTime: int.parse(_preparationTimeController.text.trim()),
           isAvailable: _isAvailable,
         ),
       );
@@ -180,26 +190,43 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _ReadOnlyMenuField(
-                    child: Row(
-                      children: [
-                        PosMenuCategoryIcon(
-                          category: widget.menuItem.category,
-                          color: kPrimary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            widget.menuItem.category,
-                            style: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 14,
-                              color: kprimaryTextColor1,
-                            ),
-                          ),
-                        ),
-                      ],
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedCategory,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFFF8F6F6),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
+                    items: PosMenuCategories.names.map((category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Row(
+                          children: [
+                            PosMenuCategoryIcon(
+                              category: category,
+                              color: kPrimary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(category)),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: _isSubmitting
+                        ? null
+                        : (value) {
+                            if (value != null) {
+                              setState(() => _selectedCategory = value);
+                            }
+                          },
                   ),
                   const SizedBox(height: 20),
 
@@ -215,7 +242,7 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _nameController,
-                    enabled: false,
+                    enabled: !_isSubmitting,
                     decoration: InputDecoration(
                       hintText: 'Enter item name',
                       hintStyle: WorkSansAppTextStyles.medium.copyWith(
@@ -258,7 +285,7 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _descriptionController,
-                    enabled: false,
+                    enabled: !_isSubmitting,
                     maxLines: 3,
                     decoration: InputDecoration(
                       hintText: 'Enter item description',
@@ -309,7 +336,7 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _priceController,
-                              enabled: false,
+                              enabled: !_isSubmitting,
                               decoration: InputDecoration(
                                 hintText: 'Enter price',
                                 hintStyle: WorkSansAppTextStyles.medium
@@ -363,7 +390,7 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                             const SizedBox(height: 8),
                             TextFormField(
                               controller: _preparationTimeController,
-                              enabled: false,
+                              enabled: !_isSubmitting,
                               decoration: InputDecoration(
                                 hintText: 'Enter time',
                                 hintStyle: WorkSansAppTextStyles.medium
@@ -474,25 +501,6 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ReadOnlyMenuField extends StatelessWidget {
-  final Widget child;
-
-  const _ReadOnlyMenuField({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F6F6),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: child,
     );
   }
 }

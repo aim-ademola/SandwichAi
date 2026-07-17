@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
+import 'package:sandwich_ai/src/core/theme/context_theme_extension.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/config/dev_login_config.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -646,12 +647,18 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
     required double screenWidth,
     required bool isLoading,
   }) {
+    final panelBorderColor = context.isDarkMode
+        ? context.modeBorder
+        : context.modePrimary.withValues(alpha: 0.18);
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.modeSurface,
+        color: context.isDarkMode
+            ? context.modeSurfaceAlt
+            : context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modePrimary.withValues(alpha: 0.18)),
+        border: Border.all(color: panelBorderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -662,7 +669,9 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: context.modePrimary.withValues(alpha: 0.1),
+                  color: context.modePrimary.withValues(
+                    alpha: context.isDarkMode ? 0.16 : 0.1,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -681,7 +690,9 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: screenWidth < 360 ? 13 : 14,
                         fontWeight: FontWeight.w700,
-                        color: context.modeTextPrimary,
+                        color: context.isDarkMode
+                            ? Colors.white
+                            : context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 1),
@@ -692,7 +703,9 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: screenWidth < 360 ? 11 : 12,
                         fontWeight: FontWeight.w500,
-                        color: context.modeTextSecondary,
+                        color: context.isDarkMode
+                            ? Colors.white.withValues(alpha: 0.78)
+                            : context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -712,9 +725,19 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                       ? null
                       : () => _applyDevLoginUser(user, submit: true),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: context.modePrimary,
+                    foregroundColor: context.isDarkMode
+                        ? Colors.white
+                        : context.modePrimary,
+                    disabledForegroundColor: context.modeTextMuted,
+                    backgroundColor: context.modeSurface,
+                    disabledBackgroundColor: context.modeSurfaceMuted
+                        .withValues(alpha: 0.55),
                     side: BorderSide(
-                      color: context.modePrimary.withValues(alpha: 0.28),
+                      color: isLoading
+                          ? context.modeBorder
+                          : context.modePrimary.withValues(
+                              alpha: context.isDarkMode ? 0.42 : 0.28,
+                            ),
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -731,6 +754,9 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: screenWidth < 360 ? 11 : 12,
                       fontWeight: FontWeight.w700,
+                      color: context.isDarkMode
+                          ? Colors.white
+                          : context.modePrimary,
                     ),
                   ),
                 ),

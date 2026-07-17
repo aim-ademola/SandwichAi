@@ -54,7 +54,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
 
   String get _snapshotTitle {
     if (_isSelectedDateToday) return "Today's Snapshot";
-    return DateFormat('MMM d Snapshot').format(_selectedDate);
+    return '${DateFormat('MMM d').format(_selectedDate)} Snapshot';
   }
 
   Future<void> _queueActiveOrdersTour() async {

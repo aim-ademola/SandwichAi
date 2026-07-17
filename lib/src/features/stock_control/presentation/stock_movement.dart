@@ -57,9 +57,9 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -75,7 +75,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: context.modeBorder,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -90,7 +90,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -119,7 +119,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       decoration: BoxDecoration(
-                        color: kPrimary,
+                        color: context.modePrimary,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -128,7 +128,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
                     ),
@@ -149,9 +149,9 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (bottomSheetContext) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -166,7 +166,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 20),
@@ -205,11 +205,11 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? kPrimary.withValues(alpha: 0.1)
-              : const Color(0xFFF8F6F6),
+              ? context.modePrimary.withValues(alpha: 0.1)
+              : context.modeSurfaceAlt,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? kPrimary : Colors.transparent,
+            color: isSelected ? context.modePrimary : Colors.transparent,
             width: 2,
           ),
         ),
@@ -218,7 +218,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 15,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? kPrimary : kprimaryTextColor1,
+            color: isSelected ? context.modePrimary : context.modeTextPrimary,
           ),
         ),
       ),
@@ -236,7 +236,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
           const SizedBox(width: 16),
@@ -247,7 +247,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -261,25 +261,33 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: context.modeSurface,
           elevation: 0,
+          surfaceTintColor: Colors.transparent,
           title: Text(
             'Inventory Movement',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           centerTitle: true,
-          // actions: [
-          //   IconButton(
-          //     icon: const Icon(Icons.filter_list, color: kprimaryTextColor1),
-          //     onPressed: _showFilterBottomSheet,
-          //   ),
-          // ],
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: IconButton.filledTonal(
+                icon: Icon(Icons.tune_rounded, color: context.modePrimary),
+                style: IconButton.styleFrom(
+                  backgroundColor: context.modePrimary.withValues(alpha: 0.1),
+                ),
+                onPressed: _showFilterBottomSheet,
+                tooltip: 'Filter movements',
+              ),
+            ),
+          ],
         ),
         body: BlocConsumer<StockMovementBloc, StockMovementState>(
           listener: (context, state) {
@@ -303,7 +311,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                     Icon(
                       Icons.error_outline,
                       size: 64,
-                      color: Colors.grey.shade400,
+                      color: context.modeTextMuted,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -311,7 +319,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                       textAlign: TextAlign.center,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -328,7 +336,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimary,
+                        backgroundColor: context.modePrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 16,
@@ -337,7 +345,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                       child: Text(
                         'Retry',
                         style: WorkSansAppTextStyles.medium.copyWith(
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -349,137 +357,13 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
 
             if (state is StockMovementLoaded) {
               return RefreshIndicator(
-                color: kPrimary,
+                color: context.modePrimary,
                 onRefresh: () async {
                   context.read<StockMovementBloc>().add(
                     const RefreshStockMovements(),
                   );
                 },
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 16),
-                      // Summary Cards
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.04),
-                                blurRadius: 12,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              _buildSummaryItem(
-                                icon: Icons.local_shipping,
-                                iconColor: kPrimary,
-                                iconBgColor: kPrimary.withValues(alpha: 0.1),
-                                title: 'Received',
-                                value: '${state.totalReceived} KG',
-                              ),
-                              const SizedBox(height: 16),
-                              Divider(color: Colors.grey.shade200, height: 1),
-                              const SizedBox(height: 16),
-                              _buildSummaryItem(
-                                icon: Icons.inventory_2,
-                                iconColor: kPrimary,
-                                iconBgColor: kPrimary.withValues(alpha: 0.1),
-                                title: 'Outbound',
-                                value: '${state.totalConsumed} KG',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Movement List Header
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Recent Movements',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: kprimaryTextColor1,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: kPrimary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '${state.filteredItems.length} items',
-                                style: WorkSansAppTextStyles.medium.copyWith(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: kPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Movement Items
-                      if (state.filteredItems.isEmpty)
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(48.0),
-                            child: Text(
-                              'No movements found',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 16,
-                                color: kprimaryTextColor2,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: state.filteredItems.length,
-                          itemBuilder: (context, index) {
-                            final movement = state.filteredItems[index];
-                            return GestureDetector(
-                              onTap: () => _showMovementDetails(movement),
-                              child: _buildMovementCard(movement),
-                            );
-                          },
-                        ),
-
-                      // Loading more indicator
-                      if (state.isLoadingMore)
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
-
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                ),
+                child: _buildLoadedMovements(state),
               );
             }
 
@@ -490,116 +374,443 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
     );
   }
 
-  Widget _buildMovementCard(StockMovementItem movement) {
-    final isInflow = movement.movementType == MovementType.INFLOW;
-    final iconData = isInflow ? Icons.local_shipping : Icons.inventory_2;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
+  Widget _buildLoadedMovements(StockMovementLoaded state) {
+    return SingleChildScrollView(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: kPrimary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+          _buildSummaryHeader(state),
+          const SizedBox(height: 18),
+          _buildQuickFilters(),
+          const SizedBox(height: 24),
+          _buildMovementListHeader(state.filteredItems.length),
+          const SizedBox(height: 10),
+          if (state.filteredItems.isEmpty)
+            _buildEmptyMovementState()
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: state.filteredItems.length,
+              itemBuilder: (context, index) {
+                final movement = state.filteredItems[index];
+                return _buildMovementCard(movement);
+              },
             ),
-            child: Icon(iconData, color: kPrimary, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${movement.movementType.displayName} ${movement.quantityDisplay}',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  movement.item.itemName,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 14,
-                    color: kprimaryTextColor2,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  movement.formattedDate,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 13,
-                    color: kprimaryTextColor2,
-                  ),
-                ),
-              ],
+          if (state.isLoadingMore)
+            Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Center(
+                child: CircularProgressIndicator(color: context.modePrimary),
+              ),
             ),
-          ),
-          Icon(Icons.chevron_right, color: kprimaryTextColor2, size: 20),
+          const SizedBox(height: 24),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryItem({
-    required IconData icon,
-    required Color iconColor,
-    required Color iconBgColor,
-    required String title,
-    required String value,
-  }) {
-    return Row(
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: iconBgColor,
-            borderRadius: BorderRadius.circular(12),
+  Widget _buildSummaryHeader(StockMovementLoaded state) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.modePrimary,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: context.modePrimary.withValues(alpha: 0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
-          child: Icon(icon, color: iconColor, size: 24),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Text(
-                title,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: kprimaryTextColor2,
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: context.modeTextInverse.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.inventory_2_outlined,
+                  color: context.modeTextInverse,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Stock Flow Summary',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: context.modeTextInverse,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Track incoming and outgoing inventory',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: context.modeTextInverse.withValues(alpha: 0.78),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryMetric(
+                  icon: Icons.south_west_rounded,
+                  title: 'Received',
+                  value: '${state.totalReceived} KG',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildSummaryMetric(
+                  icon: Icons.north_east_rounded,
+                  title: 'Outbound',
+                  value: '${state.totalConsumed} KG',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildSummaryMetric({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.modeTextInverse.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: context.modeTextInverse.withValues(alpha: 0.14),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: context.modeTextInverse, size: 19),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: context.modeTextInverse.withValues(alpha: 0.76),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: context.modeTextInverse,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickFilters() {
+    final filters = [
+      ('All', null),
+      ('Received', 'INFLOW'),
+      ('Outbound', 'OUTFLOW'),
+      ('Spoilage', 'SPOILAGE'),
+      ('Transfer', 'TRANSFER'),
+      ('Adjustment', 'ADJUSTMENT'),
+    ];
+
+    return SizedBox(
+      height: 38,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemBuilder: (context, index) {
+          final filter = filters[index];
+          final isSelected = _selectedMovementType == filter.$2;
+          return ChoiceChip(
+            label: Text(filter.$1),
+            selected: isSelected,
+            showCheckmark: false,
+            onSelected: (_) => _applyMovementFilter(filter.$2),
+            selectedColor: context.modePrimary,
+            backgroundColor: context.modeSurface,
+            side: BorderSide(
+              color: isSelected ? context.modePrimary : context.modeBorder,
+            ),
+            labelStyle: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: isSelected
+                  ? context.modeTextInverse
+                  : context.modeTextSecondary,
+            ),
+          );
+        },
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemCount: filters.length,
+      ),
+    );
+  }
+
+  void _applyMovementFilter(String? value) {
+    setState(() {
+      _selectedMovementType = value;
+    });
+    context.read<StockMovementBloc>().add(
+      FilterByMovementType(movementType: value),
+    );
+  }
+
+  Widget _buildMovementListHeader(int count) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Recent Movements',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: context.modeTextPrimary,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: context.modePrimary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              '$count item${count == 1 ? '' : 's'}',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: context.modePrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyMovementState() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 30),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.modeBorder),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.receipt_long_outlined, color: context.modeTextMuted),
+          const SizedBox(height: 10),
+          Text(
+            'No movements found',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Try changing the movement filter.',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 12,
+              color: context.modeTextSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMovementCard(StockMovementItem movement) {
+    final accent = _movementAccent(movement.movementType);
+    final iconData = _movementIcon(movement.movementType);
+
+    return InkWell(
+      onTap: () => _showMovementDetails(movement),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: context.modeBorder.withValues(alpha: 0.8)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.16
+                    : 0.04,
+              ),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(iconData, color: accent, size: 22),
+            ),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          movement.item.itemName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: context.modeTextPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        movement.quantityDisplay,
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: accent,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 7),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _buildMovementBadge(
+                        movement.movementType.displayName,
+                        accent,
+                      ),
+                      Text(
+                        movement.formattedDate,
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 12,
+                          color: context.modeTextMuted,
+                        ),
+                      ),
+                      Text(
+                        '${movement.balanceBefore} → ${movement.balanceAfter}',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 12,
+                          color: context.modeTextMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.chevron_right_rounded, color: context.modeTextMuted),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMovementBadge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Color _movementAccent(MovementType type) {
+    switch (type) {
+      case MovementType.INFLOW:
+        return context.modeSuccess;
+      case MovementType.OUTFLOW:
+        return context.modePrimary;
+      case MovementType.SPOILAGE:
+        return context.modeError;
+      case MovementType.TRANSFER:
+        return context.modePrimaryBlue;
+      case MovementType.ADJUSTMENT:
+        return context.modeWarning;
+    }
+  }
+
+  IconData _movementIcon(MovementType type) {
+    switch (type) {
+      case MovementType.INFLOW:
+        return Icons.south_west_rounded;
+      case MovementType.OUTFLOW:
+        return Icons.north_east_rounded;
+      case MovementType.SPOILAGE:
+        return Icons.warning_amber_rounded;
+      case MovementType.TRANSFER:
+        return Icons.swap_horiz_rounded;
+      case MovementType.ADJUSTMENT:
+        return Icons.tune_rounded;
+    }
   }
 }

@@ -42,6 +42,10 @@ class AppTheme {
       extensions: const <ThemeExtension<dynamic>>[SandwichThemeColors.light],
     );
 
+    final appTextTheme = _workSansTextTheme(
+      base.textTheme,
+    ).apply(bodyColor: colors.textPrimary, displayColor: colors.textPrimary);
+
     return base.copyWith(
       extensions: <ThemeExtension<dynamic>>[colors],
       appBarTheme: AppBarTheme(
@@ -85,11 +89,8 @@ class AppTheme {
           side: BorderSide(color: colors.border.withValues(alpha: 0.45)),
         ),
       ),
-      textTheme: base.textTheme.apply(
-        bodyColor: colors.textPrimary,
-        displayColor: colors.textPrimary,
-        fontFamily: AppTextStyles.fontFamily,
-      ),
+      textTheme: appTextTheme,
+      primaryTextTheme: appTextTheme,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colors.surface,
@@ -136,6 +137,30 @@ class AppTheme {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
       ),
+    );
+  }
+
+  static TextTheme _workSansTextTheme(TextTheme textTheme) {
+    TextStyle? withFont(TextStyle? style) {
+      return style?.copyWith(fontFamily: AppTextStyles.fontFamily);
+    }
+
+    return textTheme.copyWith(
+      displayLarge: withFont(textTheme.displayLarge),
+      displayMedium: withFont(textTheme.displayMedium),
+      displaySmall: withFont(textTheme.displaySmall),
+      headlineLarge: withFont(textTheme.headlineLarge),
+      headlineMedium: withFont(textTheme.headlineMedium),
+      headlineSmall: withFont(textTheme.headlineSmall),
+      titleLarge: withFont(textTheme.titleLarge),
+      titleMedium: withFont(textTheme.titleMedium),
+      titleSmall: withFont(textTheme.titleSmall),
+      bodyLarge: withFont(textTheme.bodyLarge),
+      bodyMedium: withFont(textTheme.bodyMedium),
+      bodySmall: withFont(textTheme.bodySmall),
+      labelLarge: withFont(textTheme.labelLarge),
+      labelMedium: withFont(textTheme.labelMedium),
+      labelSmall: withFont(textTheme.labelSmall),
     );
   }
 }

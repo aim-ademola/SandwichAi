@@ -15,7 +15,6 @@ import 'package:sandwich_ai/src/features/procurement/data/model/supplier_stat_mo
 import 'package:sandwich_ai/src/features/procurement/data/repository/supplier_stat_repo.dart';
 
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_drawer.dart';
-import 'package:sandwich_ai/src/features/procurement/presentation/supplier_list.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_performance_cubit/procurement_performance_cubit.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_performance_cubit/procurement_performance_state.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/supplier_stat_bloc/bloc.dart';
@@ -417,6 +416,27 @@ class _ProcurementDashboardScreenState
                         context.modePrimary,
                       ),
                     ),
+                  )
+                else
+                  TextButton(
+                    onPressed: _openSuppliersTab,
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.modePrimary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'View all suppliers',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: width < 360 ? 11 : 12,
+                        fontWeight: FontWeight.w700,
+                        color: context.modePrimary,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -638,11 +658,7 @@ class _ProcurementDashboardScreenState
     final score = ranking.score > 0 ? ranking.score.toStringAsFixed(1) : '-';
 
     return InkWell(
-      onTap: () {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const SupplierListWrapper()));
-      },
+      onTap: _openSuppliersTab,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
@@ -709,6 +725,10 @@ class _ProcurementDashboardScreenState
         ),
       ),
     );
+  }
+
+  void _openSuppliersTab() {
+    context.go('/Procurement-nav?tab=suppliers');
   }
 
   Widget _buildErrorState(

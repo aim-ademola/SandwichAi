@@ -222,12 +222,14 @@ enum BottomNavItem {
 }
 
 class ProcurementMainScreen extends StatelessWidget {
-  const ProcurementMainScreen({super.key});
+  final int initialIndex;
+
+  const ProcurementMainScreen({super.key, this.initialIndex = 0});
 
   @override
   Widget build(BuildContext context) {
     return ProcuremntBottomNavBar(
-      initialIndex: 0, // Starting index
+      initialIndex: initialIndex,
       pages: [
         ProcurementDashboardScreen(),
         ProcurementOrdersScreen(),

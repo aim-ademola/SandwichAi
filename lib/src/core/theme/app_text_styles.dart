@@ -4,7 +4,7 @@ class AppTextStyles {
   AppTextStyles._();
 
   static const String fontFamily = 'Work_Sans';
-  static const String brandFontFamily = 'Phluff';
+  static const String brandFontFamily = fontFamily;
 
   static TextStyle displayLarge = const TextStyle(
     fontSize: 20.8,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -9,6 +10,7 @@ import 'package:sandwich_ai/src/features/pos/bloc/customer_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/customer_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/customer_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/customer_model.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/widgets/pos_design_system.dart';
 
 class CustomersListScreen extends StatefulWidget {
   const CustomersListScreen({super.key});
@@ -76,36 +78,24 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.modeBackground,
-      appBar: AppBar(
-        backgroundColor: context.modeSurface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'Customers',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: context.modeTextPrimary,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add, color: context.modePrimary, size: 28),
-            onPressed: () {
-              context.push('/customer-dtls').then((_) {
-                context.read<CustomerBloc>().add(const RefreshCustomers());
-              });
+    return PosPageScaffold(
+      title: 'Customers',
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 14),
+          child: PosIconActionButton(
+            icon: HugeIcons.strokeRoundedAdd01,
+            color: context.modePrimary,
+            tooltip: 'Add customer',
+            onPressed: () async {
+              final customerBloc = context.read<CustomerBloc>();
+              await context.push('/customer-dtls');
+              if (!mounted) return;
+              customerBloc.add(const RefreshCustomers());
             },
           ),
-        ],
-      ),
+        ),
+      ],
       body: Column(
         children: [
           // Search Bar
@@ -194,10 +184,11 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedAlert02,
+                          size: 52,
                           color: context.modeError,
+                          strokeWidth: 1.9,
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -267,27 +258,10 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.people_outline,
-                          size: 64,
-                          color: context.modeTextMuted,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No customers found',
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: context.modeTextPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Start by adding your first customer',
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 14,
-                            color: context.modeTextSecondary,
-                          ),
+                        PosEmptyState(
+                          icon: HugeIcons.strokeRoundedUserMultiple02,
+                          title: 'No customers found',
+                          message: 'Start by adding your first customer',
                         ),
                       ],
                     ),
@@ -330,10 +304,11 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
 
   Widget _buildCustomerCard(CustomerModel customer) {
     return GestureDetector(
-      onTap: () {
-        context.push('/customer-detail/${customer.id}').then((_) {
-          context.read<CustomerBloc>().add(const RefreshCustomers());
-        });
+      onTap: () async {
+        final customerBloc = context.read<CustomerBloc>();
+        await context.push('/customer-detail/${customer.id}');
+        if (!mounted) return;
+        customerBloc.add(const RefreshCustomers());
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -437,21 +412,21 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
               children: [
                 Expanded(
                   child: _buildStatItem(
-                    icon: Icons.shopping_bag_outlined,
+                    icon: HugeIcons.strokeRoundedShoppingBag01,
                     label: 'Orders',
                     value: '${customer.totalOrders}',
                   ),
                 ),
                 Expanded(
                   child: _buildStatItem(
-                    icon: Icons.attach_money,
+                    icon: HugeIcons.strokeRoundedMoney03,
                     label: 'Spent',
                     value: _formatCurrency(customer.totalSpent),
                   ),
                 ),
                 Expanded(
                   child: _buildStatItem(
-                    icon: Icons.stars_outlined,
+                    icon: HugeIcons.strokeRoundedStar,
                     label: 'Points',
                     value: '${customer.loyaltyPoints}',
                   ),
@@ -465,13 +440,18 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
   }
 
   Widget _buildStatItem({
-    required IconData icon,
+    required List<List<dynamic>> icon,
     required String label,
     required String value,
   }) {
     return Column(
       children: [
-        Icon(icon, size: 18, color: context.modeTextMuted),
+        HugeIcon(
+          icon: icon,
+          size: 18,
+          color: context.modeTextMuted,
+          strokeWidth: 1.8,
+        ),
         const SizedBox(height: 4),
         Text(
           value,

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/state.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/event.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/add_menu_repo.dart';
@@ -140,12 +141,40 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     CreateMenuItem event,
     Emitter<MenuItemsState> emit,
   ) async {
-    emit(
-      const MenuItemCreationError(
-        error: 'Menu items can only be created by the organization.',
-        errorType: MenuItemsErrorType.validation,
-      ),
-    );
+    try {
+      emit(const MenuItemCreating());
+
+      final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+      final response = await _repository.createMenuItem(
+        branchId: branchId,
+        dishName: event.dishName,
+        description: event.description,
+        category: event.category,
+        price: event.price,
+        preparationTime: event.preparationTime,
+        isAvailable: event.isAvailable,
+        imageUrl: event.imageUrl,
+      );
+
+      await response.when(
+        success: (menuItem) async {
+          emit(MenuItemCreated(menuItem: menuItem));
+          add(const LoadMenuItems());
+        },
+        error: (error) async {
+          final errorType = _determineErrorType(error.toString());
+          emit(
+            MenuItemCreationError(
+              error: error.toString(),
+              errorType: errorType,
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      final errorType = _determineErrorType(e.toString());
+      emit(MenuItemCreationError(error: e.toString(), errorType: errorType));
+    }
   }
 
   Future<void> _onUpdateMenuItem(
@@ -155,9 +184,15 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     try {
       emit(const MenuItemUpdating());
 
-      final response = await _repository.updateMenuItemAvailability(
+      final response = await _repository.updateMenuItem(
         menuItemId: event.menuItemId,
+        dishName: event.dishName,
+        description: event.description,
+        category: event.category,
+        price: event.price,
+        preparationTime: event.preparationTime,
         isAvailable: event.isAvailable,
+        imageUrl: event.imageUrl,
       );
 
       await response.when(

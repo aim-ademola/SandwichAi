@@ -18,6 +18,9 @@ class ApiMenuItem {
   final Branch? branch;
   final Recipe? recipe;
 
+  bool get isGlobal => branchId.trim().isEmpty;
+  bool get isBranchItem => !isGlobal;
+
   ApiMenuItem({
     required this.id,
     required this.dishName,
@@ -45,7 +48,7 @@ class ApiMenuItem {
       preparationTime: _parseToInt(json['preparationTime']),
       isAvailable: json['isAvailable'] as bool? ?? true,
       imageUrl: json['imageUrl'] as String? ?? '',
-      branchId: json['branchId'] as String? ?? '',
+      branchId: _parseNullableString(json['branchId'] ?? json['branch_id']),
       organizationId: json['organizationId'] as String? ?? '',
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
@@ -97,6 +100,12 @@ class ApiMenuItem {
     if (value is String) return value;
     if (value is num) return value.toString();
     return value.toString();
+  }
+
+  static String _parseNullableString(dynamic value) {
+    if (value == null) return '';
+    final parsed = value.toString();
+    return parsed == 'null' ? '' : parsed;
   }
 
   /// Helper method to safely parse values to int

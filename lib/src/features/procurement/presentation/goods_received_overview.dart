@@ -84,7 +84,7 @@ class _GoodsReceivedOverviewScreenState
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 2.3,
+      childAspectRatio: 2.05,
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
       children: [
@@ -104,10 +104,19 @@ class _GoodsReceivedOverviewScreenState
       return const Center(child: CircularProgressIndicator());
     }
     if (state.reorderStatus == GoodsReceivedAdvancedStatus.error) {
+      final permissionError =
+          (state.reorderError ?? '').contains('stock-cards:read') ||
+          (state.reorderError ?? '').toLowerCase().contains(
+            'missing permission',
+          );
       return _InfoPanel(
-        icon: Icons.error_outline,
-        title: 'Could not load suggestions',
-        message: state.reorderError ?? '',
+        icon: permissionError ? Icons.lock_outline : Icons.error_outline,
+        title: permissionError
+            ? 'Reorder suggestions unavailable'
+            : 'Could not load suggestions',
+        message: permissionError
+            ? 'Your account needs stock-cards:read permission to view these suggestions.'
+            : state.reorderError ?? '',
       );
     }
     final suggestions = state.reorderSuggestions?.suggestions ?? const [];
@@ -182,7 +191,7 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: context.modeSurface,
         borderRadius: BorderRadius.circular(8),
@@ -190,22 +199,28 @@ class _MetricCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
               color: context.modeTextMuted,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: context.modePrimary,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: context.modePrimary,
+              ),
             ),
           ),
         ],

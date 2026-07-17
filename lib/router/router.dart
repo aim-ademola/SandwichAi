@@ -20,7 +20,9 @@ import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_order_deta
 import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_shift_tab.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/customer_model.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/compaints.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/customer-base_details.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/customer_base.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/customer_details.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/my_task.dart';
@@ -29,6 +31,7 @@ import 'package:sandwich_ai/src/features/pos/presentation/order_summary.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_dashboard.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_requisition.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_staff_screen.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/reviews.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/table_view.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/output_ver_tabs.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_vaidate_stock_trf.dart';
@@ -189,6 +192,28 @@ class AppRouter {
           );
         },
       ),
+      GoRoute(
+        path: '/customer-detail/:customerId',
+        name: 'customer-detail',
+        pageBuilder: (context, state) {
+          final customerId = state.pathParameters['customerId'];
+          return CupertinoPage(
+            key: state.pageKey,
+            child: CustomerDetailScreen(customerId: customerId ?? ''),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/edit-customer',
+        name: 'edit-customer',
+        pageBuilder: (context, state) {
+          final customer = state.extra as CustomerModel?;
+          return CupertinoPage(
+            key: state.pageKey,
+            child: CreateEditCustomerScreen(customer: customer),
+          );
+        },
+      ),
 
       GoRoute(
         path: '/pos-dash',
@@ -277,6 +302,16 @@ class AppRouter {
           return CupertinoPage(
             key: state.pageKey,
             child: const ComplaintsScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/reviews',
+        name: 'reviews',
+        pageBuilder: (context, state) {
+          return CupertinoPage(
+            key: state.pageKey,
+            child: const ReviewsScreen(),
           );
         },
       ),

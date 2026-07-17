@@ -62,8 +62,10 @@ class PosMenuCategories {
     ),
   ];
 
-  static List<String> get names =>
-      all.map((category) => category.name).toList();
+  static List<String> get names => all
+      .where((category) => category.name != 'More')
+      .map((category) => category.name)
+      .toList();
 
   static PosMenuCategory byName(String name) {
     final normalized = name.trim().toLowerCase();

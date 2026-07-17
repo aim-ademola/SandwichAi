@@ -331,11 +331,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
   Widget _buildCustomerCard(CustomerModel customer) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/customer-detail',
-          arguments: customer.id,
-        ).then((_) {
+        context.push('/customer-detail/${customer.id}').then((_) {
           context.read<CustomerBloc>().add(const RefreshCustomers());
         });
       },

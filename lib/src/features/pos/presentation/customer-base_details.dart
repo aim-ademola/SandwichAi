@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -323,15 +324,13 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/edit-customer',
-                                  arguments: customer,
-                                ).then((_) {
-                                  context.read<CustomerBloc>().add(
-                                    LoadCustomerById(widget.customerId),
-                                  );
-                                });
+                                context
+                                    .push('/edit-customer', extra: customer)
+                                    .then((_) {
+                                      context.read<CustomerBloc>().add(
+                                        LoadCustomerById(widget.customerId),
+                                      );
+                                    });
                               },
                               icon: const Icon(Icons.edit_outlined, size: 18),
                               label: Text(

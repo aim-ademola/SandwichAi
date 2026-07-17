@@ -18,16 +18,26 @@ class PosAppDrawer extends StatelessWidget {
       moduleSubtitle: 'Customer service, payments and orders',
       footerChildren: const [AppDrawerThemeSwitch()],
       children: [
-        // _buildDrawerItem(
-        //   context,
-        //   icon: Icons.feedback_outlined,
-        //   title: 'Complaints',
-        //   onTap: () {
-        //     Navigator.pop(context);
-        //     context.push('/complaints');
-        //   },
-        // ),
-        // const SizedBox(height: 8),
+        _buildDrawerItem(
+          context,
+          icon: Icons.feedback_outlined,
+          title: 'Complaints',
+          onTap: () {
+            Navigator.pop(context);
+            context.push('/complaints');
+          },
+        ),
+        const SizedBox(height: 8),
+        _buildDrawerItem(
+          context,
+          icon: Icons.reviews_outlined,
+          title: 'Reviews',
+          onTap: () {
+            Navigator.pop(context);
+            context.push('/reviews');
+          },
+        ),
+        const SizedBox(height: 8),
         _buildDrawerItem(
           context,
           icon: Icons.person_2_outlined,
@@ -70,8 +80,7 @@ class PosAppDrawer extends StatelessWidget {
             Navigator.push(
               context,
               CupertinoPageRoute(
-                builder: (_) =>
-                    FeatureRegistry.isEnabled(AppFeature.printer)
+                builder: (_) => FeatureRegistry.isEnabled(AppFeature.printer)
                     ? const PrinterSettingsScreen()
                     : const FeatureUnavailableScreen(
                         feature: AppFeature.printer,

@@ -10,6 +10,7 @@ import 'package:sandwich_ai/src/features/pos/data/repository/add_menu_repo.dart'
     as addtomenurepo;
 import 'package:sandwich_ai/src/features/pos/data/repository/api_menu_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/customer_repo.dart';
+import 'package:sandwich_ai/src/features/pos/data/repository/customer_service_feedback_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/order_statua_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/payment_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/pos_dashboradd_repo.dart';
@@ -141,6 +142,9 @@ class RepositoryProviders {
     ),
     RepositoryProvider<CustomerRepositoryInterface>(
       create: (context) => CustomerRepository(),
+    ),
+    RepositoryProvider<CustomerServiceFeedbackRepositoryInterface>(
+      create: (context) => CustomerServiceFeedbackRepository(),
     ),
     RepositoryProvider<req.StockRequestRepositoryInterface>(
       create: (context) => req.StockRequestRepository(),

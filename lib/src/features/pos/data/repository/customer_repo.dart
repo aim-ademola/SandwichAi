@@ -66,7 +66,7 @@ class CustomerRepository extends BaseRepository
       };
 
       final response = await _apiClient
-          .get('customer-service/customers', queryParameters: queryParams)
+          .get('customer-service/Customers', queryParameters: queryParams)
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -80,7 +80,9 @@ class CustomerRepository extends BaseRepository
 
       AppLogger.log('API Response: ${response.data}');
 
-      final customersResponse = CustomersListResponse.fromJson(response.data);
+      final customersResponse = CustomersListResponse.fromJson(
+        _asMap(response.data),
+      );
       return ApiResponse.success(customersResponse);
     } on DioException catch (e) {
       return ApiResponse.errorMessage(_handleDioError(e));
@@ -106,7 +108,7 @@ class CustomerRepository extends BaseRepository
       _validateId(id);
 
       final response = await _apiClient
-          .get('customer-service/customers/$id')
+          .get('customer-service/Customers/$id')
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -118,7 +120,7 @@ class CustomerRepository extends BaseRepository
         return ApiResponse.errorMessage('Customer not found');
       }
 
-      final customer = CustomerModel.fromJson(response.data);
+      final customer = CustomerModel.fromJson(_unwrapRecord(response.data));
       return ApiResponse.success(customer);
     } on DioException catch (e) {
       return ApiResponse.errorMessage(_handleDioError(e));
@@ -184,7 +186,7 @@ class CustomerRepository extends BaseRepository
       AppLogger.log('Creating customer with data: $data');
 
       final response = await _apiClient
-          .post('customer-service/customers', data: data)
+          .post('customer-service/Customers', data: data)
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -198,7 +200,7 @@ class CustomerRepository extends BaseRepository
         return ApiResponse.errorMessage('Failed to create customer');
       }
 
-      final customer = CustomerModel.fromJson(response.data);
+      final customer = CustomerModel.fromJson(_unwrapRecord(response.data));
       return ApiResponse.success(customer);
     } on DioException catch (e) {
       AppLogger.log('DioException in createCustomer: ${e.response?.data}');
@@ -270,7 +272,7 @@ class CustomerRepository extends BaseRepository
       }
 
       final response = await _apiClient
-          .patch('customer-service/customers/$id', data: data)
+          .patch('customer-service/Customers/$id', data: data)
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -282,7 +284,7 @@ class CustomerRepository extends BaseRepository
         return ApiResponse.errorMessage('Failed to update customer');
       }
 
-      final customer = CustomerModel.fromJson(response.data);
+      final customer = CustomerModel.fromJson(_unwrapRecord(response.data));
       return ApiResponse.success(customer);
     } on DioException catch (e) {
       return ApiResponse.errorMessage(_handleDioError(e));
@@ -307,7 +309,7 @@ class CustomerRepository extends BaseRepository
       _validateId(id);
 
       await _apiClient
-          .delete('customer-service/customers/$id')
+          .delete('customer-service/Customers/$id')
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -354,6 +356,23 @@ class CustomerRepository extends BaseRepository
     if (name.isEmpty) {
       throw FormatException('Name cannot be empty');
     }
+  }
+
+  Map<String, dynamic> _asMap(dynamic data) {
+    if (data is Map<String, dynamic>) return data;
+    if (data is Map) return Map<String, dynamic>.from(data);
+    if (data is List) {
+      return {'data': data};
+    }
+    throw const FormatException('Invalid customer response format');
+  }
+
+  Map<String, dynamic> _unwrapRecord(dynamic data) {
+    final map = _asMap(data);
+    final record = map['data'] ?? map['customer'] ?? map;
+    if (record is Map<String, dynamic>) return record;
+    if (record is Map) return Map<String, dynamic>.from(record);
+    throw const FormatException('Invalid customer record format');
   }
 
   // Handle DioException specifically

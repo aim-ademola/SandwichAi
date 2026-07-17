@@ -198,7 +198,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
           Text(
             'SandwichAI',
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 24,
+              fontSize: 18,
               fontWeight: FontWeight.w900,
               color: context.modeTextPrimary,
             ),
@@ -249,7 +249,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                     child: Text(
                       _snapshotTitle,
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 24,
+                        fontSize: 18,
                         fontWeight: FontWeight.w900,
                         color: context.modeTextPrimary,
                       ),
@@ -275,7 +275,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
       crossAxisCount: 2,
       crossAxisSpacing: spacing,
       mainAxisSpacing: spacing,
-      childAspectRatio: width < 360 ? 0.88 : 0.94,
+      childAspectRatio: width < 360 ? 0.82 : 0.9,
       children: [
         _buildActionCard(
           icon: HugeIcons.strokeRoundedShoppingCart02,
@@ -330,6 +330,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             ],
           ),
           child: Stack(
+            alignment: Alignment.center,
             children: [
               Positioned(
                 right: -12,
@@ -347,82 +348,76 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.12),
-                            blurRadius: 14,
-                            offset: const Offset(0, 6),
+                padding: const EdgeInsets.all(12),
+                child: SizedBox.expand(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 14,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: HugeIcon(
+                            icon: icon,
+                            color: colors.first,
+                            size: 27,
+                            strokeWidth: 1.9,
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: HugeIcon(
-                          icon: icon,
-                          color: colors.first,
-                          size: 38,
-                          strokeWidth: 1.9,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 22),
-                    Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 21,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white.withValues(alpha: 0.85),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      width: 45,
-                      height: 45,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.12),
-                            blurRadius: 12,
-                            offset: const Offset(0, 5),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha: 0.82),
+                            ),
                           ),
                         ],
                       ),
-                      child: Center(
+                      SizedBox(
+                        width: 24,
+                        height: 24,
                         child: HugeIcon(
                           icon: HugeIcons.strokeRoundedArrowRight02,
-                          color: colors.first,
-                          size: 27,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          size: 18,
                           strokeWidth: 2,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -583,8 +578,8 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
                     color: context.modeTextPrimary,
                   ),
                 ),
@@ -608,8 +603,8 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
               color: data.color,
             ),
           ),

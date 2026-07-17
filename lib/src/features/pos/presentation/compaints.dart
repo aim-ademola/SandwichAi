@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/customer_service_feedback_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/repository/customer_service_feedback_repo.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -14,20 +18,29 @@ class ComplaintsScreen extends StatefulWidget {
 class _ComplaintsScreenState extends State<ComplaintsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final TextEditingController _customerNameController = TextEditingController();
   final TextEditingController _subjectController = TextEditingController();
   final TextEditingController _detailsController = TextEditingController();
   final List<File> _attachedFiles = [];
   final ImagePicker _picker = ImagePicker();
+  String _selectedCategory = 'OTHERS';
+  String _selectedSource = 'POS_COUNTER';
+  List<CustomerServiceRecord> _complaints = [];
+  bool _isLoadingComplaints = false;
+  bool _isSubmittingComplaint = false;
+  String? _complaintsError;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadComplaints();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _customerNameController.dispose();
     _subjectController.dispose();
     _detailsController.dispose();
     super.dispose();
@@ -55,10 +68,10 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                   'File size exceeds 5MB limit',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
-                backgroundColor: Colors.red,
+                backgroundColor: context.modeError,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -81,10 +94,10 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
               'Error picking file: $e',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.white,
+                color: context.modeTextInverse,
               ),
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: context.modeError,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -101,8 +114,36 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
     });
   }
 
-  void _submitComplaint() {
-    if (_subjectController.text.trim().isEmpty ||
+  Future<void> _loadComplaints() async {
+    setState(() {
+      _isLoadingComplaints = true;
+      _complaintsError = null;
+    });
+
+    final response = await context
+        .read<CustomerServiceFeedbackRepositoryInterface>()
+        .getComplaints(limit: 50);
+
+    if (!mounted) return;
+    response.when(
+      success: (records) {
+        setState(() {
+          _complaints = records.data;
+          _isLoadingComplaints = false;
+        });
+      },
+      error: (error) {
+        setState(() {
+          _complaintsError = error.toString();
+          _isLoadingComplaints = false;
+        });
+      },
+    );
+  }
+
+  Future<void> _submitComplaint() async {
+    if (_customerNameController.text.trim().isEmpty ||
+        _subjectController.text.trim().isEmpty ||
         _detailsController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -110,10 +151,10 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
             'Please fill in all required fields',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: Colors.white,
+              color: context.modeTextInverse,
             ),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: context.modeError,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -123,7 +164,81 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
       return;
     }
 
-    // Show success dialog
+    setState(() => _isSubmittingComplaint = true);
+    final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+
+    if (!mounted) return;
+    if (branchId.isEmpty) {
+      setState(() => _isSubmittingComplaint = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Branch not found. Please login again.',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 14,
+              color: context.modeTextInverse,
+            ),
+          ),
+          backgroundColor: context.modeError,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      return;
+    }
+
+    final response = await context
+        .read<CustomerServiceFeedbackRepositoryInterface>()
+        .createComplaint({
+          'branchId': branchId,
+          'customerName': _customerNameController.text.trim(),
+          'category': _selectedCategory,
+          'source': _selectedSource,
+          'description': _detailsController.text.trim(),
+          'subject': _subjectController.text.trim(),
+          if (_attachedFiles.isNotEmpty)
+            'attachments': _attachedFiles.map((file) => file.path).toList(),
+        });
+
+    if (!mounted) return;
+    setState(() => _isSubmittingComplaint = false);
+
+    response.when(
+      success: (_) {
+        _customerNameController.clear();
+        _subjectController.clear();
+        _detailsController.clear();
+        setState(() {
+          _selectedCategory = 'OTHERS';
+          _selectedSource = 'POS_COUNTER';
+          _attachedFiles.clear();
+        });
+        _loadComplaints();
+      },
+      error: (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              error.toString(),
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 14,
+                color: context.modeTextInverse,
+              ),
+            ),
+            backgroundColor: context.modeError,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!response.isSuccess) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -135,12 +250,12 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
+                color: context.modeSuccess.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.check_circle,
-                color: Colors.green,
+                color: context.modeSuccess,
                 size: 40,
               ),
             ),
@@ -151,7 +266,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -160,7 +275,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -168,19 +283,14 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
-              // Clear form
-              _subjectController.clear();
-              _detailsController.clear();
-              setState(() {
-                _attachedFiles.clear();
-              });
+              Navigator.pop(context);
+              _tabController.animateTo(1);
             },
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: kPrimary,
+                color: context.modePrimary,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -189,7 +299,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                 ),
               ),
             ),
@@ -204,12 +314,13 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: context.modeSurface,
           elevation: 0,
+          surfaceTintColor: Colors.transparent,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
@@ -217,7 +328,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           centerTitle: true,
@@ -226,12 +337,12 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
           children: [
             // Tab bar
             Container(
-              color: Colors.white,
+              color: context.modeSurface,
               child: TabBar(
                 controller: _tabController,
-                labelColor: kPrimary,
-                unselectedLabelColor: kprimaryTextColor2,
-                indicatorColor: kPrimary,
+                labelColor: context.modePrimary,
+                unselectedLabelColor: context.modeTextSecondary,
+                indicatorColor: context.modePrimary,
                 indicatorWeight: 3,
                 labelStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 15,
@@ -266,37 +377,198 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Complaint Subject
           Text(
-            'Complaint Subject',
+            'Customer Name',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: context.modeBorder),
             ),
             child: TextField(
-              controller: _subjectController,
-              cursorColor: kPrimary,
+              controller: _customerNameController,
+              cursorColor: context.modePrimary,
               decoration: InputDecoration(
-                hintText: 'Enter a brief subject for your complaint',
+                hintText: 'Enter customer name',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextMuted,
                 ),
                 border: InputBorder.none,
               ),
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Category',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: context.modeSurface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: context.modeBorder),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedCategory,
+                isExpanded: true,
+                dropdownColor: context.modeSurface,
+                iconEnabledColor: context.modeTextSecondary,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  color: context.modeTextPrimary,
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'LATE_ORDER',
+                    child: Text('Late order'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'WRONG_ITEM',
+                    child: Text('Wrong item'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'WRONG_ORDER',
+                    child: Text('Wrong order'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'POOR_QUALITY',
+                    child: Text('Poor quality'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'STAFF_ATTITUDE',
+                    child: Text('Staff attitude'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'PAYMENT_ISSUES',
+                    child: Text('Payment issues'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'DELIVERY_APP',
+                    child: Text('Delivery app'),
+                  ),
+                  DropdownMenuItem(value: 'HYGIENE', child: Text('Hygiene')),
+                  DropdownMenuItem(value: 'PRICING', child: Text('Pricing')),
+                  DropdownMenuItem(value: 'OTHERS', child: Text('Others')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedCategory = value);
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Source',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: context.modeSurface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: context.modeBorder),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedSource,
+                isExpanded: true,
+                dropdownColor: context.modeSurface,
+                iconEnabledColor: context.modeTextSecondary,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  color: context.modeTextPrimary,
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'POS_COUNTER',
+                    child: Text('POS counter'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'DELIVERY_APP',
+                    child: Text('Delivery app'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'CALL_CENTER',
+                    child: Text('Call center'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'SOCIAL_MEDIA',
+                    child: Text('Social media'),
+                  ),
+                  DropdownMenuItem(value: 'EMAIL', child: Text('Email')),
+                  DropdownMenuItem(
+                    value: 'IN_PERSON',
+                    child: Text('In person'),
+                  ),
+                  DropdownMenuItem(value: 'ONLINE', child: Text('Online')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedSource = value);
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Complaint Subject
+          Text(
+            'Complaint Subject',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: context.modeSurface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: context.modeBorder),
+            ),
+            child: TextField(
+              controller: _subjectController,
+              cursorColor: context.modePrimary,
+              decoration: InputDecoration(
+                hintText: 'Enter a brief subject for your complaint',
+                hintStyle: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  color: context.modeTextMuted,
+                ),
+                border: InputBorder.none,
+              ),
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 14,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -307,32 +579,32 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: context.modeBorder),
             ),
             child: TextField(
               controller: _detailsController,
-              cursorColor: kPrimary,
+              cursorColor: context.modePrimary,
               maxLines: 6,
               decoration: InputDecoration(
                 hintText: 'Describe the issue in detail here...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextMuted,
                 ),
                 border: InputBorder.none,
               ),
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -343,34 +615,40 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.modeSurface,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: context.modeBorder),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.attach_file, color: kPrimary, size: 24),
+                  Icon(Icons.attach_file, color: context.modePrimary, size: 24),
                   const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Attach Files/Images',
-                        style: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Attach Files/Images',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: context.modeTextPrimary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Accepted file types: jpg, png, pdf. Max size 5MB.',
-                        style: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: 12,
-                          color: kprimaryTextColor2,
+                        const SizedBox(height: 2),
+                        Text(
+                          'Accepted file types: jpg, png, pdf. Max size 5MB.',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 12,
+                            color: context.modeTextSecondary,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -385,20 +663,20 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: context.modeBorder),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.image, color: kPrimary, size: 24),
+                    Icon(Icons.image, color: context.modePrimary, size: 24),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         _attachedFiles[index].path.split('/').last,
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -406,7 +684,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                     IconButton(
                       icon: const Icon(Icons.close, size: 20),
                       onPressed: () => _removeFile(index),
-                      color: Colors.red,
+                      color: context.modeError,
                     ),
                   ],
                 ),
@@ -416,23 +694,34 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
           const SizedBox(height: 32),
           // Submit button
           GestureDetector(
-            onTap: _submitComplaint,
+            onTap: _isSubmittingComplaint ? null : _submitComplaint,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: kPrimary,
+                color: context.modePrimary,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-                'Submit Complaint',
-                textAlign: TextAlign.center,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
+              child: _isSubmittingComplaint
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: context.modeTextInverse,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      'Submit Complaint',
+                      textAlign: TextAlign.center,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: context.modeTextInverse,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -441,29 +730,54 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
   }
 
   Widget _buildMyComplaintsTab() {
-    // Sample complaints data
-    final complaints = [
-      {
-        'subject': 'Order Processing Delay',
-        'date': 'Nov 14, 2025',
-        'status': 'Pending',
-        'statusColor': Colors.orange,
-      },
-      {
-        'subject': 'Payment System Error',
-        'date': 'Nov 10, 2025',
-        'status': 'Resolved',
-        'statusColor': Colors.green,
-      },
-      {
-        'subject': 'Equipment Malfunction',
-        'date': 'Nov 8, 2025',
-        'status': 'In Progress',
-        'statusColor': Colors.blue,
-      },
-    ];
+    if (_isLoadingComplaints) {
+      return Center(
+        child: CircularProgressIndicator(color: context.modePrimary),
+      );
+    }
 
-    if (complaints.isEmpty) {
+    if (_complaintsError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: context.modeError),
+              const SizedBox(height: 16),
+              Text(
+                'Failed to load complaints',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: context.modeTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _complaintsError!,
+                textAlign: TextAlign.center,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  color: context.modeTextSecondary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadComplaints,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.modePrimary,
+                  foregroundColor: context.modeTextInverse,
+                ),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_complaints.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -471,7 +785,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
             Icon(
               Icons.feedback_outlined,
               size: 80,
-              color: Colors.grey.shade400,
+              color: context.modeTextMuted,
             ),
             const SizedBox(height: 16),
             Text(
@@ -479,7 +793,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 8),
@@ -487,7 +801,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
               'Your submitted complaints will appear here',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -495,85 +809,334 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: complaints.length,
-      itemBuilder: (context, index) {
-        final complaint = complaints[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      complaint['subject'] as String,
+    return RefreshIndicator(
+      onRefresh: _loadComplaints,
+      color: context.modePrimary,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _complaints.length,
+        itemBuilder: (context, index) {
+          final complaint = _complaints[index];
+          final statusColor = _statusColor(complaint.status);
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: context.modeSurface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.modeBorder),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        complaint.title,
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: context.modeTextPrimary,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        complaint.status,
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: statusColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: context.modeTextSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _formatRecordDate(complaint.createdAt),
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        fontSize: 14,
+                        color: context.modeTextSecondary,
                       ),
                     ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 20),
+                      color: context.modePrimary,
+                      onPressed: () => _showEditComplaintDialog(complaint),
                     ),
-                    decoration: BoxDecoration(
-                      color: (complaint['statusColor'] as Color).withValues(
-                        alpha: 0.1,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 20),
+                      color: context.modeError,
+                      onPressed: () => _deleteComplaint(complaint),
                     ),
-                    child: Text(
-                      complaint['status'] as String,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: complaint['statusColor'] as Color,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 14,
-                    color: kprimaryTextColor2,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    complaint['date'] as String,
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      color: kprimaryTextColor2,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'resolved':
+      case 'closed':
+        return context.modeSuccess;
+      case 'in progress':
+      case 'processing':
+        return context.modeInfo;
+      case 'rejected':
+      case 'cancelled':
+        return context.modeError;
+      default:
+        return context.modeWarning;
+    }
+  }
+
+  String _formatRecordDate(String? value) {
+    if (value == null || value.isEmpty) return 'Not available';
+    return value.split('T').first;
+  }
+
+  Future<void> _deleteComplaint(CustomerServiceRecord complaint) async {
+    final response = await context
+        .read<CustomerServiceFeedbackRepositoryInterface>()
+        .deleteComplaint(complaint.id);
+
+    if (!mounted) return;
+    response.when(
+      success: (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Complaint deleted successfully')),
         );
+        _loadComplaints();
       },
+      error: (error) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
+      },
+    );
+  }
+
+  void _showEditComplaintDialog(CustomerServiceRecord complaint) {
+    final subjectController = TextEditingController(text: complaint.title);
+    final detailsController = TextEditingController(text: complaint.details);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        backgroundColor: context.modeSurface,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: context.modePrimary.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.edit_note_outlined,
+                        color: context.modePrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Update Complaint',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: context.modeTextPrimary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(dialogContext),
+                      icon: Icon(Icons.close, color: context.modeTextMuted),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                _buildDialogField(
+                  controller: subjectController,
+                  label: 'Subject',
+                  hint: 'Enter complaint subject',
+                  icon: Icons.subject_outlined,
+                ),
+                const SizedBox(height: 14),
+                _buildDialogField(
+                  controller: detailsController,
+                  label: 'Description',
+                  hint: 'Describe the complaint',
+                  icon: Icons.notes_outlined,
+                  maxLines: 4,
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: context.modeTextPrimary,
+                          side: BorderSide(color: context.modeBorder),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.pop(dialogContext);
+                          final response = await context
+                              .read<
+                                CustomerServiceFeedbackRepositoryInterface
+                              >()
+                              .updateComplaint(complaint.id, {
+                                'subject': subjectController.text.trim(),
+                                'description': detailsController.text.trim(),
+                              });
+
+                          if (!mounted) return;
+                          response.when(
+                            success: (_) => _loadComplaints(),
+                            error: (error) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.toString())),
+                              );
+                            },
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.modePrimary,
+                          foregroundColor: context.modeTextInverse,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Text(
+                          'Update',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: context.modeTextInverse,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDialogField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: context.modeTextPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          cursorColor: context.modePrimary,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 14,
+              color: context.modeTextMuted,
+            ),
+            prefixIcon: Icon(icon, color: context.modeTextMuted, size: 20),
+            filled: true,
+            fillColor: context.modeSurfaceAlt,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: context.modeBorder),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: context.modePrimary, width: 1.4),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
+          ),
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: context.modeTextPrimary,
+          ),
+        ),
+      ],
     );
   }
 }

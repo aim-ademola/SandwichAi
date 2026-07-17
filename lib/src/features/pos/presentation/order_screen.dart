@@ -1,9 +1,12 @@
 import 'package:animate_to/animate_to.dart';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/theme/context_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -38,6 +41,8 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen>
     with TickerProviderStateMixin, WidgetsBindingObserver {
+  static const String _menuItemOrderStoragePrefix = 'new_order_item_sort_order';
+
   late TabController _tabController;
   late final OrderSessionCubit _sessionCubit;
   final TextEditingController _searchController = TextEditingController();
@@ -47,7 +52,9 @@ class _OrderScreenState extends State<OrderScreen>
 
   final Map<String, int> _orderItems = {};
   final Map<String, String> _itemSpecialRequests = {};
+  final Map<String, List<String>> _localMenuItemOrder = {};
   String? _lastKnownSessionId;
+  String? _menuItemOrderStorageKey;
   bool _showUnavailableItems = false;
 
   @override
@@ -58,6 +65,7 @@ class _OrderScreenState extends State<OrderScreen>
     _tabController = TabController(length: 1, vsync: this);
     context.read<MenuItemsBloc>().add(const LoadMenuItems());
     _ensureActiveSession();
+    unawaited(_loadLocalMenuItemOrder());
   }
 
   @override
@@ -457,20 +465,95 @@ class _OrderScreenState extends State<OrderScreen>
   }
 
   List<ApiMenuItem> _getOrderedItems(List<ApiMenuItem> allItems) {
-    return allItems.where((item) => _orderItems.containsKey(item.id)).toList();
+    return _sortMenuItems(
+      allItems,
+      null,
+    ).where((item) => _orderItems.containsKey(item.id)).toList();
+  }
+
+  String _menuItemOrderKey(String? category) {
+    final normalized = category?.trim();
+    return normalized == null || normalized.isEmpty ? '__all__' : normalized;
+  }
+
+  List<ApiMenuItem> _sortMenuItems(List<ApiMenuItem> items, String? category) {
+    final savedOrder =
+        _localMenuItemOrder[_menuItemOrderKey(category)] ??
+        (category == null
+            ? null
+            : _localMenuItemOrder[_menuItemOrderKey(null)]);
+    if (savedOrder == null || savedOrder.isEmpty) return List.of(items);
+
+    final originalIndex = <String, int>{
+      for (var i = 0; i < items.length; i++) items[i].id: i,
+    };
+
+    return List<ApiMenuItem>.from(items)..sort((a, b) {
+      final aIndex = savedOrder.indexOf(a.id);
+      final bIndex = savedOrder.indexOf(b.id);
+      if (aIndex == -1 && bIndex == -1) {
+        return (originalIndex[a.id] ?? 0).compareTo(originalIndex[b.id] ?? 0);
+      }
+      if (aIndex == -1) return 1;
+      if (bIndex == -1) return -1;
+      return aIndex.compareTo(bIndex);
+    });
+  }
+
+  Future<void> _loadLocalMenuItemOrder() async {
+    final userId = await AuthCacheHelper.instance.userID();
+    final storageKey =
+        '$_menuItemOrderStoragePrefix:${userId?.isNotEmpty == true ? userId : 'guest'}';
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getString(storageKey);
+    if (!mounted) return;
+
+    setState(() {
+      _menuItemOrderStorageKey = storageKey;
+      _localMenuItemOrder.clear();
+      if (encoded == null || encoded.isEmpty) return;
+
+      final decoded = jsonDecode(encoded);
+      if (decoded is! Map) return;
+      for (final entry in decoded.entries) {
+        final value = entry.value;
+        if (value is List) {
+          _localMenuItemOrder[entry.key.toString()] = value
+              .map((item) => item.toString())
+              .toList();
+        }
+      }
+    });
+  }
+
+  List<String> _mergeMenuItemOrder(
+    List<String>? existingOrder,
+    List<String> sortedVisibleIds,
+  ) {
+    final visibleIdSet = sortedVisibleIds.toSet();
+    return [
+      ...sortedVisibleIds,
+      ...?existingOrder?.where((id) => !visibleIdSet.contains(id)),
+    ];
+  }
+
+  Future<void> _saveLocalMenuItemOrder() async {
+    final storageKey = _menuItemOrderStorageKey;
+    if (storageKey == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(storageKey, jsonEncode(_localMenuItemOrder));
   }
 
   List<String> _orderedCategoriesFor(List<ApiMenuItem> menuItems) {
     final availableCategories = menuItems.map((item) => item.category).toSet();
-    final ordered = PosMenuCategories.names
-        .where(availableCategories.contains)
-        .toList();
     final customCategories =
         availableCategories
             .where((category) => !PosMenuCategories.names.contains(category))
+            .where((category) => category.trim().isNotEmpty)
             .toList()
           ..sort();
-    return [...ordered, ...customCategories];
+    return [...PosMenuCategories.names, ...customCategories];
   }
 
   double _calculateTotal(List<ApiMenuItem> allItems) {
@@ -847,12 +930,12 @@ class _OrderScreenState extends State<OrderScreen>
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
           child: Column(
             children: [
               _buildSearchCard(),
               if (categories.isNotEmpty && !isSearching) ...[
-                const SizedBox(height: 24),
+                const SizedBox(height: 6),
                 _buildCategoryTabs(categories),
               ],
             ],
@@ -1186,7 +1269,7 @@ class _OrderScreenState extends State<OrderScreen>
 
   Widget _buildSearchCard() {
     return Container(
-      height: 62,
+      height: 52,
       decoration: BoxDecoration(
         color: context.modeSurface,
         borderRadius: BorderRadius.circular(18),
@@ -1224,7 +1307,7 @@ class _OrderScreenState extends State<OrderScreen>
           prefixIcon: Icon(
             Icons.search_rounded,
             color: context.modeTextPrimary,
-            size: 26,
+            size: 22,
           ),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
@@ -1245,7 +1328,7 @@ class _OrderScreenState extends State<OrderScreen>
                   icon: Icon(
                     Icons.tune_rounded,
                     color: context.modeTextPrimary,
-                    size: 22,
+                    size: 20,
                   ),
                   onPressed: () {
                     setState(() {
@@ -1254,7 +1337,7 @@ class _OrderScreenState extends State<OrderScreen>
                   },
                 ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 20),
+          contentPadding: const EdgeInsets.symmetric(vertical: 15),
         ),
       ),
     );
@@ -1262,8 +1345,8 @@ class _OrderScreenState extends State<OrderScreen>
 
   Widget _buildCategoryTabs(List<String> categories) {
     return Container(
-      height: 78,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 54,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
@@ -1291,7 +1374,7 @@ class _OrderScreenState extends State<OrderScreen>
         indicatorColor: context.modePrimary,
         indicatorWeight: 3,
         dividerColor: Colors.transparent,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
         isScrollable: true,
         tabs: categories.asMap().entries.map((entry) {
           final index = entry.key;
@@ -1301,19 +1384,19 @@ class _OrderScreenState extends State<OrderScreen>
               ? context.modePrimary
               : context.modeTextMuted;
           return Tab(
-            height: 72,
+            height: 50,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                PosMenuCategoryIcon(category: cat, color: tabColor, size: 25),
-                const SizedBox(height: 6),
+                PosMenuCategoryIcon(category: cat, color: tabColor, size: 20),
+                const SizedBox(height: 4),
                 Text(
                   cat,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
                     color: tabColor,
                   ),
                 ),
@@ -1326,10 +1409,13 @@ class _OrderScreenState extends State<OrderScreen>
   }
 
   Widget _buildMenuList(List<ApiMenuItem> items, String? category) {
-    final categoryItems = items
-        .where((item) => category == null || item.category == category)
-        .where((item) => _showUnavailableItems || item.isAvailable)
-        .toList();
+    final categoryItems = _sortMenuItems(
+      items
+          .where((item) => category == null || item.category == category)
+          .where((item) => _showUnavailableItems || item.isAvailable)
+          .toList(),
+      category,
+    );
     if (categoryItems.isEmpty) {
       return Center(
         child: Text(
@@ -1345,115 +1431,121 @@ class _OrderScreenState extends State<OrderScreen>
         ),
       );
     }
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
-      itemCount: categoryItems.length + 1,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 18),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 6,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        category ?? 'Search Results',
-                        style: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          color: context.modeTextPrimary,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 9,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.modePrimary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '${categoryItems.length} item${categoryItems.length == 1 ? '' : 's'}',
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: context.modePrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _buildSectionActionButton(
-                  icon: Icons.grid_view_rounded,
-                  label: 'Reorder',
-                  onTap: _showOrderActions,
-                ),
-              ],
-            ),
-          );
-        }
-        final item = categoryItems[index - 1];
-        final quantity = _orderItems[item.id] ?? 0;
-        return _buildMenuItem(item, quantity, quantity > 0);
-      },
-    );
-  }
-
-  Widget _buildSectionActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    bool isPrimary = false,
-  }) {
-    return Material(
-      color: isPrimary
-          ? context.modePrimary.withValues(alpha: 0.08)
-          : context.modeSurface,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: 38,
-          padding: const EdgeInsets.symmetric(horizontal: 11),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: context.modeBorder.withValues(alpha: 0.6),
-            ),
-          ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 17,
-                color: isPrimary
-                    ? context.modePrimary
-                    : context.modeTextPrimary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: isPrimary
-                      ? context.modePrimary
-                      : context.modeTextPrimary,
+              Expanded(
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      category ?? 'Search Results',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: context.modeTextPrimary,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: context.modePrimary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${categoryItems.length} item${categoryItems.length == 1 ? '' : 's'}',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: context.modePrimary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              Icon(Icons.drag_handle, size: 20, color: context.modeTextMuted),
             ],
           ),
         ),
-      ),
+        Expanded(
+          child: ReorderableListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            buildDefaultDragHandles: false,
+            proxyDecorator: (child, index, animation) {
+              return Material(
+                color: Colors.transparent,
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 1, end: 1.02).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            onReorder: (oldIndex, newIndex) => _handleMenuItemReorder(
+              categoryItems,
+              category,
+              oldIndex,
+              newIndex,
+            ),
+            itemCount: categoryItems.length,
+            itemBuilder: (context, index) {
+              final item = categoryItems[index];
+              final quantity = _orderItems[item.id] ?? 0;
+              return _buildMenuItem(
+                item,
+                quantity,
+                quantity > 0,
+                reorderIndex: index,
+              );
+            },
+          ),
+        ),
+      ],
     );
+  }
+
+  void _handleMenuItemReorder(
+    List<ApiMenuItem> items,
+    String? category,
+    int oldIndex,
+    int newIndex,
+  ) {
+    if (items.length < 2) return;
+    if (newIndex > oldIndex) newIndex -= 1;
+    if (oldIndex < 0 ||
+        oldIndex >= items.length ||
+        newIndex < 0 ||
+        newIndex >= items.length) {
+      return;
+    }
+
+    final draftItems = List<ApiMenuItem>.from(items);
+    final movedItem = draftItems.removeAt(oldIndex);
+    draftItems.insert(newIndex, movedItem);
+
+    setState(() {
+      final sortedVisibleIds = draftItems.map((item) => item.id).toList();
+      final categoryKey = _menuItemOrderKey(category);
+      final globalKey = _menuItemOrderKey(null);
+
+      _localMenuItemOrder[categoryKey] = _mergeMenuItemOrder(
+        _localMenuItemOrder[categoryKey],
+        sortedVisibleIds,
+      );
+      _localMenuItemOrder[globalKey] = _mergeMenuItemOrder(
+        _localMenuItemOrder[globalKey],
+        sortedVisibleIds,
+      );
+    });
+    unawaited(_saveLocalMenuItemOrder());
   }
 
   Widget _buildAvailabilityBadge(bool isAvailable) {
@@ -1490,12 +1582,18 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
-  Widget _buildMenuItem(ApiMenuItem item, int quantity, bool isAdded) {
+  Widget _buildMenuItem(
+    ApiMenuItem item,
+    int quantity,
+    bool isAdded, {
+    required int reorderIndex,
+  }) {
     final hasSpecialRequest = _itemSpecialRequests.containsKey(item.id);
     final isAvailable = item.isAvailable;
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
+      key: ValueKey('menu-item-${item.id}'),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
@@ -1515,8 +1613,8 @@ class _OrderScreenState extends State<OrderScreen>
           GestureDetector(
             onLongPress: () => _showMenuItemOptions(item),
             child: Container(
-              width: 76,
-              height: 76,
+              width: 58,
+              height: 58,
               decoration: BoxDecoration(
                 color: context.modePrimary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(14),
@@ -1528,7 +1626,7 @@ class _OrderScreenState extends State<OrderScreen>
                     key: _animateToController.tag(item),
                     child: Icon(
                       Icons.restaurant_menu_rounded,
-                      size: 38,
+                      size: 30,
                       color: isAvailable
                           ? context.modePrimary
                           : context.modeTextMuted,
@@ -1544,14 +1642,14 @@ class _OrderScreenState extends State<OrderScreen>
                       child: Icon(
                         Icons.block_rounded,
                         color: Colors.white.withValues(alpha: 0.92),
-                        size: 24,
+                        size: 20,
                       ),
                     ),
                 ],
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: GestureDetector(
               onLongPress: () => _showMenuItemOptions(item),
@@ -1564,8 +1662,8 @@ class _OrderScreenState extends State<OrderScreen>
                         child: Text(
                           item.dishName,
                           style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
                             color: isAvailable
                                 ? context.modeTextPrimary
                                 : context.modeTextMuted,
@@ -1602,7 +1700,7 @@ class _OrderScreenState extends State<OrderScreen>
                         'N${item.price}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: isAvailable
                               ? context.modeTextSecondary
                               : context.modeTextMuted,
@@ -1628,22 +1726,33 @@ class _OrderScreenState extends State<OrderScreen>
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 6),
           IconButton(
             icon: Icon(
               Icons.more_vert_rounded,
               color: context.modeTextPrimary,
-              size: 24,
+              size: 20,
             ),
             onPressed: () => _showMenuItemOptions(item),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
-          const SizedBox(width: 8),
+          ReorderableDelayedDragStartListener(
+            index: reorderIndex,
+            child: Tooltip(
+              message: 'Hold and drag to sort',
+              child: Icon(
+                Icons.drag_handle,
+                color: context.modeTextMuted,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
           if (!isAvailable && !isAdded)
             Container(
-              width: 34,
-              height: 34,
+              width: 30,
+              height: 30,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: context.modeSurfaceAlt,
@@ -1659,8 +1768,8 @@ class _OrderScreenState extends State<OrderScreen>
                 _addItem(item.id);
               },
               child: Container(
-                width: 42,
-                height: 42,
+                width: 34,
+                height: 34,
                 decoration: BoxDecoration(
                   color: context.modeSurface,
                   borderRadius: BorderRadius.circular(100),
@@ -1670,7 +1779,7 @@ class _OrderScreenState extends State<OrderScreen>
                 ),
                 child: Icon(
                   Icons.add_rounded,
-                  size: 28,
+                  size: 23,
                   color: context.modePrimary,
                 ),
               ),
@@ -1688,8 +1797,8 @@ class _OrderScreenState extends State<OrderScreen>
                   InkWell(
                     onTap: () => _removeItem(item.id),
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      width: 28,
+                      height: 28,
                       alignment: Alignment.center,
                       child: Icon(
                         Icons.remove_rounded,
@@ -1699,8 +1808,8 @@ class _OrderScreenState extends State<OrderScreen>
                     ),
                   ),
                   Container(
-                    width: 32,
-                    height: 32,
+                    width: 28,
+                    height: 28,
                     alignment: Alignment.center,
                     child: Text(
                       '$quantity',
@@ -1719,8 +1828,8 @@ class _OrderScreenState extends State<OrderScreen>
                           }
                         : null,
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      width: 28,
+                      height: 28,
                       alignment: Alignment.center,
                       child: Icon(
                         Icons.add,
@@ -1931,9 +2040,7 @@ class _BottomSheetAction extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         decoration: BoxDecoration(
-          border: Border.all(
-            color: context.modeBorder,
-          ),
+          border: Border.all(color: context.modeBorder),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

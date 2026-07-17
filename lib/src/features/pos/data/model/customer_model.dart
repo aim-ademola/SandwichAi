@@ -55,23 +55,34 @@ class CustomerModel {
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
     return CustomerModel(
-      id: json['id'] as String,
-      phone: json['phone'] as String,
-      email: json['email'] as String,
-      name: json['name'] as String,
-      organizationId: json['organizationId'] as String,
-      dateOfBirth: json['dateOfBirth'] as String?,
-      address: json['address'] as String?,
-      city: json['city'] as String?,
-      dietaryRestrictions: json['dietaryRestrictions'] as String?,
+      id: _parseString(json['id'] ?? json['_id']),
+      phone: _parseString(json['phone'] ?? json['phoneNumber']),
+      email: _parseString(json['email']),
+      name: _parseString(json['name'] ?? json['fullName']),
+      organizationId: _parseString(
+        json['organizationId'] ?? json['organization_id'],
+      ),
+      dateOfBirth: _parseStringOrNull(
+        json['dateOfBirth'] ?? json['date_of_birth'],
+      ),
+      address: _parseStringOrNull(json['address']),
+      city: _parseStringOrNull(json['city']),
+      dietaryRestrictions: _parseStringOrNull(
+        json['dietaryRestrictions'] ?? json['dietary_restrictions'],
+      ),
       favoriteItems: json['favoriteItems'] != null
           ? List<String>.from(json['favoriteItems'] as List)
           : null,
       totalOrders: json['totalOrders'] as int? ?? 0,
       totalSpent: _parseDouble(json['totalSpent']), // Fixed here
       loyaltyPoints: json['loyaltyPoints'] as int? ?? 0,
-      membershipTier: json['membershipTier'] as String? ?? 'Bronze',
-      lastOrderDate: json['lastOrderDate'] as String?,
+      membershipTier: _parseString(
+        json['membershipTier'] ?? json['membership_tier'],
+        fallback: 'Bronze',
+      ),
+      lastOrderDate: _parseStringOrNull(
+        json['lastOrderDate'] ?? json['last_order_date'],
+      ),
       avgOrderValue: _parseDoubleNullable(json['avgOrderValue']), // Fixed here
       avgRating: _parseDoubleNullable(json['avgRating']), // Fixed here
       isActive: json['isActive'] as bool? ?? true,
@@ -80,9 +91,20 @@ class CustomerModel {
       allowsMarketing: json['allowsMarketing'] as bool? ?? false,
       allowsSMS: json['allowsSMS'] as bool? ?? false,
       allowsEmail: json['allowsEmail'] as bool? ?? false,
-      createdAt: json['createdAt'] as String,
-      updatedAt: json['updatedAt'] as String,
+      createdAt: _parseString(json['createdAt'] ?? json['created_at']),
+      updatedAt: _parseString(json['updatedAt'] ?? json['updated_at']),
     );
+  }
+
+  static String _parseString(dynamic value, {String fallback = ''}) {
+    if (value == null) return fallback;
+    return value.toString();
+  }
+
+  static String? _parseStringOrNull(dynamic value) {
+    if (value == null) return null;
+    final parsed = value.toString();
+    return parsed.isEmpty ? null : parsed;
   }
 
   // Helper method to parse double from string or number
@@ -154,16 +176,34 @@ class CustomersListResponse {
   });
 
   factory CustomersListResponse.fromJson(Map<String, dynamic> json) {
+    final rawData = json['data'] ?? json['customers'] ?? json['items'] ?? [];
+    final meta = json['meta'] is Map<String, dynamic>
+        ? json['meta'] as Map<String, dynamic>
+        : json;
+
     return CustomersListResponse(
       data:
-          (json['data'] as List<dynamic>?)
+          (rawData as List<dynamic>?)
               ?.map((e) => CustomerModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      page: json['page'] ?? 1,
-      limit: json['limit'] ?? 10,
-      total: json['total'] ?? 0,
-      totalPages: json['totalPages'] ?? 0,
+      page: _parseInt(meta['page'] ?? meta['currentPage'], fallback: 1),
+      limit: _parseInt(meta['limit'] ?? meta['perPage'], fallback: 10),
+      total: _parseInt(
+        meta['total'],
+        fallback: (rawData is List ? rawData.length : 0),
+      ),
+      totalPages: _parseInt(
+        meta['totalPages'] ?? meta['lastPage'],
+        fallback: 1,
+      ),
     );
+  }
+
+  static int _parseInt(dynamic value, {required int fallback}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? fallback;
+    return fallback;
   }
 }

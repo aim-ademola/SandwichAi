@@ -93,8 +93,8 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
       title: Text(
         'Today\'s Overview',
         style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
           color: context.modeTextPrimary,
         ),
       ),
@@ -363,33 +363,36 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                           PieChartSectionData(
                             color: context.modeTextMuted,
                             value: tasks.pending.toDouble(),
-                            title: '${((tasks.pending / total) * 100).toStringAsFixed(0)}%',
+                            title:
+                                '${((tasks.pending / total) * 100).toStringAsFixed(0)}%',
                             radius: 25,
                             titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
                               color: context.modeTextInverse,
                             ),
                           ),
                           PieChartSectionData(
                             color: context.modeWarning,
                             value: tasks.inProcess.toDouble(),
-                            title: '${((tasks.inProcess / total) * 100).toStringAsFixed(0)}%',
+                            title:
+                                '${((tasks.inProcess / total) * 100).toStringAsFixed(0)}%',
                             radius: 25,
                             titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
                               color: context.modeTextInverse,
                             ),
                           ),
                           PieChartSectionData(
                             color: context.modeSuccess,
                             value: tasks.completedToday.toDouble(),
-                            title: '${((tasks.completedToday / total) * 100).toStringAsFixed(0)}%',
+                            title:
+                                '${((tasks.completedToday / total) * 100).toStringAsFixed(0)}%',
                             radius: 25,
                             titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
                               color: context.modeTextInverse,
                             ),
                           ),
@@ -435,10 +438,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
         Text(

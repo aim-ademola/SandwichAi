@@ -41,6 +41,7 @@ class StockControlDashboardBodyScreen extends StatefulWidget {
 class _StockControlDashboardBodyScreenState
     extends State<StockControlDashboardBodyScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isTotalValueVisible = true;
 
   @override
   void initState() {
@@ -259,11 +260,9 @@ class _StockControlDashboardBodyScreenState
   Widget _buildBody(BuildContext context, dynamic loadedState) {
     final state = loadedState is BranchStockSummaryLoaded ? loadedState : null;
 
-    bool isValueVisible = true; // initial state
-
     void toggleVisibility() {
       setState(() {
-        isValueVisible = !isValueVisible;
+        _isTotalValueVisible = !_isTotalValueVisible;
       });
     }
 
@@ -295,7 +294,7 @@ class _StockControlDashboardBodyScreenState
                   child: _buildTotalStockCard(
                     constraints.maxWidth,
                     overview.totalValue,
-                    isValueVisible,
+                    _isTotalValueVisible,
                     toggleVisibility,
                   ),
                 ),
@@ -490,7 +489,7 @@ class _StockControlDashboardBodyScreenState
             formattedValue,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: valueFontSize,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
               color: valueColor,
             ),
           ),
@@ -550,7 +549,7 @@ class _StockControlDashboardBodyScreenState
                   'Total Stock Value',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: labelFontSize,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: context.modeTextSecondary,
                   ),
                 ),
@@ -576,7 +575,7 @@ class _StockControlDashboardBodyScreenState
                     overflow: TextOverflow.ellipsis,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: valueFontSize,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                       color: context.modeTextPrimary,
                     ),
                   ),
@@ -993,8 +992,8 @@ class _StockControlDashboardBodyScreenState
                               '${((status.inStock / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextInverse,
                           ),
                         ),
@@ -1005,8 +1004,8 @@ class _StockControlDashboardBodyScreenState
                               '${((status.expired / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextInverse,
                           ),
                         ),

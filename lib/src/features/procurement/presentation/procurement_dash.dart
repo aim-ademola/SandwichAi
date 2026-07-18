@@ -316,7 +316,7 @@ class _ProcurementDashboardScreenState
               number,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: numberFontSize,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
                 color: numberColor,
               ),
             ),
@@ -353,7 +353,7 @@ class _ProcurementDashboardScreenState
             'Budget',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: titleFontSize,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: context.modeTextPrimary,
             ),
           ),
@@ -402,7 +402,7 @@ class _ProcurementDashboardScreenState
                   'Suppliers',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: titleFontSize,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: context.modeTextPrimary,
                   ),
                 ),
@@ -506,7 +506,7 @@ class _ProcurementDashboardScreenState
               'Procurement Performance',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: titleFontSize,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: context.modeTextPrimary,
               ),
             ),
@@ -606,7 +606,7 @@ class _ProcurementDashboardScreenState
                       'Supplier Rankings',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: titleFontSize,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         color: context.modeTextPrimary,
                       ),
                     ),
@@ -908,7 +908,7 @@ class _ProcurementDashboardScreenState
             value,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: numberSize,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
               color: valueColor ?? context.modeTextPrimary,
             ),
           ),
@@ -945,7 +945,7 @@ class _ProcurementDashboardScreenState
           'Recent Activity',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: titleFontSize,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: context.modeTextPrimary,
           ),
         ),
@@ -1232,7 +1232,7 @@ class _ProcurementDashboardScreenState
             'Supplier Status Breakdown',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: context.modeTextPrimary,
             ),
           ),
@@ -1255,8 +1255,8 @@ class _ProcurementDashboardScreenState
                               '${((stats.activeSuppliers / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextInverse,
                           ),
                         ),
@@ -1267,8 +1267,8 @@ class _ProcurementDashboardScreenState
                               '${((stats.pendingSuppliers / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextInverse,
                           ),
                         ),
@@ -1279,8 +1279,8 @@ class _ProcurementDashboardScreenState
                               '${((stats.verifiedSuppliers / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextInverse,
                           ),
                         ),

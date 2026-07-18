@@ -181,7 +181,6 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
                     fontSize: 11,
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                     color: isActive ? activeColor : inactiveColor,
-                    letterSpacing: 0.1,
                   ),
                 ),
               ],

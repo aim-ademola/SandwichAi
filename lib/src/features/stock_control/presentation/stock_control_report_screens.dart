@@ -253,7 +253,7 @@ class _ReportScaffold extends StatelessWidget {
             title,
             style: WorkSansAppTextStyles.medium.copyWith(
               color: context.modeTextPrimary,
-              fontSize: 18,
+              fontSize: 17,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -342,7 +342,7 @@ class _CenteredMessage extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 17,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: context.modeTextPrimary,
               ),

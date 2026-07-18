@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 
@@ -137,8 +138,8 @@ class _ProcuremntBottomNavBarState extends State<ProcuremntBottomNavBar> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 10.5,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 11,
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                     color: isActive ? activeColor : inactiveColor,
                   ),

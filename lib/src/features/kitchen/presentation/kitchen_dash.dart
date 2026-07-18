@@ -49,7 +49,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               Text(
                 'Cancel order ${order.orderId} for ${order.customerName}?',
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  color: const Color(0xFF555555),
+                  color: context.modeTextSecondary,
                 ),
               ),
               const SizedBox(height: 14),
@@ -75,7 +75,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
               child: Text(
                 'Keep',
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  color: const Color(0xFF888888),
+                  color: context.modeTextMuted,
                 ),
               ),
             ),
@@ -90,9 +90,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                 }
                 Navigator.pop(ctx, trimmedReason);
               },
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFE57373),
-              ),
+              style: TextButton.styleFrom(foregroundColor: context.modeError),
               child: Text(
                 'Yes, Cancel',
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -297,7 +295,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
         _statCard(
           label: 'Delivered',
           value: '${data.orderStats.ordersDelivered}',
-          color: const Color(0xFF2D9B6F),
+          color: context.modeSuccess,
           bg: context.modeSuccess.withValues(alpha: 0.12),
           icon: Icons.check_circle_rounded,
         ),
@@ -305,7 +303,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
         _statCard(
           label: 'Staff',
           value: '${data.staffOnDuty.total}',
-          color: const Color(0xFF4A6FE3),
+          color: context.modeInfo,
           bg: context.modeInfo.withValues(alpha: 0.12),
           icon: Icons.people_alt_rounded,
         ),
@@ -344,7 +342,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                   value,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 20,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: color,
                     height: 1,
                   ),
@@ -412,12 +410,12 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                       child: Text(
                         order.getTimeAgo(),
                         style: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: 10,
+                          fontSize: 11,
                           color: context.modeTextInverse.withValues(
                             alpha: 0.85,
                           ),
                           fontWeight: FontWeight.w500,
-                          letterSpacing: 0.4,
+                          letterSpacing: 0,
                         ),
                       ),
                     ),
@@ -489,10 +487,10 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                             child: Text(
                               cfg.label,
                               style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                                 color: cfg.color,
-                                letterSpacing: 0.3,
+                                letterSpacing: 0,
                               ),
                             ),
                           ),
@@ -636,20 +634,20 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
   _StatusConfig _statusConfig(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return const _StatusConfig(
-          color: Color(0xFFF59E0B),
+        return _StatusConfig(
+          color: context.modeWarning,
           icon: Icons.receipt_long_rounded,
           label: 'PENDING',
         );
       case 'IN_QUEUE':
-        return const _StatusConfig(
-          color: Color(0xFF4A6FE3),
+        return _StatusConfig(
+          color: context.modeInfo,
           icon: Icons.queue_rounded,
           label: 'IN QUEUE',
         );
       case 'CONFIRMED':
-        return const _StatusConfig(
-          color: Color(0xFF9C27B0),
+        return _StatusConfig(
+          color: context.modePrimaryBlue,
           icon: Icons.check_circle_outline_rounded,
           label: 'NEW ORDER',
         );
@@ -666,26 +664,26 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           label: 'READY',
         );
       case 'SERVED':
-        return const _StatusConfig(
-          color: Color(0xFF2D9B6F),
+        return _StatusConfig(
+          color: context.modeSuccess,
           icon: Icons.restaurant_rounded,
           label: 'SERVED',
         );
       case 'COMPLETED':
-        return const _StatusConfig(
-          color: Color(0xFF388E3C),
+        return _StatusConfig(
+          color: context.modeSuccess,
           icon: Icons.verified_rounded,
           label: 'COMPLETED',
         );
       case 'CANCELLED':
-        return const _StatusConfig(
-          color: Color(0xFFE57373),
+        return _StatusConfig(
+          color: context.modeError,
           icon: Icons.cancel_outlined,
           label: 'CANCELLED',
         );
       default:
         return _StatusConfig(
-          color: Colors.grey,
+          color: context.modeTextMuted,
           icon: Icons.help_outline,
           label: status.toUpperCase(),
         );
@@ -994,7 +992,8 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
   }
 
   Widget _buildOrderStatsChart(OrderStats stats) {
-    final total = stats.ongoingOrders + stats.ordersDelivered + stats.ordersReceived;
+    final total =
+        stats.ongoingOrders + stats.ordersDelivered + stats.ordersReceived;
     if (total == 0) return const SizedBox.shrink();
 
     return Container(
@@ -1011,7 +1010,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
             'Order Statistics',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: context.modeTextPrimary,
             ),
           ),
@@ -1030,33 +1029,36 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                         PieChartSectionData(
                           color: context.modePrimary,
                           value: stats.ongoingOrders.toDouble(),
-                          title: '${((stats.ongoingOrders / total) * 100).toStringAsFixed(0)}%',
+                          title:
+                              '${((stats.ongoingOrders / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextInverse,
                           ),
                         ),
                         PieChartSectionData(
-                          color: const Color(0xFF2D9B6F),
+                          color: context.modeSuccess,
                           value: stats.ordersDelivered.toDouble(),
-                          title: '${((stats.ordersDelivered / total) * 100).toStringAsFixed(0)}%',
+                          title:
+                              '${((stats.ordersDelivered / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextInverse,
                           ),
                         ),
                         PieChartSectionData(
-                          color: const Color(0xFF4A6FE3),
+                          color: context.modeInfo,
                           value: stats.ordersReceived.toDouble(),
-                          title: '${((stats.ordersReceived / total) * 100).toStringAsFixed(0)}%',
+                          title:
+                              '${((stats.ordersReceived / total) * 100).toStringAsFixed(0)}%',
                           radius: 25,
                           titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextInverse,
                           ),
                         ),
@@ -1078,12 +1080,12 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                     ),
                     const SizedBox(height: 8),
                     _chartIndicator(
-                      color: const Color(0xFF2D9B6F),
+                      color: context.modeSuccess,
                       label: 'Delivered (${stats.ordersDelivered})',
                     ),
                     const SizedBox(height: 8),
                     _chartIndicator(
-                      color: const Color(0xFF4A6FE3),
+                      color: context.modeInfo,
                       label: 'Received (${stats.ordersReceived})',
                     ),
                   ],
@@ -1102,10 +1104,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
         Text(

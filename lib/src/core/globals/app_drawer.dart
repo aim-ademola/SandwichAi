@@ -130,8 +130,8 @@ class _PremiumDrawerHeader extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
                     ),
@@ -284,7 +284,7 @@ class _AppDrawerAccountMenuState extends State<AppDrawerAccountMenu> {
                           overflow: TextOverflow.ellipsis,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextPrimary,
                           ),
                         ),
@@ -353,7 +353,7 @@ class _AccountAvatar extends StatelessWidget {
         initial,
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           color: context.modePrimary,
         ),
       ),
@@ -406,7 +406,7 @@ class AppDrawerThemeSwitch extends StatelessWidget {
                       isDark ? 'Dark mode' : 'Light mode',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: context.modeTextPrimary,
                       ),
                     ),

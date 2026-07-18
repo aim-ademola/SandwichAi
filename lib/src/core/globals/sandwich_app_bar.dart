@@ -34,7 +34,7 @@ class SandwichAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(
         title,
         style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 18,
+          fontSize: 17,
           fontWeight: FontWeight.w600,
           color: context.modeTextPrimary,
         ),

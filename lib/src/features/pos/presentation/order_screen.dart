@@ -19,7 +19,6 @@ import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/pos_menu_categories.dart';
-import 'package:sandwich_ai/src/features/pos/presentation/addtomenu.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/cash_approval_waiting.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/edit_menu.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/online_qr.dart';
@@ -702,8 +701,8 @@ class _OrderScreenState extends State<OrderScreen>
               Text(
                 label,
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
                   color: context.modeTextPrimary,
                 ),
               ),
@@ -1465,7 +1464,7 @@ class _OrderScreenState extends State<OrderScreen>
                       category ?? 'Search Results',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                         color: context.modeTextPrimary,
                       ),
                     ),
@@ -1482,7 +1481,7 @@ class _OrderScreenState extends State<OrderScreen>
                         '${categoryItems.length} item${categoryItems.length == 1 ? '' : 's'}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: context.modePrimary,
                         ),
                       ),
@@ -1491,30 +1490,6 @@ class _OrderScreenState extends State<OrderScreen>
                 ),
               ),
               Icon(Icons.drag_handle, size: 20, color: context.modeTextMuted),
-              const SizedBox(width: 10),
-              TextButton.icon(
-                onPressed: () => context.showAddMenuItemDialog(),
-                style: TextButton.styleFrom(
-                  foregroundColor: context.modePrimary,
-                  backgroundColor: context.modePrimary.withValues(alpha: 0.08),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                ),
-                icon: const Icon(Icons.add, size: 18),
-                label: Text(
-                  'Add Item',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: context.modePrimary,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -1772,7 +1747,7 @@ class _OrderScreenState extends State<OrderScreen>
                           item.dishName,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                             color: isAvailable
                                 ? context.modeTextPrimary
                                 : context.modeTextMuted,
@@ -1809,7 +1784,7 @@ class _OrderScreenState extends State<OrderScreen>
                         'N${item.price}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: isAvailable
                               ? context.modeTextSecondary
                               : context.modeTextMuted,

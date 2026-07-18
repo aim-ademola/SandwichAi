@@ -423,7 +423,8 @@ class AddBranchStockRepository extends BaseRepository
               : <String, dynamic>{};
           return ApiResponse.success(BranchStockControlResponse.fromJson(json));
         },
-        error: (error) => ApiResponse.error(error),
+        error: (error) =>
+            ApiResponse.errorMessage(_parseErrorMessage(error.toString())),
       );
     } catch (e) {
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
@@ -447,7 +448,8 @@ class AddBranchStockRepository extends BaseRepository
             BranchStockControlListResponse.fromJson(json),
           );
         },
-        error: (error) => ApiResponse.error(error),
+        error: (error) =>
+            ApiResponse.errorMessage(_parseErrorMessage(error.toString())),
       );
     } catch (e) {
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));

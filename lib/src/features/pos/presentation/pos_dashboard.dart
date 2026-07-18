@@ -199,7 +199,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             'SandwichAI',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w600,
               color: context.modeTextPrimary,
             ),
           ),
@@ -250,7 +250,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                       _snapshotTitle,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 18,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w600,
                         color: context.modeTextPrimary,
                       ),
                     ),
@@ -282,14 +282,14 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
           label: 'New Order',
           subtitle: 'Create a new order',
           onTap: () => context.goNamed('Pos-nav', extra: 1),
-          colors: const [Color(0xFFFF4B0B), Color(0xFFFF6B18)],
+          colors: [context.modePrimary, context.modePrimaryAlt],
         ),
         _buildActionCard(
           icon: HugeIcons.strokeRoundedInvoice03,
           label: 'Active Orders',
           subtitle: 'View ongoing orders',
           onTap: () => context.goNamed('Pos-nav', extra: 2),
-          colors: const [Color(0xFFFF9C2B), Color(0xFFFF8D24)],
+          colors: [context.modeWarning, context.modePrimary],
           showcaseKey: _activeOrdersTourKey,
           showcaseDescription:
               'Use Active Orders to continue orders already sent to kitchen, take payment, and check completion status.',
@@ -388,7 +388,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                             textAlign: TextAlign.center,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
                           ),
@@ -399,7 +399,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: FontWeight.w500,
                               color: Colors.white.withValues(alpha: 0.82),
                             ),
@@ -495,7 +495,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             : 'Total orders on ${DateFormat('MMM d').format(_selectedDate)}',
         value: '${summary.totalOrders}',
         icon: HugeIcons.strokeRoundedShoppingCart02,
-        color: const Color(0xFF1F75FF),
+        color: context.modeInfo,
       ),
       _SnapshotData(
         title: 'Sales',
@@ -504,21 +504,21 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             : 'Total sales on ${DateFormat('MMM d').format(_selectedDate)}',
         value: summary.formattedSales,
         icon: HugeIcons.strokeRoundedChartIncrease,
-        color: const Color(0xFF0F9B69),
+        color: context.modeSuccess,
       ),
       _SnapshotData(
         title: 'Pending Orders',
         subtitle: 'Awaiting processing',
         value: '${summary.pendingOrders}',
         icon: HugeIcons.strokeRoundedHourglass,
-        color: const Color(0xFFE5A600),
+        color: context.modeWarning,
       ),
       _SnapshotData(
         title: 'Completed Orders',
         subtitle: 'Successfully delivered',
         value: '${summary.completedOrders}',
         icon: HugeIcons.strokeRoundedCheckmarkSquare02,
-        color: const Color(0xFF0C8D7B),
+        color: context.modePrimaryBlue,
       ),
     ];
 
@@ -579,7 +579,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     color: context.modeTextPrimary,
                   ),
                 ),
@@ -604,7 +604,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
             overflow: TextOverflow.ellipsis,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: data.color,
             ),
           ),

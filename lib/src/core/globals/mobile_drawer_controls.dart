@@ -169,7 +169,7 @@ class _DrawerBranchSwitcherState extends State<DrawerBranchSwitcher> {
                           overflow: TextOverflow.ellipsis,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                             color: context.modeTextPrimary,
                           ),
                         ),
@@ -226,7 +226,7 @@ class _DrawerBranchSwitcherState extends State<DrawerBranchSwitcher> {
                   'Switch branch',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 18,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: context.modeTextPrimary,
                   ),
                 ),
@@ -312,7 +312,7 @@ class AppBranchOptionTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: context.modeTextPrimary,
                       ),
                     ),
@@ -563,7 +563,7 @@ class _DrawerModuleTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                    fontWeight: FontWeight.w600,
                     color: color,
                   ),
                 ),
@@ -618,7 +618,7 @@ class _DrawerPanel extends StatelessWidget {
                   title,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     color: context.modeTextPrimary,
                   ),
                 ),

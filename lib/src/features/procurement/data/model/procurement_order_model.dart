@@ -5,15 +5,17 @@ class ProcurementResponse {
   ProcurementResponse({required this.message, required this.data});
 
   factory ProcurementResponse.fromJson(Map<String, dynamic> json) {
+    final data = json['data'];
     return ProcurementResponse(
-      message: json['message'] as String? ?? '',
-      data:
-          (json['data'] as List<dynamic>?)
-              ?.map(
-                (e) => ProcurementRequest.fromJson(e as Map<String, dynamic>),
-              )
-              .toList() ??
-          [],
+      message: _string(json['message']),
+      data: data is List
+          ? data
+                .whereType<Map>()
+                .map(
+                  (e) => ProcurementRequest.fromJson(e.cast<String, dynamic>()),
+                )
+                .toList()
+          : [],
     );
   }
 
@@ -111,14 +113,11 @@ class ProcurementRequest {
           : null,
       createdAt: _parseToString(json['createdAt']),
       updatedAt: _parseToString(json['updatedAt']),
-      items:
-          (json['items'] as List<dynamic>?)
-              ?.map((e) => ProcurementItem.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      branch: BranchInfo.fromJson(
-        json['branch'] as Map<String, dynamic>? ?? {},
-      ),
+      items: _asList(json['items'])
+          .whereType<Map>()
+          .map((e) => ProcurementItem.fromJson(e.cast<String, dynamic>()))
+          .toList(),
+      branch: BranchInfo.fromJson(_asMap(json['branch'])),
     );
   }
 
@@ -208,7 +207,7 @@ class ProcurementItem {
       status: _parseToString(json['status']),
       createdAt: _parseToString(json['createdAt']),
       updatedAt: _parseToString(json['updatedAt']),
-      item: ItemInfo.fromJson(json['item'] as Map<String, dynamic>? ?? {}),
+      item: ItemInfo.fromJson(_asMap(json['item'])),
     );
   }
 
@@ -279,4 +278,22 @@ class BranchInfo {
     if (value is bool) return value.toString();
     return value.toString();
   }
+}
+
+String _string(dynamic value, {String fallback = ''}) {
+  if (value == null) return fallback;
+  if (value is String) return value;
+  if (value is num || value is bool) return value.toString();
+  return fallback;
+}
+
+Map<String, dynamic> _asMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return value.cast<String, dynamic>();
+  return const {};
+}
+
+List<dynamic> _asList(dynamic value) {
+  if (value is List) return value;
+  return const [];
 }

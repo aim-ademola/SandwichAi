@@ -33,8 +33,8 @@ class StockRequestItem {
       status: _parseString(json['status'], fallback: 'PENDING'),
       createdAt: _parseDateTime(json['createdAt']),
       updatedAt: _parseDateTime(json['updatedAt']),
-      item: json['item'] != null
-          ? StockRequestItemDetails.fromJson(json['item'])
+      item: _asMap(json['item']).isNotEmpty
+          ? StockRequestItemDetails.fromJson(_asMap(json['item']))
           : null,
     );
   }
@@ -162,14 +162,14 @@ class StockRequest {
       notes: _parseString(json['notes']),
       createdAt: _parseDateTime(json['createdAt']),
       updatedAt: _parseDateTime(json['updatedAt']),
-      items:
-          (json['items'] as List<dynamic>?)
-              ?.whereType<Map<String, dynamic>>()
-              .map(StockRequestItem.fromJson)
-              .toList() ??
-          [],
-      requestingBranch: json['requestingBranch'] != null
-          ? RequestingBranch.fromJson(json['requestingBranch'])
+      items: _asList(json['items'])
+          .whereType<Map>()
+          .map(
+            (item) => StockRequestItem.fromJson(item.cast<String, dynamic>()),
+          )
+          .toList(),
+      requestingBranch: _asMap(json['requestingBranch']).isNotEmpty
+          ? RequestingBranch.fromJson(_asMap(json['requestingBranch']))
           : null,
     );
   }
@@ -317,7 +317,8 @@ class StockRequestUser {
 // Helper to safely parse a user field that could be null, a String, or a Map
 StockRequestUser? _parseUser(dynamic value) {
   if (value == null) return null;
-  if (value is Map<String, dynamic>) return StockRequestUser.fromJson(value);
+  final user = _asMap(value);
+  if (user.isNotEmpty) return StockRequestUser.fromJson(user);
   return null; // was a plain string ID — treat as unknown
 }
 
@@ -384,5 +385,16 @@ List<dynamic> _extractStockRequestList(Map<String, dynamic> json) {
     return [json];
   }
 
+  return const [];
+}
+
+Map<String, dynamic> _asMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return value.cast<String, dynamic>();
+  return const {};
+}
+
+List<dynamic> _asList(dynamic value) {
+  if (value is List) return value;
   return const [];
 }

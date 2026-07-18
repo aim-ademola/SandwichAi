@@ -112,12 +112,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
             screenWidth,
           ),
           const SizedBox(height: 8),
-          _buildInfoRow(
-            context,
-            'Branch',
-            '${order.branch.name} (${order.branch.branchCode})',
-            screenWidth,
-          ),
+          _buildInfoRow(context, 'Branch', _branchLabel, screenWidth),
           const SizedBox(height: 8),
           _buildInfoRow(
             context,
@@ -238,7 +233,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 _buildItemCard(context, item, screenWidth),
               ],
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -257,7 +252,9 @@ class ProcurementDetailsScreen extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                item.item.itemName,
+                item.item.itemName.isEmpty
+                    ? 'Unknown Item'
+                    : item.item.itemName,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getBodyFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
@@ -292,7 +289,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
               child: _buildItemDetail(
                 context,
                 'Qty Needed',
-                '${item.qtyNeeded} ${item.item.unit}',
+                _quantityLabel(item.qtyNeeded, item.item.unit),
                 screenWidth,
               ),
             ),
@@ -313,7 +310,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
               child: _buildItemDetail(
                 context,
                 'Current Stock',
-                '${item.currentStock} ${item.item.unit}',
+                _quantityLabel(item.currentStock, item.item.unit),
                 screenWidth,
               ),
             ),
@@ -625,6 +622,19 @@ class ProcurementDetailsScreen extends StatelessWidget {
 
   String _formatAmount(double amount) {
     return NumberFormat('#,##0.00').format(amount);
+  }
+
+  String get _branchLabel {
+    final name = order.branch.name.isEmpty
+        ? 'Unknown branch'
+        : order.branch.name;
+    if (order.branch.branchCode.isEmpty) return name;
+    return '$name (${order.branch.branchCode})';
+  }
+
+  String _quantityLabel(String quantity, String unit) {
+    if (unit.trim().isEmpty) return quantity;
+    return '$quantity $unit';
   }
 
   String _formatDate(String dateStr) {

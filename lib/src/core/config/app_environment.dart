@@ -34,7 +34,7 @@ class AppEnvironment {
       devOrganizationCode: 'ORG-001',
       devUsers: [
         AppEnvironmentUser(
-          department: 'Customer Service',
+          department: 'STOCK CONTROL',
           email: 'thedanielsdev+6060@gmail.com',
           password: '12345678',
         ),

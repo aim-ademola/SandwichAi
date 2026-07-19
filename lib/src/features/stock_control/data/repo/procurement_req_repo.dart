@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
@@ -16,7 +15,6 @@ class ProcurementRequestRepository extends BaseRepository
   final ApiClient _apiClient = ApiClient.instance;
 
   @override
-  @override
   Future<ApiResponse<ProcurementRequestResponse>> createProcurementRequest({
     required CreateProcurementRequest request,
   }) async {
@@ -24,7 +22,11 @@ class ProcurementRequestRepository extends BaseRepository
       _validateProcurementRequest(request);
 
       final response = await _apiClient
-          .post('/procurement/requests', data: request.toJson())
+          .post<ProcurementRequestResponse>(
+            '/procurement/requests',
+            data: request.toJson(),
+            fromJson: (data) => ProcurementRequestResponse.fromApi(data),
+          )
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -32,23 +34,10 @@ class ProcurementRequestRepository extends BaseRepository
             },
           );
 
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Invalid response from server');
-      }
-
-      // FIX: Check if data is wrapped or not
-      final responseData = response.data is Map<String, dynamic>
-          ? (response.data.containsKey('data')
-                ? response.data['data'] as Map<String, dynamic>
-                : response.data as Map<String, dynamic>)
-          : throw FormatException('Invalid response format');
-
-      return ApiResponse.success(
-        ProcurementRequestResponse.fromJson(responseData),
-      );
-    } on SocketException {
-      return ApiResponse.errorMessage(
-        'No internet connection. Please check your network settings.',
+      return response.when(
+        success: ApiResponse.success,
+        error: (error) =>
+            ApiResponse.errorMessage(_parseErrorMessage(error.toString())),
       );
     } on TimeoutException {
       return ApiResponse.errorMessage(
@@ -77,8 +66,9 @@ class ProcurementRequestRepository extends BaseRepository
     if (request.urgencyLevel.isEmpty) {
       throw FormatException('Urgency level cannot be empty');
     }
-    if (request.urgencyReason.isEmpty) {
-      throw FormatException('Urgency reason cannot be empty');
+    if (request.urgencyLevel.toUpperCase() != 'NORMAL' &&
+        request.urgencyReason.isEmpty) {
+      throw FormatException('Urgency reason is required for urgent requests');
     }
     if (request.expectedDelivery.isEmpty) {
       throw FormatException('Expected delivery date cannot be empty');

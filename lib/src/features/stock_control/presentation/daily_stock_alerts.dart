@@ -12,7 +12,7 @@ class StockNotificationSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: context.modeBackground,
       appBar: _buildAppBar(context),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -27,7 +27,7 @@ class StockNotificationSettingsScreen extends StatelessWidget {
               SizedBox(height: _getCardSpacing(screenWidth)),
               const NotificationTypeSettings(),
               SizedBox(height: _getCardSpacing(screenWidth)),
-              _buildNotificationSummary(screenWidth),
+              _buildNotificationSummary(context, screenWidth),
             ],
           );
         },
@@ -38,8 +38,9 @@ class StockNotificationSettingsScreen extends StatelessWidget {
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       elevation: 0,
+      backgroundColor: context.modeSurface,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -47,21 +48,22 @@ class StockNotificationSettingsScreen extends StatelessWidget {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
+          color: context.modeTextPrimary,
         ),
       ),
     );
   }
 
-  Widget _buildNotificationSummary(double screenWidth) {
+  Widget _buildNotificationSummary(BuildContext context, double screenWidth) {
     return Container(
       margin: EdgeInsets.symmetric(
         horizontal: _getHorizontalMargin(screenWidth),
       ),
       padding: EdgeInsets.all(_getContainerPadding(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +72,7 @@ class StockNotificationSettingsScreen extends StatelessWidget {
             children: [
               Icon(
                 Icons.info_outline,
-                color: kPrimary,
+                color: context.modePrimary,
                 size: _getHeaderIconSize(screenWidth),
               ),
               SizedBox(width: _getIconSpacing(screenWidth)),
@@ -79,7 +81,7 @@ class StockNotificationSettingsScreen extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getHeaderFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
@@ -90,7 +92,7 @@ class StockNotificationSettingsScreen extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInfoDescFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF757575),
+              color: context.modeTextSecondary,
               height: 1.5,
             ),
           ),
@@ -196,7 +198,7 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
     if (_isLoading) {
       return Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
+          valueColor: AlwaysStoppedAnimation<Color>(context.modePrimary),
         ),
       );
     }
@@ -212,9 +214,9 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
           ),
           padding: EdgeInsets.all(_getContainerPadding(screenWidth)),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.modeSurface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+            border: Border.all(color: context.modeBorder, width: 1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,12 +226,12 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
                   Container(
                     padding: EdgeInsets.all(_getIconPadding(screenWidth)),
                     decoration: BoxDecoration(
-                      color: kPrimary.withValues(alpha: 0.1),
+                      color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.notifications_active,
-                      color: kPrimary,
+                      color: context.modePrimary,
                       size: _getMainIconSize(screenWidth),
                     ),
                   ),
@@ -240,19 +242,19 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getTitleFontSize(screenWidth),
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
                 ],
               ),
               SizedBox(height: _getSectionSpacing(screenWidth)),
-              const Divider(height: 1, color: Color(0xFFE0E0E0)),
+              Divider(height: 1, color: context.modeDivider),
               SizedBox(height: _getSectionSpacing(screenWidth)),
               _buildNotificationToggle(
                 screenWidth: screenWidth,
                 icon: Icons.inventory_2_outlined,
-                iconColor: kPrimary,
+                iconColor: context.modePrimary,
                 title: 'Low Stock',
                 description: 'Items running low',
                 value: _lowStockEnabled,
@@ -304,7 +306,7 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
               _buildNotificationToggle(
                 screenWidth: screenWidth,
                 icon: Icons.remove_shopping_cart,
-                iconColor: const Color(0xFF757575),
+                iconColor: context.modeTextMuted,
                 title: 'Out of Stock',
                 description: 'Items completely depleted',
                 value: _outOfStockEnabled,
@@ -366,7 +368,7 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getInfoLabelFontSize(screenWidth),
                   fontWeight: FontWeight.w600,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
               SizedBox(height: _getTextSpacing(screenWidth)),
@@ -375,7 +377,7 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getInfoDescFontSize(screenWidth),
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextSecondary,
                 ),
               ),
             ],
@@ -385,7 +387,7 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
           scale: _getSwitchScale(screenWidth),
           child: CupertinoSwitch(
             value: value,
-            activeTrackColor: kPrimary,
+            activeTrackColor: context.modePrimary,
             onChanged: onChanged,
           ),
         ),
@@ -520,14 +522,14 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: kPrimary,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: context.modePrimary,
+              onPrimary: context.modeTextInverse,
+              surface: context.modeSurface,
+              onSurface: context.modeTextPrimary,
             ),
             timePickerTheme: TimePickerThemeData(
-              backgroundColor: Colors.white,
+              backgroundColor: context.modeSurface,
               hourMinuteShape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -571,10 +573,10 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Colors.white,
+            color: context.modeTextInverse,
           ),
         ),
-        backgroundColor: kGreen,
+        backgroundColor: context.modeSuccess,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -587,7 +589,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
     if (_isLoading) {
       return Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
+          valueColor: AlwaysStoppedAnimation<Color>(context.modePrimary),
         ),
       );
     }
@@ -603,9 +605,9 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
           ),
           padding: EdgeInsets.all(_getContainerPadding(screenWidth)),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.modeSurface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+            border: Border.all(color: context.modeBorder, width: 1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,12 +617,12 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                   Container(
                     padding: EdgeInsets.all(_getIconPadding(screenWidth)),
                     decoration: BoxDecoration(
-                      color: kPrimary.withValues(alpha: 0.1),
+                      color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.schedule,
-                      color: kPrimary,
+                      color: context.modePrimary,
                       size: _getMainIconSize(screenWidth),
                     ),
                   ),
@@ -634,7 +636,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getTitleFontSize(screenWidth),
                             fontWeight: FontWeight.w600,
-                            color: Colors.black,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         SizedBox(height: _getTextSpacing(screenWidth)),
@@ -643,7 +645,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getSubtitleFontSize(screenWidth),
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFF757575),
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
@@ -653,7 +655,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                     scale: _getSwitchScale(screenWidth),
                     child: CupertinoSwitch(
                       value: _isEnabled,
-                      activeTrackColor: kPrimary,
+                      activeTrackColor: context.modePrimary,
                       onChanged: (value) async {
                         setState(() {
                           _isEnabled = value;
@@ -674,7 +676,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
               ),
               if (_isEnabled) ...[
                 SizedBox(height: _getSectionSpacing(screenWidth)),
-                const Divider(height: 1, color: Color(0xFFE0E0E0)),
+                Divider(height: 1, color: context.modeDivider),
                 SizedBox(height: _getSectionSpacing(screenWidth)),
                 InkWell(
                   onTap: _selectTime,
@@ -682,14 +684,14 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                   child: Container(
                     padding: EdgeInsets.all(_getTimePickerPadding(screenWidth)),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
+                      color: context.modeSurfaceAlt,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.access_time,
-                          color: kPrimary,
+                          color: context.modePrimary,
                           size: _getSecondaryIconSize(screenWidth),
                         ),
                         SizedBox(width: _getIconSpacing(screenWidth)),
@@ -702,7 +704,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: _getLabelFontSize(screenWidth),
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF757575),
+                                  color: context.modeTextSecondary,
                                 ),
                               ),
                               SizedBox(height: _getTextSpacing(screenWidth)),
@@ -711,7 +713,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: _getTimeFontSize(screenWidth),
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: context.modeTextPrimary,
                                 ),
                               ),
                             ],
@@ -719,7 +721,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                         ),
                         Icon(
                           Icons.chevron_right,
-                          color: const Color(0xFF757575),
+                          color: context.modeTextSecondary,
                           size: _getSecondaryIconSize(screenWidth),
                         ),
                       ],

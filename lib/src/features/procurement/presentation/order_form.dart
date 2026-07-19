@@ -108,10 +108,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: kPrimary,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: context.modePrimary,
+              onPrimary: context.modeTextInverse,
+              onSurface: context.modeTextPrimary,
+              surface: context.modeSurface,
             ),
           ),
           child: child!,
@@ -275,9 +276,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -302,12 +303,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: kPrimary,
+                          color: context.modePrimary,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: Icon(Icons.close, color: context.modeTextSecondary),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -319,7 +320,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   subtitle,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: Colors.grey.shade600,
+                    color: context.modeTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -335,15 +336,17 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: kPrimary.withOpacity(0.1),
+                      color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: kPrimary.withOpacity(0.3)),
+                      border: Border.all(
+                        color: context.modePrimary.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.lightbulb_outline,
-                          color: kPrimary,
+                          color: context.modePrimary,
                           size: 24,
                         ),
                         const SizedBox(width: 12),
@@ -352,7 +355,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                             tip,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 13,
-                              color: Colors.black87,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                         ),
@@ -375,7 +378,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: fontSize + 2,
         fontWeight: FontWeight.w700,
-        color: kPrimary,
+        color: context.modePrimary,
       ),
     );
   }
@@ -386,7 +389,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: fontSize,
         fontWeight: FontWeight.w600,
-        color: Colors.black,
+        color: context.modeTextPrimary,
       ),
     );
   }
@@ -415,20 +418,20 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           onTap: onTap,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          cursorColor: kPrimary,
+          cursorColor: context.modePrimary,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: inputFontSize,
-            color: Colors.black,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: inputFontSize,
-              color: const Color(0xFFBDBDBD),
+              color: context.modeTextMuted,
               fontWeight: FontWeight.w400,
             ),
             filled: true,
-            fillColor: fillColor ?? Colors.white,
+            fillColor: fillColor ?? context.modeSurface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
@@ -437,8 +440,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(
                 color: fillColor != null
-                    ? const Color(0xFFF7EADD)
-                    : const Color(0xFFE0E0E0),
+                    ? context.modePrimary.withValues(alpha: 0.2)
+                    : context.modeBorder,
                 width: 1,
               ),
             ),
@@ -446,14 +449,14 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(
                 color: fillColor != null
-                    ? const Color(0xFFF7EADD)
-                    : const Color(0xFFE0E0E0),
+                    ? context.modePrimary.withValues(alpha: 0.2)
+                    : context.modeBorder,
                 width: 1,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: kPrimary, width: 2),
+              borderSide: BorderSide(color: context.modePrimary, width: 2),
             ),
             suffixIcon: suffixIcon,
           ),
@@ -474,22 +477,27 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE0E0E0)),
+                  border: Border.all(color: context.modeBorder),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: kPrimary,
+                        color: context.modePrimary,
                       ),
                     ),
-                    SizedBox(width: 12),
-                    Text('Loading suppliers...'),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Loading suppliers...',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        color: context.modeTextSecondary,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -506,25 +514,30 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: context.modeError.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
+                  border: Border.all(
+                    color: context.modeError.withValues(alpha: 0.35),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    Icon(Icons.error_outline, color: context.modeError),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Failed to load suppliers',
-                        style: TextStyle(color: Colors.red.shade700),
+                        style: TextStyle(color: context.modeError),
                       ),
                     ),
                     TextButton(
                       onPressed: () {
                         context.read<SupplierBloc>().add(LoadSuppliers());
                       },
-                      child: Text('Retry', style: TextStyle(color: kPrimary)),
+                      child: Text(
+                        'Retry',
+                        style: TextStyle(color: context.modePrimary),
+                      ),
                     ),
                   ],
                 ),
@@ -545,43 +558,40 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   hintText: 'Select a supplier',
                   hintStyle: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: inputFontSize,
-                    color: const Color(0xFFBDBDBD),
+                    color: context.modeTextMuted,
                     fontWeight: FontWeight.w400,
                   ),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.modeSurface,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: context.modeBorder, width: 1),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: context.modeBorder, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: kPrimary, width: 2),
+                    borderSide: BorderSide(
+                      color: context.modePrimary,
+                      width: 2,
+                    ),
                   ),
                 ),
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: inputFontSize,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
-                icon: const Icon(
+                icon: Icon(
                   Icons.keyboard_arrow_down,
-                  color: Color(0xFF9E9E9E),
+                  color: context.modeTextSecondary,
                 ),
-                dropdownColor: Colors.white,
+                dropdownColor: context.modeSurface,
                 items: state.suppliers.map((supplier) {
                   return DropdownMenuItem<String>(
                     value: supplier.id,
@@ -589,7 +599,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       supplier.businessName,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: inputFontSize,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   );
@@ -624,9 +634,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   vertical: 16,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE0E0E0)),
+                  border: Border.all(color: context.modeBorder),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -636,7 +646,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                         _selectedSupplierName!,
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: inputFontSize,
-                          color: Colors.black,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                     ),
@@ -660,11 +670,16 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: context.modeSurfaceAlt,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE0E0E0)),
+                border: Border.all(color: context.modeBorder),
               ),
-              child: const Text('No suppliers available'),
+              child: Text(
+                'No suppliers available',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  color: context.modeTextSecondary,
+                ),
+              ),
             ),
           ],
         );
@@ -685,13 +700,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: kPrimary.withOpacity(0.1),
+                  color: context.modePrimary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.help_outline,
                   size: 16,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
               ),
             ),
@@ -702,29 +717,33 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           initialValue: _selectedPriority,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+              borderSide: BorderSide(color: context.modeBorder, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+              borderSide: BorderSide(color: context.modeBorder, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: kPrimary, width: 2),
+              borderSide: BorderSide(color: context.modePrimary, width: 2),
             ),
           ),
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: inputFontSize,
-            color: Colors.black,
+            color: context.modeTextPrimary,
           ),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF9E9E9E)),
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: context.modeTextSecondary,
+          ),
+          dropdownColor: context.modeSurface,
           items: _priorities.map((priority) {
             return DropdownMenuItem<String>(
               value: priority,
@@ -756,13 +775,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: kPrimary.withOpacity(0.1),
+                  color: context.modePrimary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.help_outline,
                   size: 16,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
               ),
             ),
@@ -773,29 +792,33 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           initialValue: _selectedPaymentTerm,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+              borderSide: BorderSide(color: context.modeBorder, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+              borderSide: BorderSide(color: context.modeBorder, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: kPrimary, width: 2),
+              borderSide: BorderSide(color: context.modePrimary, width: 2),
             ),
           ),
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: inputFontSize,
-            color: Colors.black,
+            color: context.modeTextPrimary,
           ),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF9E9E9E)),
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: context.modeTextSecondary,
+          ),
+          dropdownColor: context.modeSurface,
           items: _paymentTerms.map((term) {
             return DropdownMenuItem<String>(
               value: term,
@@ -820,9 +843,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFE0E0E0)),
+          border: Border.all(color: context.modeBorder),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -831,12 +854,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               DateFormat('MMMM dd, yyyy').format(_expectedDeliveryDate),
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: inputFontSize,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
             ),
-            const Icon(
+            Icon(
               Icons.calendar_today_outlined,
-              color: Color(0xFF9E9E9E),
+              color: context.modeTextSecondary,
               size: 20,
             ),
           ],
@@ -878,9 +901,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFEC9455), width: 1.5),
+        border: Border.all(
+          color: context.modePrimary.withValues(alpha: 0.55),
+          width: 1.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -893,12 +919,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: labelFontSize,
                   fontWeight: FontWeight.w700,
-                  color: kPrimary,
+                  color: context.modePrimary,
                 ),
               ),
               if (_lineItems.length > 1)
                 IconButton(
-                  icon: const Icon(Icons.close, size: 20, color: Colors.red),
+                  icon: Icon(Icons.close, size: 20, color: context.modeError),
                   onPressed: () => _removeLineItem(index),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -927,7 +953,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      cursorColor: kPrimary,
+                      cursorColor: context.modePrimary,
                       onChanged: (value) {
                         setState(() {
                           item.calculateTotal();
@@ -935,39 +961,39 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       },
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: inputFontSize,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                       decoration: InputDecoration(
                         hintText: '0',
                         hintStyle: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: inputFontSize,
-                          color: const Color(0xFFBDBDBD),
+                          color: context.modeTextMuted,
                           fontWeight: FontWeight.w400,
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: context.modeSurface,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 16,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE0E0E0),
+                          borderSide: BorderSide(
+                            color: context.modeBorder,
                             width: 1,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE0E0E0),
+                          borderSide: BorderSide(
+                            color: context.modeBorder,
                             width: 1,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                            color: kPrimary,
+                          borderSide: BorderSide(
+                            color: context.modePrimary,
                             width: 2,
                           ),
                         ),
@@ -989,9 +1015,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF7EADD),
+                        color: context.modePrimary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFF7EADD)),
+                        border: Border.all(
+                          color: context.modePrimary.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Text(
                         item.selectedProductPrice != null
@@ -999,7 +1027,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                             : '₦0.00',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: inputFontSize,
-                          color: Colors.black,
+                          color: context.modeTextPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1017,41 +1045,35 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           TextFormField(
             controller: item.noteController,
             maxLines: 2,
-            cursorColor: kPrimary,
+            cursorColor: context.modePrimary,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: inputFontSize,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
             decoration: InputDecoration(
               hintText: 'e.g. Pack separately, handle with care',
               hintStyle: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: inputFontSize,
-                color: const Color(0xFFBDBDBD),
+                color: context.modeTextMuted,
                 fontWeight: FontWeight.w400,
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: context.modeSurface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE0E0E0),
-                  width: 1,
-                ),
+                borderSide: BorderSide(color: context.modeBorder, width: 1),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE0E0E0),
-                  width: 1,
-                ),
+                borderSide: BorderSide(color: context.modeBorder, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: kPrimary, width: 2),
+                borderSide: BorderSide(color: context.modePrimary, width: 2),
               ),
             ),
           ),
@@ -1062,7 +1084,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: kPrimary.withOpacity(0.1),
+                color: context.modePrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -1073,7 +1095,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: labelFontSize,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   Text(
@@ -1081,7 +1103,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: labelFontSize + 1,
                       fontWeight: FontWeight.w700,
-                      color: kPrimary,
+                      color: context.modePrimary,
                     ),
                   ),
                 ],
@@ -1100,22 +1122,27 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE0E0E0)),
+              border: Border.all(color: context.modeBorder),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: kPrimary,
+                    color: context.modePrimary,
                   ),
                 ),
-                SizedBox(width: 12),
-                Text('Loading products...'),
+                const SizedBox(width: 12),
+                Text(
+                  'Loading products...',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    color: context.modeTextSecondary,
+                  ),
+                ),
               ],
             ),
           );
@@ -1129,42 +1156,37 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               hintText: 'Select a product',
               hintStyle: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: inputFontSize,
-                color: const Color(0xFFBDBDBD),
+                color: context.modeTextMuted,
                 fontWeight: FontWeight.w400,
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: context.modeSurface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 16,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE0E0E0),
-                  width: 1,
-                ),
+                borderSide: BorderSide(color: context.modeBorder, width: 1),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE0E0E0),
-                  width: 1,
-                ),
+                borderSide: BorderSide(color: context.modeBorder, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: kPrimary, width: 2),
+                borderSide: BorderSide(color: context.modePrimary, width: 2),
               ),
             ),
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: inputFontSize,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
-            icon: const Icon(
+            icon: Icon(
               Icons.keyboard_arrow_down,
-              color: Color(0xFF9E9E9E),
+              color: context.modeTextSecondary,
             ),
+            dropdownColor: context.modeSurface,
             items: state.products.map((product) {
               return DropdownMenuItem<String>(
                 value: product.id,
@@ -1176,7 +1198,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       product.productName,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: inputFontSize,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1184,7 +1206,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       '₦${NumberFormat('#,##0.00').format(double.parse(product.baseUnitPrice))} per ${product.unitType}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: inputFontSize - 2,
-                        color: Colors.grey,
+                        color: context.modeTextSecondary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1211,15 +1233,15 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: context.modeSurfaceAlt,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFE0E0E0)),
+            border: Border.all(color: context.modeBorder),
           ),
           child: Text(
             _selectedSupplierId == null
                 ? 'Please select a supplier first'
                 : 'No products available',
-            style: TextStyle(color: Colors.grey.shade600),
+            style: TextStyle(color: context.modeTextSecondary),
           ),
         );
       },
@@ -1232,9 +1254,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       child: OutlinedButton.icon(
         onPressed: _addLineItem,
         style: OutlinedButton.styleFrom(
-          foregroundColor: kPrimary,
-          backgroundColor: const Color(0xFFF7EADD),
-          side: BorderSide.none,
+          foregroundColor: context.modePrimary,
+          backgroundColor: context.modePrimary.withValues(alpha: 0.1),
+          side: BorderSide(color: context.modePrimary.withValues(alpha: 0.2)),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -1247,7 +1269,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             fontSize: fontSize,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
-            color: kPrimary,
+            color: context.modePrimary,
           ),
         ),
       ),
@@ -1260,10 +1282,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       child: ElevatedButton(
         onPressed: _submitForm,
         style: ElevatedButton.styleFrom(
-          backgroundColor: kPrimary,
-          foregroundColor: Colors.white,
+          backgroundColor: context.modePrimary,
+          foregroundColor: context.modeTextInverse,
           elevation: 2,
-          shadowColor: kPrimary.withOpacity(0.4),
+          shadowColor: context.modePrimary.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -1274,7 +1296,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             fontSize: fontSize,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
-            color: kWhite,
+            color: context.modeTextInverse,
           ),
         ),
       ),
@@ -1305,9 +1327,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: context.modeSurfaceAlt,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: context.modeBorder),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1315,10 +1337,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: kPrimary.withOpacity(0.1),
+                color: context.modePrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: kPrimary, size: 20),
+              child: Icon(icon, color: context.modePrimary, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1330,7 +1352,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -1338,7 +1360,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     description,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 13,
-                      color: Colors.grey.shade700,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
@@ -1433,7 +1455,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: context.modeError,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -1444,23 +1466,30 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
+        backgroundColor: context.modeSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
+                color: context.modeSuccess.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.check_circle,
-                color: Colors.green.shade600,
+                color: context.modeSuccess,
                 size: 32,
               ),
             ),
             const SizedBox(width: 12),
-            const Text('Order Created!'),
+            Text(
+              'Order Created!',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modeTextPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ],
         ),
         content: Column(
@@ -1469,7 +1498,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           children: [
             Text(
               'Your purchase order has been successfully submitted for approval.',
-              style: WorkSansAppTextStyles.medium.copyWith(fontSize: 14),
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 14,
+                color: context.modeTextSecondary,
+              ),
             ),
             const SizedBox(height: 16),
           ],
@@ -1482,7 +1514,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             },
             child: Text(
               'View Orders',
-              style: WorkSansAppTextStyles.medium.copyWith(color: kPrimary),
+              style: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modePrimary,
+              ),
             ),
           ),
           ElevatedButton(
@@ -1493,14 +1527,16 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               _resetForm();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
+              backgroundColor: context.modePrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
             child: Text(
               'Create Another',
-              style: WorkSansAppTextStyles.medium.copyWith(color: kWhite),
+              style: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modeTextInverse,
+              ),
             ),
           ),
         ],
@@ -1578,7 +1614,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       child: DefaultTextStyle.merge(
         style: WorkSansAppTextStyles.medium,
         child: Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           appBar: _buildAppBar(context),
           body: _buildBody(context),
         ),
@@ -1588,10 +1624,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -1599,7 +1635,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
@@ -1645,7 +1681,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                                     labelFontSize: labelFontSize,
                                     inputFontSize: inputFontSize,
                                     readOnly: true,
-                                    fillColor: const Color(0xFFF7EADD),
+                                    fillColor: context.modePrimary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -1656,7 +1694,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                                     labelFontSize: labelFontSize,
                                     inputFontSize: inputFontSize,
                                     readOnly: true,
-                                    fillColor: const Color(0xFFF7EADD),
+                                    fillColor: context.modePrimary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -1717,13 +1757,15 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: kPrimary.withOpacity(0.1),
+                                      color: context.modePrimary.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.help_outline,
                                       size: 16,
-                                      color: kPrimary,
+                                      color: context.modePrimary,
                                     ),
                                   ),
                                 ),
@@ -1746,13 +1788,15 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: kPrimary.withOpacity(0.1),
+                                      color: context.modePrimary.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.help_outline,
                                       size: 16,
-                                      color: kPrimary,
+                                      color: context.modePrimary,
                                     ),
                                   ),
                                 ),
@@ -1845,17 +1889,25 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 // Loading Overlay
                 if (orderState is OrderCreating)
                   Container(
-                    color: Colors.black54,
-                    child: const Center(
+                    color: Colors.black.withValues(alpha: 0.54),
+                    child: Center(
                       child: Card(
+                        color: context.modeSurface,
                         child: Padding(
-                          padding: EdgeInsets.all(24.0),
+                          padding: const EdgeInsets.all(24.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              CircularProgressIndicator(color: kPrimary),
-                              SizedBox(height: 16),
-                              Text('Creating your order...'),
+                              CircularProgressIndicator(
+                                color: context.modePrimary,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Creating your order...',
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  color: context.modeTextPrimary,
+                                ),
+                              ),
                             ],
                           ),
                         ),

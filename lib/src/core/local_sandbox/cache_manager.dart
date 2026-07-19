@@ -13,7 +13,7 @@ class AuthCacheHelper {
 
   // Initialize secure storage for sensitive data
   static const _secureStorage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    aOptions: AndroidOptions(),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
@@ -153,14 +153,16 @@ class AuthCacheHelper {
 
     try {
       final jsonData = jsonDecode(encoded) as Map<String, dynamic>;
+      final branch = <String, dynamic>{'id': branchId, 'name': branchName};
+      if (branchCode != null) {
+        branch['branch_code'] = branchCode;
+        branch['branchCode'] = branchCode;
+      }
+      if (city != null) {
+        branch['city'] = city;
+      }
       jsonData['branchId'] = branchId;
-      jsonData['branch'] = {
-        'id': branchId,
-        'name': branchName,
-        if (branchCode != null) 'branch_code': branchCode,
-        if (branchCode != null) 'branchCode': branchCode,
-        if (city != null) 'city': city,
-      };
+      jsonData['branch'] = branch;
       await _box.put(_keyUserData, jsonEncode(jsonData));
     } catch (_) {
       // Keep the direct branch cache update even if legacy user JSON is invalid.
@@ -212,7 +214,11 @@ class AuthCacheHelper {
   /// Check if user is logged in
   Future<bool> isLoggedIn() async {
     final token = _box.get(_keyAccessToken);
-    return token != null && token.toString().isNotEmpty;
+    final userData = _box.get(_keyUserData);
+    return token != null &&
+        token.toString().isNotEmpty &&
+        userData != null &&
+        userData.toString().isNotEmpty;
   }
 
   /// Set remember me

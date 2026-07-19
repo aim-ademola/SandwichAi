@@ -97,22 +97,30 @@ class _CompleteStockRequestDetailsScreenState
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.modeSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: Text(
           config.title,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
+            color: context.modeTextPrimary,
           ),
         ),
         content: Text(
           config.body,
-          style: WorkSansAppTextStyles.medium.copyWith(fontSize: 14),
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: context.modeTextSecondary,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: TextStyle(color: kprimaryTextColor2)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: context.modeTextSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -126,7 +134,7 @@ class _CompleteStockRequestDetailsScreenState
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: config.confirmColor,
-              foregroundColor: Colors.white,
+              foregroundColor: context.modeTextInverse,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -169,7 +177,7 @@ class _CompleteStockRequestDetailsScreenState
         body:
             'Are you sure you want to complete the transfer for $requestId?\n\nThis will mark all items as transferred and complete the request.',
         confirmLabel: 'Complete Transfer',
-        confirmColor: kPrimary,
+        confirmColor: context.modePrimary,
       ),
       StockRequestAction.reject => _ActionDialogConfig(
         title: 'Reject Request',
@@ -197,7 +205,7 @@ class _CompleteStockRequestDetailsScreenState
         final screenWidth = constraints.maxWidth;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           appBar: _buildAppBar(screenWidth),
           body: Column(
             children: [
@@ -209,7 +217,7 @@ class _CompleteStockRequestDetailsScreenState
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(state.error),
-                          backgroundColor: const Color(0xFFE53935),
+                          backgroundColor: context.modeError,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -217,7 +225,7 @@ class _CompleteStockRequestDetailsScreenState
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(state.message),
-                          backgroundColor: kGreen,
+                          backgroundColor: context.modeSuccess,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -302,12 +310,12 @@ class _CompleteStockRequestDetailsScreenState
 
   PreferredSizeWidget _buildAppBar(double screenWidth) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
       leading: IconButton(
         icon: Icon(
           Icons.arrow_back,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
           size: _getIconSize(screenWidth),
         ),
         onPressed: () => Navigator.pop(context),
@@ -317,7 +325,7 @@ class _CompleteStockRequestDetailsScreenState
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getAppBarTitleFontSize(screenWidth),
           fontWeight: FontWeight.w600,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
@@ -328,14 +336,14 @@ class _CompleteStockRequestDetailsScreenState
 
   Widget _buildTabBar(double screenWidth) {
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       child: TabBar(
         controller: _tabController,
         isScrollable: true,
         tabAlignment: TabAlignment.start,
-        labelColor: kPrimary,
-        unselectedLabelColor: kprimaryTextColor2,
-        indicatorColor: kPrimary,
+        labelColor: context.modePrimary,
+        unselectedLabelColor: context.modeTextSecondary,
+        indicatorColor: context.modePrimary,
         indicatorWeight: 3,
         labelStyle: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getTabFontSize(screenWidth),
@@ -375,7 +383,7 @@ class _CompleteStockRequestDetailsScreenState
   Widget _buildLoadingState() {
     return Center(
       child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(kPrimary),
+        valueColor: AlwaysStoppedAnimation<Color>(context.modePrimary),
       ),
     );
   }
@@ -391,13 +399,13 @@ class _CompleteStockRequestDetailsScreenState
               width: _getEmptyIconSize(screenWidth),
               height: _getEmptyIconSize(screenWidth),
               decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.1),
+                color: context.modePrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.inbox_outlined,
                 size: _getEmptyIconSize(screenWidth) * 0.5,
-                color: kPrimary,
+                color: context.modePrimary,
               ),
             ),
             SizedBox(height: _getSectionSpacing(screenWidth)),
@@ -406,7 +414,7 @@ class _CompleteStockRequestDetailsScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getSectionTitleFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -414,7 +422,7 @@ class _CompleteStockRequestDetailsScreenState
               'No requests found for this status',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -435,7 +443,7 @@ class _CompleteStockRequestDetailsScreenState
   }) {
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      color: kPrimary,
+      color: context.modePrimary,
       child: ListView.builder(
         padding: EdgeInsets.all(_getHorizontalPadding(screenWidth)),
         itemCount: requests.length,
@@ -462,11 +470,15 @@ class _CompleteStockRequestDetailsScreenState
     return Container(
       margin: EdgeInsets.only(bottom: _getFieldSpacing(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.22
+                  : 0.04,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -516,7 +528,7 @@ class _CompleteStockRequestDetailsScreenState
                     Icon(
                       Icons.note_outlined,
                       size: _getIconSize(screenWidth) - 2,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -524,7 +536,7 @@ class _CompleteStockRequestDetailsScreenState
                         request.notes,
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getCaptionFontSize(screenWidth),
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -534,7 +546,7 @@ class _CompleteStockRequestDetailsScreenState
                 ),
               ],
               SizedBox(height: _getFieldSpacing(screenWidth)),
-              Divider(height: 1, color: Colors.grey.shade200),
+              Divider(height: 1, color: context.modeDivider),
               SizedBox(height: _getFieldSpacing(screenWidth)),
               Row(
                 children: [
@@ -554,7 +566,7 @@ class _CompleteStockRequestDetailsScreenState
                     _formatDate(request.createdAt),
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getCaptionFontSize(screenWidth),
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
@@ -633,7 +645,7 @@ class _CompleteStockRequestDetailsScreenState
           action: StockRequestAction.complete,
           label: 'Complete Transfer',
           icon: Icons.send_outlined,
-          color: kPrimary,
+          color: context.modePrimary,
           flex: 2,
         ),
         _ActionButtonConfig(
@@ -688,7 +700,7 @@ class _CompleteStockRequestDetailsScreenState
             : () => _handleAction(request, config.action),
         style: ElevatedButton.styleFrom(
           backgroundColor: config.color,
-          foregroundColor: Colors.white,
+          foregroundColor: context.modeTextInverse,
           disabledBackgroundColor: config.color.withValues(alpha: 0.5),
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -698,9 +710,11 @@ class _CompleteStockRequestDetailsScreenState
             ? SizedBox(
                 width: _getIconSize(screenWidth) - 4,
                 height: _getIconSize(screenWidth) - 4,
-                child: const CircularProgressIndicator(
+                child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    context.modeTextInverse,
+                  ),
                 ),
               )
             : Icon(config.icon, size: _getIconSize(screenWidth) - 4),
@@ -709,7 +723,7 @@ class _CompleteStockRequestDetailsScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth) - 1,
             fontWeight: FontWeight.w600,
-            color: kWhite,
+            color: context.modeTextInverse,
           ),
         ),
       ),
@@ -727,14 +741,14 @@ class _CompleteStockRequestDetailsScreenState
           Icon(
             Icons.inventory_outlined,
             size: _getIconSize(screenWidth) - 2,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
           const SizedBox(width: 8),
           Text(
             'No items requested',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getCaptionFontSize(screenWidth),
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -755,7 +769,7 @@ class _CompleteStockRequestDetailsScreenState
                 Icon(
                   Icons.inventory_outlined,
                   size: _getIconSize(screenWidth) - 2,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -763,7 +777,7 @@ class _CompleteStockRequestDetailsScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getInputFontSize(screenWidth),
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ],
@@ -783,7 +797,7 @@ class _CompleteStockRequestDetailsScreenState
                       height: 6,
                       margin: const EdgeInsets.only(left: 8),
                       decoration: BoxDecoration(
-                        color: kPrimary,
+                        color: context.modePrimary,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -793,7 +807,7 @@ class _CompleteStockRequestDetailsScreenState
                         text: TextSpan(
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getCaptionFontSize(screenWidth),
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                           children: [
                             TextSpan(
@@ -805,7 +819,7 @@ class _CompleteStockRequestDetailsScreenState
                             TextSpan(
                               text: ' - ',
                               style: TextStyle(
-                                color: kprimaryTextColor2.withValues(
+                                color: context.modeTextSecondary.withValues(
                                   alpha: 0.6,
                                 ),
                               ),
@@ -813,7 +827,7 @@ class _CompleteStockRequestDetailsScreenState
                             TextSpan(
                               text: '$qty ${unit.toLowerCase()}',
                               style: TextStyle(
-                                color: kPrimary,
+                                color: context.modePrimary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -838,14 +852,14 @@ class _CompleteStockRequestDetailsScreenState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getCaptionFontSize(screenWidth),
                           fontWeight: FontWeight.w600,
-                          color: kPrimary,
+                          color: context.modePrimary,
                         ),
                       ),
                       const SizedBox(width: 4),
                       Icon(
                         Icons.keyboard_arrow_down,
                         size: _getIconSize(screenWidth) - 4,
-                        color: kPrimary,
+                        color: context.modePrimary,
                       ),
                     ],
                   ),
@@ -885,20 +899,24 @@ class _CompleteStockRequestDetailsScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: kPrimary.withValues(alpha: 0.08),
+        color: context.modePrimary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: _getIconSize(screenWidth) - 6, color: kPrimary),
+          Icon(
+            icon,
+            size: _getIconSize(screenWidth) - 6,
+            color: context.modePrimary,
+          ),
           const SizedBox(width: 4),
           Text(
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getCaptionFontSize(screenWidth),
               fontWeight: FontWeight.w500,
-              color: kPrimary,
+              color: context.modePrimary,
             ),
           ),
         ],
@@ -917,7 +935,7 @@ class _CompleteStockRequestDetailsScreenState
       'COMPLETED' => const Color(0xFF66BB6A),
       'REJECTED' => const Color(0xFFEF5350),
       'CANCELLED' => const Color(0xFFBDBDBD),
-      _ => kprimaryTextColor2,
+      _ => context.modeTextSecondary,
     };
   }
 

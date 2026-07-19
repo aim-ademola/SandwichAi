@@ -35,12 +35,16 @@ class StockExpiryItem {
       itemId: _string(json['itemId'] ?? item['id']),
       itemName: _string(json['itemName'] ?? item['itemName'] ?? item['name']),
       batchId: _string(json['batchId']),
-      batchNumber: _string(json['batchNumber'] ?? json['batchNo']),
-      quantity: _double(json['quantity'] ?? json['currentStock']),
+      batchNumber: _string(
+        json['batchNumber'] ?? json['batchNo'] ?? json['batchCode'],
+      ),
+      quantity: _double(
+        json['quantity'] ?? json['remainingQty'] ?? json['currentStock'],
+      ),
       unit: _string(json['unit'] ?? item['unit']),
       expiryDate: _date(json['expiryDate']),
       daysUntilExpiry: _int(json['daysUntilExpiry']),
-      status: _string(json['status']),
+      status: _string(json['status'] ?? json['urgency']),
       raw: json,
     );
   }
@@ -61,6 +65,7 @@ class StockExpiryReport {
 
   factory StockExpiryReport.fromJson(Map<String, dynamic> json) {
     final list = _extractList(json);
+    final data = _asMap(json['data']);
     return StockExpiryReport(
       message: _string(json['message']),
       items: list
@@ -69,7 +74,9 @@ class StockExpiryReport {
             (item) => StockExpiryItem.fromJson(Map<String, dynamic>.from(item)),
           )
           .toList(),
-      summary: _asMap(json['summary']),
+      summary: _asMap(json['summary']).isNotEmpty
+          ? _asMap(json['summary'])
+          : _asMap(data['summary']),
       raw: json,
     );
   }
@@ -91,12 +98,29 @@ class StockExpirySummary {
   });
 
   factory StockExpirySummary.fromJson(Map<String, dynamic> json) {
-    final data = _asMap(json['data']).isNotEmpty ? _asMap(json['data']) : json;
+    final responseData = _asMap(json['data']);
+    final data = _asMap(responseData['summary']).isNotEmpty
+        ? _asMap(responseData['summary'])
+        : responseData.isNotEmpty
+        ? responseData
+        : json;
     return StockExpirySummary(
-      expired: _int(data['expired']),
-      expiringSoon: _int(data['expiringSoon']),
-      expiringThisWeek: _int(data['expiringThisWeek']),
-      expiringThisMonth: _int(data['expiringThisMonth']),
+      expired: _int(
+        data['expired'] ?? data['expiredBatches'] ?? data['expiredNow'],
+      ),
+      expiringSoon: _int(
+        data['expiringSoon'] ?? data['urgent'] ?? data['expiringWithin7Days'],
+      ),
+      expiringThisWeek: _int(
+        data['expiringThisWeek'] ??
+            data['warning'] ??
+            data['expiringWithin14Days'],
+      ),
+      expiringThisMonth: _int(
+        data['expiringThisMonth'] ??
+            data['notice'] ??
+            data['expiringWithin30Days'],
+      ),
       raw: json,
     );
   }
@@ -127,10 +151,14 @@ class StockBatch {
 
   factory StockBatch.fromJson(Map<String, dynamic> json) => StockBatch(
     id: _string(json['id'] ?? json['batchId']),
-    batchNumber: _string(json['batchNumber'] ?? json['batchNo']),
+    batchNumber: _string(
+      json['batchNumber'] ?? json['batchNo'] ?? json['batchCode'],
+    ),
     branchId: _string(json['branchId']),
     itemId: _string(json['itemId']),
-    quantity: _double(json['quantity'] ?? json['currentStock']),
+    quantity: _double(
+      json['quantity'] ?? json['remainingQty'] ?? json['currentStock'],
+    ),
     unit: _string(json['unit']),
     expiryDate: _date(json['expiryDate']),
     status: _string(json['status']),

@@ -32,13 +32,13 @@ class StockCardRepository implements StockCardRepositoryInterface {
 
   @override
   Future<ApiResponse<StockExpiryReport>> getExpiryReport() {
-    return _getObject('stock-cards/expiry-report', StockExpiryReport.fromJson);
+    return _getObject('expiry/expiry-tracking', StockExpiryReport.fromJson);
   }
 
   @override
   Future<ApiResponse<StockExpirySummary>> getExpirySummary() {
     return _getObject(
-      'stock-cards/analytics/expiry-summary',
+      'expiry/expiry-tracking/analytics/expiry-summary',
       StockExpirySummary.fromJson,
     );
   }
@@ -53,7 +53,7 @@ class StockCardRepository implements StockCardRepositoryInterface {
       );
     }
     return _getObject(
-      'stock-cards/$branchId/expiry-report',
+      'expiry/expiry-tracking/$branchId/expiry-report',
       StockExpiryReport.fromJson,
     );
   }
@@ -67,7 +67,9 @@ class StockCardRepository implements StockCardRepositoryInterface {
       return ApiResponse.errorMessage('Branch ID and item ID are required.');
     }
 
-    final response = await _getRaw('stock-cards/$branchId/$itemId/batches');
+    final response = await _getRaw(
+      'expiry/expiry-tracking/$branchId/$itemId/batches',
+    );
     return response.when(
       success: (json) {
         final list = _extractList(json);
@@ -99,7 +101,7 @@ class StockCardRepository implements StockCardRepositoryInterface {
     try {
       final response = await _apiClient
           .patch(
-            'stock-cards/$branchId/$itemId/batches/$batchId',
+            'expiry/expiry-tracking/$branchId/$itemId/batches/$batchId',
             data: request.toJson(),
           )
           .timeout(const Duration(seconds: 30));

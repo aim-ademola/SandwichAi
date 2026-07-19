@@ -125,7 +125,13 @@ class MenuItemsRepository extends BaseRepository
         return ApiResponse.errorMessage('Failed to create menu item');
       }
 
-      final menuItem = ApiMenuItem.fromJson(response.data);
+      final responseData = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : throw FormatException('Invalid response format');
+      final menuItemData = responseData['data'] is Map<String, dynamic>
+          ? responseData['data'] as Map<String, dynamic>
+          : responseData;
+      final menuItem = ApiMenuItem.fromJson(menuItemData);
       return ApiResponse.success(menuItem);
     } on SocketException {
       return ApiResponse.errorMessage(
@@ -186,7 +192,13 @@ class MenuItemsRepository extends BaseRepository
         return ApiResponse.errorMessage('Failed to update menu item');
       }
 
-      final menuItem = ApiMenuItem.fromJson(response.data);
+      final responseData = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : throw FormatException('Invalid response format');
+      final menuItemData = responseData['data'] is Map<String, dynamic>
+          ? responseData['data'] as Map<String, dynamic>
+          : responseData;
+      final menuItem = ApiMenuItem.fromJson(menuItemData);
       return ApiResponse.success(menuItem);
     } on SocketException {
       return ApiResponse.errorMessage(

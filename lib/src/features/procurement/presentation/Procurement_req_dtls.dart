@@ -108,7 +108,10 @@ class ProcurementDetailsScreen extends StatelessWidget {
           _buildInfoRow(
             context,
             'Requested By',
-            order.requestingDepartment,
+            _nonEmpty(
+              order.requestingDepartment,
+              fallback: 'Unknown department',
+            ),
             screenWidth,
           ),
           const SizedBox(height: 8),
@@ -390,7 +393,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  order.notes!,
+                  _nonEmpty(order.notes, fallback: 'No notes provided'),
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getBodyFontSize(screenWidth),
                     fontWeight: FontWeight.w400,
@@ -433,28 +436,28 @@ class ProcurementDetailsScreen extends StatelessWidget {
             context.modeInfo,
             screenWidth,
           ),
-          if (order.approvedBy != null) ...[
+          if (_hasText(order.approvedBy)) ...[
             const SizedBox(height: 12),
             _buildTimelineItem(
               context,
-              'Approved by ${order.approvedBy}',
-              _formatDate(order.approvedAt!),
+              'Approved by ${_nonEmpty(order.approvedBy, fallback: 'Unknown user')}',
+              _formatDate(order.approvedAt),
               Icons.check_circle,
               context.modeSuccess,
               screenWidth,
             ),
           ],
-          if (order.rejectedBy != null) ...[
+          if (_hasText(order.rejectedBy)) ...[
             const SizedBox(height: 12),
             _buildTimelineItem(
               context,
-              'Rejected by ${order.rejectedBy}',
-              _formatDate(order.rejectedAt!),
+              'Rejected by ${_nonEmpty(order.rejectedBy, fallback: 'Unknown user')}',
+              _formatDate(order.rejectedAt),
               Icons.cancel,
               context.modeError,
               screenWidth,
             ),
-            if (order.rejectionNote != null) ...[
+            if (_hasText(order.rejectionNote)) ...[
               const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.only(left: 36),
@@ -637,7 +640,15 @@ class ProcurementDetailsScreen extends StatelessWidget {
     return '$quantity $unit';
   }
 
-  String _formatDate(String dateStr) {
+  bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
+
+  String _nonEmpty(String? value, {required String fallback}) {
+    final normalized = value?.trim() ?? '';
+    return normalized.isEmpty ? fallback : normalized;
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.trim().isEmpty) return 'Not set';
     try {
       final date = DateTime.parse(dateStr);
       return '${date.day}/${date.month}/${date.year}';

@@ -222,7 +222,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                 ),
               ),
             );
-            // Navigator.pop(context);
+            Navigator.pop(context);
           }
 
           if (state is CustomerUpdated) {
@@ -241,7 +241,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                 ),
               ),
             );
-            // Navigator.pop(context);
+            Navigator.pop(context);
           }
 
           if (state is CustomerActionError) {

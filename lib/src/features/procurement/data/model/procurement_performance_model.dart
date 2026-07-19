@@ -57,13 +57,18 @@ class ProcurementPerformanceRanking {
     return ProcurementPerformanceRanking(
       supplierId: _string(json['supplierId'] ?? supplier['id']),
       supplierName: _string(
-        json['supplierName'] ?? supplier['businessName'] ?? supplier['name'],
+        json['supplierName'] ??
+            json['name'] ??
+            supplier['businessName'] ??
+            supplier['name'],
       ),
-      rank: _int(json['rank']),
-      score: _double(json['score']),
-      onTimeDeliveryRate: _double(json['onTimeDeliveryRate']),
-      qualityPassRate: _double(json['qualityPassRate']),
-      totalSpend: _double(json['totalSpend']),
+      rank: _int(json['rank'] ?? json['spendRank']),
+      score: _double(json['score'] ?? json['performanceScore']),
+      onTimeDeliveryRate: _double(
+        json['onTimeDeliveryRate'] ?? json['onTimeRate'],
+      ),
+      qualityPassRate: _double(json['qualityPassRate'] ?? json['qcPassRate']),
+      totalSpend: _double(json['totalSpend'] ?? json['totalValue']),
       raw: json,
     );
   }
@@ -100,13 +105,28 @@ class ProcurementPerformanceRankingsResponse {
 }
 
 List<dynamic> _extractList(Map<String, dynamic> json) {
-  for (final key in const ['data', 'items', 'results', 'rankings']) {
+  for (final key in const [
+    'data',
+    'items',
+    'results',
+    'rankings',
+    'topPerformers',
+    'topSuppliers',
+    'top',
+  ]) {
     final value = json[key];
     if (value is List) return value;
   }
   final data = json['data'];
   if (data is Map) {
-    for (final key in const ['items', 'results', 'rankings']) {
+    for (final key in const [
+      'items',
+      'results',
+      'rankings',
+      'topPerformers',
+      'topSuppliers',
+      'top',
+    ]) {
       final value = data[key];
       if (value is List) return value;
     }

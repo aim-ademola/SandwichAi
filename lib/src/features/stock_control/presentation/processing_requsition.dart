@@ -83,6 +83,7 @@ class _StockTransferToProcessingOrKItchenScreenState
           LoadProcessingTransfers(branchId: branchId),
         );
         final orgID = await AuthCacheHelper.instance.getOrgId() ?? '';
+        if (!mounted) return;
         context.read<InventoryItemsBloc>().add(
           LoadInventoryItems(organizationId: orgID, page: 1, limit: 20),
         );
@@ -301,7 +302,7 @@ class _StockTransferToProcessingOrKItchenScreenState
           maxHeight: MediaQuery.of(context).size.height * 0.7,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -312,7 +313,7 @@ class _StockTransferToProcessingOrKItchenScreenState
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: context.modeBorder,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -323,10 +324,14 @@ class _StockTransferToProcessingOrKItchenScreenState
                   Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: kPrimary.withValues(alpha: 0.1),
+                      color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.help_outline, color: kPrimary, size: 24),
+                    child: Icon(
+                      Icons.help_outline,
+                      color: context.modePrimary,
+                      size: 24,
+                    ),
                   ),
                   SizedBox(width: 16),
                   Expanded(
@@ -335,14 +340,14 @@ class _StockTransferToProcessingOrKItchenScreenState
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
                   IconButton(
                     icon: Icon(
                       Icons.close,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                       size: 24,
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -350,7 +355,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                 ],
               ),
             ),
-            Divider(height: 1, color: Colors.grey.shade200),
+            Divider(height: 1, color: context.modeDivider),
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(20),
@@ -361,7 +366,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                       description,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 15,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                         height: 1.5,
                       ),
                     ),
@@ -370,10 +375,10 @@ class _StockTransferToProcessingOrKItchenScreenState
                       Container(
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: kPrimary.withValues(alpha: 0.05),
+                          color: context.modePrimary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: kPrimary.withValues(alpha: 0.1),
+                            color: context.modePrimary.withValues(alpha: 0.16),
                             width: 1,
                           ),
                         ),
@@ -384,7 +389,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                               children: [
                                 Icon(
                                   Icons.lightbulb_outline,
-                                  color: kPrimary,
+                                  color: context.modePrimary,
                                   size: 20,
                                 ),
                                 SizedBox(width: 8),
@@ -393,7 +398,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: kPrimary,
+                                    color: context.modePrimary,
                                   ),
                                 ),
                               ],
@@ -412,7 +417,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                       width: 6,
                                       height: 6,
                                       decoration: BoxDecoration(
-                                        color: kPrimary,
+                                        color: context.modePrimary,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -423,7 +428,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                         style: WorkSansAppTextStyles.medium
                                             .copyWith(
                                               fontSize: 13,
-                                              color: kprimaryTextColor1,
+                                              color: context.modeTextPrimary,
                                               height: 1.4,
                                             ),
                                       ),
@@ -431,7 +436,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                   ],
                                 ),
                               );
-                            }).toList(),
+                            }),
                           ],
                         ),
                       ),
@@ -457,10 +462,12 @@ class _StockTransferToProcessingOrKItchenScreenState
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: Colors.white,
+            color: context.modeTextInverse,
           ),
         ),
-        backgroundColor: backgroundColor ?? (isError ? Colors.red : kPrimary),
+        backgroundColor:
+            backgroundColor ??
+            (isError ? context.modeError : context.modePrimary),
         behavior: SnackBarBehavior.floating,
         duration: Duration(seconds: isError ? 3 : 2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -523,12 +530,12 @@ class _StockTransferToProcessingOrKItchenScreenState
           return DefaultTextStyle.merge(
             style: WorkSansAppTextStyles.medium,
             child: Scaffold(
-              backgroundColor: const Color(0xFFF8F6F6),
+              backgroundColor: context.modeBackground,
               appBar: AppBar(
-                backgroundColor: Colors.white,
+                backgroundColor: context.modeSurface,
                 elevation: 0,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: Text(
@@ -536,7 +543,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 centerTitle: true,
@@ -544,12 +551,12 @@ class _StockTransferToProcessingOrKItchenScreenState
               body: Column(
                 children: [
                   Container(
-                    color: Colors.white,
+                    color: context.modeSurface,
                     child: TabBar(
                       controller: _tabController,
-                      labelColor: kPrimary,
-                      unselectedLabelColor: kprimaryTextColor2,
-                      indicatorColor: kPrimary,
+                      labelColor: context.modePrimary,
+                      unselectedLabelColor: context.modeTextSecondary,
+                      indicatorColor: context.modePrimary,
                       indicatorWeight: 3,
                       labelStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 15,
@@ -601,7 +608,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   SizedBox(width: 8),
@@ -618,7 +625,11 @@ class _StockTransferToProcessingOrKItchenScreenState
                         'Helps in tracking transfer history and auditing',
                       ],
                     ),
-                    child: Icon(Icons.help_outline, color: kPrimary, size: 18),
+                    child: Icon(
+                      Icons.help_outline,
+                      color: context.modePrimary,
+                      size: 18,
+                    ),
                   ),
                 ],
               ),
@@ -629,13 +640,13 @@ class _StockTransferToProcessingOrKItchenScreenState
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: context.modeSurfaceAlt,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: context.modeBorder),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.qr_code, color: kPrimary, size: 20),
+                    Icon(Icons.qr_code, color: context.modePrimary, size: 20),
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -643,11 +654,15 @@ class _StockTransferToProcessingOrKItchenScreenState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                     ),
-                    Icon(Icons.lock, color: kprimaryTextColor2, size: 16),
+                    Icon(
+                      Icons.lock,
+                      color: context.modeTextSecondary,
+                      size: 16,
+                    ),
                   ],
                 ),
               ),
@@ -664,7 +679,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                       SizedBox(width: 8),
@@ -684,7 +699,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         ),
                         child: Icon(
                           Icons.help_outline,
-                          color: kPrimary,
+                          color: context.modePrimary,
                           size: 18,
                         ),
                       ),
@@ -697,7 +712,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: kPrimary.withValues(alpha: 0.1),
+                        color: context.modePrimary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -705,7 +720,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: kPrimary,
+                          color: context.modePrimary,
                         ),
                       ),
                     ),
@@ -724,7 +739,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -734,9 +749,9 @@ class _StockTransferToProcessingOrKItchenScreenState
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.modeSurface,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: context.modeBorder),
                     ),
                     child: Row(
                       children: [
@@ -744,7 +759,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: kPrimary.withValues(alpha: 0.1),
+                            color: context.modePrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Center(
@@ -753,7 +768,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: kPrimary,
+                                color: context.modePrimary,
                               ),
                             ),
                           ),
@@ -768,7 +783,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: kprimaryTextColor1,
+                                  color: context.modeTextPrimary,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -776,7 +791,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                 'Qty: ${item.quantity}',
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 13,
-                                  color: kprimaryTextColor2,
+                                  color: context.modeTextSecondary,
                                 ),
                               ),
                             ],
@@ -803,7 +818,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   SizedBox(width: 8),
@@ -821,7 +836,11 @@ class _StockTransferToProcessingOrKItchenScreenState
                         'Keep it clear and concise for easy understanding',
                       ],
                     ),
-                    child: Icon(Icons.help_outline, color: kPrimary, size: 18),
+                    child: Icon(
+                      Icons.help_outline,
+                      color: context.modePrimary,
+                      size: 18,
+                    ),
                   ),
                 ],
               ),
@@ -829,25 +848,25 @@ class _StockTransferToProcessingOrKItchenScreenState
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: context.modeBorder),
                 ),
                 child: TextField(
                   controller: _notesController,
-                  cursorColor: kPrimary,
+                  cursorColor: context.modePrimary,
                   maxLines: 4,
                   decoration: InputDecoration(
                     hintText: 'Add any additional notes or instructions...',
                     hintStyle: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     border: InputBorder.none,
                   ),
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -860,7 +879,9 @@ class _StockTransferToProcessingOrKItchenScreenState
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    color: isLoading ? Colors.grey : kPrimary,
+                    color: isLoading
+                        ? context.modeTextMuted
+                        : context.modePrimary,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: isLoading
@@ -871,7 +892,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                                context.modeTextInverse,
                               ),
                             ),
                           ),
@@ -882,7 +903,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: context.modeTextInverse,
                           ),
                         ),
                 ),
@@ -903,7 +924,7 @@ class _StockTransferToProcessingOrKItchenScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -917,18 +938,18 @@ class _StockTransferToProcessingOrKItchenScreenState
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: _selectedItemId == null && !_isSearching
-                    ? Colors.grey.shade300
-                    : kPrimary.withValues(alpha: 0.3),
+                    ? context.modeBorder
+                    : context.modePrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
             child: Row(
               children: [
-                Icon(Icons.search, color: kprimaryTextColor2, size: 20),
+                Icon(Icons.search, color: context.modeTextSecondary, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -936,14 +957,14 @@ class _StockTransferToProcessingOrKItchenScreenState
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       color: _selectedItemName != null
-                          ? kprimaryTextColor1
-                          : kprimaryTextColor2,
+                          ? context.modeTextPrimary
+                          : context.modeTextSecondary,
                     ),
                   ),
                 ),
                 Icon(
                   _isOpened ? Icons.arrow_drop_down : Icons.arrow_drop_up,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: 24,
                 ),
               ],
@@ -962,12 +983,16 @@ class _StockTransferToProcessingOrKItchenScreenState
     return Container(
       constraints: const BoxConstraints(maxHeight: 200),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: context.modeBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.24
+                  : 0.08,
+            ),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -982,22 +1007,25 @@ class _StockTransferToProcessingOrKItchenScreenState
               autofocus: true,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Type to search...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
                 prefixIcon: const Icon(Icons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: context.modeBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: kPrimary, width: 1.5),
+                  borderSide: BorderSide(
+                    color: context.modePrimary,
+                    width: 1.5,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -1006,7 +1034,7 @@ class _StockTransferToProcessingOrKItchenScreenState
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           Expanded(
             child: _filteredItems.isEmpty
                 ? Center(
@@ -1016,7 +1044,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         'No items found',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ),
@@ -1067,7 +1095,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.grey.shade200,
+                                color: context.modeDivider,
                                 width: 1,
                               ),
                             ),
@@ -1078,12 +1106,14 @@ class _StockTransferToProcessingOrKItchenScreenState
                                 width: 32,
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: kPrimary.withValues(alpha: 0.1),
+                                  color: context.modePrimary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.inventory_2_outlined,
-                                  color: kPrimary,
+                                  color: context.modePrimary,
                                   size: 18,
                                 ),
                               ),
@@ -1098,7 +1128,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                           .copyWith(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
-                                            color: kprimaryTextColor1,
+                                            color: context.modeTextPrimary,
                                           ),
                                     ),
                                     const SizedBox(height: 2),
@@ -1107,7 +1137,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: 12,
-                                            color: kprimaryTextColor2,
+                                            color: context.modeTextSecondary,
                                           ),
                                     ),
                                   ],
@@ -1139,7 +1169,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   SizedBox(width: 8),
@@ -1156,7 +1186,11 @@ class _StockTransferToProcessingOrKItchenScreenState
                         'You can add the same item multiple times if needed',
                       ],
                     ),
-                    child: Icon(Icons.help_outline, color: kPrimary, size: 18),
+                    child: Icon(
+                      Icons.help_outline,
+                      color: context.modePrimary,
+                      size: 18,
+                    ),
                   ),
                 ],
               ),
@@ -1164,13 +1198,13 @@ class _StockTransferToProcessingOrKItchenScreenState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: context.modeBorder),
                 ),
                 child: TextField(
                   controller: _quantityController,
-                  cursorColor: kPrimary,
+                  cursorColor: context.modePrimary,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -1178,13 +1212,13 @@ class _StockTransferToProcessingOrKItchenScreenState
                     hintText: 'Enter quantity',
                     hintStyle: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     border: InputBorder.none,
                   ),
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -1199,10 +1233,10 @@ class _StockTransferToProcessingOrKItchenScreenState
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: kPrimary,
+                color: context.modePrimary,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 24),
+              child: Icon(Icons.add, color: context.modeTextInverse, size: 24),
             ),
           ),
         ),
@@ -1233,7 +1267,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -1244,7 +1278,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                     textAlign: TextAlign.center,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ),
@@ -1256,7 +1290,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: kPrimary,
+                    backgroundColor: context.modePrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -1264,7 +1298,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                   child: Text(
                     'Retry',
                     style: WorkSansAppTextStyles.medium.copyWith(
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1367,14 +1401,14 @@ class _StockTransferToProcessingOrKItchenScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 80, color: Colors.grey.shade300),
+            Icon(icon, size: 80, color: context.modeTextMuted),
             const SizedBox(height: 24),
             Text(
               title,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -1383,7 +1417,7 @@ class _StockTransferToProcessingOrKItchenScreenState
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -1403,12 +1437,16 @@ class _StockTransferToProcessingOrKItchenScreenState
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.modeBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.22
+                  : 0.04,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1429,7 +1467,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -1437,7 +1475,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                       formattedDate,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -1466,21 +1504,21 @@ class _StockTransferToProcessingOrKItchenScreenState
             ],
           ),
           const SizedBox(height: 12),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           const SizedBox(height: 12),
           Row(
             children: [
               Icon(
                 Icons.inventory_2_outlined,
                 size: 18,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
               const SizedBox(width: 8),
               Text(
                 '${transfer.items.length} item(s)',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
@@ -1490,14 +1528,18 @@ class _StockTransferToProcessingOrKItchenScreenState
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.note_outlined, size: 18, color: kprimaryTextColor2),
+                Icon(
+                  Icons.note_outlined,
+                  size: 18,
+                  color: context.modeTextSecondary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     transfer.notes!,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 13,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -1517,11 +1559,15 @@ class _StockTransferToProcessingOrKItchenScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: kPrimary,
+                    color: context.modePrimary,
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward_ios, size: 14, color: kPrimary),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: context.modePrimary,
+                ),
               ],
             ),
           ),
@@ -1545,9 +1591,9 @@ class _StockTransferToProcessingOrKItchenScreenState
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.85,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
@@ -1558,7 +1604,7 @@ class _StockTransferToProcessingOrKItchenScreenState
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                border: Border(bottom: BorderSide(color: context.modeDivider)),
               ),
               child: Row(
                 children: [
@@ -1571,7 +1617,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -1579,14 +1625,14 @@ class _StockTransferToProcessingOrKItchenScreenState
                           'Batch: ${transfer.batchCode}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: Icon(Icons.close, color: context.modeTextSecondary),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -1611,7 +1657,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -1622,9 +1668,9 @@ class _StockTransferToProcessingOrKItchenScreenState
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: context.modeSurfaceAlt,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: context.modeBorder),
                         ),
                         child: Row(
                           children: [
@@ -1632,7 +1678,9 @@ class _StockTransferToProcessingOrKItchenScreenState
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: kPrimary.withValues(alpha: 0.1),
+                                color: context.modePrimary.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Center(
@@ -1641,7 +1689,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: kPrimary,
+                                    color: context.modePrimary,
                                   ),
                                 ),
                               ),
@@ -1657,7 +1705,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                         .copyWith(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
-                                          color: kprimaryTextColor1,
+                                          color: context.modeTextPrimary,
                                         ),
                                   ),
                                   const SizedBox(height: 2),
@@ -1666,7 +1714,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                     style: WorkSansAppTextStyles.medium
                                         .copyWith(
                                           fontSize: 13,
-                                          color: kprimaryTextColor2,
+                                          color: context.modeTextSecondary,
                                         ),
                                   ),
                                 ],
@@ -1699,7 +1747,7 @@ class _StockTransferToProcessingOrKItchenScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ),
@@ -1708,7 +1756,7 @@ class _StockTransferToProcessingOrKItchenScreenState
               value,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),

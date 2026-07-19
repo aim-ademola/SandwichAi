@@ -2,19 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/app_bootstrap.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
-import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/state.dart';
-import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/event.dart';
-import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/api_menu_blocs/bloc.dart'
     as api_menu;
 import 'package:sandwich_ai/src/features/pos/bloc/api_menu_blocs/event.dart'
     as api_menu_event;
+import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/pos_menu_categories.dart';
+import 'package:sandwich_ai/src/features/pos/data/repository/add_menu_repo.dart'
+    as add_menu_repo;
 
 class AddMenuItemDialog extends StatefulWidget {
-  const AddMenuItemDialog({super.key});
+  final add_menu_repo.MenuItemsRepositoryInterface repository;
+  final ValueChanged<ApiMenuItem>? onLocalCreated;
+  final void Function(String localId, ApiMenuItem menuItem)? onBackendCreated;
+  final ValueChanged<String>? onCreateFailed;
+
+  const AddMenuItemDialog({
+    super.key,
+    required this.repository,
+    this.onLocalCreated,
+    this.onBackendCreated,
+    this.onCreateFailed,
+  });
 
   @override
   State<AddMenuItemDialog> createState() => _AddMenuItemDialogState();
@@ -43,7 +55,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
     super.dispose();
   }
 
-  void _handleDone() {
+  Future<void> _handleDone() async {
     if (_isSubmitting) return;
 
     if (_formKey.currentState!.validate()) {
@@ -70,17 +82,85 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
         _isSubmitting = true;
       });
 
-      // Dispatch CreateMenuItem event to BLoC
-      context.read<MenuItemsBloc>().add(
-        CreateMenuItem(
-          dishName: _nameController.text.trim(),
-          description: _descriptionController.text.trim(),
-          category: _selectedCategory!,
-          price: int.parse(_priceController.text.trim()),
-          preparationTime: int.parse(_preparationTimeController.text.trim()),
-          isAvailable: _isAvailable,
-          imageUrl: _imagePath,
-        ),
+      final now = DateTime.now();
+      final localId = 'local-menu-${now.microsecondsSinceEpoch}';
+      final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+      final organizationId = await AuthCacheHelper.instance.getOrgId() ?? '';
+      final dishName = _nameController.text.trim();
+      final description = _descriptionController.text.trim();
+      final category = _selectedCategory!;
+      final price = int.parse(_priceController.text.trim());
+      final preparationTime = int.parse(_preparationTimeController.text.trim());
+      final imageUrl = _imagePath ?? '';
+      final localItem = ApiMenuItem(
+        id: localId,
+        dishName: dishName,
+        description: description,
+        category: category,
+        price: price.toString(),
+        preparationTime: preparationTime,
+        isAvailable: _isAvailable,
+        imageUrl: imageUrl,
+        branchId: branchId,
+        organizationId: organizationId,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      widget.onLocalCreated?.call(localItem);
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+
+      final response = await widget.repository.createMenuItem(
+        branchId: branchId,
+        dishName: dishName,
+        description: description,
+        category: category,
+        price: price,
+        preparationTime: preparationTime,
+        isAvailable: _isAvailable,
+        imageUrl: imageUrl,
+      );
+
+      response.when(
+        success: (menuItem) {
+          widget.onBackendCreated?.call(localId, menuItem);
+          rootScaffoldMessengerKey.currentState?.showSnackBar(
+            SnackBar(
+              content: Text(
+                'Menu item "${menuItem.dishName}" added successfully',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+              backgroundColor: kGreen,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        },
+        error: (error) {
+          widget.onCreateFailed?.call(localId);
+          rootScaffoldMessengerKey.currentState?.showSnackBar(
+            SnackBar(
+              content: Text(
+                error.toString(),
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+              backgroundColor: kRed,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        },
       );
     }
   }
@@ -178,64 +258,14 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<MenuItemsBloc, MenuItemsState>(
-      listener: (context, state) {
-        if (state is MenuItemCreated) {
-          context.read<api_menu.MenuItemsBloc>().add(
-            const api_menu_event.RefreshMenuItems(),
-          );
-
-          setState(() {
-            _isSubmitting = false;
-          });
-
-          Navigator.of(context).pop();
-
-          // Show success message
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            rootScaffoldMessengerKey.currentState?.showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Menu item "${state.menuItem.dishName}" added successfully',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    color: context.modeTextInverse,
-                  ),
-                ),
-                backgroundColor: context.modeSuccess,
-                duration: const Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            );
-          });
-        } else if (state is MenuItemCreationError) {
-          setState(() {
-            _isSubmitting = false;
-          });
-
-          rootScaffoldMessengerKey.currentState?.showSnackBar(
-            SnackBar(
-              content: Text(
-                state.error,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  color: context.modeTextInverse,
-                ),
-              ),
-              backgroundColor: context.modeError,
-              duration: const Duration(seconds: 3),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
-        }
-      },
-      child: Dialog(
-        backgroundColor: context.modeSurface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Dialog(
+      backgroundColor: context.modeSurface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width > 560
+            ? 520
+            : MediaQuery.sizeOf(context).width * 0.9,
+        height: MediaQuery.sizeOf(context).height * 0.86,
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -282,6 +312,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: _selectedCategory,
+                    isExpanded: true,
                     decoration: InputDecoration(
                       hintText: 'Select category',
                       hintStyle: WorkSansAppTextStyles.medium.copyWith(
@@ -320,6 +351,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                       return DropdownMenuItem<String>(
                         value: category,
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             PosMenuCategoryIcon(
                               category: category,
@@ -327,7 +359,11 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                               size: 22,
                             ),
                             const SizedBox(width: 10),
-                            Expanded(child: Text(category)),
+                            Text(
+                              category,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ],
                         ),
                       );
@@ -342,7 +378,13 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                               size: 20,
                             ),
                             const SizedBox(width: 10),
-                            Expanded(child: Text(category)),
+                            Expanded(
+                              child: Text(
+                                category,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ],
                         );
                       }).toList();
@@ -772,10 +814,30 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
 
 extension AddMenuItemDialogExtension on BuildContext {
   void showAddMenuItemDialog() {
+    final apiMenuBloc = read<api_menu.MenuItemsBloc>();
+    final repository = read<add_menu_repo.MenuItemsRepositoryInterface>();
     showDialog(
       context: this,
+      useRootNavigator: true,
       barrierDismissible: false,
-      builder: (context) => const AddMenuItemDialog(),
+      builder: (context) => AddMenuItemDialog(
+        repository: repository,
+        onLocalCreated: (menuItem) {
+          apiMenuBloc.add(api_menu_event.UpsertLocalMenuItem(menuItem));
+        },
+        onBackendCreated: (localId, menuItem) {
+          apiMenuBloc.add(
+            api_menu_event.ReplaceLocalMenuItem(
+              localId: localId,
+              menuItem: menuItem,
+            ),
+          );
+          apiMenuBloc.add(const api_menu_event.RefreshMenuItems());
+        },
+        onCreateFailed: (localId) {
+          apiMenuBloc.add(api_menu_event.RemoveLocalMenuItem(localId));
+        },
+      ),
     );
   }
 }

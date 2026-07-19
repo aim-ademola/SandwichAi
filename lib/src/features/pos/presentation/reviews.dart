@@ -93,9 +93,12 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     if (!mounted) return;
     setState(() => _isSubmitting = false);
     response.when(
-      success: (_) {
+      success: (review) {
         _commentController.clear();
-        setState(() => _rating = 5);
+        setState(() {
+          _rating = 5;
+          _reviews = _upsertReview(_reviews, review);
+        });
         _loadReviews();
       },
       error: (error) {
@@ -113,7 +116,12 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
     if (!mounted) return;
     response.when(
-      success: (_) => _loadReviews(),
+      success: (_) {
+        setState(() {
+          _reviews = _reviews.where((item) => item.id != review.id).toList();
+        });
+        _loadReviews();
+      },
       error: (error) {
         ScaffoldMessenger.of(
           context,
@@ -188,7 +196,12 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
                   if (!mounted) return;
                   response.when(
-                    success: (_) => _loadReviews(),
+                    success: (updatedReview) {
+                      setState(() {
+                        _reviews = _upsertReview(_reviews, updatedReview);
+                      });
+                      _loadReviews();
+                    },
                     error: (error) {
                       ScaffoldMessenger.of(
                         this.context,
@@ -306,6 +319,13 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         ],
       ),
     );
+  }
+
+  List<CustomerServiceRecord> _upsertReview(
+    List<CustomerServiceRecord> current,
+    CustomerServiceRecord review,
+  ) {
+    return [review, ...current.where((item) => item.id != review.id)];
   }
 
   Widget _buildReviewCard(CustomerServiceRecord review) {

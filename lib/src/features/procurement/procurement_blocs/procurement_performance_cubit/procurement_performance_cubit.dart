@@ -12,10 +12,7 @@ class ProcurementPerformanceCubit extends Cubit<ProcurementPerformanceState> {
        super(const ProcurementPerformanceState());
 
   Future<void> loadDashboardPerformance({String? branchId}) async {
-    await Future.wait([
-      loadPerformance(branchId: branchId),
-      loadRankings(branchId: branchId),
-    ]);
+    await Future.wait([loadPerformance(branchId: branchId), loadRankings()]);
   }
 
   Future<void> loadPerformance({String? branchId}) async {
@@ -56,7 +53,7 @@ class ProcurementPerformanceCubit extends Cubit<ProcurementPerformanceState> {
     );
   }
 
-  Future<void> loadRankings({String? branchId}) async {
+  Future<void> loadRankings() async {
     emit(
       state.copyWith(
         rankingsStatus: ProcurementPerformanceStatus.loading,
@@ -64,9 +61,7 @@ class ProcurementPerformanceCubit extends Cubit<ProcurementPerformanceState> {
       ),
     );
 
-    final response = await _repository.getProcurementPerformanceRankings(
-      branchId: branchId,
-    );
+    final response = await _repository.getProcurementPerformanceRankings();
     response.when(
       success: (data) => emit(
         state.copyWith(
@@ -97,7 +92,9 @@ class ProcurementPerformanceCubit extends Cubit<ProcurementPerformanceState> {
         .toSet()
         .join('\n');
 
-    if (backendDetails.isEmpty) return message;
+    if (backendDetails.isEmpty) {
+      return 'Supplier rankings are unavailable right now. Please try again.';
+    }
     return backendDetails;
   }
 

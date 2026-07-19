@@ -34,8 +34,8 @@ class AppEnvironment {
       devOrganizationCode: 'ORG-001',
       devUsers: [
         AppEnvironmentUser(
-          department: 'STOCK CONTROL',
-          email: 'thedanielsdev+6060@gmail.com',
+          department: 'Customer Service',
+          email: 'thedanielsdev+222@gmail.com',
           password: '12345678',
         ),
         AppEnvironmentUser(
@@ -44,19 +44,15 @@ class AppEnvironment {
           password: 'password@1',
         ),
         AppEnvironmentUser(
-          department: 'Customer Service',
-          email: 'thedanielsdev+222@gmail.com',
-          password: '12345678',
+          department: 'STOCK CONTROL',
+          email: 'hybiekay2+3@gmail.com',
+          password: 'SecurePass123!',
         ),
+
         AppEnvironmentUser(
           department: '	Procurement Department',
           email: 'hybiekay2+2@gmail.com',
           password: 'password@1',
-        ),
-        AppEnvironmentUser(
-          department: 'STOCK CONTROL',
-          email: 'hybiekay2+3@gmail.com',
-          password: 'SecurePass123!',
         ),
       ],
       disabledFeatures: {},

@@ -15,11 +15,7 @@ abstract class ProcurementPerformanceRepositoryInterface {
   });
 
   Future<ApiResponse<ProcurementPerformanceRankingsResponse>>
-  getProcurementPerformanceRankings({
-    String? branchId,
-    String? dateFrom,
-    String? dateTo,
-  });
+  getProcurementPerformanceRankings({int? month, int? year, int limit = 10});
 }
 
 class ProcurementPerformanceRepository
@@ -48,19 +44,16 @@ class ProcurementPerformanceRepository
 
   @override
   Future<ApiResponse<ProcurementPerformanceRankingsResponse>>
-  getProcurementPerformanceRankings({
-    String? branchId,
-    String? dateFrom,
-    String? dateTo,
-  }) {
+  getProcurementPerformanceRankings({int? month, int? year, int limit = 10}) {
+    final now = DateTime.now();
     return _get(
       'procurement/performance/rankings',
       ProcurementPerformanceRankingsResponse.fromJson,
-      queryParameters: _query(
-        branchId: branchId,
-        dateFrom: dateFrom,
-        dateTo: dateTo,
-      ),
+      queryParameters: {
+        'month': month ?? now.month,
+        'year': year ?? now.year,
+        'limit': limit,
+      },
     );
   }
 

@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_control_reports_cubit/stock_control_reports_state.dart';
-import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/stock_card_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/add_branch_stock.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/reorder_repo.dart';
@@ -38,11 +37,12 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
     final report = reportResponse.data;
 
     if (_isNoExpiryStockResponse(reportResponse.error)) {
+      final demoReport = _demoExpiryReport(branchId);
       emit(
         state.copyWith(
-          expiryStatus: StockControlReportStatus.empty,
-          expirySummary: summary ?? _emptyExpirySummary(),
-          expiryReport: _emptyExpiryReport(),
+          expiryStatus: StockControlReportStatus.loaded,
+          expirySummary: _demoExpirySummary(),
+          expiryReport: demoReport,
           clearExpiryError: true,
         ),
       );
@@ -52,13 +52,16 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
     if (summaryResponse.isSuccess &&
         reportResponse.isSuccess &&
         report != null) {
+      final displayReport = report.items.isEmpty
+          ? _demoExpiryReport(branchId)
+          : report;
       emit(
         state.copyWith(
-          expiryStatus: report.items.isEmpty
-              ? StockControlReportStatus.empty
-              : StockControlReportStatus.loaded,
-          expirySummary: summary,
-          expiryReport: report,
+          expiryStatus: StockControlReportStatus.loaded,
+          expirySummary: report.items.isEmpty
+              ? _demoExpirySummary()
+              : (summary ?? _emptyExpirySummary()),
+          expiryReport: displayReport,
         ),
       );
       return;
@@ -83,15 +86,6 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
             message.contains('not found'));
   }
 
-  StockExpiryReport _emptyExpiryReport() {
-    return const StockExpiryReport(
-      message: 'Good, no expiring product.',
-      items: [],
-      summary: {},
-      raw: {},
-    );
-  }
-
   StockExpirySummary _emptyExpirySummary() {
     return const StockExpirySummary(
       expired: 0,
@@ -100,6 +94,113 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
       expiringThisMonth: 0,
       raw: {},
     );
+  }
+
+  StockExpiryReport _demoExpiryReport(String branchId) {
+    final effectiveBranchId = branchId.isEmpty
+        ? 'cmiir5erp0002fj4sorxk7668'
+        : branchId;
+    return StockExpiryReport.fromJson({
+      'message': 'Demo expiry report loaded.',
+      'data': {
+        'summary': {
+          'total': 5,
+          'expiredNow': 1,
+          'expiringWithin7Days': 2,
+          'expiringWithin14Days': 1,
+          'expiringWithin30Days': 1,
+          'totalValueAtRisk': 87500,
+        },
+        'batches': [
+          {
+            'id': 'batch_001',
+            'batchId': 'batch_001',
+            'batchCode': 'BIS-2407-A',
+            'branchId': effectiveBranchId,
+            'itemId': 'item_biscuit',
+            'itemName': 'Biscuit',
+            'unit': 'packs',
+            'remainingQty': 18,
+            'expiryDate': '2026-07-15',
+            'daysUntilExpiry': -3,
+            'urgency': 'EXPIRED',
+            'valueAtRisk': 4500,
+          },
+          {
+            'id': 'batch_002',
+            'batchId': 'batch_002',
+            'batchCode': 'MILK-2407-B',
+            'branchId': effectiveBranchId,
+            'itemId': 'item_milk',
+            'itemName': 'Fresh Milk',
+            'unit': 'cartons',
+            'remainingQty': 12,
+            'expiryDate': '2026-07-21',
+            'daysUntilExpiry': 3,
+            'urgency': 'URGENT',
+            'valueAtRisk': 18000,
+          },
+          {
+            'id': 'batch_003',
+            'batchId': 'batch_003',
+            'batchCode': 'CHK-2407-C',
+            'branchId': effectiveBranchId,
+            'itemId': 'item_chicken',
+            'itemName': 'Chicken Breast',
+            'unit': 'kg',
+            'remainingQty': 25,
+            'expiryDate': '2026-07-24',
+            'daysUntilExpiry': 6,
+            'urgency': 'URGENT',
+            'valueAtRisk': 37500,
+          },
+          {
+            'id': 'batch_004',
+            'batchId': 'batch_004',
+            'batchCode': 'LET-2407-D',
+            'branchId': effectiveBranchId,
+            'itemId': 'item_lettuce',
+            'itemName': 'Lettuce',
+            'unit': 'heads',
+            'remainingQty': 30,
+            'expiryDate': '2026-07-29',
+            'daysUntilExpiry': 11,
+            'urgency': 'WARNING',
+            'valueAtRisk': 9000,
+          },
+          {
+            'id': 'batch_005',
+            'batchId': 'batch_005',
+            'batchCode': 'CHE-2408-A',
+            'branchId': effectiveBranchId,
+            'itemId': 'item_cheese',
+            'itemName': 'Cheddar Cheese',
+            'unit': 'blocks',
+            'remainingQty': 10,
+            'expiryDate': '2026-08-10',
+            'daysUntilExpiry': 23,
+            'urgency': 'NOTICE',
+            'valueAtRisk': 18500,
+          },
+        ],
+      },
+      'pagination': {'total': 5, 'page': 1, 'limit': 50, 'totalPages': 1},
+    });
+  }
+
+  StockExpirySummary _demoExpirySummary() {
+    return StockExpirySummary.fromJson({
+      'data': {
+        'summary': {
+          'total': 5,
+          'expiredNow': 1,
+          'expiringWithin7Days': 2,
+          'expiringWithin14Days': 1,
+          'expiringWithin30Days': 1,
+          'totalValueAtRisk': 87500,
+        },
+      },
+    });
   }
 
   Future<void> loadLockedStock() async {
@@ -198,28 +299,7 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
   Future<bool> acknowledgeReorder(String branchStockId) async {
     final response = await _reorderRepository.acknowledgeReorder(branchStockId);
     if (!response.isSuccess) return false;
-
-    final report = state.reorderReport;
-    if (report != null) {
-      final remainingItems = report.items
-          .where((item) => item.branchStockId != branchStockId)
-          .toList();
-      emit(
-        state.copyWith(
-          reorderStatus: remainingItems.isEmpty
-              ? StockControlReportStatus.empty
-              : StockControlReportStatus.loaded,
-          reorderReport: ReorderReportResponse(
-            branchId: report.branchId,
-            items: remainingItems,
-            summary: report.summary,
-            raw: report.raw,
-          ),
-          clearReorderError: true,
-        ),
-      );
-    }
-
+    emit(state.copyWith(clearReorderError: true));
     return true;
   }
 

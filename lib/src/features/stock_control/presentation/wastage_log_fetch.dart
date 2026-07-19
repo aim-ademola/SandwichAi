@@ -36,10 +36,11 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: kPrimary,
-              onPrimary: Colors.white,
-              onSurface: kprimaryTextColor1,
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: context.modePrimary,
+              onPrimary: context.modeTextInverse,
+              onSurface: context.modeTextPrimary,
+              surface: context.modeSurface,
             ),
           ),
           child: child!,
@@ -48,6 +49,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
     );
 
     if (picked != null) {
+      if (!mounted) return;
       setState(() {
         _startDate = picked.start;
         _endDate = picked.end;
@@ -76,7 +78,9 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
     return BlocBuilder<WasteLogsBloc, WasteLogsState>(
       builder: (context, state) {
         if (state is WasteLogsLoading) {
-          return Center(child: CircularProgressIndicator(color: kPrimary));
+          return Center(
+            child: CircularProgressIndicator(color: context.modePrimary),
+          );
         }
 
         if (state is WasteLogsError) {
@@ -110,7 +114,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
 
   Widget _buildFiltersSection(WasteLogsLoaded state) {
     return Container(
-      color: Colors.white,
+      color: context.modeSurface,
       padding: EdgeInsets.all(16),
       child: Column(
         children: [
@@ -134,7 +138,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButtonHideUnderline(
@@ -144,21 +148,39 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
             'Filter by reason',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
           isExpanded: true,
+          dropdownColor: context.modeSurface,
+          iconEnabledColor: context.modeTextSecondary,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: context.modeTextPrimary,
+          ),
           items: [
-            DropdownMenuItem(value: null, child: Text('All Reasons')),
+            DropdownMenuItem(
+              value: null,
+              child: Text(
+                'All Reasons',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  color: context.modeTextPrimary,
+                ),
+              ),
+            ),
             ...WasteReason.values.map((reason) {
               return DropdownMenuItem(
                 value: reason.value,
                 child: Text(
                   reason.displayName,
-                  style: WorkSansAppTextStyles.medium.copyWith(fontSize: 14),
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 14,
+                    color: context.modeTextPrimary,
+                  ),
                 ),
               );
-            }).toList(),
+            }),
           ],
           onChanged: (value) {
             setState(() {
@@ -177,15 +199,17 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
       child: Container(
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          border: Border.all(color: Color(0xFFE0E0E0)),
+          border: Border.all(color: context.modeBorder),
           borderRadius: BorderRadius.circular(8),
           color: _startDate != null
-              ? kPrimary.withValues(alpha: 0.1)
-              : Colors.white,
+              ? context.modePrimary.withValues(alpha: 0.1)
+              : context.modeSurface,
         ),
         child: Icon(
           Icons.date_range,
-          color: _startDate != null ? kPrimary : kprimaryTextColor2,
+          color: _startDate != null
+              ? context.modePrimary
+              : context.modeTextSecondary,
           size: 22,
         ),
       ),
@@ -223,7 +247,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
             'Clear All',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 13,
-              color: kPrimary,
+              color: context.modePrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -236,7 +260,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: kPrimary.withValues(alpha: 0.1),
+        color: context.modePrimary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -246,14 +270,14 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: kPrimary,
+              color: context.modePrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
           SizedBox(width: 4),
           InkWell(
             onTap: onRemove,
-            child: Icon(Icons.close, size: 16, color: kPrimary),
+            child: Icon(Icons.close, size: 16, color: context.modePrimary),
           ),
         ],
       ),
@@ -262,7 +286,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
 
   Widget _buildSummaryCards(WasteLogsResponse response) {
     return Container(
-      color: const Color(0xFFF8F6F6),
+      color: context.modeBackground,
       padding: EdgeInsets.all(16),
       child: Row(
         children: [
@@ -297,11 +321,16 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.22
+                  : 0.04,
+            ),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -329,7 +358,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           SizedBox(height: 4),
@@ -337,7 +366,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -347,7 +376,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
 
   Widget _buildLogsList(List<WasteLogItem> logs) {
     return Container(
-      color: const Color(0xFFF8F6F6),
+      color: context.modeBackground,
       child: ListView.builder(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemCount: logs.length,
@@ -364,11 +393,16 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.22
+                  : 0.04,
+            ),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -392,7 +426,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: kprimaryTextColor1,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                           SizedBox(height: 4),
@@ -400,7 +434,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                             log.item.category,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 13,
-                              color: kprimaryTextColor2,
+                              color: context.modeTextSecondary,
                             ),
                           ),
                         ],
@@ -447,7 +481,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                   Container(
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8F6F6),
+                      color: context.modeSurfaceAlt,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -455,7 +489,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                         Icon(
                           Icons.note_outlined,
                           size: 16,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                         SizedBox(width: 8),
                         Expanded(
@@ -463,7 +497,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                             log.notes,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 13,
-                              color: kprimaryTextColor1,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                         ),
@@ -477,28 +511,28 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                     Icon(
                       Icons.calendar_today_outlined,
                       size: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     SizedBox(width: 6),
                     Text(
                       DateFormat('MMM d, yyyy').format(log.date),
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                     SizedBox(width: 16),
                     Icon(
                       Icons.person_outline,
                       size: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     SizedBox(width: 6),
                     Text(
                       log.recordedBy,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                     if (log.isVerified) ...[
@@ -546,14 +580,14 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
   Widget _buildInfoItem(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: kprimaryTextColor2),
+        Icon(icon, size: 16, color: context.modeTextSecondary),
         SizedBox(width: 6),
         Text(
           text,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
       ],
@@ -565,18 +599,14 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.delete_outline,
-            size: 80,
-            color: kprimaryTextColor2.withValues(alpha: 0.5),
-          ),
+          Icon(Icons.delete_outline, size: 80, color: context.modeTextMuted),
           SizedBox(height: 16),
           Text(
             'No waste logs found',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           SizedBox(height: 8),
@@ -584,7 +614,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
             'Start logging waste to see records here',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
         ],
@@ -602,7 +632,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
             Icon(
               Icons.error_outline,
               size: 80,
-              color: Colors.red.withValues(alpha: 0.5),
+              color: context.modeError.withValues(alpha: 0.5),
             ),
             SizedBox(height: 16),
             Text(
@@ -610,7 +640,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             SizedBox(height: 8),
@@ -619,7 +649,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
             SizedBox(height: 24),
@@ -628,7 +658,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                 context.read<WasteLogsBloc>().add(RefreshWasteLogs());
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimary,
+                backgroundColor: context.modePrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -636,7 +666,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
               child: Text(
                 'Retry',
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                   fontWeight: FontWeight.w600,
                 ),
               ),

@@ -19,6 +19,7 @@ import 'package:sandwich_ai/src/features/pos/bloc/pos_order_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/api_menu_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/order_session_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/pos_menu_categories.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/addtomenu.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/cash_approval_waiting.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/edit_menu.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/online_qr.dart';
@@ -1489,7 +1490,21 @@ class _OrderScreenState extends State<OrderScreen>
                   ],
                 ),
               ),
-              Icon(Icons.drag_handle, size: 20, color: context.modeTextMuted),
+              TextButton.icon(
+                onPressed: () => context.showAddMenuItemDialog(),
+                icon: const Icon(Icons.add_rounded, size: 20),
+                label: const Text('Add Item'),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.modePrimary,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 36),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  textStyle: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -1822,14 +1837,18 @@ class _OrderScreenState extends State<OrderScreen>
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
-          ReorderableDelayedDragStartListener(
+          ReorderableDragStartListener(
             index: reorderIndex,
             child: Tooltip(
-              message: 'Hold and drag to sort',
-              child: Icon(
-                Icons.drag_handle,
-                color: context.modeTextMuted,
-                size: 20,
+              message: 'Drag to sort',
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Icon(
+                  Icons.drag_handle_rounded,
+                  color: context.modeTextMuted,
+                  size: 24,
+                ),
               ),
             ),
           ),

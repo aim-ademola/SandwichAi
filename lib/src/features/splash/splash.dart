@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/core/navigation/department_navigation.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 
 class AppSplashScreen extends StatefulWidget {
@@ -35,12 +37,28 @@ class _AppSplashScreenState extends State<AppSplashScreen>
     // Navigate when animation finishes
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (!mounted) return;
-          context.go('/');
-        });
+        unawaited(_openInitialRoute());
       }
     });
+  }
+
+  Future<void> _openInitialRoute() async {
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
+
+    final route = await _resolveInitialRoute();
+    if (!mounted) return;
+    context.go(route);
+  }
+
+  Future<String> _resolveInitialRoute() async {
+    final authCache = AuthCacheHelper.instance;
+    final isLoggedIn = await authCache.isLoggedIn();
+    if (!isLoggedIn) return '/';
+
+    final user = await authCache.getUserData();
+    final route = DepartmentNavigation.routeForDepartment(user?.department);
+    return route ?? '/';
   }
 
   @override

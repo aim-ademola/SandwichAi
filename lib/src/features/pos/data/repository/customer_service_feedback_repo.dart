@@ -110,7 +110,10 @@ class CustomerServiceFeedbackRepository extends BaseRepository
   }) async {
     try {
       final response = await _apiClient
-          .get(path, queryParameters: {'page': page, 'limit': limit})
+          .get(
+            path,
+            queryParameters: await _listQuery(page: page, limit: limit),
+          )
           .timeout(const Duration(seconds: 30));
 
       if (response.data == null) {
@@ -160,6 +163,18 @@ class CustomerServiceFeedbackRepository extends BaseRepository
     } catch (e) {
       return ApiResponse.errorMessage(_messageFor(e));
     }
+  }
+
+  Future<Map<String, dynamic>> _listQuery({
+    required int page,
+    required int limit,
+  }) async {
+    final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    return {
+      'page': page,
+      'limit': limit,
+      if (branchId.trim().isNotEmpty) 'branchId': branchId.trim(),
+    };
   }
 
   Future<ApiResponse<CustomerServiceRecord>> _update(

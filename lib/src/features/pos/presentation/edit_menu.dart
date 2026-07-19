@@ -91,25 +91,32 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
     return BlocListener<MenuItemsBloc, MenuItemsState>(
       listener: (context, state) {
         if (state is MenuItemUpdated) {
+          final successColor = context.modeSuccess;
+          final inverseTextColor = context.modeTextInverse;
+          context.read<api_menu.MenuItemsBloc>().add(
+            api_menu_event.UpsertLocalMenuItem(state.menuItem),
+          );
           context.read<api_menu.MenuItemsBloc>().add(
             const api_menu_event.RefreshMenuItems(),
           );
 
-          setState(() {
-            _isSubmitting = false;
-          });
+          if (mounted) {
+            setState(() {
+              _isSubmitting = false;
+            });
+          }
 
-          Navigator.of(context).pop();
+          Navigator.of(context, rootNavigator: true).pop();
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 'Menu item "${state.menuItem.dishName}" updated successfully',
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  color: Colors.white,
+                  color: inverseTextColor,
                 ),
               ),
-              backgroundColor: kGreen,
+              backgroundColor: successColor,
               duration: const Duration(seconds: 2),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -143,359 +150,371 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
       child: Dialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Edit Menu Item',
+        child: SizedBox(
+          width: MediaQuery.sizeOf(context).width > 560
+              ? 520
+              : MediaQuery.sizeOf(context).width * 0.9,
+          height: MediaQuery.sizeOf(context).height * 0.86,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Edit Menu Item',
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: kprimaryTextColor1,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.close,
+                            color: kprimaryTextColor2,
+                          ),
+                          onPressed: _isSubmitting
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Category
+                    Text(
+                      'Category',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: kprimaryTextColor1,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedCategory,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color(0xFFF8F6F6),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      items: PosMenuCategories.names.map((category) {
+                        return DropdownMenuItem<String>(
+                          value: category,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              PosMenuCategoryIcon(
+                                category: category,
+                                color: kPrimary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                category,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: _isSubmitting
+                          ? null
+                          : (value) {
+                              if (value != null) {
+                                setState(() => _selectedCategory = value);
+                              }
+                            },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Item Name
+                    Text(
+                      'Item Name',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: kprimaryTextColor1,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _nameController,
+                      enabled: !_isSubmitting,
+                      decoration: InputDecoration(
+                        hintText: 'Enter item name',
+                        hintStyle: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 14,
+                          color: kprimaryTextColor2,
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF8F6F6),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 14,
+                        color: kprimaryTextColor1,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter item name';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Description
+                    Text(
+                      'Description',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: kprimaryTextColor1,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _descriptionController,
+                      enabled: !_isSubmitting,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Enter item description',
+                        hintStyle: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 14,
+                          color: kprimaryTextColor2,
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF8F6F6),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 14,
+                        color: kprimaryTextColor1,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter description';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Price and Preparation Time Row
+                    Row(
+                      children: [
+                        // Price
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Price (₦)',
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: kprimaryTextColor1,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              TextFormField(
+                                controller: _priceController,
+                                enabled: !_isSubmitting,
+                                decoration: InputDecoration(
+                                  hintText: 'Enter price',
+                                  hintStyle: WorkSansAppTextStyles.medium
+                                      .copyWith(
+                                        fontSize: 14,
+                                        color: kprimaryTextColor2,
+                                      ),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF8F6F6),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: 14,
+                                  color: kprimaryTextColor1,
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Required';
+                                  }
+                                  final price = int.tryParse(value);
+                                  if (price == null || price <= 0) {
+                                    return 'Invalid price';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        // Preparation Time
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Prep Time (min)',
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: kprimaryTextColor1,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              TextFormField(
+                                controller: _preparationTimeController,
+                                enabled: !_isSubmitting,
+                                decoration: InputDecoration(
+                                  hintText: 'Enter time',
+                                  hintStyle: WorkSansAppTextStyles.medium
+                                      .copyWith(
+                                        fontSize: 14,
+                                        color: kprimaryTextColor2,
+                                      ),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF8F6F6),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: 14,
+                                  color: kprimaryTextColor1,
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Required';
+                                  }
+                                  final time = int.tryParse(value);
+                                  if (time == null || time <= 0) {
+                                    return 'Invalid time';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Availability Toggle
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Available',
                           style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 20,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: kprimaryTextColor1,
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.close,
-                          color: kprimaryTextColor2,
+                        Switch(
+                          value: _isAvailable,
+                          onChanged: _isSubmitting
+                              ? null
+                              : (value) {
+                                  setState(() {
+                                    _isAvailable = value;
+                                  });
+                                },
+                          activeThumbColor: kPrimary,
                         ),
-                        onPressed: _isSubmitting
-                            ? null
-                            : () => Navigator.of(context).pop(),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
 
-                  // Category
-                  Text(
-                    'Category',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedCategory,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFFF8F6F6),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    items: PosMenuCategories.names.map((category) {
-                      return DropdownMenuItem<String>(
-                        value: category,
-                        child: Row(
-                          children: [
-                            PosMenuCategoryIcon(
-                              category: category,
-                              color: kPrimary,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(child: Text(category)),
-                          ],
+                    // Update Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _isSubmitting ? null : _handleUpdate,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kPrimary,
+                          disabledBackgroundColor: kPrimary.withValues(
+                            alpha: 0.5,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 0,
                         ),
-                      );
-                    }).toList(),
-                    onChanged: _isSubmitting
-                        ? null
-                        : (value) {
-                            if (value != null) {
-                              setState(() => _selectedCategory = value);
-                            }
-                          },
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Item Name
-                  Text(
-                    'Item Name',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _nameController,
-                    enabled: !_isSubmitting,
-                    decoration: InputDecoration(
-                      hintText: 'Enter item name',
-                      hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        color: kprimaryTextColor2,
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF8F6F6),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      color: kprimaryTextColor1,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter item name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Description
-                  Text(
-                    'Description',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _descriptionController,
-                    enabled: !_isSubmitting,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: 'Enter item description',
-                      hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
-                        color: kprimaryTextColor2,
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF8F6F6),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      color: kprimaryTextColor1,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Price and Preparation Time Row
-                  Row(
-                    children: [
-                      // Price
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Price (₦)',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: kprimaryTextColor1,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: _priceController,
-                              enabled: !_isSubmitting,
-                              decoration: InputDecoration(
-                                hintText: 'Enter price',
-                                hintStyle: WorkSansAppTextStyles.medium
-                                    .copyWith(
-                                      fontSize: 14,
-                                      color: kprimaryTextColor2,
-                                    ),
-                                filled: true,
-                                fillColor: const Color(0xFFF8F6F6),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide.none,
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
+                              )
+                            : Text(
+                                'Update',
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
                                 ),
                               ),
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 14,
-                                color: kprimaryTextColor1,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Required';
-                                }
-                                final price = int.tryParse(value);
-                                if (price == null || price <= 0) {
-                                  return 'Invalid price';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        ),
                       ),
-                      const SizedBox(width: 16),
-                      // Preparation Time
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Prep Time (min)',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: kprimaryTextColor1,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: _preparationTimeController,
-                              enabled: !_isSubmitting,
-                              decoration: InputDecoration(
-                                hintText: 'Enter time',
-                                hintStyle: WorkSansAppTextStyles.medium
-                                    .copyWith(
-                                      fontSize: 14,
-                                      color: kprimaryTextColor2,
-                                    ),
-                                filled: true,
-                                fillColor: const Color(0xFFF8F6F6),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide.none,
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 14,
-                                color: kprimaryTextColor1,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Required';
-                                }
-                                final time = int.tryParse(value);
-                                if (time == null || time <= 0) {
-                                  return 'Invalid time';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Availability Toggle
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Available',
-                        style: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
-                        ),
-                      ),
-                      Switch(
-                        value: _isAvailable,
-                        onChanged: _isSubmitting
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  _isAvailable = value;
-                                });
-                              },
-                        activeThumbColor: kPrimary,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Update Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: _isSubmitting ? null : _handleUpdate,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimary,
-                        disabledBackgroundColor: kPrimary.withValues(
-                          alpha: 0.5,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
-                              ),
-                            )
-                          : Text(
-                              'Update',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -509,6 +528,7 @@ extension EditMenuItemDialogExtension on BuildContext {
   void showEditMenuItemDialog(ApiMenuItem menuItem) {
     showDialog(
       context: this,
+      useRootNavigator: true,
       barrierDismissible: false,
       builder: (context) => EditMenuItemDialog(menuItem: menuItem),
     );

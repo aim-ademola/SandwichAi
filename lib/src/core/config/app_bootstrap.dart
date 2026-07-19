@@ -22,6 +22,14 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> bootstrapSandwichAi(AppEnvironment environment) async {
   WidgetsFlutterBinding.ensureInitialized();
   AppEnvironment.configure(environment);
+
+  await Hive.initFlutter();
+  await Hive.openBox('auth_box');
+  await Hive.openBox('onboarding_box');
+  await Hive.openBox('pending_requests');
+  await Hive.openBox('settings_box');
+  await Hive.openBox('order_sessions_box');
+
   await FeatureRegistry.initialize();
 
   if (FirebaseMessagingService.isSupportedPlatform) {
@@ -44,12 +52,6 @@ Future<void> bootstrapSandwichAi(AppEnvironment environment) async {
   await NotificationService().initialize();
   await FirebaseMessagingService.instance.initialize();
 
-  await Hive.initFlutter();
-  await Hive.openBox('auth_box');
-  await Hive.openBox('onboarding_box');
-  await Hive.openBox('pending_requests');
-  await Hive.openBox('settings_box');
-  await Hive.openBox('order_sessions_box');
   await ThemeController.instance.load();
 
   runApp(AppBlocProviders(child: AppInitializer(child: const MyApp())));

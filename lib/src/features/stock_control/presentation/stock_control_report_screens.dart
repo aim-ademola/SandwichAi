@@ -43,7 +43,7 @@ class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
           return _ReportStateBody(
             status: state.expiryStatus,
             error: state.expiryError,
-            emptyMessage: 'Good, no expiring product.',
+            emptyMessage: 'No expiring products found.',
             onRetry: _load,
             child: () {
               final report = state.expiryReport;
@@ -158,6 +158,7 @@ class ReorderReportScreen extends StatefulWidget {
 class _ReorderReportScreenState extends State<ReorderReportScreen> {
   String _branchId = '';
   final Set<String> _acknowledgingIds = {};
+  final Set<String> _acknowledgedIds = {};
 
   @override
   void initState() {
@@ -183,6 +184,7 @@ class _ReorderReportScreenState extends State<ReorderReportScreen> {
     if (!mounted) return;
     setState(() {
       _acknowledgingIds.remove(item.branchStockId);
+      if (ok) _acknowledgedIds.add(item.branchStockId);
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -211,6 +213,9 @@ class _ReorderReportScreenState extends State<ReorderReportScreen> {
               itemBuilder: (context, index) => _ReorderCard(
                 item: items[index],
                 isAcknowledging: _acknowledgingIds.contains(
+                  items[index].branchStockId,
+                ),
+                isAcknowledged: _acknowledgedIds.contains(
                   items[index].branchStockId,
                 ),
                 onAcknowledge: () => _acknowledge(items[index]),
@@ -382,7 +387,7 @@ class _ExpirySummaryGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 10,
       crossAxisSpacing: 10,
-      childAspectRatio: 2.4,
+      childAspectRatio: 2.0,
       children: [
         _MetricTile(label: 'Expired', value: summary.expired.toString()),
         _MetricTile(
@@ -411,7 +416,8 @@ class _MetricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      constraints: const BoxConstraints(minHeight: 74),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: context.modeSurface,
         borderRadius: BorderRadius.circular(8),
@@ -423,17 +429,23 @@ class _MetricTile extends StatelessWidget {
         children: [
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
+              height: 1.2,
               color: context.modeTextMuted,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: FontWeight.w700,
+              height: 1.15,
               color: context.modePrimary,
             ),
           ),
@@ -511,11 +523,13 @@ class _RawStockList extends StatelessWidget {
 class _ReorderCard extends StatelessWidget {
   final ReorderSuggestion item;
   final bool isAcknowledging;
+  final bool isAcknowledged;
   final VoidCallback onAcknowledge;
 
   const _ReorderCard({
     required this.item,
     required this.isAcknowledging,
+    required this.isAcknowledged,
     required this.onAcknowledge,
   });
 
@@ -526,11 +540,15 @@ class _ReorderCard extends StatelessWidget {
       subtitle:
           'Current: ${item.currentStock} | Reorder: ${item.reorderLevel} | Suggested: ${item.suggestedQty}',
       trailing: ElevatedButton.icon(
-        onPressed: isAcknowledging ? null : onAcknowledge,
+        onPressed: isAcknowledging || isAcknowledged ? null : onAcknowledge,
         style: ElevatedButton.styleFrom(
-          backgroundColor: context.modePrimary,
+          backgroundColor: isAcknowledged
+              ? context.modeSuccess
+              : context.modePrimary,
           foregroundColor: context.modeTextInverse,
-          disabledBackgroundColor: context.modePrimary.withValues(alpha: 0.45),
+          disabledBackgroundColor: isAcknowledged
+              ? context.modeSuccess
+              : context.modePrimary.withValues(alpha: 0.45),
           disabledForegroundColor: context.modeTextInverse,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -547,9 +565,18 @@ class _ReorderCard extends StatelessWidget {
                   color: context.modeTextInverse,
                 ),
               )
-            : const Icon(Icons.check_circle_outline, size: 15),
+            : Icon(
+                isAcknowledged
+                    ? Icons.check_circle
+                    : Icons.check_circle_outline,
+                size: 15,
+              ),
         label: Text(
-          isAcknowledging ? 'Saving' : 'Acknowledge',
+          isAcknowledging
+              ? 'Saving'
+              : isAcknowledged
+              ? 'Acknowledged'
+              : 'Acknowledge',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w700,

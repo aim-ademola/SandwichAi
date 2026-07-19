@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,6 +43,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
     );
     _applyDefaultLoginCredentialsIfEnabled();
     _loadSavedCredentials();
+    unawaited(_redirectIfAlreadyLoggedIn());
   }
 
   @override
@@ -80,6 +83,18 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
     } catch (e) {
       AppLogger.log('Error loading saved credentials: $e');
     }
+  }
+
+  Future<void> _redirectIfAlreadyLoggedIn() async {
+    final authCache = AuthCacheHelper.instance;
+    final isLoggedIn = await authCache.isLoggedIn();
+    if (!isLoggedIn || !mounted) return;
+
+    final user = await authCache.getUserData();
+    final route = DepartmentNavigation.routeForDepartment(user?.department);
+    if (route == null || !mounted) return;
+
+    context.go(route);
   }
 
   void _applyDefaultLoginCredentialsIfEnabled() {

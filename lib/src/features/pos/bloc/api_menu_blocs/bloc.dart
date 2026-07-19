@@ -19,6 +19,9 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
       super(const MenuItemsInitial()) {
     on<LoadMenuItems>(_onLoadMenuItems);
     on<RefreshMenuItems>(_onRefreshMenuItems);
+    on<UpsertLocalMenuItem>(_onUpsertLocalMenuItem);
+    on<ReplaceLocalMenuItem>(_onReplaceLocalMenuItem);
+    on<RemoveLocalMenuItem>(_onRemoveLocalMenuItem);
     on<SearchMenuItems>(_onSearchMenuItems);
     on<FilterMenuItemsByCategory>(_onFilterMenuItemsByCategory);
   }
@@ -110,6 +113,74 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
         final errorType = _determineErrorType(error.toString());
         emit(MenuItemsError(error: error.toString(), errorType: errorType));
       },
+    );
+  }
+
+  void _onUpsertLocalMenuItem(
+    UpsertLocalMenuItem event,
+    Emitter<MenuItemsState> emit,
+  ) {
+    _emitLocalItems(
+      emit,
+      _upsertMenuItem(_allItemsForFiltering(), event.menuItem),
+    );
+  }
+
+  void _onReplaceLocalMenuItem(
+    ReplaceLocalMenuItem event,
+    Emitter<MenuItemsState> emit,
+  ) {
+    final withoutLocal = _removeMenuItemById(
+      _allItemsForFiltering(),
+      event.localId,
+    );
+    _emitLocalItems(emit, _upsertMenuItem(withoutLocal, event.menuItem));
+  }
+
+  void _onRemoveLocalMenuItem(
+    RemoveLocalMenuItem event,
+    Emitter<MenuItemsState> emit,
+  ) {
+    _emitLocalItems(
+      emit,
+      _removeMenuItemById(_allItemsForFiltering(), event.localId),
+    );
+  }
+
+  void _emitLocalItems(
+    Emitter<MenuItemsState> emit,
+    List<ApiMenuItem> nextItems,
+  ) {
+    final currentState = state;
+    final selectedCategory = currentState is MenuItemsLoaded
+        ? currentState.selectedCategory
+        : null;
+    final searchQuery = currentState is MenuItemsLoaded
+        ? currentState.searchQuery
+        : _latestSearchQuery.isEmpty
+        ? null
+        : _latestSearchQuery;
+
+    _cachedItems = nextItems;
+    _lastLoadedAt = DateTime.now();
+
+    final filteredItems = nextItems.where((item) {
+      final categoryMatches =
+          selectedCategory == null || item.category == selectedCategory;
+      final searchMatches =
+          searchQuery == null ||
+          searchQuery.isEmpty ||
+          _matchesQuery(item, searchQuery);
+      return categoryMatches && searchMatches;
+    }).toList();
+
+    emit(
+      MenuItemsLoaded(
+        menuItems: nextItems,
+        filteredItems: filteredItems,
+        selectedCategory: selectedCategory,
+        searchQuery: searchQuery,
+      ),
     );
   }
 
@@ -227,6 +298,35 @@ class MenuItemsBloc extends Bloc<MenuItemsEvent, MenuItemsState> {
     }
 
     return merged.values.toList();
+  }
+
+  List<ApiMenuItem> _upsertMenuItem(
+    List<ApiMenuItem> items,
+    ApiMenuItem incomingItem,
+  ) {
+    final key = _menuItemKey(incomingItem);
+    final nextItems = <ApiMenuItem>[incomingItem];
+
+    for (final item in items) {
+      if (_menuItemKey(item) != key) {
+        nextItems.add(item);
+      }
+    }
+
+    return nextItems;
+  }
+
+  List<ApiMenuItem> _removeMenuItemById(
+    List<ApiMenuItem> items,
+    String itemId,
+  ) {
+    return items.where((item) => item.id != itemId).toList();
+  }
+
+  String _menuItemKey(ApiMenuItem item) {
+    return item.id.isNotEmpty
+        ? item.id
+        : '${item.dishName}|${item.category}|${item.price}';
   }
 
   bool _matchesQuery(ApiMenuItem item, String query) {

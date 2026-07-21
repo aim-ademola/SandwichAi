@@ -179,7 +179,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedMenu01,
             color: context.modeTextPrimary,
-            size: 28,
+            size: 28 * AppIcon.sizeScale,
             strokeWidth: 1.8,
           ),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -216,7 +216,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                 color: state is DashboardRefreshing
                     ? context.modeTextMuted
                     : context.modeTextPrimary,
-                size: 28,
+                size: 28 * AppIcon.sizeScale,
                 strokeWidth: 1.8,
               ),
               onPressed: state is DashboardRefreshing
@@ -373,7 +373,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                           child: HugeIcon(
                             icon: icon,
                             color: colors.first,
-                            size: 27,
+                            size: 27 * AppIcon.sizeScale,
                             strokeWidth: 1.9,
                           ),
                         ),
@@ -413,7 +413,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                         child: HugeIcon(
                           icon: HugeIcons.strokeRoundedArrowRight02,
                           color: Colors.white.withValues(alpha: 0.9),
-                          size: 18,
+                          size: 18 * AppIcon.sizeScale,
                           strokeWidth: 2,
                         ),
                       ),
@@ -462,7 +462,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
               HugeIcon(
                 icon: HugeIcons.strokeRoundedCalendar03,
                 color: context.modeTextPrimary,
-                size: 18,
+                size: 18 * AppIcon.sizeScale,
                 strokeWidth: 1.8,
               ),
               const SizedBox(width: 8),
@@ -563,7 +563,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
               child: HugeIcon(
                 icon: data.icon,
                 color: data.color,
-                size: 35,
+                size: 35 * AppIcon.sizeScale,
                 strokeWidth: 1.8,
               ),
             ),
@@ -623,7 +623,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
           children: [
             HugeIcon(
               icon: HugeIcons.strokeRoundedAlert02,
-              size: 64,
+              size: 64 * AppIcon.sizeScale,
               color: context.modeError,
             ),
             const SizedBox(height: 16),

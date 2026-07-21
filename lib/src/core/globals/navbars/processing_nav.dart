@@ -4,6 +4,7 @@ import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -157,7 +158,7 @@ class ProcessingBottomNavBarState extends State<ProcessingBottomNavBar> {
                 HugeIcon(
                   icon: isActive ? activeIcon : icon,
                   color: isActive ? activeColor : inactiveColor,
-                  size: 22,
+                  size: 22 * AppIcon.sizeScale,
                   strokeWidth: 1.8,
                 ),
                 const SizedBox(height: 3),

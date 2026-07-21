@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -119,7 +120,7 @@ class _KitchenBottomNavBarState extends State<KitchenBottomNavBar> {
                 HugeIcon(
                   icon: isActive ? activeIcon : icon,
                   color: isActive ? activeColor : inactiveColor,
-                  size: 22,
+                  size: 22 * AppIcon.sizeScale,
                   strokeWidth: 1.8,
                 ),
                 const SizedBox(height: 3),

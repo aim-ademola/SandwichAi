@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -41,7 +42,7 @@ class PosPageScaffold extends StatelessWidget {
                     icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedArrowLeft01,
                       color: context.modeTextPrimary,
-                      size: 26,
+                      size: 26 * AppIcon.sizeScale,
                       strokeWidth: 1.8,
                     ),
                     onPressed: onBack ?? () => Navigator.maybePop(context),
@@ -185,7 +186,7 @@ class PosIconActionButton extends StatelessWidget {
               child: HugeIcon(
                 icon: icon,
                 color: color,
-                size: 20,
+                size: 20 * AppIcon.sizeScale,
                 strokeWidth: 1.9,
               ),
             ),

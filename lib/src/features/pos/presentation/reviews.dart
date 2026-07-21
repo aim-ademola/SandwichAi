@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -339,7 +340,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               HugeIcon(
                 icon: HugeIcons.strokeRoundedStar,
                 color: Colors.amber.shade700,
-                size: 18,
+                size: 18 * AppIcon.sizeScale,
                 strokeWidth: 1.9,
               ),
               const SizedBox(width: 6),
@@ -396,7 +397,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             HugeIcon(
               icon: HugeIcons.strokeRoundedAlert02,
               color: context.modeError,
-              size: 32,
+              size: 32 * AppIcon.sizeScale,
               strokeWidth: 1.9,
             ),
             const SizedBox(height: 12),

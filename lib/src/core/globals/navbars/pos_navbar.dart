@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -162,7 +163,7 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
                 HugeIcon(
                   icon: isActive ? activeIcon : icon,
                   color: isActive ? activeColor : inactiveColor,
-                  size: 24,
+                  size: 24 * AppIcon.sizeScale,
                   strokeWidth: 1.8,
                 ),
                 const SizedBox(height: 4),

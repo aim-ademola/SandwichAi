@@ -57,9 +57,9 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
   }
 
   String _formatCurrency(double? amount) {
-    if (amount == null) return 'â‚¦0.00';
+    if (amount == null) return '₦0.00';
     final formatter = NumberFormat('#,##0.00', 'en_US');
-    return 'â‚¦${formatter.format(amount)}';
+    return '₦${formatter.format(amount)}';
   }
 
   Color _getMembershipColor(String? tier) {
@@ -190,7 +190,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                       children: [
                         HugeIcon(
                           icon: HugeIcons.strokeRoundedAlert02,
-                          size: 52,
+                          size: 52 * AppIcon.sizeScale,
                           color: context.modeError,
                           strokeWidth: 1.9,
                         ),
@@ -452,7 +452,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
       children: [
         HugeIcon(
           icon: icon,
-          size: 18,
+          size: 18 * AppIcon.sizeScale,
           color: context.modeTextMuted,
           strokeWidth: 1.8,
         ),

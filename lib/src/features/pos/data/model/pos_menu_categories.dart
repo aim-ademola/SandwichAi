@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 class PosMenuCategory {
@@ -95,7 +96,7 @@ class PosMenuCategoryIcon extends StatelessWidget {
     return HugeIcon(
       icon: PosMenuCategories.byName(category).icon,
       color: color,
-      size: size,
+      size: size * AppIcon.sizeScale,
       strokeWidth: strokeWidth,
     );
   }

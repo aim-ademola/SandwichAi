@@ -866,7 +866,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                   children: [
                     HugeIcon(
                       icon: HugeIcons.strokeRoundedCalendar03,
-                      size: 15,
+                      size: 15 * AppIcon.sizeScale,
                       color: context.modeTextMuted,
                       strokeWidth: 1.8,
                     ),
@@ -1242,7 +1242,7 @@ class _ComplaintActionButton extends StatelessWidget {
               child: HugeIcon(
                 icon: icon,
                 color: color,
-                size: 20,
+                size: 20 * AppIcon.sizeScale,
                 strokeWidth: 1.9,
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 
 class PosIconTile extends StatelessWidget {
   final List<List<dynamic>> icon;
@@ -30,7 +31,7 @@ class PosIconTile extends StatelessWidget {
         child: HugeIcon(
           icon: icon,
           color: color,
-          size: iconSize,
+          size: iconSize * AppIcon.sizeScale,
           strokeWidth: 1.9,
         ),
       ),

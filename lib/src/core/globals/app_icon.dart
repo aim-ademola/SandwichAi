@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 class AppIcon extends StatelessWidget {
+  static const double sizeScale = 0.75;
+
   final IconData icon;
   final double? size;
   final Color? color;
@@ -34,11 +36,11 @@ class AppIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconTheme = IconTheme.of(context);
-    final effectiveSize = size ?? iconTheme.size ?? 24;
+    final effectiveSize = (size ?? iconTheme.size ?? 24) * sizeScale;
     final effectiveColor = color ?? iconTheme.color ?? Colors.black;
 
     Widget child = HugeIcon(
-      icon: _AppHugeIconMap.resolve(icon),
+      icon: _HugeIconMap.resolve(icon),
       color: effectiveColor,
       size: effectiveSize,
       strokeWidth: _strokeWidth,
@@ -67,8 +69,8 @@ class AppIcon extends StatelessWidget {
   }
 }
 
-class _AppHugeIconMap {
-  const _AppHugeIconMap._();
+class _HugeIconMap {
+  const _HugeIconMap._();
 
   static List<List<dynamic>> resolve(IconData icon) {
     return _icons[icon] ?? HugeIcons.strokeRoundedSquare;

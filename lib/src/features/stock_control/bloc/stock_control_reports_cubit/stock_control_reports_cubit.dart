@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_control_reports_cubit/stock_control_reports_state.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/stock_card_model.dart';
@@ -37,6 +38,17 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
     final report = reportResponse.data;
 
     if (_isNoExpiryStockResponse(reportResponse.error)) {
+      if (!_shouldShowDemoExpiryData) {
+        emit(
+          state.copyWith(
+            expiryStatus: StockControlReportStatus.empty,
+            expirySummary: summary ?? _emptyExpirySummary(),
+            clearExpiryError: true,
+          ),
+        );
+        return;
+      }
+
       final demoReport = _demoExpiryReport(branchId);
       emit(
         state.copyWith(
@@ -52,13 +64,14 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
     if (summaryResponse.isSuccess &&
         reportResponse.isSuccess &&
         report != null) {
-      final displayReport = report.items.isEmpty
-          ? _demoExpiryReport(branchId)
-          : report;
+      final useDemoData = report.items.isEmpty && _shouldShowDemoExpiryData;
+      final displayReport = useDemoData ? _demoExpiryReport(branchId) : report;
       emit(
         state.copyWith(
-          expiryStatus: StockControlReportStatus.loaded,
-          expirySummary: report.items.isEmpty
+          expiryStatus: displayReport.items.isEmpty
+              ? StockControlReportStatus.empty
+              : StockControlReportStatus.loaded,
+          expirySummary: useDemoData
               ? _demoExpirySummary()
               : (summary ?? _emptyExpirySummary()),
           expiryReport: displayReport,
@@ -76,6 +89,10 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
             'Failed to load expiry tracking.',
       ),
     );
+  }
+
+  bool get _shouldShowDemoExpiryData {
+    return AppEnvironment.current.flavor == AppFlavor.dev;
   }
 
   bool _isNoExpiryStockResponse(NetworkException? error) {

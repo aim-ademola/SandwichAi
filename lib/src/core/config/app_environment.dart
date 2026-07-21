@@ -54,13 +54,8 @@ class AppEnvironment {
           password: 'password@1',
         ),
         AppEnvironmentUser(
-          department: 'Processing Department',
+          department: 'PROCESSING',
           email: 'hybiekay2+4@gmail.com',
-          password: 'password@1',
-        ),
-        AppEnvironmentUser(
-          department: 'Point of Sale',
-          email: 'hybiekay2+5@gmail.com',
           password: 'password@1',
         ),
       ],

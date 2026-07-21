@@ -7,6 +7,18 @@ import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notifications_screen.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 
+String cleanNotificationText(String value) {
+  return value
+      .replaceAll('Ã¢Å¡Â Ã¯Â¸Â', '')
+      .replaceAll('âš ï¸', '')
+      .replaceAll('Ã¢ÂÂ°', '')
+      .replaceAll('â°', '')
+      .replaceAll('⚠️', '')
+      .replaceAll('⏰', '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+}
+
 class NotificationLogItem {
   const NotificationLogItem({
     required this.id,
@@ -49,8 +61,8 @@ class NotificationLogItem {
   factory NotificationLogItem.fromJson(Map<String, dynamic> json) {
     return NotificationLogItem(
       id: json['id'] as int? ?? 0,
-      title: json['title'] as String? ?? 'Notification',
-      body: json['body'] as String? ?? '',
+      title: cleanNotificationText(json['title'] as String? ?? 'Notification'),
+      body: cleanNotificationText(json['body'] as String? ?? ''),
       payload: json['payload'] as String?,
       createdAt:
           DateTime.tryParse(json['createdAt'] as String? ?? '') ??
@@ -104,7 +116,7 @@ class NotificationBadgeController extends ChangeNotifier {
     final item = NotificationLogItem(
       id: id,
       title: _cleanTitle(title),
-      body: body,
+      body: cleanNotificationText(body),
       payload: payload,
       createdAt: DateTime.now(),
     );
@@ -156,7 +168,7 @@ class NotificationBadgeController extends ChangeNotifier {
   }
 
   String _cleanTitle(String title) {
-    return title
+    return cleanNotificationText(title)
         .replaceAll(RegExp(r'^[^\w\s]+'), '')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
@@ -219,7 +231,10 @@ class _NotificationBellActionState extends State<NotificationBellAction> {
                     borderRadius: BorderRadius.circular(24),
                     child: IconButton(
                       tooltip: 'Notifications',
-                      icon: AppIcon(Icons.notifications_none_rounded),
+                      icon: AppIconSlot(
+                        Icons.notifications_none_rounded,
+                        color: iconColor,
+                      ),
                       color: iconColor,
                       onPressed: () => _openNotificationsScreen(context),
                     ),

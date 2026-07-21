@@ -1084,10 +1084,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                   fontSize: inputFontSize,
                   color: const Color(0xFF9E9E9E),
                 ),
-                prefixIcon: const AppIcon(
-                  Icons.search,
-                  color: Color(0xFF9E9E9E),
-                ),
+                prefixIcon: AppIconSlot(Icons.search, color: Color(0xFF9E9E9E)),
                 suffixIcon: _inventorySearchController.text.isEmpty
                     ? null
                     : IconButton(

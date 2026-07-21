@@ -78,15 +78,15 @@ class CustomerServiceFeedbackRepository extends BaseRepository
     int page = 1,
     int limit = 10,
   }) {
-    return _getList('customer-service/Reviews', page: page, limit: limit);
+    return _getList('customer-service/reviews', page: page, limit: limit);
   }
 
   @override
   Future<ApiResponse<CustomerServiceRecord>> createReview(
     Map<String, dynamic> data,
   ) async {
-    final normalized = await _normalizeReviewData(data);
-    return _create('customer-service/Reviews', normalized);
+    final normalized = await _normalizeCreateReviewData(data);
+    return _create('customer-service/reviews', normalized);
   }
 
   @override
@@ -94,13 +94,13 @@ class CustomerServiceFeedbackRepository extends BaseRepository
     String id,
     Map<String, dynamic> data,
   ) async {
-    final normalized = await _normalizeReviewData(data);
-    return _update('customer-service/Reviews/$id', normalized);
+    final normalized = _normalizeUpdateReviewData(data);
+    return _update('customer-service/reviews/$id', normalized);
   }
 
   @override
   Future<ApiResponse<bool>> deleteReview(String id) {
-    return _delete('customer-service/Reviews/$id');
+    return _delete('customer-service/reviews/$id');
   }
 
   Future<ApiResponse<CustomerServiceRecordList>> _getList(
@@ -217,7 +217,7 @@ class CustomerServiceFeedbackRepository extends BaseRepository
     }
   }
 
-  Future<Map<String, dynamic>> _normalizeReviewData(
+  Future<Map<String, dynamic>> _normalizeCreateReviewData(
     Map<String, dynamic> data,
   ) async {
     final normalized = Map<String, dynamic>.from(data);
@@ -236,6 +236,31 @@ class CustomerServiceFeedbackRepository extends BaseRepository
     normalized
       ..remove('rating')
       ..['overallRating'] = rating;
+
+    return normalized;
+  }
+
+  Map<String, dynamic> _normalizeUpdateReviewData(Map<String, dynamic> data) {
+    final normalized = <String, dynamic>{};
+    for (final key in const [
+      'sentiment',
+      'responseText',
+      'respondedBy',
+      'isPublished',
+      'isFlagged',
+      'flagReason',
+    ]) {
+      final value = data[key];
+      if (value == null) continue;
+      if (value is String && value.trim().isEmpty) continue;
+      normalized[key] = value is String ? value.trim() : value;
+    }
+
+    if (normalized.isEmpty) {
+      throw const FormatException(
+        'Please enter a response or moderation update.',
+      );
+    }
 
     return normalized;
   }

@@ -6,7 +6,24 @@ class CustomerServiceRecord {
   final int? rating;
   final String? customerId;
   final String? customerName;
+  final String? customerPhone;
+  final String? customerEmail;
   final String? orderId;
+  final String? reviewId;
+  final String? sentiment;
+  final int? foodQuality;
+  final int? serviceQuality;
+  final int? cleanliness;
+  final int? valueForMoney;
+  final int? ambience;
+  final String? responseText;
+  final String? respondedBy;
+  final String? respondedAt;
+  final bool? wouldRecommend;
+  final bool? isPublished;
+  final bool? isFlagged;
+  final String? flagReason;
+  final String? reviewSource;
   final String? createdAt;
   final String? updatedAt;
   final Map<String, dynamic> raw;
@@ -19,7 +36,24 @@ class CustomerServiceRecord {
     this.rating,
     this.customerId,
     this.customerName,
+    this.customerPhone,
+    this.customerEmail,
     this.orderId,
+    this.reviewId,
+    this.sentiment,
+    this.foodQuality,
+    this.serviceQuality,
+    this.cleanliness,
+    this.valueForMoney,
+    this.ambience,
+    this.responseText,
+    this.respondedBy,
+    this.respondedAt,
+    this.wouldRecommend,
+    this.isPublished,
+    this.isFlagged,
+    this.flagReason,
+    this.reviewSource,
     this.createdAt,
     this.updatedAt,
     required this.raw,
@@ -52,7 +86,38 @@ class CustomerServiceRecord {
       customerName: _stringOrNull(
         json['customerName'] ?? json['customer_name'] ?? json['name'],
       ),
+      customerPhone: _stringOrNull(
+        json['customerPhone'] ?? json['customer_phone'],
+      ),
+      customerEmail: _stringOrNull(
+        json['customerEmail'] ?? json['customer_email'],
+      ),
       orderId: _stringOrNull(json['orderId'] ?? json['order_id']),
+      reviewId: _stringOrNull(json['reviewId'] ?? json['review_id']),
+      sentiment: _stringOrNull(json['sentiment']),
+      foodQuality: _intOrNull(json['foodQuality'] ?? json['food_quality']),
+      serviceQuality: _intOrNull(
+        json['serviceQuality'] ?? json['service_quality'],
+      ),
+      cleanliness: _intOrNull(json['cleanliness']),
+      valueForMoney: _intOrNull(
+        json['valueForMoney'] ?? json['value_for_money'],
+      ),
+      ambience: _intOrNull(json['ambience']),
+      responseText: _stringOrNull(
+        json['responseText'] ?? json['response_text'],
+      ),
+      respondedBy: _stringOrNull(json['respondedBy'] ?? json['responded_by']),
+      respondedAt: _stringOrNull(json['respondedAt'] ?? json['responded_at']),
+      wouldRecommend: _boolOrNull(
+        json['wouldRecommend'] ?? json['would_recommend'],
+      ),
+      isPublished: _boolOrNull(json['isPublished'] ?? json['is_published']),
+      isFlagged: _boolOrNull(json['isFlagged'] ?? json['is_flagged']),
+      flagReason: _stringOrNull(json['flagReason'] ?? json['flag_reason']),
+      reviewSource: _stringOrNull(
+        json['reviewSource'] ?? json['review_source'],
+      ),
       createdAt: _stringOrNull(json['createdAt'] ?? json['created_at']),
       updatedAt: _stringOrNull(json['updatedAt'] ?? json['updated_at']),
       raw: Map<String, dynamic>.from(json),
@@ -75,6 +140,12 @@ class CustomerServiceRecord {
     if (value is int) return value;
     if (value is num) return value.toInt();
     if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static bool? _boolOrNull(dynamic value) {
+    if (value is bool) return value;
+    if (value is String) return bool.tryParse(value);
     return null;
   }
 }

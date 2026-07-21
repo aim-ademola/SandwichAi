@@ -73,16 +73,16 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
 
   String _formatAmount(String amount) {
     try {
-      return 'â‚¦${double.parse(amount).toStringAsFixed(2)}';
+      return '₦${double.parse(amount).toStringAsFixed(2)}';
     } catch (_) {
-      return 'â‚¦$amount';
+      return '₦$amount';
     }
   }
 
   String _formatDate(String dt) {
     try {
       final wat = DateTime.parse(dt).toUtc().add(const Duration(hours: 1));
-      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(wat);
+      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
     } catch (_) {
       return dt;
     }
@@ -173,7 +173,7 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Text(
-                    'âœ“  Payment Approved',
+                    '✓  Payment Approved',
                     style: pw.TextStyle(
                       fontSize: 16,
                       fontWeight: pw.FontWeight.bold,
@@ -470,7 +470,7 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
                             ),
                       label: Text(
                         _isGeneratingPdf
-                            ? 'Generating PDFâ€¦'
+                            ? 'Generating PDF…'
                             : 'Download Receipt',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 15,
@@ -489,7 +489,7 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
                   ),
                   const SizedBox(height: 10),
 
-                  // Done â€” marks session completed
+                  // Done — marks session completed
                   SizedBox(
                     width: double.infinity,
                     height: 54,

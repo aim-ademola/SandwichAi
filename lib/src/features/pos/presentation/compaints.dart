@@ -361,240 +361,87 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
 
   Widget _buildLodgeComplaintTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Customer Name',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: context.modeSurface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: context.modeBorder),
-            ),
-            child: TextField(
-              controller: _customerNameController,
-              cursorColor: context.modePrimary,
-              decoration: InputDecoration(
-                hintText: 'Enter customer name',
-                hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: context.modeTextMuted,
-                ),
-                border: InputBorder.none,
-              ),
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                color: context.modeTextPrimary,
-              ),
-            ),
+          _buildLodgeTextField(
+            controller: _customerNameController,
+            label: 'Customer Name',
+            hint: 'Enter customer name',
           ),
           const SizedBox(height: 20),
-          Text(
-            'Category',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: context.modeSurface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: context.modeBorder),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedCategory,
-                isExpanded: true,
-                dropdownColor: context.modeSurface,
-                iconEnabledColor: context.modeTextSecondary,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: context.modeTextPrimary,
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'LATE_ORDER',
-                    child: Text('Late order'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'WRONG_ITEM',
-                    child: Text('Wrong item'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'WRONG_ORDER',
-                    child: Text('Wrong order'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'POOR_QUALITY',
-                    child: Text('Poor quality'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'STAFF_ATTITUDE',
-                    child: Text('Staff attitude'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'PAYMENT_ISSUES',
-                    child: Text('Payment issues'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'DELIVERY_APP',
-                    child: Text('Delivery app'),
-                  ),
-                  DropdownMenuItem(value: 'HYGIENE', child: Text('Hygiene')),
-                  DropdownMenuItem(value: 'PRICING', child: Text('Pricing')),
-                  DropdownMenuItem(value: 'OTHERS', child: Text('Others')),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedCategory = value);
-                  }
-                },
+          _buildLodgeDropdown(
+            label: 'Category',
+            value: _selectedCategory,
+            items: const [
+              DropdownMenuItem(value: 'LATE_ORDER', child: Text('Late order')),
+              DropdownMenuItem(value: 'WRONG_ITEM', child: Text('Wrong item')),
+              DropdownMenuItem(
+                value: 'WRONG_ORDER',
+                child: Text('Wrong order'),
               ),
-            ),
+              DropdownMenuItem(
+                value: 'POOR_QUALITY',
+                child: Text('Poor quality'),
+              ),
+              DropdownMenuItem(
+                value: 'STAFF_ATTITUDE',
+                child: Text('Staff attitude'),
+              ),
+              DropdownMenuItem(
+                value: 'PAYMENT_ISSUES',
+                child: Text('Payment issues'),
+              ),
+              DropdownMenuItem(
+                value: 'DELIVERY_APP',
+                child: Text('Delivery app'),
+              ),
+              DropdownMenuItem(value: 'HYGIENE', child: Text('Hygiene')),
+              DropdownMenuItem(value: 'PRICING', child: Text('Pricing')),
+              DropdownMenuItem(value: 'OTHERS', child: Text('Others')),
+            ],
+            onChanged: (value) => setState(() => _selectedCategory = value),
           ),
           const SizedBox(height: 20),
-          Text(
-            'Source',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: context.modeSurface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: context.modeBorder),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedSource,
-                isExpanded: true,
-                dropdownColor: context.modeSurface,
-                iconEnabledColor: context.modeTextSecondary,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: context.modeTextPrimary,
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'POS_COUNTER',
-                    child: Text('POS counter'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'DELIVERY_APP',
-                    child: Text('Delivery app'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'CALL_CENTER',
-                    child: Text('Call center'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'SOCIAL_MEDIA',
-                    child: Text('Social media'),
-                  ),
-                  DropdownMenuItem(value: 'EMAIL', child: Text('Email')),
-                  DropdownMenuItem(
-                    value: 'IN_PERSON',
-                    child: Text('In person'),
-                  ),
-                  DropdownMenuItem(value: 'ONLINE', child: Text('Online')),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedSource = value);
-                  }
-                },
+          _buildLodgeDropdown(
+            label: 'Source',
+            value: _selectedSource,
+            items: const [
+              DropdownMenuItem(
+                value: 'POS_COUNTER',
+                child: Text('POS counter'),
               ),
-            ),
+              DropdownMenuItem(
+                value: 'DELIVERY_APP',
+                child: Text('Delivery app'),
+              ),
+              DropdownMenuItem(
+                value: 'CALL_CENTER',
+                child: Text('Call center'),
+              ),
+              DropdownMenuItem(
+                value: 'SOCIAL_MEDIA',
+                child: Text('Social media'),
+              ),
+              DropdownMenuItem(value: 'EMAIL', child: Text('Email')),
+              DropdownMenuItem(value: 'IN_PERSON', child: Text('In person')),
+              DropdownMenuItem(value: 'ONLINE', child: Text('Online')),
+            ],
+            onChanged: (value) => setState(() => _selectedSource = value),
           ),
           const SizedBox(height: 20),
-          // Complaint Subject
-          Text(
-            'Complaint Subject',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: context.modeSurface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: context.modeBorder),
-            ),
-            child: TextField(
-              controller: _subjectController,
-              cursorColor: context.modePrimary,
-              decoration: InputDecoration(
-                hintText: 'Enter a brief subject for your complaint',
-                hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: context.modeTextMuted,
-                ),
-                border: InputBorder.none,
-              ),
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                color: context.modeTextPrimary,
-              ),
-            ),
+          _buildLodgeTextField(
+            controller: _subjectController,
+            label: 'Complaint Subject',
+            hint: 'Enter a brief subject for your complaint',
           ),
           const SizedBox(height: 20),
-          // Detailed Complaint
-          Text(
-            'Detailed Complaint',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: context.modeSurface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: context.modeBorder),
-            ),
-            child: TextField(
-              controller: _detailsController,
-              cursorColor: context.modePrimary,
-              maxLines: 6,
-              decoration: InputDecoration(
-                hintText: 'Describe the issue in detail here...',
-                hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 14,
-                  color: context.modeTextMuted,
-                ),
-                border: InputBorder.none,
-              ),
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                color: context.modeTextPrimary,
-              ),
-            ),
+          _buildLodgeTextField(
+            controller: _detailsController,
+            label: 'Detailed Complaint',
+            hint: 'Describe the issue in detail here...',
+            maxLines: 6,
           ),
           const SizedBox(height: 20),
           // Attach Files
@@ -695,15 +542,27 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                 borderRadius: BorderRadius.circular(8),
               ),
               child: _isSubmittingComplaint
-                  ? SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: context.modeTextInverse,
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: context.modeTextInverse,
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Submitting...',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: context.modeTextInverse,
+                          ),
+                        ),
+                      ],
                     )
                   : Text(
                       'Submit Complaint',
@@ -717,6 +576,98 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLodgeTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLodgeLabel(label),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          cursorColor: context.modePrimary,
+          maxLines: maxLines,
+          decoration: _lodgeInputDecoration(hint: hint, maxLines: maxLines),
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: context.modeTextPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLodgeDropdown({
+    required String label,
+    required String value,
+    required List<DropdownMenuItem<String>> items,
+    required ValueChanged<String> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLodgeLabel(label),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: value,
+          isExpanded: true,
+          dropdownColor: context.modeSurface,
+          iconEnabledColor: context.modeTextSecondary,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 14,
+            color: context.modeTextPrimary,
+          ),
+          decoration: _lodgeInputDecoration(),
+          items: items,
+          onChanged: (nextValue) {
+            if (nextValue != null) onChanged(nextValue);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLodgeLabel(String label) {
+    return Text(
+      label,
+      style: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: context.modeTextPrimary,
+      ),
+    );
+  }
+
+  InputDecoration _lodgeInputDecoration({String? hint, int maxLines = 1}) {
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: BorderSide(color: context.modeBorder),
+    );
+
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: 14,
+        color: context.modeTextMuted,
+      ),
+      filled: true,
+      fillColor: context.modeSurface,
+      border: border,
+      enabledBorder: border,
+      focusedBorder: border.copyWith(
+        borderSide: BorderSide(color: context.modePrimary, width: 1.2),
+      ),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: maxLines > 1 ? 14 : 13,
       ),
     );
   }
@@ -1046,9 +997,11 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                         color: context.modePrimary.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: AppIcon(
-                        Icons.edit_note_outlined,
-                        color: context.modePrimary,
+                      child: Center(
+                        child: AppIcon(
+                          Icons.edit_note_outlined,
+                          color: context.modePrimary,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -1186,7 +1139,13 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
               fontSize: 14,
               color: context.modeTextMuted,
             ),
-            prefixIcon: AppIcon(icon, color: context.modeTextMuted, size: 20),
+            prefixIcon: AppIconSlot(
+              icon,
+              color: context.modeTextMuted,
+              size: 20,
+              maxLines: maxLines,
+            ),
+            prefixIconConstraints: AppIconSlot.constraints(),
             filled: true,
             fillColor: context.modeSurfaceAlt,
             enabledBorder: OutlineInputBorder(

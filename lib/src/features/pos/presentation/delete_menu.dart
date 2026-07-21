@@ -98,10 +98,12 @@ class _DeleteMenuItemDialogState extends State<DeleteMenuItemDialog> {
                   color: Colors.red.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const AppIcon(
-                  Icons.delete_outline,
-                  size: 32,
-                  color: Colors.red,
+                child: const Center(
+                  child: AppIcon(
+                    Icons.delete_outline,
+                    size: 32,
+                    color: Colors.red,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

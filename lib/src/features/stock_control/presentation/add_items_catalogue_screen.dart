@@ -879,7 +879,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                   fontSize: _getInputFontSize(screenWidth),
                   color: kprimaryTextColor2,
                 ),
-                prefixIcon: AppIcon(
+                prefixIcon: AppIconSlot(
                   Icons.search,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth),
@@ -1213,7 +1213,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                   fontWeight: FontWeight.w400,
                   color: kprimaryTextColor2,
                 ),
-                suffixIcon: AppIcon(
+                suffixIcon: AppIconSlot(
                   Icons.calendar_today,
                   color: kPrimary,
                   size: _getIconSize(screenWidth),

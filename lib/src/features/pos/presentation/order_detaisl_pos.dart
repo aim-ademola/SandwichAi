@@ -193,7 +193,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${widget.orderItems.length} items â€¢ â‚¦${widget.totalAmount.toStringAsFixed(2)}',
+                          '${widget.orderItems.length} items • ₦${widget.totalAmount.toStringAsFixed(2)}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             color: Colors.white.withValues(alpha: 0.9),
@@ -550,7 +550,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
 
           // Discount
           Text(
-            'Discount (â‚¦)',
+            'Discount (₦)',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -676,7 +676,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
           ),
         ),
         Text(
-          'â‚¦${amount.toStringAsFixed(2)}',
+          '₦${amount.toStringAsFixed(2)}',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: isTotal ? 16 : 14,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,

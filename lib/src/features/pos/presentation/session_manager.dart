@@ -82,7 +82,12 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
               elevation: 0,
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
-                icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
+                icon: Center(
+                  child: AppIcon(
+                    Icons.arrow_back,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
                 onPressed: widget.onClose ?? () => Navigator.of(context).pop(),
               ),
               title: Text(
@@ -98,11 +103,13 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
                 IconButton(
                   tooltip: 'Session tour',
                   onPressed: state.sessions.isEmpty ? null : _startSessionTour,
-                  icon: AppIcon(
-                    Icons.help_outline,
-                    color: state.sessions.isEmpty
-                        ? context.modeTextMuted
-                        : context.modeTextSecondary,
+                  icon: Center(
+                    child: AppIcon(
+                      Icons.help_outline,
+                      color: state.sessions.isEmpty
+                          ? context.modeTextMuted
+                          : context.modeTextSecondary,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -110,11 +117,13 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
                   onPressed: state.canAddSession
                       ? () => _startNewOrder(context)
                       : null,
-                  icon: AppIcon(
-                    Icons.add_circle_outline,
-                    color: state.canAddSession
-                        ? context.modePrimary
-                        : context.modeTextMuted,
+                  icon: Center(
+                    child: AppIcon(
+                      Icons.add_circle_outline,
+                      color: state.canAddSession
+                          ? context.modePrimary
+                          : context.modeTextMuted,
+                    ),
                   ),
                 ),
               ],
@@ -476,10 +485,12 @@ class _NewOrderPage extends StatelessWidget {
                   color: context.modePrimary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: AppIcon(
-                  Icons.add_shopping_cart_rounded,
-                  color: context.modePrimary,
-                  size: 30,
+                child: Center(
+                  child: AppIcon(
+                    Icons.add_shopping_cart_rounded,
+                    color: context.modePrimary,
+                    size: 30,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -506,7 +517,7 @@ class _NewOrderPage extends StatelessWidget {
               const SizedBox(height: 22),
               ElevatedButton.icon(
                 onPressed: enabled ? onStart : null,
-                icon: const AppIcon(Icons.add),
+                icon: const Center(child: AppIcon(Icons.add)),
                 label: const Text('Start New Order'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.modePrimary,
@@ -575,7 +586,7 @@ class _SessionTabChip extends StatelessWidget {
                     color: color.withValues(alpha: 0.13),
                     shape: BoxShape.circle,
                   ),
-                  child: AppIcon(icon, size: 16, color: color),
+                  child: Center(child: AppIcon(icon, size: 16, color: color)),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -687,10 +698,12 @@ class _SessionPage extends StatelessWidget {
                           color: status.color.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: AppIcon(
-                          status.icon,
-                          color: status.color,
-                          size: 26,
+                        child: Center(
+                          child: AppIcon(
+                            status.icon,
+                            color: status.color,
+                            size: 26,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -711,10 +724,12 @@ class _SessionPage extends StatelessWidget {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                AppIcon(
-                                  Icons.schedule,
-                                  size: 14,
-                                  color: context.modeTextMuted,
+                                Center(
+                                  child: AppIcon(
+                                    Icons.schedule,
+                                    size: 14,
+                                    color: context.modeTextMuted,
+                                  ),
                                 ),
                                 const SizedBox(width: 4),
                                 Expanded(
@@ -737,9 +752,11 @@ class _SessionPage extends StatelessWidget {
                       IconButton(
                         tooltip: 'Delete session',
                         onPressed: onDelete,
-                        icon: AppIcon(
-                          Icons.delete_outline,
-                          color: context.modeError,
+                        icon: Center(
+                          child: AppIcon(
+                            Icons.delete_outline,
+                            color: context.modeError,
+                          ),
                         ),
                       ),
                     ],
@@ -823,7 +840,7 @@ class _SessionPage extends StatelessWidget {
               emptyText: 'No support notes yet.',
               trailing: TextButton.icon(
                 onPressed: onEditSupportNotes,
-                icon: const AppIcon(Icons.edit_note, size: 18),
+                icon: const Center(child: AppIcon(Icons.edit_note, size: 18)),
                 label: const Text('Edit'),
               ),
             ),
@@ -884,7 +901,7 @@ class _ActionBar extends StatelessWidget {
           height: 46,
           child: ElevatedButton.icon(
             onPressed: onResume,
-            icon: const AppIcon(Icons.open_in_new, size: 18),
+            icon: const Center(child: AppIcon(Icons.open_in_new, size: 18)),
             label: const Text('Resume Order'),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.modePrimary,
@@ -909,7 +926,7 @@ class _ActionBar extends StatelessWidget {
                     height: 42,
                     child: OutlinedButton.icon(
                       onPressed: action.onPressed,
-                      icon: AppIcon(action.icon, size: 17),
+                      icon: Center(child: AppIcon(action.icon, size: 17)),
                       label: Text(
                         action.label,
                         maxLines: 1,
@@ -1016,7 +1033,9 @@ class _InfoTile extends StatelessWidget {
               color: context.modePrimary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: AppIcon(icon, color: context.modePrimary, size: 18),
+            child: Center(
+              child: AppIcon(icon, color: context.modePrimary, size: 18),
+            ),
           ),
           const SizedBox(width: 9),
           Expanded(
@@ -1094,7 +1113,9 @@ class _NotesBlock extends StatelessWidget {
                   color: context.modePrimary.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: AppIcon(icon, size: 17, color: context.modePrimary),
+                child: Center(
+                  child: AppIcon(icon, size: 17, color: context.modePrimary),
+                ),
               ),
               const SizedBox(width: 9),
               Expanded(
@@ -1263,10 +1284,12 @@ class _AutoStartNewOrderState extends State<_AutoStartNewOrder> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(
-              Icons.receipt_long_outlined,
-              size: 72,
-              color: context.modeTextMuted,
+            Center(
+              child: AppIcon(
+                Icons.receipt_long_outlined,
+                size: 72,
+                color: context.modeTextMuted,
+              ),
             ),
             const SizedBox(height: 16),
             Text(

@@ -1031,8 +1031,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       ),
                       child: Text(
                         item.selectedProductPrice != null
-                            ? 'â‚¦${NumberFormat('#,##0.00').format(item.selectedProductPrice)}'
-                            : 'â‚¦0.00',
+                            ? '₦${NumberFormat('#,##0.00').format(item.selectedProductPrice)}'
+                            : '₦0.00',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: inputFontSize,
                           color: context.modeTextPrimary,
@@ -1107,7 +1107,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     ),
                   ),
                   Text(
-                    'â‚¦${NumberFormat('#,##0.00').format(item.total)}',
+                    '₦${NumberFormat('#,##0.00').format(item.total)}',
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: labelFontSize + 1,
                       fontWeight: FontWeight.w700,
@@ -1211,7 +1211,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'â‚¦${NumberFormat('#,##0.00').format(double.parse(product.baseUnitPrice))} per ${product.unitType}',
+                      '₦${NumberFormat('#,##0.00').format(double.parse(product.baseUnitPrice))} per ${product.unitType}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: inputFontSize - 2,
                         color: context.modeTextSecondary,

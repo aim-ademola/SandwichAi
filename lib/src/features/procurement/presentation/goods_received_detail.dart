@@ -41,13 +41,67 @@ class _GoodsReceivedDetailScreenState extends State<GoodsReceivedDetailScreen> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) {
+          final border = OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: context.modeBorder),
+          );
+
+          InputDecoration fieldDecoration({
+            required String label,
+            required IconData icon,
+            int maxLines = 1,
+          }) {
+            return InputDecoration(
+              labelText: label,
+              labelStyle: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modeTextSecondary,
+                fontSize: 13,
+              ),
+              prefixIcon: AppIconSlot(
+                icon,
+                color: context.modePrimary,
+                size: 20,
+                maxLines: maxLines,
+              ),
+              prefixIconConstraints: AppIconSlot.constraints(),
+              filled: true,
+              fillColor: context.modeSurface,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: maxLines > 1 ? 14 : 16,
+              ),
+              border: border,
+              enabledBorder: border,
+              focusedBorder: border.copyWith(
+                borderSide: BorderSide(color: context.modePrimary, width: 1.5),
+              ),
+            );
+          }
+
           return AlertDialog(
-            title: const Text('Update QC'),
+            backgroundColor: context.modeSurface,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text(
+              'Update QC',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: context.modeTextPrimary,
+              ),
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
                   initialValue: qcStatus,
+                  dropdownColor: context.modeSurface,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    color: context.modeTextPrimary,
+                    fontSize: 14,
+                  ),
                   items: const [
                     DropdownMenuItem(value: 'PASSED', child: Text('Passed')),
                     DropdownMenuItem(value: 'FAILED', child: Text('Failed')),
@@ -58,21 +112,39 @@ class _GoodsReceivedDetailScreenState extends State<GoodsReceivedDetailScreen> {
                       setDialogState(() => qcStatus = value);
                     }
                   },
-                  decoration: const InputDecoration(labelText: 'QC Status'),
+                  decoration: fieldDecoration(
+                    label: 'QC Status',
+                    icon: Icons.fact_check_outlined,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: noteController,
                   minLines: 2,
                   maxLines: 4,
-                  decoration: const InputDecoration(labelText: 'QC Note'),
+                  cursorColor: context.modePrimary,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    color: context.modeTextPrimary,
+                    fontSize: 14,
+                  ),
+                  decoration: fieldDecoration(
+                    label: 'QC Note',
+                    icon: Icons.note_alt_outlined,
+                    maxLines: 4,
+                  ),
                 ),
               ],
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
+                child: Text(
+                  'Cancel',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    color: context.modeTextSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               ElevatedButton(
                 onPressed: () async {

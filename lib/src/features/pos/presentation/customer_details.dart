@@ -311,12 +311,14 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                       ),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: AppIcon(
-                                      isEditMode
-                                          ? Icons.edit_outlined
-                                          : Icons.person_add_outlined,
-                                      color: context.modePrimary,
-                                      size: 24,
+                                    child: Center(
+                                      child: AppIcon(
+                                        isEditMode
+                                            ? Icons.edit_outlined
+                                            : Icons.person_add_outlined,
+                                        color: context.modePrimary,
+                                        size: 24,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 16),
@@ -675,10 +677,21 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
               fontSize: 14,
               color: context.modeTextMuted,
             ),
-            prefixIcon: AppIcon(icon, size: 20, color: context.modeTextMuted),
+            prefixIcon: AppIconSlot(
+              icon,
+              size: 20,
+              color: context.modeTextMuted,
+              maxLines: maxLines,
+            ),
+            prefixIconConstraints: AppIconSlot.constraints(),
             suffixIcon: suffixIcon != null
-                ? AppIcon(suffixIcon, size: 20, color: context.modeTextMuted)
+                ? AppIconSlot(
+                    suffixIcon,
+                    size: 20,
+                    color: context.modeTextMuted,
+                  )
                 : null,
+            suffixIconConstraints: AppIconSlot.constraints(),
             filled: true,
             fillColor: context.modeSurfaceAlt,
             border: OutlineInputBorder(

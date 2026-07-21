@@ -182,7 +182,7 @@ class _KitchenShiftManagementScreenState
               onPressed: () => _showAddShiftDialog(context),
               backgroundColor: context.modePrimary,
               foregroundColor: context.modeTextInverse,
-              icon: const AppIcon(Icons.add),
+              icon: const Center(child: AppIcon(Icons.add)),
               label: Text(
                 'Add Shift',
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -278,7 +278,12 @@ class _KitchenShiftManagementScreenState
               ),
               child: Row(
                 children: [
-                  AppIcon(Icons.date_range, color: context.modePrimary),
+                  Center(
+                    child: AppIcon(
+                      Icons.date_range,
+                      color: context.modePrimary,
+                    ),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -536,10 +541,12 @@ class _KitchenShiftManagementScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(
-              Icons.calendar_today_outlined,
-              size: 80,
-              color: context.modeTextMuted.withValues(alpha: 0.5),
+            Center(
+              child: AppIcon(
+                Icons.calendar_today_outlined,
+                size: 80,
+                color: context.modeTextMuted.withValues(alpha: 0.5),
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -575,10 +582,12 @@ class _KitchenShiftManagementScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(
-              Icons.error_outline,
-              size: 80,
-              color: context.modeError.withValues(alpha: 0.5),
+            Center(
+              child: AppIcon(
+                Icons.error_outline,
+                size: 80,
+                color: context.modeError.withValues(alpha: 0.5),
+              ),
             ),
             const SizedBox(height: 16),
             Text(

@@ -478,7 +478,7 @@ class _InventoryBodyState extends State<InventoryBody> {
           fontSize: _getSearchFontSize(screenWidth),
           color: context.modeTextMuted,
         ),
-        prefixIcon: AppIcon(
+        prefixIcon: AppIconSlot(
           Icons.search_rounded,
           color: context.modeTextSecondary,
           size: _getSearchIconSize(screenWidth),

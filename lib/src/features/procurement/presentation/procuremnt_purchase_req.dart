@@ -366,7 +366,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'â‚¦${_formatAmount(order.totalAmountDouble)}',
+                      '₦${_formatAmount(order.totalAmountDouble)}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: amountFontSize,
                         fontWeight: FontWeight.bold,

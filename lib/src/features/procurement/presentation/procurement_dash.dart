@@ -362,7 +362,7 @@ class _ProcurementDashboardScreenState
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              'â‚¦350,000 / â‚¦500,000',
+              '₦350,000 / ₦500,000',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: budgetFontSize,
                 fontWeight: FontWeight.w600,

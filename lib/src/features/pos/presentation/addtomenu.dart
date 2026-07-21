@@ -189,9 +189,11 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
             ),
             const SizedBox(height: 20),
             ListTile(
-              leading: AppIcon(
-                Icons.camera_alt,
-                color: rootContext.modePrimary,
+              leading: Center(
+                child: AppIcon(
+                  Icons.camera_alt,
+                  color: rootContext.modePrimary,
+                ),
               ),
               title: Text(
                 'Camera',
@@ -222,9 +224,11 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
               },
             ),
             ListTile(
-              leading: AppIcon(
-                Icons.photo_library,
-                color: rootContext.modePrimary,
+              leading: Center(
+                child: AppIcon(
+                  Icons.photo_library,
+                  color: rootContext.modePrimary,
+                ),
               ),
               title: Text(
                 'Gallery',
@@ -518,7 +522,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Price (â‚¦)',
+                              'Price (₦)',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -714,10 +718,12 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                AppIcon(
-                                  Icons.add_photo_alternate_outlined,
-                                  size: 40,
-                                  color: context.modeTextMuted,
+                                Center(
+                                  child: AppIcon(
+                                    Icons.add_photo_alternate_outlined,
+                                    size: 40,
+                                    color: context.modeTextMuted,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -757,10 +763,12 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                                         ),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: AppIcon(
-                                        Icons.close,
-                                        size: 20,
-                                        color: context.modeTextInverse,
+                                      child: Center(
+                                        child: AppIcon(
+                                          Icons.close,
+                                          size: 20,
+                                          color: context.modeTextInverse,
+                                        ),
                                       ),
                                     ),
                                   ),

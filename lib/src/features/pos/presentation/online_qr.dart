@@ -86,7 +86,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
     );
   }
 
-  String _formatAmount(double amount) => 'â‚¦${amount.toStringAsFixed(2)}';
+  String _formatAmount(double amount) => '₦${amount.toStringAsFixed(2)}';
 
   String _formatExpiry(String dt) {
     try {
@@ -138,7 +138,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
         } else if (state is OnlinePaymentFailed) {
           _showFailureDialog(state.reason);
         }
-        // OnlinePaymentStillPending â†’ do nothing
+        // OnlinePaymentStillPending → do nothing
       },
       child: PopScope(
         canPop: false,
@@ -387,7 +387,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
         ),
         const SizedBox(height: 10),
         Text(
-          'Waiting for payment confirmationâ€¦',
+          'Waiting for payment confirmation…',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 12,
             color: kprimaryTextColor2,

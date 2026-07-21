@@ -93,11 +93,13 @@ class PosMenuCategoryIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HugeIcon(
-      icon: PosMenuCategories.byName(category).icon,
-      color: color,
-      size: size * AppIcon.sizeScale,
-      strokeWidth: strokeWidth,
+    return Center(
+      child: HugeIcon(
+        icon: PosMenuCategories.byName(category).icon,
+        color: color,
+        size: size * AppIcon.sizeScale,
+        strokeWidth: strokeWidth,
+      ),
     );
   }
 }

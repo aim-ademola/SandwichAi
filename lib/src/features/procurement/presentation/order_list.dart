@@ -240,7 +240,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
             fontSize: 14,
             color: context.modeTextMuted,
           ),
-          prefixIcon: AppIcon(
+          prefixIcon: AppIconSlot(
             Icons.search,
             color: context.modeTextMuted,
             size: 20,
@@ -532,7 +532,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'â‚¦${NumberFormat('#,##0.00').format(order.totalAmount)}',
+                              '₦${NumberFormat('#,##0.00').format(order.totalAmount)}',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,

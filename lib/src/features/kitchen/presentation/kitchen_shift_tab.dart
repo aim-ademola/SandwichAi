@@ -42,7 +42,9 @@ class _KitchenShiftTabScreenState extends State<KitchenShiftTabScreen>
           elevation: 0,
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
-            icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
+            icon: Center(
+              child: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(

@@ -468,7 +468,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                         fontSize: _getInputFontSize(screenWidth),
                         color: context.modeTextSecondary,
                       ),
-                      prefixIcon: AppIcon(
+                      prefixIcon: AppIconSlot(
                         Icons.search,
                         color: context.modeTextSecondary,
                         size: _getIconSize(screenWidth),

@@ -864,13 +864,8 @@ class _StockTransferToProcessingOrKItchenScreenState
                   controller: _notesController,
                   cursorColor: context.modePrimary,
                   maxLines: 4,
-                  decoration: InputDecoration(
+                  decoration: _wrappedInputDecoration(
                     hintText: 'Add any additional notes or instructions...',
-                    hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      color: context.modeTextSecondary,
-                    ),
-                    border: InputBorder.none,
                   ),
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
@@ -1027,7 +1022,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                   fontSize: 14,
                   color: context.modeTextSecondary,
                 ),
-                prefixIcon: const AppIcon(Icons.search, size: 20),
+                prefixIcon: AppIconSlot(Icons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: context.modeBorder),
@@ -1208,6 +1203,8 @@ class _StockTransferToProcessingOrKItchenScreenState
               ),
               const SizedBox(height: 8),
               Container(
+                height: 56,
+                alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: context.modeSurface,
@@ -1220,13 +1217,8 @@ class _StockTransferToProcessingOrKItchenScreenState
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: InputDecoration(
+                  decoration: _wrappedInputDecoration(
                     hintText: 'Enter quantity',
-                    hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      color: context.modeTextSecondary,
-                    ),
-                    border: InputBorder.none,
                   ),
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
@@ -1257,6 +1249,25 @@ class _StockTransferToProcessingOrKItchenScreenState
           ),
         ),
       ],
+    );
+  }
+
+  InputDecoration _wrappedInputDecoration({required String hintText}) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: 14,
+        color: context.modeTextSecondary,
+      ),
+      isDense: true,
+      contentPadding: EdgeInsets.zero,
+      border: InputBorder.none,
+      enabledBorder: InputBorder.none,
+      focusedBorder: InputBorder.none,
+      disabledBorder: InputBorder.none,
+      errorBorder: InputBorder.none,
+      focusedErrorBorder: InputBorder.none,
+      filled: false,
     );
   }
 

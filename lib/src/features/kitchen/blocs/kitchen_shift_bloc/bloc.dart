@@ -75,7 +75,13 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
       await shiftsResponse.when(
         success: (shifts) async {
           if (shifts.isEmpty) {
-            emit(const KitchenShiftEmpty());
+            emit(
+              KitchenShiftEmpty(
+                employees: employees,
+                startDate: event.startDate,
+                endDate: event.endDate,
+              ),
+            );
             return;
           }
 
@@ -132,6 +138,15 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
           // Update employees inside the loaded state
           final currentState = state as KitchenShiftLoaded;
           emit(currentState.copyWith(employees: employees));
+        } else if (state is KitchenShiftEmpty) {
+          final currentState = state as KitchenShiftEmpty;
+          emit(
+            KitchenShiftEmpty(
+              employees: employees,
+              startDate: currentState.startDate,
+              endDate: currentState.endDate,
+            ),
+          );
         } else {
           // If not loaded yet, emit a temporary state
           emit(
@@ -337,7 +352,13 @@ class KitchenShiftBloc extends Bloc<KitchenShiftEvent, KitchenShiftState> {
     await response.when(
       success: (shifts) async {
         if (shifts.isEmpty) {
-          emit(const KitchenShiftEmpty());
+          emit(
+            KitchenShiftEmpty(
+              employees: currentState.employees,
+              startDate: currentState.startDate,
+              endDate: currentState.endDate,
+            ),
+          );
           return;
         }
 

@@ -386,7 +386,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                   fontSize: 14,
                   color: const Color(0xFF9E9E9E),
                 ),
-                prefixIcon: const AppIcon(Icons.search, size: 20),
+                prefixIcon: AppIconSlot(Icons.search, size: 20),
                 filled: true,
                 fillColor: const Color(0xFFF8F6F6),
                 border: OutlineInputBorder(
@@ -678,7 +678,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
               horizontal: 16,
               vertical: 16,
             ),
-            suffixIcon: const AppIcon(Icons.people_outline),
+            suffixIcon: AppIconSlot(Icons.people_outline),
           ),
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,

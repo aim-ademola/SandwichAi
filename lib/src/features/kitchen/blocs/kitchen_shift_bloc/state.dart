@@ -64,7 +64,15 @@ class KitchenShiftLoaded extends KitchenShiftState {
 }
 
 class KitchenShiftEmpty extends KitchenShiftState {
-  const KitchenShiftEmpty();
+  final List<Employee> employees;
+  final DateTime? startDate;
+  final DateTime? endDate;
+
+  const KitchenShiftEmpty({
+    this.employees = const [],
+    this.startDate,
+    this.endDate,
+  });
 }
 
 class KitchenShiftOperationSuccess extends KitchenShiftState {

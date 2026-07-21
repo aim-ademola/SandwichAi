@@ -97,18 +97,20 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                   widget.supplier.logo!,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
-                                    return AppIcon(
+                                    return AppIconSlot(
                                       Icons.business,
                                       size: 32,
                                       color: context.modeTextMuted,
+                                      width: 64,
                                     );
                                   },
                                 ),
                               )
-                            : AppIcon(
+                            : AppIconSlot(
                                 Icons.business,
                                 size: 32,
                                 color: context.modeTextMuted,
+                                width: 64,
                               ),
                       ),
                       const SizedBox(width: 16),
@@ -141,10 +143,11 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                       ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: AppIcon(
+                                    child: AppIconSlot(
                                       Icons.verified,
                                       size: 18,
                                       color: context.modeTextInverse,
+                                      width: 28,
                                     ),
                                   ),
                               ],
@@ -252,7 +255,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: AppIcon(icon, size: 16, color: color),
+          child: AppIconSlot(icon, size: 16, color: color, width: 32),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -435,20 +438,22 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Center(
-                                child: AppIcon(
+                                child: AppIconSlot(
                                   Icons.fastfood,
                                   size: 40,
                                   color: context.modeTextMuted,
+                                  width: 56,
                                 ),
                               );
                             },
                           ),
                         )
                       : Center(
-                          child: AppIcon(
+                          child: AppIconSlot(
                             Icons.fastfood,
                             size: 40,
                             color: context.modeTextMuted,
+                            width: 56,
                           ),
                         ),
                 ),
@@ -468,10 +473,11 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          AppIcon(
+                          AppIconSlot(
                             Icons.star,
                             size: 12,
                             color: context.modeTextInverse,
+                            width: 14,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -664,7 +670,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                     Navigator.pop(context);
                   },
                 );
-              }).toList(),
+              }),
             ],
           ),
         );
@@ -718,7 +724,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                     Navigator.pop(context);
                   },
                 );
-              }).toList(),
+              }),
             ],
           ),
         );

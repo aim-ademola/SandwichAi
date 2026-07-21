@@ -125,7 +125,10 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
               hintStyle: WorkSansAppTextStyles.medium.copyWith(
                 color: context.modeTextMuted,
               ),
-              prefixIcon: AppIcon(Icons.search, color: context.modeTextMuted),
+              prefixIcon: AppIconSlot(
+                Icons.search,
+                color: context.modeTextMuted,
+              ),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
                       icon: AppIcon(Icons.clear, color: context.modeTextMuted),
@@ -298,18 +301,20 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                               supplier.logo!,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
-                                return AppIcon(
+                                return AppIconSlot(
                                   Icons.business,
                                   size: 32,
                                   color: context.modeTextMuted,
+                                  width: 64,
                                 );
                               },
                             ),
                           )
-                        : AppIcon(
+                        : AppIconSlot(
                             Icons.business,
                             size: 32,
                             color: context.modeTextMuted,
+                            width: 64,
                           ),
                   ),
                   const SizedBox(width: 16),
@@ -341,10 +346,11 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                                   ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: AppIcon(
+                                child: AppIconSlot(
                                   Icons.verified,
                                   size: 16,
                                   color: context.modeSuccess,
+                                  width: 24,
                                 ),
                               ),
                           ],
@@ -360,10 +366,11 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            AppIcon(
+                            AppIconSlot(
                               Icons.location_on,
                               size: 14,
                               color: context.modeTextMuted,
+                              width: 16,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -453,7 +460,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AppIcon(icon, size: 14, color: color),
+          AppIconSlot(icon, size: 14, color: color, width: 16),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
@@ -476,10 +483,11 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AppIcon(
+          AppIconSlot(
             Icons.inventory_2_outlined,
             size: 80,
             color: context.modeTextMuted,
+            width: 96,
           ),
           const SizedBox(height: 16),
           Text(
@@ -510,7 +518,12 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(Icons.error_outline, size: 80, color: context.modeError),
+            AppIconSlot(
+              Icons.error_outline,
+              size: 80,
+              color: context.modeError,
+              width: 96,
+            ),
             const SizedBox(height: 16),
             Text(
               'Oops! Something went wrong',

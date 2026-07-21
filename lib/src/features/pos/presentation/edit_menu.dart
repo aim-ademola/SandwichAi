@@ -179,9 +179,11 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                           ),
                         ),
                         IconButton(
-                          icon: const AppIcon(
-                            Icons.close,
-                            color: kprimaryTextColor2,
+                          icon: const Center(
+                            child: AppIcon(
+                              Icons.close,
+                              color: kprimaryTextColor2,
+                            ),
                           ),
                           onPressed: _isSubmitting
                               ? null
@@ -345,7 +347,7 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Price (â‚¦)',
+                                'Price (₦)',
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,

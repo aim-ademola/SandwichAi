@@ -222,9 +222,11 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: AppIcon(
-                        Icons.close,
-                        color: context.modeTextPrimary,
+                      icon: Center(
+                        child: AppIcon(
+                          Icons.close,
+                          color: context.modeTextPrimary,
+                        ),
                       ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -239,6 +241,8 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                     AppLogger.log('DEBUG: Current state: ${state.runtimeType}');
 
                     final employees = state is KitchenShiftLoaded
+                        ? state.employees
+                        : state is KitchenShiftEmpty
                         ? state.employees
                         : <Employee>[];
 
@@ -351,10 +355,12 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                                 : context.modeTextSecondary,
                           ),
                         ),
-                        AppIcon(
-                          Icons.calendar_today,
-                          color: context.modePrimary,
-                          size: 20,
+                        Center(
+                          child: AppIcon(
+                            Icons.calendar_today,
+                            color: context.modePrimary,
+                            size: 20,
+                          ),
                         ),
                       ],
                     ),
@@ -437,10 +443,12 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                                       : context.modeTextSecondary,
                                 ),
                               ),
-                              AppIcon(
-                                Icons.access_time,
-                                color: context.modePrimary,
-                                size: 20,
+                              Center(
+                                child: AppIcon(
+                                  Icons.access_time,
+                                  color: context.modePrimary,
+                                  size: 20,
+                                ),
                               ),
                             ],
                           ),
@@ -480,10 +488,12 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                                       : context.modeTextSecondary,
                                 ),
                               ),
-                              AppIcon(
-                                Icons.access_time,
-                                color: context.modePrimary,
-                                size: 20,
+                              Center(
+                                child: AppIcon(
+                                  Icons.access_time,
+                                  color: context.modePrimary,
+                                  size: 20,
+                                ),
                               ),
                             ],
                           ),
@@ -655,7 +665,9 @@ class ShiftDetailsSheet extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: AppIcon(Icons.close, color: context.modeTextPrimary),
+                icon: Center(
+                  child: AppIcon(Icons.close, color: context.modeTextPrimary),
+                ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),

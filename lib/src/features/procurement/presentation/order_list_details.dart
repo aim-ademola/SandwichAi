@@ -455,11 +455,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               _buildPdfTableCell(item.productCode, font),
               _buildPdfTableCell('${item.quantityOrdered} ${item.unit}', font),
               _buildPdfTableCell(
-                'â‚¦${NumberFormat('#,##0.00').format(item.unitPrice)}',
+                '₦${NumberFormat('#,##0.00').format(item.unitPrice)}',
                 font,
               ),
               _buildPdfTableCell(
-                'â‚¦${NumberFormat('#,##0.00').format(item.totalPrice)}',
+                '₦${NumberFormat('#,##0.00').format(item.totalPrice)}',
                 font,
               ),
             ],
@@ -498,13 +498,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         children: [
           _buildPdfPriceRow(
             'Subtotal',
-            'â‚¦${NumberFormat('#,##0.00').format(widget.order.subtotal)}',
+            '₦${NumberFormat('#,##0.00').format(widget.order.subtotal)}',
             font,
           ),
           pw.SizedBox(height: 8),
           _buildPdfPriceRow(
             'Tax',
-            'â‚¦${NumberFormat('#,##0.00').format(widget.order.tax)}',
+            '₦${NumberFormat('#,##0.00').format(widget.order.tax)}',
             font,
           ),
           pw.SizedBox(height: 8),
@@ -512,7 +512,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
           pw.SizedBox(height: 8),
           _buildPdfPriceRow(
             'TOTAL',
-            'â‚¦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
+            '₦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
             fontBold,
             isTotal: true,
           ),
@@ -1064,7 +1064,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'â‚¦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
+                      '₦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
@@ -1153,17 +1153,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               children: [
                 _buildPriceRow(
                   'Subtotal',
-                  'â‚¦${NumberFormat('#,##0.00').format(widget.order.subtotal)}',
+                  '₦${NumberFormat('#,##0.00').format(widget.order.subtotal)}',
                 ),
                 const Divider(height: 24),
                 _buildPriceRow(
                   'Tax',
-                  'â‚¦${NumberFormat('#,##0.00').format(widget.order.tax)}',
+                  '₦${NumberFormat('#,##0.00').format(widget.order.tax)}',
                 ),
                 const Divider(height: 24),
                 _buildPriceRow(
                   'Total',
-                  'â‚¦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
+                  '₦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
                   isTotal: true,
                 ),
               ],
@@ -1283,7 +1283,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                           ),
                         ),
                         Text(
-                          'â‚¦${NumberFormat('#,##0.00').format(item.totalPrice)}',
+                          '₦${NumberFormat('#,##0.00').format(item.totalPrice)}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,

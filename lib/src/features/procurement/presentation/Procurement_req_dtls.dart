@@ -140,7 +140,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                'â‚¦${_formatAmount(order.totalAmountDouble)}',
+                '₦${_formatAmount(order.totalAmountDouble)}',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getAmountFontSize(screenWidth),
                   fontWeight: FontWeight.bold,
@@ -301,7 +301,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
               child: _buildItemDetail(
                 context,
                 'Unit Cost',
-                'â‚¦${_formatAmount(item.unitCostDouble)}',
+                '₦${_formatAmount(item.unitCostDouble)}',
                 screenWidth,
               ),
             ),
@@ -322,7 +322,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
               child: _buildItemDetail(
                 context,
                 'Total Cost',
-                'â‚¦${_formatAmount(item.totalCostDouble)}',
+                '₦${_formatAmount(item.totalCostDouble)}',
                 screenWidth,
                 highlight: true,
               ),

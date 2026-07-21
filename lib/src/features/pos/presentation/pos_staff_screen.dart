@@ -138,7 +138,7 @@ class _PosStaffScreenState extends State<PosStaffScreen> {
                     fontSize: 14,
                     color: kprimaryTextColor2,
                   ),
-                  prefixIcon: const AppIcon(
+                  prefixIcon: AppIconSlot(
                     Icons.search,
                     color: kprimaryTextColor2,
                   ),

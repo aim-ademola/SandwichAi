@@ -69,6 +69,46 @@ class AppIcon extends StatelessWidget {
   }
 }
 
+class AppIconSlot extends StatelessWidget {
+  final IconData icon;
+  final double size;
+  final Color? color;
+  final double width;
+  final int maxLines;
+
+  const AppIconSlot(
+    this.icon, {
+    super.key,
+    this.size = 20,
+    this.color,
+    this.width = 48,
+    this.maxLines = 1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isMultiline = maxLines > 1;
+
+    return SizedBox(
+      width: width,
+      child: Align(
+        alignment: isMultiline ? Alignment.topCenter : Alignment.center,
+        child: Padding(
+          padding: EdgeInsets.only(top: isMultiline ? 12 : 0),
+          child: AppIcon(icon, size: size, color: color),
+        ),
+      ),
+    );
+  }
+
+  static BoxConstraints constraints({
+    double width = 48,
+    double minHeight = 48,
+  }) {
+    return BoxConstraints(minWidth: width, minHeight: minHeight);
+  }
+}
+
 class _HugeIconMap {
   const _HugeIconMap._();
 

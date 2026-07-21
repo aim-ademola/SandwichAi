@@ -113,12 +113,17 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   fontSize: 14,
                   color: context.modeTextMuted,
                 ),
-                prefixIcon: AppIcon(Icons.search, color: context.modeTextMuted),
+                prefixIcon: AppIconSlot(
+                  Icons.search,
+                  color: context.modeTextMuted,
+                ),
+                prefixIconConstraints: AppIconSlot.constraints(),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: AppIcon(
+                        icon: AppIconSlot(
                           Icons.clear,
                           color: context.modeTextMuted,
+                          width: 24,
                         ),
                         onPressed: () {
                           _searchController.clear();

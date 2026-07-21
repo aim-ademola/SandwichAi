@@ -91,7 +91,7 @@ class _ProductIntakeHistoryScreenState
             fontSize: 15,
             color: Colors.grey.shade500,
           ),
-          prefixIcon: const AppIcon(Icons.search, color: Color(0xFF9E9E9E)),
+          prefixIcon: AppIconSlot(Icons.search, color: Color(0xFF9E9E9E)),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
                   icon: const AppIcon(Icons.clear, color: Color(0xFF9E9E9E)),

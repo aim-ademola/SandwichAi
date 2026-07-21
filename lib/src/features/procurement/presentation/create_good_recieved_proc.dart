@@ -1043,7 +1043,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                           onChanged: (value) => setState(() {}),
                           decoration: InputDecoration(
                             hintText: 'Search suppliers...',
-                            prefixIcon: AppIcon(
+                            prefixIcon: AppIconSlot(
                               Icons.search,
                               color: context.modePrimary,
                             ),
@@ -1213,12 +1213,14 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
               fontWeight: FontWeight.w400,
             ),
             prefixIcon: icon != null
-                ? AppIcon(
+                ? AppIconSlot(
                     icon,
                     color: context.modePrimary,
                     size: _getIconSize(screenWidth),
+                    maxLines: maxLines,
                   )
                 : null,
+            prefixIconConstraints: AppIconSlot.constraints(),
             filled: true,
             fillColor: context.modeSurface,
             contentPadding: EdgeInsets.symmetric(
@@ -1524,7 +1526,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                           onChanged: (value) => setDialogState(() {}),
                           decoration: InputDecoration(
                             hintText: 'Search items...',
-                            prefixIcon: AppIcon(
+                            prefixIcon: AppIconSlot(
                               Icons.search,
                               color: context.modePrimary,
                             ),

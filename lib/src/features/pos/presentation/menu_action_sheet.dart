@@ -35,7 +35,7 @@ class BottomSheetAction extends StatelessWidget {
                 color: iconColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: AppIcon(icon, color: iconColor, size: 22),
+              child: Center(child: AppIcon(icon, color: iconColor, size: 22)),
             ),
             const SizedBox(width: 16),
             Expanded(

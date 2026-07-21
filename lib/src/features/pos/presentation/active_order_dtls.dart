@@ -382,7 +382,7 @@ class OrderDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              'Ã—${item.quantity}',
+              '×${item.quantity}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize,
                 fontWeight: FontWeight.w600,
@@ -391,7 +391,7 @@ class OrderDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'â‚¦${item.totalPrice}',
+              '₦${item.totalPrice}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize,
                 fontWeight: FontWeight.w700,
@@ -956,8 +956,8 @@ class OrderDetailScreen extends StatelessWidget {
     final parsedAmount = double.tryParse(amount.replaceAll('-', '')) ?? 0;
     final formattedAmount = NumberFormat('#,##0.##').format(parsedAmount);
     final displayAmount = amount.startsWith('-')
-        ? '-â‚¦$formattedAmount'
-        : 'â‚¦$formattedAmount';
+        ? '-₦$formattedAmount'
+        : '₦$formattedAmount';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1009,7 +1009,7 @@ class OrderDetailScreen extends StatelessWidget {
       }
 
       final wat = dateTime.toUtc().add(const Duration(hours: 1));
-      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(wat);
+      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
     } catch (_) {
       return dt.toString();
     }

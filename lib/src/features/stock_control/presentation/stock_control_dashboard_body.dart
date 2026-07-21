@@ -59,7 +59,7 @@ class _StockControlDashboardBodyScreenState
   }
 
   String _formatCurrency(double value) {
-    final formatter = NumberFormat.currency(symbol: 'â‚¦', decimalDigits: 2);
+    final formatter = NumberFormat.currency(symbol: '₦', decimalDigits: 2);
     return formatter.format(value);
   }
 
@@ -83,10 +83,12 @@ class _StockControlDashboardBodyScreenState
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    AppIcon(
-                      Icons.inventory_2_outlined,
-                      size: 48,
-                      color: context.modeTextMuted,
+                    Center(
+                      child: AppIcon(
+                        Icons.inventory_2_outlined,
+                        size: 48,
+                        color: context.modeTextMuted,
+                      ),
                     ),
                     SizedBox(height: 12),
                     Text(
@@ -120,10 +122,12 @@ class _StockControlDashboardBodyScreenState
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    AppIcon(
-                      Icons.inventory_2_outlined,
-                      size: 48,
-                      color: context.modeTextMuted,
+                    Center(
+                      child: AppIcon(
+                        Icons.inventory_2_outlined,
+                        size: 48,
+                        color: context.modeTextMuted,
+                      ),
                     ),
                     SizedBox(height: 12),
                     Text(
@@ -177,10 +181,12 @@ class _StockControlDashboardBodyScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(
-              _getErrorIcon(state.errorType),
-              size: 64,
-              color: context.modeError,
+            Center(
+              child: AppIcon(
+                _getErrorIcon(state.errorType),
+                size: 64,
+                color: context.modeError,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -434,10 +440,12 @@ class _StockControlDashboardBodyScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    AppIcon(
-                      shortcut.icon,
-                      color: context.modePrimary,
-                      size: 22,
+                    Center(
+                      child: AppIcon(
+                        shortcut.icon,
+                        color: context.modePrimary,
+                        size: 22,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Text(
@@ -539,10 +547,12 @@ class _StockControlDashboardBodyScreenState
               color: context.modePrimary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: AppIcon(
-              Icons.account_balance_wallet_outlined,
-              color: context.modePrimary,
-              size: 24,
+            child: Center(
+              child: AppIcon(
+                Icons.account_balance_wallet_outlined,
+                color: context.modePrimary,
+                size: 24,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -574,9 +584,7 @@ class _StockControlDashboardBodyScreenState
                     );
                   },
                   child: Text(
-                    isValueVisible
-                        ? _formatCurrency(totalValue)
-                        : 'â€¢â€¢â€¢â€¢â€¢â€¢',
+                    isValueVisible ? _formatCurrency(totalValue) : '••••••',
                     key: ValueKey(isValueVisible),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -594,12 +602,14 @@ class _StockControlDashboardBodyScreenState
           IconButton(
             tooltip: isValueVisible ? 'Hide value' : 'Show value',
             onPressed: onToggleVisibility,
-            icon: AppIcon(
-              isValueVisible
-                  ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined,
-              color: context.modeTextMuted,
-              size: 20,
+            icon: Center(
+              child: AppIcon(
+                isValueVisible
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                color: context.modeTextMuted,
+                size: 20,
+              ),
             ),
           ),
         ],
@@ -701,7 +711,7 @@ class _StockControlDashboardBodyScreenState
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${item.itemCount} items â€¢ ${_formatCurrency(item.totalValue)}',
+                  '${item.itemCount} items • ${_formatCurrency(item.totalValue)}',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: detailsFontSize - 1,
                     fontWeight: FontWeight.w400,
@@ -760,10 +770,12 @@ class _StockControlDashboardBodyScreenState
           width: 45,
           height: 45,
           errorBuilder: (context, error, stackTrace) {
-            return AppIcon(
-              Icons.inventory_2,
-              size: 45,
-              color: context.modeTextMuted,
+            return Center(
+              child: AppIcon(
+                Icons.inventory_2,
+                size: 45,
+                color: context.modeTextMuted,
+              ),
             );
           },
         ),
@@ -1076,7 +1088,12 @@ class _StockControlDashboardBodyScreenState
             ),
             child: Row(
               children: [
-                AppIcon(Icons.show_chart, color: context.modeTextMuted),
+                Center(
+                  child: AppIcon(
+                    Icons.show_chart,
+                    color: context.modeTextMuted,
+                  ),
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(

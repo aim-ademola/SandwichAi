@@ -45,7 +45,7 @@ class OrderSummaryScreen extends StatefulWidget {
 }
 
 class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
-  //  Core calculations â”€
+  // Core calculations
 
   double _calculateSubtotal() {
     double subtotal = 0;
@@ -69,11 +69,10 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
     return _taxableAmount() + _calculateTotalTax(salesTaxes);
   }
 
-  String _formatPrice(double price) => 'â‚¦${price.toStringAsFixed(2)}';
+  String _formatPrice(double price) => '₦${price.toStringAsFixed(2)}';
 
   bool get _isDineIn => _normalizeOrderType(widget.orderType) == 'DINE_IN';
-
-  //  Navigation â”€â”€
+  // Navigation
 
   void _confirmOrder() {
     final items = widget.orderItems.entries.map((entry) {
@@ -145,8 +144,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
         return orderType.toUpperCase().replaceAll(' ', '_');
     }
   }
-
-  //  Build â”€
+  // Build
 
   @override
   Widget build(BuildContext context) {
@@ -187,12 +185,12 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
       child: DefaultTextStyle.merge(
         style: WorkSansAppTextStyles.medium,
         child: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: context.modeBackground,
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: context.modeSurface,
             elevation: 0,
             leading: IconButton(
-              icon: const AppIcon(Icons.arrow_back, color: kprimaryTextColor1),
+              icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -200,7 +198,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             actions: [
@@ -226,7 +224,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
 
               return Column(
                 children: [
-                  // â”€â”€ Scrollable body â”€
+                  // Scrollable body
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -245,7 +243,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: kprimaryTextColor1,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -271,7 +269,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                           }),
 
                           const SizedBox(height: 8),
-                          Divider(color: Colors.grey[300], thickness: 1),
+                          Divider(color: context.modeBorder, thickness: 1),
                           const SizedBox(height: 16),
 
                           // Subtotal
@@ -287,8 +285,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                             ),
                             const SizedBox(height: 12),
                           ],
-
-                          // â”€â”€ Tax rows
+                          // Tax rows
                           if (taxState is TaxConfigLoading)
                             _TaxLoadingRow()
                           else if (taxState is TaxConfigError)
@@ -325,7 +322,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
-                                  color: kprimaryTextColor1,
+                                  color: context.modeTextPrimary,
                                 ),
                               ),
                               Text(
@@ -333,7 +330,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
-                                  color: kPrimary,
+                                  color: context.modePrimary,
                                 ),
                               ),
                             ],
@@ -343,8 +340,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                       ),
                     ),
                   ),
-
-                  // â”€â”€ Bottom CTA
+                  // Bottom CTA
                   BlocBuilder<PosOrderBloc, PosOrderState>(
                     builder: (context, orderState) {
                       return _BottomCta(
@@ -374,8 +370,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
       ),
     );
   }
-
-  //  Helpers â”€â”€
+  // Helpers
 
   Widget _buildSummaryRow(
     String label,
@@ -390,7 +385,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
         ),
         Text(
@@ -398,7 +393,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: isDiscount ? Colors.red : kprimaryTextColor1,
+            color: isDiscount ? context.modeError : context.modeTextPrimary,
           ),
         ),
       ],
@@ -406,7 +401,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
   }
 }
 
-//  Sub-widgets â”€
+// Sub-widgets
 
 class _OrderDetailsCard extends StatelessWidget {
   final OrderSummaryScreen widget;
@@ -418,7 +413,7 @@ class _OrderDetailsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F6F6),
+        color: context.modeSurfaceAlt,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -426,10 +421,12 @@ class _OrderDetailsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              AppIcon(
-                _getOrderTypeIcon(widget.orderType),
-                color: kPrimary,
-                size: 20,
+              Center(
+                child: AppIcon(
+                  _getOrderTypeIcon(widget.orderType),
+                  color: context.modePrimary,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 8),
               Text(
@@ -437,7 +434,7 @@ class _OrderDetailsCard extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
@@ -448,7 +445,7 @@ class _OrderDetailsCard extends StatelessWidget {
               'Table: ${widget.tableNumber}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -457,15 +454,17 @@ class _OrderDetailsCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.08),
+                color: context.modePrimary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  const AppIcon(
-                    Icons.restaurant_menu_rounded,
-                    color: kPrimary,
-                    size: 18,
+                  Center(
+                    child: AppIcon(
+                      Icons.restaurant_menu_rounded,
+                      color: context.modePrimary,
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -474,7 +473,7 @@ class _OrderDetailsCard extends StatelessWidget {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: kPrimary,
+                        color: context.modePrimary,
                       ),
                     ),
                   ),
@@ -488,7 +487,7 @@ class _OrderDetailsCard extends StatelessWidget {
               'Customer: ${widget.customerName}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -498,20 +497,20 @@ class _OrderDetailsCard extends StatelessWidget {
               'Phone: ${widget.customerPhone}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
           if (widget.specialInstructions != null) ...[
             const SizedBox(height: 12),
-            const Divider(height: 1),
+            Divider(height: 1, color: context.modeBorder),
             const SizedBox(height: 12),
             Text(
               'Special Instructions:',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 4),
@@ -519,7 +518,7 @@ class _OrderDetailsCard extends StatelessWidget {
               widget.specialInstructions!,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -577,8 +576,8 @@ class _OrderItemCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey[200]!),
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -596,8 +595,14 @@ class _OrderItemCard extends StatelessWidget {
                     return Container(
                       width: 48,
                       height: 48,
-                      color: Colors.grey[300],
-                      child: const AppIcon(Icons.restaurant, size: 24),
+                      color: context.modeSurfaceAlt,
+                      child: Center(
+                        child: AppIcon(
+                          Icons.restaurant,
+                          size: 24,
+                          color: context.modeTextMuted,
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -612,7 +617,7 @@ class _OrderItemCard extends StatelessWidget {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -621,7 +626,7 @@ class _OrderItemCard extends StatelessWidget {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -632,7 +637,7 @@ class _OrderItemCard extends StatelessWidget {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
@@ -642,19 +647,25 @@ class _OrderItemCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: kPrimary.withValues(alpha: 0.1),
+                color: context.modePrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
                 children: [
-                  const AppIcon(Icons.edit_note, size: 16, color: kPrimary),
+                  Center(
+                    child: AppIcon(
+                      Icons.edit_note,
+                      size: 16,
+                      color: context.modePrimary,
+                    ),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       specialRequest!,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
-                        color: kPrimary,
+                        color: context.modePrimary,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -684,8 +695,7 @@ class _TaxRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final amount = tax.calculateTaxAmount(taxableAmount);
-
-    // Build a descriptive label: e.g. "VAT (7.5%)" or "Service Fee (flat)"
+    // Build
     final rateLabel = tax.taxRateType.toUpperCase() == 'PERCENTAGE'
         ? '${tax.taxRate.toStringAsFixed(tax.taxRate % 1 == 0 ? 0 : 2)}%'
         : 'flat';
@@ -703,7 +713,7 @@ class _TaxRow extends StatelessWidget {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ),
@@ -715,7 +725,7 @@ class _TaxRow extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
         ],
@@ -736,7 +746,7 @@ class _TaxLoadingRow extends StatelessWidget {
             'Tax',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
           const SizedBox(
@@ -761,10 +771,12 @@ class _TaxErrorRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          const AppIcon(
-            Icons.warning_amber_rounded,
-            size: 16,
-            color: Colors.red,
+          Center(
+            child: AppIcon(
+              Icons.warning_amber_rounded,
+              size: 16,
+              color: context.modeError,
+            ),
           ),
           const SizedBox(width: 6),
           Expanded(
@@ -772,7 +784,7 @@ class _TaxErrorRow extends StatelessWidget {
               'Tax unavailable: $message',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 13,
-                color: Colors.red,
+                color: context.modeError,
               ),
             ),
           ),
@@ -798,7 +810,7 @@ class _BottomCta extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -813,20 +825,20 @@ class _BottomCta extends StatelessWidget {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: kPrimary,
-            disabledBackgroundColor: kPrimary.withValues(alpha: 0.5),
+            backgroundColor: context.modePrimary,
+            disabledBackgroundColor: context.modePrimary.withValues(alpha: 0.5),
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
           child: isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 22,
                   height: 22,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 )
               : Text(
@@ -834,7 +846,7 @@ class _BottomCta extends StatelessWidget {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: context.modeTextInverse,
                   ),
                 ),
         ),

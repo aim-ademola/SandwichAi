@@ -1315,7 +1315,7 @@ class _StockProcurementRequestScreenState
             label: 'Unit Cost',
             hint: 'Cost per unit',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            prefixText: 'â‚¦ ',
+            prefixText: '₦ ',
             screenWidth: screenWidth,
             helpTitle: 'Unit Cost',
             helpDescription:
@@ -1749,7 +1749,7 @@ class _StockProcurementRequestScreenState
                   fontSize: _getInputFontSize(screenWidth),
                   color: context.modeTextSecondary,
                 ),
-                prefixIcon: AppIcon(
+                prefixIcon: AppIconSlot(
                   Icons.search,
                   color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
@@ -1922,7 +1922,7 @@ class _StockProcurementRequestScreenState
               ),
             ),
             Text(
-              'Total: â‚¦${_calculateTotalAmount().toStringAsFixed(2)}',
+              'Total: ₦${_calculateTotalAmount().toStringAsFixed(2)}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getLabelFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
@@ -2001,7 +2001,7 @@ class _StockProcurementRequestScreenState
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Qty: ${item.qtyNeeded} ${itemInfo.unit} â€¢ â‚¦${item.unitCost.toStringAsFixed(2)} per unit',
+                          'Qty: ${item.qtyNeeded} ${itemInfo.unit} â€¢ ₦${item.unitCost.toStringAsFixed(2)} per unit',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getCaptionFontSize(screenWidth),
                             color: context.modeTextSecondary,
@@ -2020,7 +2020,7 @@ class _StockProcurementRequestScreenState
                         ],
                         SizedBox(height: 2),
                         Text(
-                          'Total: â‚¦${(item.qtyNeeded * item.unitCost).toStringAsFixed(2)}',
+                          'Total: ₦${(item.qtyNeeded * item.unitCost).toStringAsFixed(2)}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getCaptionFontSize(screenWidth),
                             fontWeight: FontWeight.w600,
@@ -2220,7 +2220,7 @@ class _StockProcurementRequestScreenState
                   fontWeight: FontWeight.w400,
                   color: context.modeTextSecondary,
                 ),
-                suffixIcon: AppIcon(
+                suffixIcon: AppIconSlot(
                   Icons.calendar_today,
                   color: context.modePrimary,
                   size: _getIconSize(screenWidth),

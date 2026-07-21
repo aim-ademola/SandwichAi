@@ -113,16 +113,16 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
 
   String _formatAmount(String amount) {
     try {
-      return 'â‚¦${double.parse(amount).toStringAsFixed(2)}';
+      return '₦${double.parse(amount).toStringAsFixed(2)}';
     } catch (_) {
-      return 'â‚¦$amount';
+      return '₦$amount';
     }
   }
 
   String _formatDate(String dt) {
     try {
       final wat = DateTime.parse(dt).toUtc().add(const Duration(hours: 1));
-      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(wat);
+      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
     } catch (_) {
       return dt;
     }
@@ -152,7 +152,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
             ),
           );
         }
-        // CashPaymentStillPending â†’ polling continues
+        // CashPaymentStillPending → polling continues
       },
       child: PopScope(
         canPop: false,
@@ -398,7 +398,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
         ),
         const SizedBox(height: 10),
         Text(
-          'Checking approval status every 5 secondsâ€¦',
+          'Checking approval status every 5 seconds…',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 12,
             color: kprimaryTextColor2,

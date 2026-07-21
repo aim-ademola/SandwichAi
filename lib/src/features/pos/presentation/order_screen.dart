@@ -1322,16 +1322,18 @@ class _OrderScreenState extends State<OrderScreen>
             fontSize: 14,
             color: context.modeTextMuted,
           ),
-          prefixIcon: AppIcon(
+          prefixIcon: AppIconSlot(
             Icons.search_rounded,
             color: context.modeTextPrimary,
             size: 22,
           ),
+          prefixIconConstraints: AppIconSlot.constraints(),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: AppIcon(
+                  icon: AppIconSlot(
                     Icons.close_rounded,
                     color: context.modeTextMuted,
+                    width: 24,
                   ),
                   onPressed: () {
                     _searchDebounce?.cancel();
@@ -1346,10 +1348,11 @@ class _OrderScreenState extends State<OrderScreen>
                   tooltip: _showUnavailableItems
                       ? 'Available items only'
                       : 'Show unavailable items',
-                  icon: AppIcon(
+                  icon: AppIconSlot(
                     Icons.tune_rounded,
                     color: context.modeTextPrimary,
                     size: 20,
+                    width: 24,
                   ),
                   onPressed: () {
                     setState(() {
@@ -1592,7 +1595,8 @@ class _OrderScreenState extends State<OrderScreen>
 
   Widget _buildAvailabilityBadge(bool isAvailable) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      constraints: const BoxConstraints(maxWidth: 86),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color: isAvailable
             ? context.modeSuccess.withValues(alpha: 0.12)
@@ -1610,13 +1614,17 @@ class _OrderScreenState extends State<OrderScreen>
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 6),
-          Text(
-            isAvailable ? 'Available' : 'Unavailable',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: isAvailable ? context.modeSuccess : context.modeError,
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              isAvailable ? 'Available' : 'Unavailable',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: isAvailable ? context.modeSuccess : context.modeError,
+              ),
             ),
           ),
         ],
@@ -1653,10 +1661,12 @@ class _OrderScreenState extends State<OrderScreen>
   Widget _buildMenuItemImage(ApiMenuItem item, bool isAvailable) {
     final imageUrl = item.imageUrl.trim();
     if (imageUrl.isEmpty) {
-      return AppIcon(
-        Icons.restaurant_menu_rounded,
-        size: 30,
-        color: isAvailable ? context.modePrimary : context.modeTextMuted,
+      return Center(
+        child: AppIcon(
+          Icons.restaurant_menu_rounded,
+          size: 30,
+          color: isAvailable ? context.modePrimary : context.modeTextMuted,
+        ),
       );
     }
 
@@ -1683,10 +1693,12 @@ class _OrderScreenState extends State<OrderScreen>
     if (imageUrl.isEmpty) {
       return Container(
         color: context.modeSurfaceAlt,
-        child: AppIcon(
-          Icons.restaurant,
-          size: 24,
-          color: context.modeTextMuted,
+        child: Center(
+          child: AppIcon(
+            Icons.restaurant,
+            size: 24,
+            color: context.modeTextMuted,
+          ),
         ),
       );
     }
@@ -1696,10 +1708,12 @@ class _OrderScreenState extends State<OrderScreen>
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => Container(
         color: context.modeSurfaceAlt,
-        child: AppIcon(
-          Icons.restaurant,
-          size: 24,
-          color: context.modeTextMuted,
+        child: Center(
+          child: AppIcon(
+            Icons.restaurant,
+            size: 24,
+            color: context.modeTextMuted,
+          ),
         ),
       ),
     );
@@ -1756,10 +1770,12 @@ class _OrderScreenState extends State<OrderScreen>
                         borderRadius: BorderRadius.circular(14),
                       ),
                       alignment: Alignment.center,
-                      child: AppIcon(
-                        Icons.block_rounded,
-                        color: Colors.white.withValues(alpha: 0.92),
-                        size: 20,
+                      child: Center(
+                        child: AppIcon(
+                          Icons.block_rounded,
+                          color: Colors.white.withValues(alpha: 0.92),
+                          size: 20,
+                        ),
                       ),
                     ),
                 ],
@@ -1800,10 +1816,12 @@ class _OrderScreenState extends State<OrderScreen>
                             color: context.modePrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: AppIcon(
-                            Icons.edit_note,
-                            size: 14,
-                            color: context.modePrimary,
+                          child: Center(
+                            child: AppIcon(
+                              Icons.edit_note,
+                              size: 14,
+                              color: context.modePrimary,
+                            ),
                           ),
                         ),
                     ],
@@ -1814,7 +1832,7 @@ class _OrderScreenState extends State<OrderScreen>
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        'N${item.price}',
+                        '₦${item.price}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -1846,10 +1864,12 @@ class _OrderScreenState extends State<OrderScreen>
           ),
           const SizedBox(width: 6),
           IconButton(
-            icon: AppIcon(
-              Icons.more_vert_rounded,
-              color: context.modeTextPrimary,
-              size: 20,
+            icon: Center(
+              child: AppIcon(
+                Icons.more_vert_rounded,
+                color: context.modeTextPrimary,
+                size: 20,
+              ),
             ),
             onPressed: () => _showMenuItemOptions(item),
             padding: EdgeInsets.zero,
@@ -1862,10 +1882,12 @@ class _OrderScreenState extends State<OrderScreen>
               child: SizedBox(
                 width: 44,
                 height: 44,
-                child: AppIcon(
-                  Icons.drag_handle_rounded,
-                  color: context.modeTextMuted,
-                  size: 24,
+                child: Center(
+                  child: AppIcon(
+                    Icons.drag_handle_rounded,
+                    color: context.modeTextMuted,
+                    size: 24,
+                  ),
                 ),
               ),
             ),
@@ -1881,10 +1903,12 @@ class _OrderScreenState extends State<OrderScreen>
                 borderRadius: BorderRadius.circular(100),
                 border: Border.all(color: context.modeBorder),
               ),
-              child: AppIcon(
-                Icons.block,
-                size: 18,
-                color: context.modeTextMuted,
+              child: Center(
+                child: AppIcon(
+                  Icons.block,
+                  size: 18,
+                  color: context.modeTextMuted,
+                ),
               ),
             )
           else if (!isAdded)
@@ -1903,10 +1927,12 @@ class _OrderScreenState extends State<OrderScreen>
                     color: context.modePrimary.withValues(alpha: 0.18),
                   ),
                 ),
-                child: AppIcon(
-                  Icons.add_rounded,
-                  size: 23,
-                  color: context.modePrimary,
+                child: Center(
+                  child: AppIcon(
+                    Icons.add_rounded,
+                    size: 23,
+                    color: context.modePrimary,
+                  ),
                 ),
               ),
             )
@@ -1926,10 +1952,12 @@ class _OrderScreenState extends State<OrderScreen>
                       width: 28,
                       height: 28,
                       alignment: Alignment.center,
-                      child: AppIcon(
-                        Icons.remove_rounded,
-                        size: 18,
-                        color: context.modePrimary,
+                      child: Center(
+                        child: AppIcon(
+                          Icons.remove_rounded,
+                          size: 18,
+                          color: context.modePrimary,
+                        ),
                       ),
                     ),
                   ),
@@ -1957,12 +1985,14 @@ class _OrderScreenState extends State<OrderScreen>
                       width: 28,
                       height: 28,
                       alignment: Alignment.center,
-                      child: AppIcon(
-                        Icons.add,
-                        size: 18,
-                        color: isAvailable
-                            ? context.modeTextPrimary
-                            : context.modeTextMuted,
+                      child: Center(
+                        child: AppIcon(
+                          Icons.add,
+                          size: 18,
+                          color: isAvailable
+                              ? context.modeTextPrimary
+                              : context.modeTextMuted,
+                        ),
                       ),
                     ),
                   ),

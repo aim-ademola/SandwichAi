@@ -635,7 +635,7 @@
 //                   fontSize: 14,
 //                   color: kprimaryTextColor2,
 //                 ),
-//                 prefixIcon: const AppIcon(Icons.search, size: 20),
+//                 prefixIcon: AppIconSlot(Icons.search, size: 20),
 //                 border: OutlineInputBorder(
 //                   borderRadius: BorderRadius.circular(8),
 //                   borderSide: BorderSide(color: Colors.grey.shade300),

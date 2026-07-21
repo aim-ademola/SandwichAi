@@ -303,7 +303,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
           Expanded(
             child: _buildSummaryCard(
               'Total Loss',
-              'â‚¦${_formatCurrency(response.totalValueLost)}',
+              '₦${_formatCurrency(response.totalValueLost)}',
               Icons.money_off_outlined,
               Colors.red,
             ),
@@ -327,7 +327,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(
+            color: context.modeTextPrimary.withValues(
               alpha: Theme.of(context).brightness == Brightness.dark
                   ? 0.22
                   : 0.04,
@@ -348,7 +348,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                   color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: AppIcon(icon, color: color, size: 20),
+                child: Center(child: AppIcon(icon, color: color, size: 20)),
               ),
               Spacer(),
             ],
@@ -399,7 +399,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(
+            color: context.modeTextPrimary.withValues(
               alpha: Theme.of(context).brightness == Brightness.dark
                   ? 0.22
                   : 0.04,
@@ -473,7 +473,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                     SizedBox(width: 20),
                     _buildInfoItem(
                       Icons.payments_outlined,
-                      'â‚¦${_formatCurrency(log.valueLostAsDouble)}',
+                      '₦${_formatCurrency(log.valueLostAsDouble)}',
                     ),
                   ],
                 ),
@@ -581,7 +581,9 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
   Widget _buildInfoItem(IconData icon, String text) {
     return Row(
       children: [
-        AppIcon(icon, size: 16, color: context.modeTextSecondary),
+        Center(
+          child: AppIcon(icon, size: 16, color: context.modeTextSecondary),
+        ),
         SizedBox(width: 6),
         Text(
           text,

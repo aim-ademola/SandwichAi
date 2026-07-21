@@ -87,7 +87,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   String? _mainOrderId;
 
   /// Prefer the sessionId passed from the parent. Falls back to the
-  /// cubit's active session â€” covers both fresh navigation and resume paths.
+  /// cubit's active session — covers both fresh navigation and resume paths.
   String? _sessionId;
 
   final List<_PaymentMethodOption> _options = const [
@@ -100,7 +100,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     _PaymentMethodOption(
       method: _PaymentMethod.cardOrBankTransfer,
       title: 'Card / Bank Transfer',
-      subtitle: 'Pay via Paystack â€” scan QR or link',
+      subtitle: 'Pay via Paystack — scan QR or link',
       icon: Icons.credit_card_rounded,
     ),
   ];
@@ -346,7 +346,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Total: â‚¦${widget.totalAmount.toStringAsFixed(2)}',
+            'Total: ₦${widget.totalAmount.toStringAsFixed(2)}',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -582,7 +582,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   }
 
   void _createOrderAndPay() {
-    _showLoading('Creating orderâ€¦');
+    _showLoading('Creating order…');
 
     context.read<OrderSessionCubit>().markPaymentStarted(
       method: _selectedMethod == _PaymentMethod.cash
@@ -622,7 +622,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       return;
     }
 
-    _showLoading('Processing paymentâ€¦');
+    _showLoading('Processing payment…');
     AppLogger.log('=== PROCESS PAYMENT ===');
     AppLogger.log('orderType: ${widget.orderType}');
     AppLogger.log('createdOrderId: $_createdOrderId');

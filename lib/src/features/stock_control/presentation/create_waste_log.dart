@@ -119,6 +119,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
       final valueLost = double.parse(_valueLostController.text.trim());
       final empId = await AuthCacheHelper.instance.getEmpID() ?? '';
       final bid = await AuthCacheHelper.instance.getBranchID() ?? '';
+      if (!mounted) return;
 
       final request = WasteLogRequest(
         branchId: bid,
@@ -152,7 +153,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
           maxHeight: MediaQuery.of(context).size.height * 0.7,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -164,7 +165,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: context.modeBorder,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -177,12 +178,12 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                   Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: kPrimary.withValues(alpha: 0.1),
+                      color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: AppIcon(
                       Icons.help_outline,
-                      color: kPrimary,
+                      color: context.modePrimary,
                       size: 24,
                     ),
                   ),
@@ -193,14 +194,14 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
                   IconButton(
                     icon: AppIcon(
                       Icons.close,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                       size: 24,
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -209,7 +210,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               ),
             ),
 
-            Divider(height: 1, color: Colors.grey.shade200),
+            Divider(height: 1, color: context.modeDivider),
 
             // Content
             Expanded(
@@ -223,7 +224,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                       description,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 15,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                         height: 1.5,
                       ),
                     ),
@@ -235,10 +236,10 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                       Container(
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: kPrimary.withValues(alpha: 0.05),
+                          color: context.modePrimary.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: kPrimary.withValues(alpha: 0.1),
+                            color: context.modePrimary.withValues(alpha: 0.1),
                             width: 1,
                           ),
                         ),
@@ -249,7 +250,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                               children: [
                                 AppIcon(
                                   Icons.lightbulb_outline,
-                                  color: kPrimary,
+                                  color: context.modePrimary,
                                   size: 20,
                                 ),
                                 SizedBox(width: 8),
@@ -258,7 +259,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: kPrimary,
+                                    color: context.modePrimary,
                                   ),
                                 ),
                               ],
@@ -277,7 +278,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                       width: 6,
                                       height: 6,
                                       decoration: BoxDecoration(
-                                        color: kPrimary,
+                                        color: context.modePrimary,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -288,7 +289,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                         style: WorkSansAppTextStyles.medium
                                             .copyWith(
                                               fontSize: 13,
-                                              color: kprimaryTextColor1,
+                                              color: context.modeTextPrimary,
                                               height: 1.4,
                                             ),
                                       ),
@@ -296,7 +297,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                   ],
                                 ),
                               );
-                            }).toList(),
+                            }),
                           ],
                         ),
                       ),
@@ -317,11 +318,11 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
         content: Text(
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
-            color: Colors.white,
+            color: context.modeTextInverse,
             fontSize: 14,
           ),
         ),
-        backgroundColor: isError ? const Color(0xFFE53935) : kGreen,
+        backgroundColor: isError ? context.modeError : context.modeSuccess,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -394,7 +395,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                         ? Center(
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                kPrimary,
+                                context.modePrimary,
                               ),
                             ),
                           )
@@ -450,13 +451,13 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                   keyboardType: TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
-                                  prefixText: 'â‚¦ ',
+                                  prefixText: '₦ ',
                                   onHelpTap: () => _showHelpBottomSheet(
                                     title: 'Value Lost',
                                     description:
                                         'The monetary value of the wasted items. This represents the financial loss to your business and is calculated based on the cost price of the wasted quantity.',
                                     tips: [
-                                      'Use the unit cost price Ã— quantity wasted',
+                                      'Use the unit cost price × quantity wasted',
                                       'Include any processing costs if applicable',
                                       'This helps track waste impact on profitability',
                                       'Regularly review to identify cost-saving opportunities',
@@ -523,7 +524,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: 17,
         fontWeight: FontWeight.w600,
-        color: kprimaryTextColor1,
+        color: context.modeTextPrimary,
       ),
     );
   }
@@ -539,7 +540,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             SizedBox(width: 8),
@@ -556,7 +557,11 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                   'If an item is missing, contact your administrator',
                 ],
               ),
-              child: AppIcon(Icons.help_outline, color: kPrimary, size: 18),
+              child: AppIcon(
+                Icons.help_outline,
+                color: context.modePrimary,
+                size: 18,
+              ),
             ),
           ],
         ),
@@ -571,18 +576,22 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: _selectedItemId == null && _isSearching == false
-                    ? const Color(0xFFE0E0E0)
-                    : kPrimary.withValues(alpha: 0.3),
+                    ? context.modeBorder
+                    : context.modePrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
             child: Row(
               children: [
-                AppIcon(Icons.search, color: kprimaryTextColor2, size: 22),
+                AppIcon(
+                  Icons.search,
+                  color: context.modeTextSecondary,
+                  size: 22,
+                ),
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -591,14 +600,14 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
                       color: _selectedItemName != null
-                          ? kprimaryTextColor1
-                          : kprimaryTextColor2,
+                          ? context.modeTextPrimary
+                          : context.modeTextSecondary,
                     ),
                   ),
                 ),
                 AppIcon(
                   _isOpened ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: 26,
                 ),
               ],
@@ -617,12 +626,12 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
     return Container(
       constraints: BoxConstraints(maxHeight: 200),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: context.modeTextPrimary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -637,26 +646,29 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               autofocus: true,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 15,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Type to search...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 15,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
-                prefixIcon: AppIcon(
+                prefixIcon: AppIconSlot(
                   Icons.search,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: 22,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: const Color(0xFFE0E0E0)),
+                  borderSide: BorderSide(color: context.modeBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: kPrimary, width: 1.5),
+                  borderSide: BorderSide(
+                    color: context.modePrimary,
+                    width: 1.5,
+                  ),
                 ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 12,
@@ -665,7 +677,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           Expanded(
             child: _filteredItems.isEmpty
                 ? Center(
@@ -673,7 +685,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                       'No items found',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   )
@@ -720,7 +732,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.grey.shade200,
+                                color: context.modeDivider,
                                 width: 1,
                               ),
                             ),
@@ -731,12 +743,14 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                 width: 32,
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: kPrimary.withValues(alpha: 0.1),
+                                  color: context.modePrimary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: AppIcon(
                                   Icons.inventory_2_outlined,
-                                  color: kPrimary,
+                                  color: context.modePrimary,
                                   size: 18,
                                 ),
                               ),
@@ -751,15 +765,15 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                           .copyWith(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
-                                            color: kprimaryTextColor1,
+                                            color: context.modeTextPrimary,
                                           ),
                                     ),
                                     Text(
-                                      '${item.category} â€¢ ${item.storage}',
+                                      '${item.category} • ${item.storage}',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: 12,
-                                            color: kprimaryTextColor2,
+                                            color: context.modeTextSecondary,
                                           ),
                                     ),
                                   ],
@@ -788,7 +802,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             SizedBox(width: 8),
@@ -807,7 +821,11 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                   'Other: Any reason not covered by the above categories',
                 ],
               ),
-              child: AppIcon(Icons.help_outline, color: kPrimary, size: 18),
+              child: AppIcon(
+                Icons.help_outline,
+                color: context.modePrimary,
+                size: 18,
+              ),
             ),
           ],
         ),
@@ -818,27 +836,21 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
             hintText: 'Select reason for waste',
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 15,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: const Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: const Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: kPrimary, width: 1.5),
+              borderSide: BorderSide(color: context.modePrimary, width: 1.5),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
@@ -849,7 +861,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                 reason.displayName,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 15,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             );
@@ -890,14 +902,18 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             if (onHelpTap != null) ...[
               SizedBox(width: 8),
               GestureDetector(
                 onTap: onHelpTap,
-                child: AppIcon(Icons.help_outline, color: kPrimary, size: 18),
+                child: AppIcon(
+                  Icons.help_outline,
+                  color: context.modePrimary,
+                  size: 18,
+                ),
               ),
             ],
           ],
@@ -909,43 +925,37 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
           maxLines: maxLines,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 15,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 15,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             prefixText: prefixText,
             prefixStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: const Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: const Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: kPrimary, width: 1.5),
+              borderSide: BorderSide(color: context.modePrimary, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Color(0xFFE53935), width: 1.5),
+              borderSide: BorderSide(color: context.modeError, width: 1.5),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
@@ -971,8 +981,10 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
           child: ElevatedButton(
             onPressed: isLoading ? null : _submitForm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: kPrimary,
-              disabledBackgroundColor: kPrimary.withValues(alpha: 0.6),
+              backgroundColor: context.modePrimary,
+              disabledBackgroundColor: context.modePrimary.withValues(
+                alpha: 0.6,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -984,7 +996,9 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                     width: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        context.modeTextInverse,
+                      ),
                     ),
                   )
                 : Text(
@@ -992,7 +1006,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                     ),
                   ),
           ),

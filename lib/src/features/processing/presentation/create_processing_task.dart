@@ -523,7 +523,7 @@ class _CreateProcessingTaskScreenState
                         fontSize: _getInputFontSize(screenWidth),
                         color: kprimaryTextColor2,
                       ),
-                      prefixIcon: AppIcon(
+                      prefixIcon: AppIconSlot(
                         Icons.search,
                         color: kprimaryTextColor2,
                         size: _getIconSize(screenWidth),

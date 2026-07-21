@@ -950,7 +950,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   fontSize: 14,
                   color: context.modeTextSecondary,
                 ),
-                prefixIcon: AppIcon(
+                prefixIcon: AppIconSlot(
                   Icons.search,
                   color: context.modePrimary,
                   size: 20,

@@ -160,10 +160,12 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                     color: context.modePrimary.withValues(alpha: 0.18),
                     shape: BoxShape.circle,
                   ),
-                  child: AppIcon(
-                    dept.icon,
-                    color: context.modePrimary,
-                    size: 22,
+                  child: Center(
+                    child: AppIcon(
+                      dept.icon,
+                      color: context.modePrimary,
+                      size: 22,
+                    ),
                   ),
                 ),
                 if (room.isPinned)
@@ -301,15 +303,15 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
 
     switch (room.type) {
       case 'BRANCH':
-        label = 'ðŸª Branch Chat';
+        label = 'Branch Chat';
         color = context.modePrimary;
         break;
       case 'GENERAL':
-        label = 'ðŸŒ General Org Chat';
+        label = 'General Org Chat';
         color = context.modePrimary;
         break;
       case 'DEPARTMENT':
-        label = 'ðŸ‘¥ ${room.department ?? 'Departmental'} Departmental Chat';
+        label = '${room.department ?? 'Departmental'} Departmental Chat';
         color = context.modePrimary;
         break;
       default:

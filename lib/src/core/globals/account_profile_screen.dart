@@ -63,7 +63,7 @@ class _GlobalProfileScreenState extends State<GlobalProfileScreen> {
             'Account',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: context.modeTextPrimary,
             ),
           ),
@@ -274,8 +274,8 @@ class _ProfileHero extends StatelessWidget {
             child: Text(
               initial,
               style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
                 color: context.modePrimary,
               ),
             ),
@@ -291,7 +291,7 @@ class _ProfileHero extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 18,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w600,
                     color: context.modeTextPrimary,
                   ),
                 ),
@@ -322,7 +322,7 @@ class _ProfileHero extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       color: context.modePrimary,
                     ),
                   ),
@@ -423,7 +423,7 @@ class _ThemeOption extends StatelessWidget {
               label,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
                 color: selected ? context.modePrimary : context.modeTextPrimary,
               ),
             ),
@@ -479,7 +479,7 @@ class _InfoRow extends StatelessWidget {
             data.label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: context.modeTextMuted,
             ),
           ),
@@ -491,7 +491,7 @@ class _InfoRow extends StatelessWidget {
             textAlign: TextAlign.right,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 13,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w500,
               color: context.modeTextPrimary,
             ),
           ),
@@ -550,7 +550,7 @@ class _AccountActionTile extends StatelessWidget {
                       title,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                         color: color,
                       ),
                     ),
@@ -603,7 +603,7 @@ class _Panel extends StatelessWidget {
                 title,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w600,
                   color: context.modeTextPrimary,
                 ),
               ),

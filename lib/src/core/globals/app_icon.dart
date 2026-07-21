@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 class AppIcon extends StatelessWidget {
-  static const double sizeScale = 0.75;
+  static const double sizeScale = 0.93;
 
   final IconData icon;
   final double? size;

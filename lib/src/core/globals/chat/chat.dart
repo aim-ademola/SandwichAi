@@ -629,7 +629,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
           color: context.modePrimary.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: AppIcon(icon, color: context.modePrimary),
+        child: Center(child: AppIcon(icon, color: context.modePrimary)),
       ),
       title: Text(label, style: TextStyle(color: context.modeTextPrimary)),
       onTap: onTap,
@@ -740,10 +740,12 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               color: widget.department.color,
               shape: BoxShape.circle,
             ),
-            child: AppIcon(
-              widget.department.icon,
-              color: context.modeTextInverse,
-              size: 20,
+            child: Center(
+              child: AppIcon(
+                widget.department.icon,
+                color: context.modeTextInverse,
+                size: 20,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -858,10 +860,12 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               color: widget.department.color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: AppIcon(
-              widget.department.icon,
-              size: 50,
-              color: widget.department.color,
+            child: Center(
+              child: AppIcon(
+                widget.department.icon,
+                size: 50,
+                color: widget.department.color,
+              ),
             ),
           ),
           const SizedBox(height: 24),

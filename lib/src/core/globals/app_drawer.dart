@@ -247,7 +247,7 @@ class _AppDrawerAccountMenuState extends State<AppDrawerAccountMenu> {
             _formatDisplayLabel(user!.department),
           if ((user?.role ?? '').trim().isNotEmpty)
             _formatDisplayLabel(user!.role),
-        ].join(' â€¢ ');
+        ].join(' • ');
 
         return Material(
           color: Colors.transparent,
@@ -285,7 +285,7 @@ class _AppDrawerAccountMenuState extends State<AppDrawerAccountMenu> {
                           overflow: TextOverflow.ellipsis,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: context.modeTextPrimary,
                           ),
                         ),
@@ -303,9 +303,11 @@ class _AppDrawerAccountMenuState extends State<AppDrawerAccountMenu> {
                       ],
                     ),
                   ),
-                  AppIcon(
-                    Icons.keyboard_arrow_right_rounded,
-                    color: context.modeTextMuted,
+                  Center(
+                    child: AppIcon(
+                      Icons.keyboard_arrow_right_rounded,
+                      color: context.modeTextMuted,
+                    ),
                   ),
                 ],
               ),
@@ -350,12 +352,14 @@ class _AccountAvatar extends StatelessWidget {
         color: context.modePrimary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
-        initial,
-        style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: context.modePrimary,
+      child: Center(
+        child: Text(
+          initial,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: context.modePrimary,
+          ),
         ),
       ),
     );
@@ -392,10 +396,14 @@ class AppDrawerThemeSwitch extends StatelessWidget {
                       : context.modePrimary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: AppIcon(
-                  isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                  color: isDark ? context.modePrimaryBlue : context.modePrimary,
-                  size: 21,
+                child: Center(
+                  child: AppIcon(
+                    isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                    color: isDark
+                        ? context.modePrimaryBlue
+                        : context.modePrimary,
+                    size: 21,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -495,10 +503,12 @@ class _ThemeModeButton extends StatelessWidget {
           color: selected ? context.modePrimary : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: AppIcon(
-          icon,
-          size: 18,
-          color: selected ? context.modeTextInverse : context.modeTextMuted,
+        child: Center(
+          child: AppIcon(
+            icon,
+            size: 18,
+            color: selected ? context.modeTextInverse : context.modeTextMuted,
+          ),
         ),
       ),
     );
@@ -553,7 +563,7 @@ class AppDrawerItem extends StatelessWidget {
                   color: itemColor.withValues(alpha: isLogout ? 0.1 : 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: AppIcon(icon, color: itemColor, size: 20),
+                child: Center(child: AppIcon(icon, color: itemColor, size: 20)),
               ),
               const SizedBox(width: 12),
               Expanded(

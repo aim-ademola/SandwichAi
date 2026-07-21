@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
@@ -85,7 +86,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.menu, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
         onPressed: () {
           _scaffoldKey.currentState?.openDrawer();
         },
@@ -104,7 +105,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
         BlocBuilder<ProcessingDashboardBloc, ProcessingDashboardState>(
           builder: (context, state) {
             return IconButton(
-              icon: Icon(Icons.refresh, color: context.modeTextPrimary),
+              icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
               onPressed: state is ProcessingDashboardLoading
                   ? null
                   : () => _onRefresh(),
@@ -155,7 +156,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(errorIcon, size: 64, color: context.modeTextMuted),
+            AppIcon(errorIcon, size: 64, color: context.modeTextMuted),
             const SizedBox(height: 16),
             Text(
               errorTitle,
@@ -177,7 +178,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _loadDashboard,
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,
@@ -241,7 +242,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               width: cardWidth,
               child: _buildMetricCard(
                 title: 'Waste Today',
-                value: '₦${_formatNumber(data.wasteToday.value)}',
+                value: 'â‚¦${_formatNumber(data.wasteToday.value)}',
                 subtitle: '${data.wasteToday.count} items',
                 trend: null,
               ),
@@ -479,7 +480,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                 padding: const EdgeInsets.all(32.0),
                 child: Column(
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.verified_outlined,
                       size: 48,
                       color: context.modeTextMuted,
@@ -541,7 +542,11 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                   color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.check_circle, color: statusColor, size: 22),
+                child: AppIcon(
+                  Icons.check_circle,
+                  color: statusColor,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -586,7 +591,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(
+              AppIcon(
                 Icons.arrow_forward_ios,
                 size: 16,
                 color: context.modeTextMuted,

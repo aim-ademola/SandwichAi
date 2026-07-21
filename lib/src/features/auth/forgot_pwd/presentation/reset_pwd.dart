@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/config/responsive_config.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sandwich_ai/src/features/auth/data/models/forgot_pwd_model.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/reset_pwd_bloc/event.dart';
@@ -112,7 +112,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             backgroundColor: const Color(0xFFF8F6F6),
             elevation: 0,
             leading: IconButton(
-              icon: Icon(
+              icon: AppIcon(
                 Icons.arrow_back_ios,
                 color: kprimaryTextColor1,
                 size: responsive.getIconSize(screenWidth),
@@ -138,7 +138,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Icon
-                        SvgPicture.asset('assets/svg/person.svg'),
+                        AppIcon(
+                          Icons.lock_outline_rounded,
+                          color: kPrimary,
+                          size: responsive.getLargeIconSize(screenWidth),
+                        ),
                         SizedBox(
                           height:
                               responsive.getVerticalSpacing(screenHeight) * 0.8,
@@ -245,7 +249,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 );
                               },
                               suffixIcon: IconButton(
-                                icon: Icon(
+                                icon: AppIcon(
                                   obscurePassword
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
@@ -308,7 +312,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               },
                               onSubmitted: (_) => _handleResetPassword(),
                               suffixIcon: IconButton(
-                                icon: Icon(
+                                icon: AppIcon(
                                   obscureConfirmPassword
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,

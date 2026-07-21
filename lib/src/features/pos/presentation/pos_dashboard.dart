@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -474,7 +475,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                 ),
               ),
               const SizedBox(width: 4),
-              Icon(
+              AppIcon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 18,
                 color: context.modeTextMuted,
@@ -651,7 +652,7 @@ class _PosDashboardScreenState extends State<PosDashboardScreen> {
                   LoadDashboardSummary(date: _dashboardDateParam),
                 );
               },
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,

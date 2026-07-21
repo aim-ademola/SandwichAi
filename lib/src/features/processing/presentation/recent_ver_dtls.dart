@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/processing/data/model/processing_dash_model.dart';
@@ -43,7 +44,7 @@ class VerificationDetailsScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: const AppIcon(Icons.arrow_back, color: Colors.black),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -95,7 +96,7 @@ class VerificationDetailsScreen extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.verified, color: Colors.white, size: 32),
+                child: AppIcon(Icons.verified, color: Colors.white, size: 32),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -261,7 +262,7 @@ class VerificationDetailsScreen extends StatelessWidget {
                   color: qcStatusColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
+                child: AppIcon(
                   _getQcStatusIcon(verification.qcStatus),
                   color: qcStatusColor,
                   size: 24,
@@ -362,7 +363,7 @@ class VerificationDetailsScreen extends StatelessWidget {
                   color: const Color(0xFFF5F5F5),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 20, color: Colors.black87),
+                child: AppIcon(icon, size: 20, color: Colors.black87),
               ),
               const SizedBox(width: 12),
               Text(
@@ -453,7 +454,7 @@ class VerificationDetailsScreen extends StatelessWidget {
                     color: const Color(0xFFF5F5F5),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Icon(
+                  child: const AppIcon(
                     Icons.copy,
                     size: 16,
                     color: Color(0xFF757575),
@@ -474,7 +475,7 @@ class VerificationDetailsScreen extends StatelessWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            const AppIcon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 12),
             Text(
               'Recipe ID copied to clipboard',
@@ -509,7 +510,7 @@ class VerificationDetailsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 20),
+          AppIcon(icon, color: color, size: 20),
           const SizedBox(height: 12),
           Text(
             label,
@@ -546,7 +547,7 @@ class VerificationDetailsScreen extends StatelessWidget {
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: color, size: 22),
+          child: AppIcon(icon, color: color, size: 22),
         ),
         const SizedBox(width: 16),
         Expanded(

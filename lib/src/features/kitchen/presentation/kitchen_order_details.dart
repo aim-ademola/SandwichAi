@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -135,7 +136,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -149,7 +150,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
       centerTitle: true,
       actions: [
         IconButton(
-          icon: Icon(Icons.refresh, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
           onPressed: () {
             context.read<KitchenDashboardBloc>().add(
               const RefreshDashboardData(),
@@ -186,7 +187,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.search_off,
               size: 80,
               color: context.modeTextMuted.withValues(alpha: 0.6),
@@ -212,7 +213,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.arrow_back),
+              icon: const AppIcon(Icons.arrow_back),
               label: const Text('Go Back'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,
@@ -236,7 +237,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 80, color: context.modeError),
+            AppIcon(Icons.error_outline, size: 80, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               'Error Loading Order',
@@ -262,7 +263,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                   const LoadDashboardData(),
                 );
               },
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,
@@ -421,7 +422,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
           const SizedBox(height: 12),
           _buildInfoRow(
             'Total Amount',
-            '₦${order.totalAmount}',
+            'â‚¦${order.totalAmount}',
             textFontSize,
             isHighlight: true,
           ),
@@ -487,7 +488,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.info_outline,
                     size: 20,
                     color: context.modeWarning,
@@ -856,7 +857,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                 color: const Color(0xFF4CAF50),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.check,
                 color: context.modeTextInverse,
                 size: 16,
@@ -870,7 +871,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                 color: const Color(0xFFE57373),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.close,
                 color: context.modeTextInverse,
                 size: 16,
@@ -935,7 +936,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                 ],
                 const SizedBox(height: 4),
                 Text(
-                  '₦${item.totalPrice}',
+                  'â‚¦${item.totalPrice}',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: notesFontSize,
                     fontWeight: FontWeight.w600,

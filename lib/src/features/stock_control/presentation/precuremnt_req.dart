@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -538,7 +539,7 @@ class _StockProcurementRequestScreenState
                         _getBorderRadius(screenWidth),
                       ),
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.help_outline,
                       color: context.modePrimary,
                       size: _getIconSize(screenWidth) + 4,
@@ -556,7 +557,7 @@ class _StockProcurementRequestScreenState
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: AppIcon(
                       Icons.close,
                       color: context.modeTextSecondary,
                       size: _getIconSize(screenWidth),
@@ -600,7 +601,7 @@ class _StockProcurementRequestScreenState
                           children: [
                             Row(
                               children: [
-                                Icon(
+                                AppIcon(
                                   Icons.lightbulb_outline,
                                   color: context.modePrimary,
                                   size: _getIconSize(screenWidth) - 2,
@@ -1020,7 +1021,7 @@ class _StockProcurementRequestScreenState
                                       ),
                                       TextButton.icon(
                                         onPressed: _quickAddLowStockItems,
-                                        icon: Icon(
+                                        icon: AppIcon(
                                           Icons.flash_on,
                                           size: 18,
                                           color: context.modePrimary,
@@ -1081,7 +1082,7 @@ class _StockProcurementRequestScreenState
       backgroundColor: context.modeSurface,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(
+        icon: AppIcon(
           Icons.arrow_back,
           color: context.modeTextPrimary,
           size: _getIconSize(screenWidth),
@@ -1099,10 +1100,10 @@ class _StockProcurementRequestScreenState
       centerTitle: true,
       actions: [
         IconButton(
-          icon: Icon(Icons.info_outline, color: context.modePrimary),
+          icon: AppIcon(Icons.info_outline, color: context.modePrimary),
           onPressed: () {
             _showSnackBar(
-              '💡 Tip: Use Quick Add to automatically add low stock items!',
+              'ðŸ’¡ Tip: Use Quick Add to automatically add low stock items!',
             );
           },
         ),
@@ -1149,7 +1150,7 @@ class _StockProcurementRequestScreenState
                 ],
                 screenWidth: screenWidth,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.help_outline,
                 color: context.modePrimary,
                 size: _getIconSize(screenWidth) - 4,
@@ -1250,7 +1251,7 @@ class _StockProcurementRequestScreenState
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome, color: context.modePrimary, size: 20),
+              AppIcon(Icons.auto_awesome, color: context.modePrimary, size: 20),
               SizedBox(width: 8),
               Text(
                 'Auto-filled Data',
@@ -1314,7 +1315,7 @@ class _StockProcurementRequestScreenState
             label: 'Unit Cost',
             hint: 'Cost per unit',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            prefixText: '₦ ',
+            prefixText: 'â‚¦ ',
             screenWidth: screenWidth,
             helpTitle: 'Unit Cost',
             helpDescription:
@@ -1341,7 +1342,7 @@ class _StockProcurementRequestScreenState
             height: _getButtonHeight(screenWidth) - 8,
             child: OutlinedButton.icon(
               onPressed: _addItemToList,
-              icon: Icon(
+              icon: AppIcon(
                 Icons.add_circle_outline,
                 size: _getIconSize(screenWidth),
               ),
@@ -1399,7 +1400,7 @@ class _StockProcurementRequestScreenState
                 ],
                 screenWidth: screenWidth,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.help_outline,
                 color: context.modePrimary,
                 size: _getIconSize(screenWidth) - 4,
@@ -1487,7 +1488,7 @@ class _StockProcurementRequestScreenState
                 ],
                 screenWidth: screenWidth,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.help_outline,
                 color: context.modePrimary,
                 size: _getIconSize(screenWidth) - 4,
@@ -1633,7 +1634,7 @@ class _StockProcurementRequestScreenState
                 ],
                 screenWidth: screenWidth,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.help_outline,
                 color: context.modePrimary,
                 size: _getIconSize(screenWidth) - 4,
@@ -1668,7 +1669,7 @@ class _StockProcurementRequestScreenState
             ),
             child: Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.search,
                   color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
@@ -1687,14 +1688,14 @@ class _StockProcurementRequestScreenState
                   ),
                 ),
                 _isOpened
-                    ? Icon(
+                    ? AppIcon(
                         Icons.arrow_drop_down,
                         color: context.modeTextSecondary,
                         size: _getIconSize(screenWidth) + 4,
                       )
                     : Transform.rotate(
                         angle: -90 * 3.14159 / 180,
-                        child: Icon(
+                        child: AppIcon(
                           Icons.arrow_drop_down,
                           color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth) + 4,
@@ -1748,14 +1749,14 @@ class _StockProcurementRequestScreenState
                   fontSize: _getInputFontSize(screenWidth),
                   color: context.modeTextSecondary,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: AppIcon(
                   Icons.search,
                   color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(
+                        icon: AppIcon(
                           Icons.clear,
                           color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth),
@@ -1857,7 +1858,7 @@ class _StockProcurementRequestScreenState
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Icon(
+                                child: AppIcon(
                                   Icons.inventory_2_outlined,
                                   color: context.modePrimary,
                                   size: _getIconSize(screenWidth) - 4,
@@ -1881,7 +1882,7 @@ class _StockProcurementRequestScreenState
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} • ${item.unit}',
+                                      '${item.category} â€¢ ${item.unit}',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(
@@ -1921,7 +1922,7 @@ class _StockProcurementRequestScreenState
               ),
             ),
             Text(
-              'Total: ₦${_calculateTotalAmount().toStringAsFixed(2)}',
+              'Total: â‚¦${_calculateTotalAmount().toStringAsFixed(2)}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getLabelFontSize(screenWidth),
                 fontWeight: FontWeight.w600,
@@ -1971,7 +1972,7 @@ class _StockProcurementRequestScreenState
                       color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.inventory_2,
                       color: context.modePrimary,
                       size: _getIconSize(screenWidth) - 4,
@@ -2000,7 +2001,7 @@ class _StockProcurementRequestScreenState
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Qty: ${item.qtyNeeded} ${itemInfo.unit} • ₦${item.unitCost.toStringAsFixed(2)} per unit',
+                          'Qty: ${item.qtyNeeded} ${itemInfo.unit} â€¢ â‚¦${item.unitCost.toStringAsFixed(2)} per unit',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getCaptionFontSize(screenWidth),
                             color: context.modeTextSecondary,
@@ -2019,7 +2020,7 @@ class _StockProcurementRequestScreenState
                         ],
                         SizedBox(height: 2),
                         Text(
-                          'Total: ₦${(item.qtyNeeded * item.unitCost).toStringAsFixed(2)}',
+                          'Total: â‚¦${(item.qtyNeeded * item.unitCost).toStringAsFixed(2)}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getCaptionFontSize(screenWidth),
                             fontWeight: FontWeight.w600,
@@ -2030,7 +2031,7 @@ class _StockProcurementRequestScreenState
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: AppIcon(
                       Icons.delete_outline,
                       color: const Color(0xFFE53935),
                       size: _getIconSize(screenWidth),
@@ -2082,7 +2083,7 @@ class _StockProcurementRequestScreenState
                 tips: helpTips,
                 screenWidth: screenWidth,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.help_outline,
                 color: context.modePrimary,
                 size: _getIconSize(screenWidth) - 4,
@@ -2219,7 +2220,7 @@ class _StockProcurementRequestScreenState
                   fontWeight: FontWeight.w400,
                   color: context.modeTextSecondary,
                 ),
-                suffixIcon: Icon(
+                suffixIcon: AppIcon(
                   Icons.calendar_today,
                   color: context.modePrimary,
                   size: _getIconSize(screenWidth),

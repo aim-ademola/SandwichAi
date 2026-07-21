@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -231,7 +232,10 @@ class _PosOrderDetailsDialogState extends State<_PosOrderDetailsDialog> {
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close, color: context.modeTextPrimary),
+                        icon: AppIcon(
+                          Icons.close,
+                          color: context.modeTextPrimary,
+                        ),
                         onPressed: () => Navigator.of(context).pop(),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),

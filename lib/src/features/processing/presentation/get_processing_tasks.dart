@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -76,7 +77,7 @@ class _ProcessingTaskHistoryScreenState
     ];
     if (!validStatuses.contains(selectedStatus)) {
       AppLogger.log(
-        '⚠️ Status "$selectedStatus" not in valid list, defaulting to PENDING_PROCESS',
+        'âš ï¸ Status "$selectedStatus" not in valid list, defaulting to PENDING_PROCESS',
       );
       // Default to PENDING if status is not recognized
       selectedStatus = 'PENDING_PROCESS';
@@ -459,14 +460,14 @@ class _ProcessingTaskHistoryScreenState
           fontSize: _getInputFontSize(screenWidth),
           color: kprimaryTextColor2,
         ),
-        prefixIcon: Icon(
+        prefixIcon: AppIcon(
           Icons.search,
           color: kprimaryTextColor2,
           size: _getIconSize(screenWidth),
         ),
         suffixIcon: _searchController.text.isNotEmpty
             ? IconButton(
-                icon: Icon(
+                icon: AppIcon(
                   Icons.clear,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth),
@@ -637,7 +638,7 @@ class _ProcessingTaskHistoryScreenState
                                       ),
                                     ),
                                   )
-                                : const Icon(Icons.edit, size: 18),
+                                : const AppIcon(Icons.edit, size: 18),
                             label: Text(
                               'Update',
                               style: WorkSansAppTextStyles.medium.copyWith(
@@ -677,7 +678,7 @@ class _ProcessingTaskHistoryScreenState
                                       ),
                                     ),
                                   )
-                                : const Icon(Icons.delete, size: 18),
+                                : const AppIcon(Icons.delete, size: 18),
                             label: Text(
                               'Delete',
                               style: WorkSansAppTextStyles.medium.copyWith(
@@ -717,7 +718,7 @@ class _ProcessingTaskHistoryScreenState
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      AppIcon(
                         Icons.check_circle,
                         color: kGreen,
                         size: _getIconSize(screenWidth) - 4,
@@ -853,7 +854,7 @@ class _ProcessingTaskHistoryScreenState
   Widget _buildInfoRow(IconData icon, String text, double screenWidth) {
     return Row(
       children: [
-        Icon(
+        AppIcon(
           icon,
           size: _getIconSize(screenWidth) - 4,
           color: kprimaryTextColor2,
@@ -920,7 +921,7 @@ class _ProcessingTaskHistoryScreenState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          AppIcon(
             Icons.inbox_outlined,
             size: 64,
             color: kprimaryTextColor2.withValues(alpha: 0.5),
@@ -954,7 +955,7 @@ class _ProcessingTaskHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.error_outline,
               size: 64,
               color: const Color(0xFFE53935).withValues(alpha: 0.5),
@@ -984,7 +985,7 @@ class _ProcessingTaskHistoryScreenState
                   const LoadProcessingTasks(),
                 );
               },
-              icon: const Icon(Icons.refresh, size: 18),
+              icon: const AppIcon(Icons.refresh, size: 18),
               label: Text(
                 'Retry',
                 style: WorkSansAppTextStyles.medium.copyWith(

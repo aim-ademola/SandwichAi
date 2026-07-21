@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -179,7 +180,11 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                       color: kPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.help_outline, color: kPrimary, size: 24),
+                    child: AppIcon(
+                      Icons.help_outline,
+                      color: kPrimary,
+                      size: 24,
+                    ),
                   ),
                   SizedBox(width: 16),
                   Expanded(
@@ -193,7 +198,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: AppIcon(
                       Icons.close,
                       color: kprimaryTextColor2,
                       size: 24,
@@ -242,7 +247,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(
+                                AppIcon(
                                   Icons.lightbulb_outline,
                                   color: kPrimary,
                                   size: 20,
@@ -445,13 +450,13 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                   keyboardType: TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
-                                  prefixText: '₦ ',
+                                  prefixText: 'â‚¦ ',
                                   onHelpTap: () => _showHelpBottomSheet(
                                     title: 'Value Lost',
                                     description:
                                         'The monetary value of the wasted items. This represents the financial loss to your business and is calculated based on the cost price of the wasted quantity.',
                                     tips: [
-                                      'Use the unit cost price × quantity wasted',
+                                      'Use the unit cost price Ã— quantity wasted',
                                       'Include any processing costs if applicable',
                                       'This helps track waste impact on profitability',
                                       'Regularly review to identify cost-saving opportunities',
@@ -551,7 +556,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                   'If an item is missing, contact your administrator',
                 ],
               ),
-              child: Icon(Icons.help_outline, color: kPrimary, size: 18),
+              child: AppIcon(Icons.help_outline, color: kPrimary, size: 18),
             ),
           ],
         ),
@@ -577,7 +582,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.search, color: kprimaryTextColor2, size: 22),
+                AppIcon(Icons.search, color: kprimaryTextColor2, size: 22),
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -591,7 +596,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                     ),
                   ),
                 ),
-                Icon(
+                AppIcon(
                   _isOpened ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                   color: kprimaryTextColor2,
                   size: 26,
@@ -640,7 +645,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                   fontSize: 15,
                   color: kprimaryTextColor2,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: AppIcon(
                   Icons.search,
                   color: kprimaryTextColor2,
                   size: 22,
@@ -729,7 +734,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                   color: kPrimary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Icon(
+                                child: AppIcon(
                                   Icons.inventory_2_outlined,
                                   color: kPrimary,
                                   size: 18,
@@ -750,7 +755,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                                           ),
                                     ),
                                     Text(
-                                      '${item.category} • ${item.storage}',
+                                      '${item.category} â€¢ ${item.storage}',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: 12,
@@ -802,7 +807,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                   'Other: Any reason not covered by the above categories',
                 ],
               ),
-              child: Icon(Icons.help_outline, color: kPrimary, size: 18),
+              child: AppIcon(Icons.help_outline, color: kPrimary, size: 18),
             ),
           ],
         ),
@@ -892,7 +897,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
               SizedBox(width: 8),
               GestureDetector(
                 onTap: onHelpTap,
-                child: Icon(Icons.help_outline, color: kPrimary, size: 18),
+                child: AppIcon(Icons.help_outline, color: kPrimary, size: 18),
               ),
             ],
           ],

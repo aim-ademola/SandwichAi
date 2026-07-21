@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -52,7 +53,7 @@ class _GlobalProfileScreenState extends State<GlobalProfileScreen> {
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: Icon(
+            icon: AppIcon(
               Icons.arrow_back_rounded,
               color: context.modeTextPrimary,
             ),
@@ -412,7 +413,7 @@ class _ThemeOption extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               icon,
               size: 20,
               color: selected ? context.modePrimary : context.modeTextMuted,
@@ -539,7 +540,7 @@ class _AccountActionTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, color: color, size: 22),
+              AppIcon(icon, color: color, size: 22),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -566,7 +567,7 @@ class _AccountActionTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded, color: color, size: 20),
+              AppIcon(Icons.chevron_right_rounded, color: color, size: 20),
             ],
           ),
         ),
@@ -596,7 +597,7 @@ class _Panel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: context.modePrimary, size: 18),
+              AppIcon(icon, color: context.modePrimary, size: 18),
               const SizedBox(width: 8),
               Text(
                 title,

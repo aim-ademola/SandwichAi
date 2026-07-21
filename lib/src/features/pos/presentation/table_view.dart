@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -103,7 +104,7 @@ class _TableManagementScreenState extends State<TableManagementScreen>
           centerTitle: true,
           actions: [
             IconButton(
-              icon: const Icon(Icons.add, color: kprimaryTextColor1),
+              icon: const AppIcon(Icons.add, color: kprimaryTextColor1),
               onPressed: () {
                 // Add new table functionality
               },
@@ -209,7 +210,7 @@ class _TableManagementScreenState extends State<TableManagementScreen>
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: Colors.grey[300],
-                    child: const Icon(Icons.table_restaurant, size: 60),
+                    child: const AppIcon(Icons.table_restaurant, size: 60),
                   );
                 },
               ),

@@ -16,15 +16,14 @@ class AnalyticsService {
     required String orgCode,
   }) async {
     try {
-      AppLogger.log('[Firebase Analytics] logLogin - email: $email, orgCode: $orgCode');
+      AppLogger.log(
+        '[Firebase Analytics] logLogin - email: $email, orgCode: $orgCode',
+      );
       await _analytics.logLogin(loginMethod: 'email_password');
       await _analytics.setUserProperty(name: 'org_code', value: orgCode);
       await _analytics.logEvent(
         name: 'login_user',
-        parameters: {
-          'email': email,
-          'org_code': orgCode,
-        },
+        parameters: {'email': email, 'org_code': orgCode},
       );
     } catch (e, stackTrace) {
       AppLogger.log(
@@ -83,7 +82,9 @@ class AnalyticsService {
   /// Logs custom screen view
   Future<void> logScreenView(String screenName) async {
     try {
-      AppLogger.log('[Firebase Analytics] logScreenView - screenName: $screenName');
+      AppLogger.log(
+        '[Firebase Analytics] logScreenView - screenName: $screenName',
+      );
       await _analytics.logScreenView(screenName: screenName);
     } catch (e, stackTrace) {
       AppLogger.log(

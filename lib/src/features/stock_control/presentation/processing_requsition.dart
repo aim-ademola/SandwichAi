@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -283,7 +284,7 @@ class _StockTransferToProcessingOrKItchenScreenState
         );
       },
       error: (error) {
-        AppLogger.log('⚠️ Failed to complete stock request: $error');
+        AppLogger.log('âš ï¸ Failed to complete stock request: $error');
       },
     );
   }
@@ -327,7 +328,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                       color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.help_outline,
                       color: context.modePrimary,
                       size: 24,
@@ -345,7 +346,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: AppIcon(
                       Icons.close,
                       color: context.modeTextSecondary,
                       size: 24,
@@ -387,7 +388,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                           children: [
                             Row(
                               children: [
-                                Icon(
+                                AppIcon(
                                   Icons.lightbulb_outline,
                                   color: context.modePrimary,
                                   size: 20,
@@ -535,7 +536,10 @@ class _StockTransferToProcessingOrKItchenScreenState
                 backgroundColor: context.modeSurface,
                 elevation: 0,
                 leading: IconButton(
-                  icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+                  icon: AppIcon(
+                    Icons.arrow_back,
+                    color: context.modeTextPrimary,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: Text(
@@ -625,7 +629,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         'Helps in tracking transfer history and auditing',
                       ],
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.help_outline,
                       color: context.modePrimary,
                       size: 18,
@@ -646,7 +650,11 @@ class _StockTransferToProcessingOrKItchenScreenState
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.qr_code, color: context.modePrimary, size: 20),
+                    AppIcon(
+                      Icons.qr_code,
+                      color: context.modePrimary,
+                      size: 20,
+                    ),
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -658,7 +666,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         ),
                       ),
                     ),
-                    Icon(
+                    AppIcon(
                       Icons.lock,
                       color: context.modeTextSecondary,
                       size: 16,
@@ -697,7 +705,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                             'Ensure quantities don\'t exceed available stock',
                           ],
                         ),
-                        child: Icon(
+                        child: AppIcon(
                           Icons.help_outline,
                           color: context.modePrimary,
                           size: 18,
@@ -798,7 +806,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, size: 20),
+                          icon: const AppIcon(Icons.close, size: 20),
                           color: Colors.red,
                           onPressed: () => _removeItem(index),
                         ),
@@ -836,7 +844,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         'Keep it clear and concise for easy understanding',
                       ],
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.help_outline,
                       color: context.modePrimary,
                       size: 18,
@@ -949,7 +957,11 @@ class _StockTransferToProcessingOrKItchenScreenState
             ),
             child: Row(
               children: [
-                Icon(Icons.search, color: context.modeTextSecondary, size: 20),
+                AppIcon(
+                  Icons.search,
+                  color: context.modeTextSecondary,
+                  size: 20,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -962,7 +974,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                     ),
                   ),
                 ),
-                Icon(
+                AppIcon(
                   _isOpened ? Icons.arrow_drop_down : Icons.arrow_drop_up,
                   color: context.modeTextSecondary,
                   size: 24,
@@ -1015,7 +1027,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                   fontSize: 14,
                   color: context.modeTextSecondary,
                 ),
-                prefixIcon: const Icon(Icons.search, size: 20),
+                prefixIcon: const AppIcon(Icons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: context.modeBorder),
@@ -1111,7 +1123,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                                   ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: Icon(
+                                child: AppIcon(
                                   Icons.inventory_2_outlined,
                                   color: context.modePrimary,
                                   size: 18,
@@ -1186,7 +1198,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                         'You can add the same item multiple times if needed',
                       ],
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.help_outline,
                       color: context.modePrimary,
                       size: 18,
@@ -1236,7 +1248,11 @@ class _StockTransferToProcessingOrKItchenScreenState
                 color: context.modePrimary,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.add, color: context.modeTextInverse, size: 24),
+              child: AppIcon(
+                Icons.add,
+                color: context.modeTextInverse,
+                size: 24,
+              ),
             ),
           ),
         ),
@@ -1260,7 +1276,11 @@ class _StockTransferToProcessingOrKItchenScreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 60, color: Colors.red.shade300),
+                AppIcon(
+                  Icons.error_outline,
+                  size: 60,
+                  color: Colors.red.shade300,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Error loading transfers',
@@ -1401,7 +1421,7 @@ class _StockTransferToProcessingOrKItchenScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 80, color: context.modeTextMuted),
+            AppIcon(icon, size: 80, color: context.modeTextMuted),
             const SizedBox(height: 24),
             Text(
               title,
@@ -1430,7 +1450,7 @@ class _StockTransferToProcessingOrKItchenScreenState
     ProcessingTransferResponse transfer, {
     required bool isPending,
   }) {
-    final dateFormat = DateFormat('MMM dd, yyyy • hh:mm a');
+    final dateFormat = DateFormat('MMM dd, yyyy â€¢ hh:mm a');
     final formattedDate = dateFormat.format(transfer.createdAt);
 
     return Container(
@@ -1508,7 +1528,7 @@ class _StockTransferToProcessingOrKItchenScreenState
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(
+              AppIcon(
                 Icons.inventory_2_outlined,
                 size: 18,
                 color: context.modeTextSecondary,
@@ -1528,7 +1548,7 @@ class _StockTransferToProcessingOrKItchenScreenState
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
+                AppIcon(
                   Icons.note_outlined,
                   size: 18,
                   color: context.modeTextSecondary,
@@ -1563,7 +1583,7 @@ class _StockTransferToProcessingOrKItchenScreenState
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(
+                AppIcon(
                   Icons.arrow_forward_ios,
                   size: 14,
                   color: context.modePrimary,
@@ -1580,7 +1600,7 @@ class _StockTransferToProcessingOrKItchenScreenState
     ProcessingTransferResponse transfer,
     bool isPending,
   ) {
-    final dateFormat = DateFormat('MMMM dd, yyyy • hh:mm a');
+    final dateFormat = DateFormat('MMMM dd, yyyy â€¢ hh:mm a');
     final formattedDate = dateFormat.format(transfer.createdAt);
 
     showModalBottomSheet(
@@ -1632,7 +1652,10 @@ class _StockTransferToProcessingOrKItchenScreenState
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.close, color: context.modeTextSecondary),
+                    icon: AppIcon(
+                      Icons.close,
+                      color: context.modeTextSecondary,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],

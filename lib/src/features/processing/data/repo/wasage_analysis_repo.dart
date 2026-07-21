@@ -28,9 +28,7 @@ class WastageAnalysisRepository extends BaseRepository
     int daysBack = 30,
   }) async {
     try {
-      if (!FeatureRegistry.isEnabled(
-        AppFeature.wastageAnalysis,
-      )) {
+      if (!FeatureRegistry.isEnabled(AppFeature.wastageAnalysis)) {
         return ApiResponse.errorMessage(
           AppEnvironment.current.disabledFeatureMessage(
             AppFeature.wastageAnalysis,

@@ -2,6 +2,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -90,10 +91,10 @@ class _ProductIntakeHistoryScreenState
             fontSize: 15,
             color: Colors.grey.shade500,
           ),
-          prefixIcon: const Icon(Icons.search, color: Color(0xFF9E9E9E)),
+          prefixIcon: const AppIcon(Icons.search, color: Color(0xFF9E9E9E)),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear, color: Color(0xFF9E9E9E)),
+                  icon: const AppIcon(Icons.clear, color: Color(0xFF9E9E9E)),
                   onPressed: _clearSearch,
                 )
               : null,
@@ -224,7 +225,7 @@ class _ProductIntakeHistoryScreenState
               // Quantity Row
               Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.inventory_2_outlined,
                     size: 16,
                     color: Colors.grey.shade600,
@@ -245,7 +246,7 @@ class _ProductIntakeHistoryScreenState
               // Batch ID
               Row(
                 children: [
-                  Icon(Icons.qr_code, size: 16, color: Colors.grey.shade600),
+                  AppIcon(Icons.qr_code, size: 16, color: Colors.grey.shade600),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -265,7 +266,7 @@ class _ProductIntakeHistoryScreenState
               // Date
               Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.calendar_today_outlined,
                     size: 16,
                     color: Colors.grey.shade600,
@@ -273,7 +274,7 @@ class _ProductIntakeHistoryScreenState
                   const SizedBox(width: 6),
                   Text(
                     DateFormat(
-                      'MMM dd, yyyy • hh:mm a',
+                      'MMM dd, yyyy â€¢ hh:mm a',
                     ).format(intake.intakeDate),
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 13,
@@ -287,7 +288,7 @@ class _ProductIntakeHistoryScreenState
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.person_outline,
                     size: 16,
                     color: Colors.grey.shade600,
@@ -327,7 +328,7 @@ class _ProductIntakeHistoryScreenState
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          AppIcon(
             qualityStatus ? Icons.check_circle : Icons.cancel,
             size: 14,
             color: qualityStatus ? Colors.green.shade600 : Colors.red.shade600,
@@ -380,7 +381,7 @@ class _ProductIntakeHistoryScreenState
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: textColor),
+          AppIcon(icon, size: 14, color: textColor),
           const SizedBox(width: 4),
           Text(
             productType.displayName,
@@ -402,7 +403,7 @@ class _ProductIntakeHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               isSearching ? Icons.search_off : Icons.inventory_2_outlined,
               size: 80,
               color: Colors.grey.shade400,
@@ -461,7 +462,7 @@ class _ProductIntakeHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 80, color: Colors.red.shade300),
+            AppIcon(icon, size: 80, color: Colors.red.shade300),
             const SizedBox(height: 16),
             Text(
               title,
@@ -485,7 +486,7 @@ class _ProductIntakeHistoryScreenState
               onPressed: () {
                 context.read<ProductIntakeBloc>().add(LoadProductIntakes());
               },
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: kPrimary,

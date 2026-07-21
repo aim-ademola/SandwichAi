@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -114,7 +115,7 @@ class _NotificationSummary extends StatelessWidget {
                 color: context.modePrimary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.notifications_active_outlined,
                 color: context.modePrimary,
               ),
@@ -185,7 +186,7 @@ class _NotificationTile extends StatelessWidget {
               color: config.color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(config.icon, color: config.color, size: 22),
+            child: AppIcon(config.icon, color: config.color, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -262,7 +263,7 @@ class _EmptyNotifications extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            AppIcon(
               Icons.notifications_none_rounded,
               size: 56,
               color: context.modeTextMuted,

@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -91,7 +92,7 @@ class NotificationService {
 
     final context = navigatorKey?.currentContext;
     if (context == null) {
-      AppLogger.log('⚠️ Navigator context not available');
+      AppLogger.log('âš ï¸ Navigator context not available');
       return;
     }
 
@@ -264,7 +265,7 @@ class NotificationService {
     NotificationImportance importance = NotificationImportance.high,
   }) async {
     if (!_initialized) {
-      AppLogger.log('⚠️ Notification Service not initialized');
+      AppLogger.log('âš ï¸ Notification Service not initialized');
       return;
     }
 
@@ -310,7 +311,7 @@ class NotificationService {
     // Check if this notification type is enabled
     final isEnabled = await _isNotificationEnabled(type);
     if (!isEnabled) {
-      AppLogger.log('⚠️ Notification type ${type.name} is disabled');
+      AppLogger.log('âš ï¸ Notification type ${type.name} is disabled');
       return;
     }
 
@@ -344,7 +345,7 @@ class NotificationService {
     NotificationImportance importance = NotificationImportance.high,
   }) async {
     if (!_initialized) {
-      AppLogger.log('⚠️ Notification Service not initialized');
+      AppLogger.log('âš ï¸ Notification Service not initialized');
       return;
     }
 
@@ -404,7 +405,7 @@ class NotificationService {
     switch (type) {
       case StockAlertType.lowStock:
         return _StockAlertNotification(
-          title: '⚠️ Low Stock Alert',
+          title: 'âš ï¸ Low Stock Alert',
           body:
               '$itemName is running low${quantity != null ? ' ($quantity remaining)' : ''}',
           payload: 'stock_alert|low|$itemName',
@@ -414,7 +415,7 @@ class NotificationService {
 
       case StockAlertType.criticalStock:
         return _StockAlertNotification(
-          title: '🚨 Critical Stock Alert',
+          title: 'ðŸš¨ Critical Stock Alert',
           body: '$itemName is critically low! Reorder immediately.',
           payload: 'stock_alert|critical|$itemName',
           priority: NotificationPriority.max,
@@ -423,7 +424,7 @@ class NotificationService {
 
       case StockAlertType.expiringSoon:
         return _StockAlertNotification(
-          title: '⏰ Expiring Soon',
+          title: 'â° Expiring Soon',
           body: '$itemName expires in ${daysUntilExpiry ?? 0} days',
           payload: 'stock_alert|expiring|$itemName',
           priority: NotificationPriority.high,
@@ -441,7 +442,7 @@ class NotificationService {
 
       case StockAlertType.outOfStock:
         return _StockAlertNotification(
-          title: '📦 Out of Stock',
+          title: 'ðŸ“¦ Out of Stock',
           body: '$itemName is out of stock',
           payload: 'stock_alert|out|$itemName',
           priority: NotificationPriority.max,
@@ -450,7 +451,7 @@ class NotificationService {
 
       case StockAlertType.nearReorder: // NEW
         return _StockAlertNotification(
-          title: '📊 Approaching Reorder Level',
+          title: 'ðŸ“Š Approaching Reorder Level',
           body:
               '$itemName is approaching reorder level${quantity != null && reorderLevel != null ? ' ($quantity/$reorderLevel)' : ''}',
           payload: 'stock_alert|near_reorder|$itemName',
@@ -567,7 +568,7 @@ class StockAlertDialog extends StatelessWidget {
                       color: iconColor.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, size: 48, color: iconColor),
+                    child: AppIcon(icon, size: 48, color: iconColor),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -723,11 +724,11 @@ class DailyStockCheckDialog extends StatelessWidget {
                       color: kPrimary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.schedule, size: 48, color: kPrimary),
+                    child: AppIcon(Icons.schedule, size: 48, color: kPrimary),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '📊 Daily Stock Check',
+                    'ðŸ“Š Daily Stock Check',
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,

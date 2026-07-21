@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -69,7 +70,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.menu, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
         onPressed: () {
           _scaffoldKey.currentState?.openDrawer();
         },
@@ -85,7 +86,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
       centerTitle: true,
       actions: [
         IconButton(
-          icon: Icon(Icons.refresh, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
           onPressed: () {
             context.read<ProcurementBloc>().add(
               const RefreshProcurementOrders(),
@@ -201,7 +202,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               _getErrorIcon(state.errorType),
               size: 64,
               color: context.modeError,
@@ -224,7 +225,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                   ),
                 );
               },
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,
@@ -242,7 +243,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          AppIcon(
             Icons.receipt_long_outlined,
             size: 64,
             color: context.modeTextMuted,
@@ -365,7 +366,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '₦${_formatAmount(order.totalAmountDouble)}',
+                      'â‚¦${_formatAmount(order.totalAmountDouble)}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: amountFontSize,
                         fontWeight: FontWeight.bold,
@@ -393,7 +394,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.warning, size: 14, color: context.modeError),
+                    AppIcon(Icons.warning, size: 14, color: context.modeError),
                     const SizedBox(width: 4),
                     Text(
                       'URGENT',
@@ -421,7 +422,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                       ),
                     );
                   },
-                  icon: const Icon(Icons.shopping_cart, size: 18),
+                  icon: const AppIcon(Icons.shopping_cart, size: 18),
                   label: Text(
                     'Order Item',
                     style: WorkSansAppTextStyles.medium.copyWith(

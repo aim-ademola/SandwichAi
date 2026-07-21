@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -140,7 +141,10 @@ class _GoodsReceivedOverviewScreenState
               ),
               child: Row(
                 children: [
-                  Icon(Icons.inventory_2_outlined, color: context.modePrimary),
+                  AppIcon(
+                    Icons.inventory_2_outlined,
+                    color: context.modePrimary,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -251,7 +255,7 @@ class _InfoPanel extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: context.modeTextMuted),
+          AppIcon(icon, color: context.modeTextMuted),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

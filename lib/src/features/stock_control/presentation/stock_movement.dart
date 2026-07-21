@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -279,7 +280,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 10),
               child: IconButton.filledTonal(
-                icon: Icon(Icons.tune_rounded, color: context.modePrimary),
+                icon: AppIcon(Icons.tune_rounded, color: context.modePrimary),
                 style: IconButton.styleFrom(
                   backgroundColor: context.modePrimary.withValues(alpha: 0.1),
                 ),
@@ -308,7 +309,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.error_outline,
                       size: 64,
                       color: context.modeTextMuted,
@@ -440,7 +441,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                   color: context.modeTextInverse.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: AppIcon(
                   Icons.inventory_2_outlined,
                   color: context.modeTextInverse,
                 ),
@@ -514,7 +515,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: context.modeTextInverse, size: 19),
+          AppIcon(icon, color: context.modeTextInverse, size: 19),
           const SizedBox(height: 10),
           Text(
             title,
@@ -639,7 +640,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
       ),
       child: Column(
         children: [
-          Icon(Icons.receipt_long_outlined, color: context.modeTextMuted),
+          AppIcon(Icons.receipt_long_outlined, color: context.modeTextMuted),
           const SizedBox(height: 10),
           Text(
             'No movements found',
@@ -697,7 +698,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                 color: accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(iconData, color: accent, size: 22),
+              child: AppIcon(iconData, color: accent, size: 22),
             ),
             const SizedBox(width: 13),
             Expanded(
@@ -747,7 +748,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                         ),
                       ),
                       Text(
-                        '${movement.balanceBefore} → ${movement.balanceAfter}',
+                        '${movement.balanceBefore} â†’ ${movement.balanceAfter}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 12,
                           color: context.modeTextMuted,
@@ -759,7 +760,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right_rounded, color: context.modeTextMuted),
+            AppIcon(Icons.chevron_right_rounded, color: context.modeTextMuted),
           ],
         ),
       ),

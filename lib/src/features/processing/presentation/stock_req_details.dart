@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:intl/intl.dart';
@@ -57,7 +58,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(
+        icon: AppIcon(
           Icons.arrow_back,
           color: context.modeTextPrimary,
           size: _getIconSize(screenWidth),
@@ -109,7 +110,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
                   color: context.modeTextInverse.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: AppIcon(
                   Icons.receipt_long,
                   color: context.modeTextInverse,
                   size: _getIconSize(screenWidth) + 4,
@@ -194,7 +195,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
   }) {
     return Column(
       children: [
-        Icon(
+        AppIcon(
           icon,
           color: context.modeTextInverse,
           size: _getIconSize(screenWidth),
@@ -308,7 +309,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
       }
 
       final wat = dateTime.toUtc().add(const Duration(hours: 1));
-      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
+      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(wat);
     } catch (_) {
       return dt.toString();
     }
@@ -373,7 +374,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
             color: context.modePrimary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
+          child: AppIcon(
             Icons.inventory_2_outlined,
             color: context.modePrimary,
             size: _getIconSize(screenWidth) - 2,
@@ -476,7 +477,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
                   ).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: AppIcon(
                   request.status == 'COMPLETED'
                       ? Icons.check_circle_outline
                       : Icons.cancel_outlined,
@@ -562,7 +563,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
             ? CrossAxisAlignment.start
             : CrossAxisAlignment.center,
         children: [
-          Icon(
+          AppIcon(
             icon,
             size: _getIconSize(screenWidth) - 2,
             color: context.modeTextSecondary,

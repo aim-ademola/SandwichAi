@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -181,7 +182,7 @@ class _KitchenShiftManagementScreenState
               onPressed: () => _showAddShiftDialog(context),
               backgroundColor: context.modePrimary,
               foregroundColor: context.modeTextInverse,
-              icon: const Icon(Icons.add),
+              icon: const AppIcon(Icons.add),
               label: Text(
                 'Add Shift',
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -277,7 +278,7 @@ class _KitchenShiftManagementScreenState
               ),
               child: Row(
                 children: [
-                  Icon(Icons.date_range, color: context.modePrimary),
+                  AppIcon(Icons.date_range, color: context.modePrimary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -535,7 +536,7 @@ class _KitchenShiftManagementScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.calendar_today_outlined,
               size: 80,
               color: context.modeTextMuted.withValues(alpha: 0.5),
@@ -574,7 +575,7 @@ class _KitchenShiftManagementScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.error_outline,
               size: 80,
               color: context.modeError.withValues(alpha: 0.5),

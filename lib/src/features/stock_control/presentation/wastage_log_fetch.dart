@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
@@ -205,7 +206,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
               ? context.modePrimary.withValues(alpha: 0.1)
               : context.modeSurface,
         ),
-        child: Icon(
+        child: AppIcon(
           Icons.date_range,
           color: _startDate != null
               ? context.modePrimary
@@ -277,7 +278,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
           SizedBox(width: 4),
           InkWell(
             onTap: onRemove,
-            child: Icon(Icons.close, size: 16, color: context.modePrimary),
+            child: AppIcon(Icons.close, size: 16, color: context.modePrimary),
           ),
         ],
       ),
@@ -302,7 +303,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
           Expanded(
             child: _buildSummaryCard(
               'Total Loss',
-              '₦${_formatCurrency(response.totalValueLost)}',
+              'â‚¦${_formatCurrency(response.totalValueLost)}',
               Icons.money_off_outlined,
               Colors.red,
             ),
@@ -347,7 +348,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                   color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: color, size: 20),
+                child: AppIcon(icon, color: color, size: 20),
               ),
               Spacer(),
             ],
@@ -472,7 +473,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                     SizedBox(width: 20),
                     _buildInfoItem(
                       Icons.payments_outlined,
-                      '₦${_formatCurrency(log.valueLostAsDouble)}',
+                      'â‚¦${_formatCurrency(log.valueLostAsDouble)}',
                     ),
                   ],
                 ),
@@ -486,7 +487,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.note_outlined,
                           size: 16,
                           color: context.modeTextSecondary,
@@ -508,7 +509,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                 ],
                 Row(
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.calendar_today_outlined,
                       size: 14,
                       color: context.modeTextSecondary,
@@ -522,7 +523,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                       ),
                     ),
                     SizedBox(width: 16),
-                    Icon(
+                    AppIcon(
                       Icons.person_outline,
                       size: 14,
                       color: context.modeTextSecondary,
@@ -549,7 +550,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            AppIcon(
                               Icons.verified_outlined,
                               size: 12,
                               color: Colors.green,
@@ -580,7 +581,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
   Widget _buildInfoItem(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: context.modeTextSecondary),
+        AppIcon(icon, size: 16, color: context.modeTextSecondary),
         SizedBox(width: 6),
         Text(
           text,
@@ -599,7 +600,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.delete_outline, size: 80, color: context.modeTextMuted),
+          AppIcon(Icons.delete_outline, size: 80, color: context.modeTextMuted),
           SizedBox(height: 16),
           Text(
             'No waste logs found',
@@ -629,7 +630,7 @@ class _WasteLogsHistoryScreenState extends State<WasteLogsHistoryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.error_outline,
               size: 80,
               color: context.modeError.withValues(alpha: 0.5),

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -76,7 +77,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.inventory_2_outlined,
                     size: 48,
                     color: context.modeTextMuted,
@@ -102,7 +103,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    AppIcon(
                       _getErrorIcon(state.errorType),
                       size: 64,
                       color: context.modeError,
@@ -240,7 +241,7 @@ class _InventoryBodyState extends State<InventoryBody> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.inventory_2_outlined,
               size: 64,
               color: context.modeTextMuted,
@@ -354,7 +355,7 @@ class _InventoryBodyState extends State<InventoryBody> {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     _getStorageIcon(item.storage),
                     size: _getInfoIconSize(screenWidth),
                     color: context.modeTextSecondary,
@@ -369,7 +370,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                     ),
                   ),
                   const Spacer(),
-                  Icon(
+                  AppIcon(
                     Icons.layers_outlined,
                     size: _getInfoIconSize(screenWidth),
                     color: context.modeTextSecondary,
@@ -477,7 +478,7 @@ class _InventoryBodyState extends State<InventoryBody> {
           fontSize: _getSearchFontSize(screenWidth),
           color: context.modeTextMuted,
         ),
-        prefixIcon: Icon(
+        prefixIcon: AppIcon(
           Icons.search_rounded,
           color: context.modeTextSecondary,
           size: _getSearchIconSize(screenWidth),
@@ -486,7 +487,7 @@ class _InventoryBodyState extends State<InventoryBody> {
             ? null
             : IconButton(
                 tooltip: 'Clear search',
-                icon: Icon(
+                icon: AppIcon(
                   Icons.close_rounded,
                   color: context.modeTextSecondary,
                   size: _getSearchIconSize(screenWidth),
@@ -723,7 +724,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   DataCell(
                     Row(
                       children: [
-                        Icon(
+                        AppIcon(
                           _getStorageIcon(item.storage),
                           size: _getTableIconSize(screenWidth),
                           color: context.modeTextSecondary,
@@ -904,7 +905,11 @@ class _InventoryBodyState extends State<InventoryBody> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: _getStatusIconSize(screenWidth), color: iconColor),
+          AppIcon(
+            icon,
+            size: _getStatusIconSize(screenWidth),
+            color: iconColor,
+          ),
           const SizedBox(width: 4),
           Text(
             label,

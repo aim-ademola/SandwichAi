@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -26,7 +27,7 @@ class TransferService {
       'sku': '54321',
       'expectedQty': 50.0,
       'unit': 'KG',
-      'image': '🍅',
+      'image': 'ðŸ…',
       'fromDept': 'Warehouse',
     },
     {
@@ -34,7 +35,7 @@ class TransferService {
       'sku': '65432',
       'expectedQty': 75.0,
       'unit': 'KG',
-      'image': '🥔',
+      'image': 'ðŸ¥”',
       'fromDept': 'Storage',
     },
     {
@@ -42,7 +43,7 @@ class TransferService {
       'sku': '98765',
       'expectedQty': 30.0,
       'unit': 'KG',
-      'image': '🥕',
+      'image': 'ðŸ¥•',
       'fromDept': 'Warehouse',
     },
     {
@@ -50,7 +51,7 @@ class TransferService {
       'sku': '11223',
       'expectedQty': 100.0,
       'unit': 'KG',
-      'image': '🥩',
+      'image': 'ðŸ¥©',
       'fromDept': 'Cold Storage',
     },
     {
@@ -58,7 +59,7 @@ class TransferService {
       'sku': '33445',
       'expectedQty': 25.0,
       'unit': 'KG',
-      'image': '🥬',
+      'image': 'ðŸ¥¬',
       'fromDept': 'Warehouse',
     },
   ];
@@ -137,7 +138,7 @@ class TransferService {
                   color: kPrimary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.local_shipping, color: kPrimary, size: 32),
+                child: AppIcon(Icons.local_shipping, color: kPrimary, size: 32),
               ),
               const SizedBox(height: 20),
               Text(
@@ -394,7 +395,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: kprimaryTextColor1),
+            icon: AppIcon(Icons.arrow_back, color: kprimaryTextColor1),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
@@ -417,7 +418,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                 height: 150,
                 color: const Color(0xFFE8D5C4),
                 child: Center(
-                  child: Icon(
+                  child: AppIcon(
                     Icons.inventory_2_outlined,
                     size: 64,
                     color: Colors.white.withValues(alpha: 0.3),
@@ -452,7 +453,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                     ),
                     child: Column(
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.inbox_outlined,
                           size: 64,
                           color: Colors.grey.shade300,
@@ -567,7 +568,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.inventory_2,
                           size: 14,
                           color: kprimaryTextColor2,
@@ -591,7 +592,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                     item.isExpanded = !item.isExpanded;
                   });
                 },
-                child: Icon(
+                child: AppIcon(
                   item.isExpanded
                       ? Icons.keyboard_arrow_up
                       : Icons.keyboard_arrow_down,
@@ -672,7 +673,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                       item.qualityCheckPassed = !item.qualityCheckPassed;
                     });
                   },
-                  child: Icon(
+                  child: AppIcon(
                     item.qualityCheckPassed ? Icons.close : Icons.check,
                     size: 20,
                     color: item.qualityCheckPassed
@@ -855,7 +856,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      const AppIcon(
                         Icons.check_circle,
                         size: 14,
                         color: Color(0xFF4CAF50),
@@ -904,7 +905,7 @@ class _DeliveryValidationScreenState extends State<DeliveryValidationScreen> {
                       ),
                     ),
                   ),
-                  const Icon(
+                  const AppIcon(
                     Icons.camera_alt_outlined,
                     size: 16,
                     color: kprimaryTextColor2,

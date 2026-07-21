@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -151,7 +152,7 @@ class _DrawerBranchSwitcherState extends State<DrawerBranchSwitcher> {
                       color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.location_city_rounded,
                       color: context.modePrimary,
                       size: 20,
@@ -190,7 +191,7 @@ class _DrawerBranchSwitcherState extends State<DrawerBranchSwitcher> {
                     ),
                   ),
                   if (branches.length > 1)
-                    Icon(
+                    AppIcon(
                       Icons.keyboard_arrow_down_rounded,
                       color: context.modeTextMuted,
                     ),
@@ -294,7 +295,7 @@ class AppBranchOptionTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
+              AppIcon(
                 selected
                     ? Icons.radio_button_checked_rounded
                     : Icons.radio_button_off_rounded,
@@ -554,7 +555,7 @@ class _DrawerModuleTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(module.icon, color: color, size: 20),
+              AppIcon(module.icon, color: color, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -569,9 +570,9 @@ class _DrawerModuleTile extends StatelessWidget {
                 ),
               ),
               if (isActive)
-                Icon(Icons.check_circle_rounded, color: color, size: 18)
+                AppIcon(Icons.check_circle_rounded, color: color, size: 18)
               else
-                Icon(
+                AppIcon(
                   Icons.chevron_right_rounded,
                   color: context.modeTextMuted,
                   size: 20,
@@ -611,7 +612,7 @@ class _DrawerPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: context.modePrimary, size: 18),
+              AppIcon(icon, color: context.modePrimary, size: 18),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

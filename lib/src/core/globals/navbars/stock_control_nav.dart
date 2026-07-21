@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
@@ -90,26 +90,26 @@ class StockControlBottomNavBarState extends State<StockControlBottomNavBar> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(
-                  icon: 'assets/svg/home.svg',
-                  activeIcon: 'assets/svg/home.svg',
+                  icon: HugeIcons.strokeRoundedDashboardSquare01,
+                  activeIcon: HugeIcons.strokeRoundedDashboardSquare01,
                   label: 'Home',
                   index: 0,
                 ),
                 _buildNavItem(
-                  icon: 'assets/svg/table.svg',
-                  activeIcon: 'assets/svg/table.svg',
+                  icon: HugeIcons.strokeRoundedTable,
+                  activeIcon: HugeIcons.strokeRoundedTable,
                   label: 'Catalogue',
                   index: 1,
                 ),
                 _buildNavItem(
-                  icon: 'assets/svg/solar_box-linear.svg',
-                  activeIcon: 'assets/svg/solar_box-linear.svg',
+                  icon: HugeIcons.strokeRoundedPackage02,
+                  activeIcon: HugeIcons.strokeRoundedPackage02,
                   label: 'Stock Movement',
                   index: 2,
                 ),
                 _buildNavItem(
-                  icon: 'assets/svg/chat.svg',
-                  activeIcon: 'assets/svg/chat.svg',
+                  icon: HugeIcons.strokeRoundedMessage01,
+                  activeIcon: HugeIcons.strokeRoundedMessage01,
                   label: 'Chat',
                   index: 3,
                 ),
@@ -122,8 +122,8 @@ class StockControlBottomNavBarState extends State<StockControlBottomNavBar> {
   }
 
   Widget _buildNavItem({
-    required String icon,
-    required String activeIcon,
+    required List<List<dynamic>> icon,
+    required List<List<dynamic>> activeIcon,
     required String label,
     required int index,
   }) {
@@ -150,14 +150,11 @@ class StockControlBottomNavBarState extends State<StockControlBottomNavBar> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset(
-                  isActive ? activeIcon : icon,
-                  width: 22,
-                  height: 22,
-                  colorFilter: ColorFilter.mode(
-                    isActive ? activeColor : inactiveColor,
-                    BlendMode.srcIn,
-                  ),
+                HugeIcon(
+                  icon: isActive ? activeIcon : icon,
+                  color: isActive ? activeColor : inactiveColor,
+                  size: 22,
+                  strokeWidth: 1.8,
                 ),
                 const SizedBox(height: 3),
                 Text(

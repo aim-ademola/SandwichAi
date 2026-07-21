@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -37,7 +38,7 @@ class ModuleInfoBottomSheet extends StatelessWidget {
   Widget _buildHeader() {
     return Row(
       children: [
-        Icon(Icons.info_outline, color: kPrimary, size: 24),
+        AppIcon(Icons.info_outline, color: kPrimary, size: 24),
         SizedBox(width: 10),
         Text(
           title,
@@ -77,7 +78,7 @@ class ModuleInfoBottomSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "• $useCase",
+                  "â€¢ $useCase",
                   style: WorkSansAppTextStyles.medium.copyWith(fontSize: 13),
                 ),
                 SizedBox(height: 6),
@@ -143,7 +144,7 @@ class InfoIconButton extends StatelessWidget {
           () {
             // Default behavior - you can pass your own onPressed
           },
-      icon: Icon(Icons.help_rounded, color: kPrimary, size: size),
+      icon: AppIcon(Icons.help_rounded, color: kPrimary, size: size),
     );
   }
 }

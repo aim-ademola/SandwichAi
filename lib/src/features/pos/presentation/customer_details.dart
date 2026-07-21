@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -191,7 +192,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -310,7 +311,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
                                       ),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: AppIcon(
                                       isEditMode
                                           ? Icons.edit_outlined
                                           : Icons.person_add_outlined,
@@ -674,9 +675,9 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
               fontSize: 14,
               color: context.modeTextMuted,
             ),
-            prefixIcon: Icon(icon, size: 20, color: context.modeTextMuted),
+            prefixIcon: AppIcon(icon, size: 20, color: context.modeTextMuted),
             suffixIcon: suffixIcon != null
-                ? Icon(suffixIcon, size: 20, color: context.modeTextMuted)
+                ? AppIcon(suffixIcon, size: 20, color: context.modeTextMuted)
                 : null,
             filled: true,
             fillColor: context.modeSurfaceAlt,
@@ -716,7 +717,7 @@ class _CreateEditCustomerScreenState extends State<CreateEditCustomerScreen> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 24, color: context.modeTextMuted),
+        AppIcon(icon, size: 24, color: context.modeTextMuted),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

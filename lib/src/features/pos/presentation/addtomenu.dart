@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/app_bootstrap.dart';
@@ -188,7 +189,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
             ),
             const SizedBox(height: 20),
             ListTile(
-              leading: Icon(Icons.camera_alt, color: rootContext.modePrimary),
+              leading: AppIcon(
+                Icons.camera_alt,
+                color: rootContext.modePrimary,
+              ),
               title: Text(
                 'Camera',
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -218,7 +222,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
               },
             ),
             ListTile(
-              leading: Icon(
+              leading: AppIcon(
                 Icons.photo_library,
                 color: rootContext.modePrimary,
               ),
@@ -289,7 +293,10 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close, color: context.modeTextMuted),
+                        icon: AppIcon(
+                          Icons.close,
+                          color: context.modeTextMuted,
+                        ),
                         onPressed: _isSubmitting
                             ? null
                             : () => Navigator.of(context).pop(),
@@ -338,7 +345,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                         vertical: 12,
                       ),
                     ),
-                    icon: Icon(
+                    icon: AppIcon(
                       Icons.arrow_drop_down,
                       color: context.modeTextMuted,
                     ),
@@ -511,7 +518,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Price (₦)',
+                              'Price (â‚¦)',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -707,7 +714,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
+                                AppIcon(
                                   Icons.add_photo_alternate_outlined,
                                   size: 40,
                                   color: context.modeTextMuted,
@@ -725,7 +732,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                           : Stack(
                               children: [
                                 Center(
-                                  child: Icon(
+                                  child: AppIcon(
                                     Icons.image,
                                     size: 60,
                                     color: context.modeTextMuted,
@@ -750,7 +757,7 @@ class _AddMenuItemDialogState extends State<AddMenuItemDialog> {
                                         ),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: Icon(
+                                      child: AppIcon(
                                         Icons.close,
                                         size: 20,
                                         color: context.modeTextInverse,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -112,16 +113,16 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
 
   String _formatAmount(String amount) {
     try {
-      return '₦${double.parse(amount).toStringAsFixed(2)}';
+      return 'â‚¦${double.parse(amount).toStringAsFixed(2)}';
     } catch (_) {
-      return '₦$amount';
+      return 'â‚¦$amount';
     }
   }
 
   String _formatDate(String dt) {
     try {
       final wat = DateTime.parse(dt).toUtc().add(const Duration(hours: 1));
-      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
+      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(wat);
     } catch (_) {
       return dt;
     }
@@ -151,7 +152,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
             ),
           );
         }
-        // CashPaymentStillPending → polling continues
+        // CashPaymentStillPending â†’ polling continues
       },
       child: PopScope(
         canPop: false,
@@ -243,7 +244,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
             shape: BoxShape.circle,
             color: Color(0xFFFFA000),
           ),
-          child: const Icon(
+          child: const AppIcon(
             Icons.hourglass_top_rounded,
             size: 38,
             color: Colors.white,
@@ -316,7 +317,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    const AppIcon(
                       Icons.pending_outlined,
                       size: 14,
                       color: Color(0xFFFFA000),
@@ -397,7 +398,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
         ),
         const SizedBox(height: 10),
         Text(
-          'Checking approval status every 5 seconds…',
+          'Checking approval status every 5 secondsâ€¦',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 12,
             color: kprimaryTextColor2,
@@ -415,7 +416,7 @@ class _CashApprovalWaitingScreenState extends State<CashApprovalWaitingScreen>
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: _pollNow,
-            icon: const Icon(Icons.refresh_rounded, size: 18),
+            icon: const AppIcon(Icons.refresh_rounded, size: 18),
             label: Text(
               'Check Now',
               style: WorkSansAppTextStyles.medium.copyWith(

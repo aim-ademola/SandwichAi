@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -127,7 +128,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -239,14 +240,14 @@ class _OrdersListScreenState extends State<OrdersListScreen>
             fontSize: 14,
             color: context.modeTextMuted,
           ),
-          prefixIcon: Icon(
+          prefixIcon: AppIcon(
             Icons.search,
             color: context.modeTextMuted,
             size: 20,
           ),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear, size: 20),
+                  icon: const AppIcon(Icons.clear, size: 20),
                   onPressed: () {
                     _searchController.clear();
                     context.read<OrdersListBloc>().add(const SearchOrders(''));
@@ -280,7 +281,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
             ),
           ),
           child: IconButton(
-            icon: Icon(
+            icon: AppIcon(
               Icons.filter_list,
               color: hasFilters
                   ? context.modeTextInverse
@@ -391,7 +392,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
           const SizedBox(width: 4),
           InkWell(
             onTap: onRemove,
-            child: Icon(Icons.close, size: 16, color: context.modePrimary),
+            child: AppIcon(Icons.close, size: 16, color: context.modePrimary),
           ),
         ],
       ),
@@ -531,7 +532,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '₦${NumberFormat('#,##0.00').format(order.totalAmount)}',
+                              'â‚¦${NumberFormat('#,##0.00').format(order.totalAmount)}',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -620,7 +621,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
   }) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: context.modeTextMuted),
+        AppIcon(icon, size: 16, color: context.modeTextMuted),
         const SizedBox(width: 6),
         Expanded(
           child: Column(
@@ -728,7 +729,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.flag, size: 12, color: color),
+          AppIcon(Icons.flag, size: 12, color: color),
           const SizedBox(width: 4),
           Text(
             priority,
@@ -766,7 +767,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.payment, size: 12, color: color),
+          AppIcon(Icons.payment, size: 12, color: color),
           const SizedBox(width: 4),
           Text(
             status,
@@ -792,7 +793,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.local_shipping, size: 12, color: context.modeInfo),
+          AppIcon(Icons.local_shipping, size: 12, color: context.modeInfo),
           const SizedBox(width: 4),
           Text(
             status.replaceAll('_', ' '),
@@ -839,7 +840,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: context.modeTextMuted),
+            AppIcon(icon, size: 64, color: context.modeTextMuted),
             const SizedBox(height: 16),
             Text(
               message,
@@ -886,7 +887,11 @@ class _OrdersListScreenState extends State<OrdersListScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inbox_outlined, size: 80, color: context.modeTextMuted),
+            AppIcon(
+              Icons.inbox_outlined,
+              size: 80,
+              color: context.modeTextMuted,
+            ),
             const SizedBox(height: 24),
             Text(
               state.message,
@@ -941,7 +946,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const AppIcon(Icons.close),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],

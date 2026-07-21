@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -92,7 +93,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -106,11 +107,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
       centerTitle: true,
       actions: [
         IconButton(
-          icon: Icon(Icons.share_outlined, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.share_outlined, color: context.modeTextPrimary),
           onPressed: _shareOrderPdf,
         ),
         PopupMenuButton<String>(
-          icon: Icon(Icons.more_vert, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.more_vert, color: context.modeTextPrimary),
           onSelected: (value) {
             switch (value) {
               case 'edit':
@@ -149,7 +150,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               value: 'print',
               child: Row(
                 children: [
-                  const Icon(Icons.print, size: 20),
+                  const AppIcon(Icons.print, size: 20),
                   const SizedBox(width: 12),
                   Text(
                     'Print Order',
@@ -162,7 +163,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               value: 'download',
               child: Row(
                 children: [
-                  const Icon(Icons.download, size: 20),
+                  const AppIcon(Icons.download, size: 20),
                   const SizedBox(width: 12),
                   Text(
                     'Download PDF',
@@ -194,7 +195,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
       value: value,
       child: Row(
         children: [
-          Icon(icon, size: 20, color: color),
+          AppIcon(icon, size: 20, color: color),
           const SizedBox(width: 12),
           Text(
             label,
@@ -454,11 +455,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               _buildPdfTableCell(item.productCode, font),
               _buildPdfTableCell('${item.quantityOrdered} ${item.unit}', font),
               _buildPdfTableCell(
-                '₦${NumberFormat('#,##0.00').format(item.unitPrice)}',
+                'â‚¦${NumberFormat('#,##0.00').format(item.unitPrice)}',
                 font,
               ),
               _buildPdfTableCell(
-                '₦${NumberFormat('#,##0.00').format(item.totalPrice)}',
+                'â‚¦${NumberFormat('#,##0.00').format(item.totalPrice)}',
                 font,
               ),
             ],
@@ -497,13 +498,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         children: [
           _buildPdfPriceRow(
             'Subtotal',
-            '₦${NumberFormat('#,##0.00').format(widget.order.subtotal)}',
+            'â‚¦${NumberFormat('#,##0.00').format(widget.order.subtotal)}',
             font,
           ),
           pw.SizedBox(height: 8),
           _buildPdfPriceRow(
             'Tax',
-            '₦${NumberFormat('#,##0.00').format(widget.order.tax)}',
+            'â‚¦${NumberFormat('#,##0.00').format(widget.order.tax)}',
             font,
           ),
           pw.SizedBox(height: 8),
@@ -511,7 +512,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
           pw.SizedBox(height: 8),
           _buildPdfPriceRow(
             'TOTAL',
-            '₦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
+            'â‚¦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
             fontBold,
             isTotal: true,
           ),
@@ -695,7 +696,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.info_outline, color: context.modePrimary),
+            AppIcon(Icons.info_outline, color: context.modePrimary),
             const SizedBox(width: 12),
             const Text('Open PDF'),
           ],
@@ -1063,7 +1064,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '₦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
+                      'â‚¦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
@@ -1152,17 +1153,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
               children: [
                 _buildPriceRow(
                   'Subtotal',
-                  '₦${NumberFormat('#,##0.00').format(widget.order.subtotal)}',
+                  'â‚¦${NumberFormat('#,##0.00').format(widget.order.subtotal)}',
                 ),
                 const Divider(height: 24),
                 _buildPriceRow(
                   'Tax',
-                  '₦${NumberFormat('#,##0.00').format(widget.order.tax)}',
+                  'â‚¦${NumberFormat('#,##0.00').format(widget.order.tax)}',
                 ),
                 const Divider(height: 24),
                 _buildPriceRow(
                   'Total',
-                  '₦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
+                  'â‚¦${NumberFormat('#,##0.00').format(widget.order.totalAmount)}',
                   isTotal: true,
                 ),
               ],
@@ -1282,7 +1283,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                           ),
                         ),
                         Text(
-                          '₦${NumberFormat('#,##0.00').format(item.totalPrice)}',
+                          'â‚¦${NumberFormat('#,##0.00').format(item.totalPrice)}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -1378,7 +1379,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   String _formatTimelineDate(String value) {
     final parsed = DateTime.tryParse(value);
     if (parsed == null) return value.isEmpty ? 'Date unavailable' : value;
-    return DateFormat('MMM dd, yyyy • hh:mm a').format(parsed);
+    return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(parsed);
   }
 
   Widget _buildTimelineItem(String title, String date) {
@@ -1437,7 +1438,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
                     color: context.modePrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: context.modePrimary, size: 20),
+                  child: AppIcon(icon, color: context.modePrimary, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -1599,7 +1600,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          AppIcon(icon, size: 14, color: color),
           const SizedBox(width: 6),
           Text(
             status,

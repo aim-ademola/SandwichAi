@@ -1,5 +1,6 @@
 // lib/widgets/api_response_handler.dart
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/error_handler.dart';
@@ -54,7 +55,7 @@ class ApiResponseHandler<T> extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(_getErrorIcon(error.type), size: 64, color: Colors.grey[400]),
+          AppIcon(_getErrorIcon(error.type), size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             error.message,

@@ -4,8 +4,7 @@ import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 class DevLoginConfig {
   const DevLoginConfig._();
 
-  static bool get enabled =>
-      FeatureRegistry.isEnabled(AppFeature.devLogin);
+  static bool get enabled => FeatureRegistry.isEnabled(AppFeature.devLogin);
   static String get organizationCode =>
       AppEnvironment.current.devOrganizationCode;
 

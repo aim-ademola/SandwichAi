@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/staffmember_model.dart';
@@ -96,7 +97,7 @@ class _PosStaffScreenState extends State<PosStaffScreen> {
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: const AppIcon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.pop(context),
           ),
           title: Column(
@@ -137,7 +138,7 @@ class _PosStaffScreenState extends State<PosStaffScreen> {
                     fontSize: 14,
                     color: kprimaryTextColor2,
                   ),
-                  prefixIcon: const Icon(
+                  prefixIcon: const AppIcon(
                     Icons.search,
                     color: kprimaryTextColor2,
                   ),
@@ -268,7 +269,7 @@ class _PosStaffScreenState extends State<PosStaffScreen> {
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
                         color: Colors.grey[300],
-                        child: const Icon(Icons.person, size: 30),
+                        child: const AppIcon(Icons.person, size: 30),
                       );
                     },
                   ),
@@ -280,7 +281,7 @@ class _PosStaffScreenState extends State<PosStaffScreen> {
                       bottom: -1,
                       left: 0,
                       right: -30,
-                      child: Icon(
+                      child: AppIcon(
                         Icons.cloud,
                         size: 16,
                         color: Colors.blueGrey,
@@ -338,7 +339,7 @@ class _PosStaffScreenState extends State<PosStaffScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    const AppIcon(
                       Icons.assignment_outlined,
                       color: Colors.white,
                       size: 18,

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -72,16 +73,16 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
 
   String _formatAmount(String amount) {
     try {
-      return '₦${double.parse(amount).toStringAsFixed(2)}';
+      return 'â‚¦${double.parse(amount).toStringAsFixed(2)}';
     } catch (_) {
-      return '₦$amount';
+      return 'â‚¦$amount';
     }
   }
 
   String _formatDate(String dt) {
     try {
       final wat = DateTime.parse(dt).toUtc().add(const Duration(hours: 1));
-      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
+      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(wat);
     } catch (_) {
       return dt;
     }
@@ -172,7 +173,7 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Text(
-                    '✓  Payment Approved',
+                    'âœ“  Payment Approved',
                     style: pw.TextStyle(
                       fontSize: 16,
                       fontWeight: pw.FontWeight.bold,
@@ -322,7 +323,7 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
                         color: Colors.green.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: const AppIcon(
                         Icons.check_circle_rounded,
                         color: Colors.green,
                         size: 54,
@@ -462,14 +463,14 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
                                 ),
                               ),
                             )
-                          : const Icon(
+                          : const AppIcon(
                               Icons.download_rounded,
                               color: Colors.white,
                               size: 20,
                             ),
                       label: Text(
                         _isGeneratingPdf
-                            ? 'Generating PDF…'
+                            ? 'Generating PDFâ€¦'
                             : 'Download Receipt',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 15,
@@ -488,7 +489,7 @@ class _CashPaymentSuccessScreenState extends State<CashPaymentSuccessScreen>
                   ),
                   const SizedBox(height: 10),
 
-                  // Done — marks session completed
+                  // Done â€” marks session completed
                   SizedBox(
                     width: double.infinity,
                     height: 54,

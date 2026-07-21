@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
@@ -81,7 +82,7 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
               elevation: 0,
               surfaceTintColor: Colors.transparent,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+                icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
                 onPressed: widget.onClose ?? () => Navigator.of(context).pop(),
               ),
               title: Text(
@@ -97,7 +98,7 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
                 IconButton(
                   tooltip: 'Session tour',
                   onPressed: state.sessions.isEmpty ? null : _startSessionTour,
-                  icon: Icon(
+                  icon: AppIcon(
                     Icons.help_outline,
                     color: state.sessions.isEmpty
                         ? context.modeTextMuted
@@ -109,7 +110,7 @@ class _SessionManagerScreenState extends State<SessionManagerScreen> {
                   onPressed: state.canAddSession
                       ? () => _startNewOrder(context)
                       : null,
-                  icon: Icon(
+                  icon: AppIcon(
                     Icons.add_circle_outline,
                     color: state.canAddSession
                         ? context.modePrimary
@@ -475,7 +476,7 @@ class _NewOrderPage extends StatelessWidget {
                   color: context.modePrimary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: AppIcon(
                   Icons.add_shopping_cart_rounded,
                   color: context.modePrimary,
                   size: 30,
@@ -505,7 +506,7 @@ class _NewOrderPage extends StatelessWidget {
               const SizedBox(height: 22),
               ElevatedButton.icon(
                 onPressed: enabled ? onStart : null,
-                icon: const Icon(Icons.add),
+                icon: const AppIcon(Icons.add),
                 label: const Text('Start New Order'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.modePrimary,
@@ -574,7 +575,7 @@ class _SessionTabChip extends StatelessWidget {
                     color: color.withValues(alpha: 0.13),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, size: 16, color: color),
+                  child: AppIcon(icon, size: 16, color: color),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -686,7 +687,11 @@ class _SessionPage extends StatelessWidget {
                           color: status.color.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(status.icon, color: status.color, size: 26),
+                        child: AppIcon(
+                          status.icon,
+                          color: status.color,
+                          size: 26,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -706,7 +711,7 @@ class _SessionPage extends StatelessWidget {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                Icon(
+                                AppIcon(
                                   Icons.schedule,
                                   size: 14,
                                   color: context.modeTextMuted,
@@ -732,7 +737,7 @@ class _SessionPage extends StatelessWidget {
                       IconButton(
                         tooltip: 'Delete session',
                         onPressed: onDelete,
-                        icon: Icon(
+                        icon: AppIcon(
                           Icons.delete_outline,
                           color: context.modeError,
                         ),
@@ -818,7 +823,7 @@ class _SessionPage extends StatelessWidget {
               emptyText: 'No support notes yet.',
               trailing: TextButton.icon(
                 onPressed: onEditSupportNotes,
-                icon: const Icon(Icons.edit_note, size: 18),
+                icon: const AppIcon(Icons.edit_note, size: 18),
                 label: const Text('Edit'),
               ),
             ),
@@ -879,7 +884,7 @@ class _ActionBar extends StatelessWidget {
           height: 46,
           child: ElevatedButton.icon(
             onPressed: onResume,
-            icon: const Icon(Icons.open_in_new, size: 18),
+            icon: const AppIcon(Icons.open_in_new, size: 18),
             label: const Text('Resume Order'),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.modePrimary,
@@ -904,7 +909,7 @@ class _ActionBar extends StatelessWidget {
                     height: 42,
                     child: OutlinedButton.icon(
                       onPressed: action.onPressed,
-                      icon: Icon(action.icon, size: 17),
+                      icon: AppIcon(action.icon, size: 17),
                       label: Text(
                         action.label,
                         maxLines: 1,
@@ -1011,7 +1016,7 @@ class _InfoTile extends StatelessWidget {
               color: context.modePrimary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: context.modePrimary, size: 18),
+            child: AppIcon(icon, color: context.modePrimary, size: 18),
           ),
           const SizedBox(width: 9),
           Expanded(
@@ -1089,7 +1094,7 @@ class _NotesBlock extends StatelessWidget {
                   color: context.modePrimary.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 17, color: context.modePrimary),
+                child: AppIcon(icon, size: 17, color: context.modePrimary),
               ),
               const SizedBox(width: 9),
               Expanded(
@@ -1258,7 +1263,7 @@ class _AutoStartNewOrderState extends State<_AutoStartNewOrder> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.receipt_long_outlined,
               size: 72,
               color: context.modeTextMuted,

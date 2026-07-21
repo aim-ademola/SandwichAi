@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notifications_screen.dart';
@@ -218,7 +219,7 @@ class _NotificationBellActionState extends State<NotificationBellAction> {
                     borderRadius: BorderRadius.circular(24),
                     child: IconButton(
                       tooltip: 'Notifications',
-                      icon: Icon(Icons.notifications_none_rounded),
+                      icon: AppIcon(Icons.notifications_none_rounded),
                       color: iconColor,
                       onPressed: () => _openNotificationsScreen(context),
                     ),

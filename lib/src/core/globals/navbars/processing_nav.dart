@@ -4,7 +4,7 @@ import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/feature_unavailable_screen.dart';
@@ -94,26 +94,26 @@ class ProcessingBottomNavBarState extends State<ProcessingBottomNavBar> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(
-                  icon: 'assets/svg/home.svg',
-                  activeIcon: 'assets/svg/home.svg',
+                  icon: HugeIcons.strokeRoundedDashboardSquare01,
+                  activeIcon: HugeIcons.strokeRoundedDashboardSquare01,
                   label: 'Home',
                   index: 0,
                 ),
                 _buildNavItem(
-                  icon: 'assets/svg/calc.svg',
-                  activeIcon: 'assets/svg/calc.svg',
+                  icon: HugeIcons.strokeRoundedCalculator,
+                  activeIcon: HugeIcons.strokeRoundedCalculator,
                   label: 'Recipe Calc',
                   index: 1,
                 ),
                 _buildNavItem(
-                  icon: 'assets/svg/solar_box-linear.svg',
-                  activeIcon: 'assets/svg/solar_box-linear.svg',
+                  icon: HugeIcons.strokeRoundedChartDecrease,
+                  activeIcon: HugeIcons.strokeRoundedChartDecrease,
                   label: 'Wastage Analysis',
                   index: 2,
                 ),
                 _buildNavItem(
-                  icon: 'assets/svg/chat.svg',
-                  activeIcon: 'assets/svg/chat.svg',
+                  icon: HugeIcons.strokeRoundedMessage01,
+                  activeIcon: HugeIcons.strokeRoundedMessage01,
                   label: 'Chat',
                   index: 3,
                 ),
@@ -126,8 +126,8 @@ class ProcessingBottomNavBarState extends State<ProcessingBottomNavBar> {
   }
 
   Widget _buildNavItem({
-    required String icon,
-    required String activeIcon,
+    required List<List<dynamic>> icon,
+    required List<List<dynamic>> activeIcon,
     required String label,
     required int index,
   }) {
@@ -154,14 +154,11 @@ class ProcessingBottomNavBarState extends State<ProcessingBottomNavBar> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset(
-                  isActive ? activeIcon : icon,
-                  width: 22,
-                  height: 22,
-                  colorFilter: ColorFilter.mode(
-                    isActive ? activeColor : inactiveColor,
-                    BlendMode.srcIn,
-                  ),
+                HugeIcon(
+                  icon: isActive ? activeIcon : icon,
+                  color: isActive ? activeColor : inactiveColor,
+                  size: 22,
+                  strokeWidth: 1.8,
                 ),
                 const SizedBox(height: 3),
                 Text(

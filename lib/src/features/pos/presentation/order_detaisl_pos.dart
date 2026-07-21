@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -192,7 +193,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${widget.orderItems.length} items • ₦${widget.totalAmount.toStringAsFixed(2)}',
+                          '${widget.orderItems.length} items â€¢ â‚¦${widget.totalAmount.toStringAsFixed(2)}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             color: Colors.white.withValues(alpha: 0.9),
@@ -202,7 +203,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: const AppIcon(Icons.close, color: Colors.white),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -345,7 +346,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    AppIcon(
                       _getOrderTypeIcon(type),
                       color: isSelected ? kPrimary : kprimaryTextColor2,
                       size: 28,
@@ -375,7 +376,11 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                       ),
                     ),
                     if (isSelected)
-                      const Icon(Icons.check_circle, color: kPrimary, size: 24),
+                      const AppIcon(
+                        Icons.check_circle,
+                        color: kPrimary,
+                        size: 24,
+                      ),
                   ],
                 ),
               ),
@@ -545,7 +550,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
 
           // Discount
           Text(
-            'Discount (₦)',
+            'Discount (â‚¦)',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -671,7 +676,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
           ),
         ),
         Text(
-          '₦${amount.toStringAsFixed(2)}',
+          'â‚¦${amount.toStringAsFixed(2)}',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: isTotal ? 16 : 14,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,

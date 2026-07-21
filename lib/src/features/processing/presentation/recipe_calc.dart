@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -167,13 +168,13 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           builder: (context, state) {
             if (state is RecipeForecastCalculated) {
               return IconButton(
-                icon: const Icon(Icons.refresh, color: Colors.black),
+                icon: const AppIcon(Icons.refresh, color: Colors.black),
                 onPressed: _resetCalculator,
                 tooltip: 'Reset',
               );
             }
             return IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.black),
+              icon: const AppIcon(Icons.refresh, color: Colors.black),
               onPressed: () {
                 context.read<MenuItemsBloc>().add(const LoadMenuItems());
               },
@@ -207,7 +208,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                     color: const Color(0xFFF5F5F5),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(
+                  child: const AppIcon(
                     Icons.calculate_outlined,
                     size: 24,
                     color: Colors.black87,
@@ -337,7 +338,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                           ),
                         ),
                       ),
-                      Icon(
+                      AppIcon(
                         _showDropdown
                             ? Icons.arrow_drop_up
                             : Icons.arrow_drop_down,
@@ -385,7 +386,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                   fontSize: 14,
                   color: const Color(0xFF9E9E9E),
                 ),
-                prefixIcon: const Icon(Icons.search, size: 20),
+                prefixIcon: const AppIcon(Icons.search, size: 20),
                 filled: true,
                 fillColor: const Color(0xFFF8F6F6),
                 border: OutlineInputBorder(
@@ -411,7 +412,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.search_off,
                           size: 48,
                           color: const Color(0xFF9E9E9E).withValues(alpha: 0.5),
@@ -477,7 +478,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                           ),
                         ),
                         trailing: isSelected
-                            ? const Icon(
+                            ? const AppIcon(
                                 Icons.check_circle,
                                 color: kPrimary,
                                 size: 20,
@@ -559,7 +560,11 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           ),
           child: Row(
             children: [
-              Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+              AppIcon(
+                Icons.error_outline,
+                color: Colors.red.shade700,
+                size: 20,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -599,7 +604,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           ),
           child: Column(
             children: [
-              Icon(
+              AppIcon(
                 Icons.restaurant_menu,
                 size: 48,
                 color: const Color(0xFF9E9E9E).withValues(alpha: 0.5),
@@ -673,7 +678,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
               horizontal: 16,
               vertical: 16,
             ),
-            suffixIcon: const Icon(Icons.people_outline),
+            suffixIcon: const AppIcon(Icons.people_outline),
           ),
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
@@ -727,7 +732,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.calculate, size: 20),
+                      const AppIcon(Icons.calculate, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'Calculate',
@@ -790,7 +795,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: const AppIcon(
                   Icons.restaurant,
                   color: Colors.white,
                   size: 28,
@@ -901,7 +906,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      const AppIcon(
                         Icons.attach_money,
                         color: Colors.white,
                         size: 20,
@@ -917,7 +922,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                     ],
                   ),
                   Text(
-                    '₦${forecast.estimatedCost!.toStringAsFixed(2)}',
+                    'â‚¦${forecast.estimatedCost!.toStringAsFixed(2)}',
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -947,7 +952,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.white, size: 20),
+          AppIcon(icon, color: Colors.white, size: 20),
           const SizedBox(height: 12),
           Text(
             label,
@@ -990,7 +995,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                   color: const Color(0xFFF5F5F5),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: const AppIcon(
                   Icons.shopping_basket_outlined,
                   size: 24,
                   color: Colors.black87,
@@ -1056,7 +1061,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
               color: const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.circle, size: 12, color: kPrimary),
+            child: const AppIcon(Icons.circle, size: 12, color: kPrimary),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1114,7 +1119,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          Icon(
+                          AppIcon(
                             Icons.trending_up,
                             size: 14,
                             color: kPrimary.withValues(alpha: 0.7),
@@ -1197,7 +1202,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                   color: const Color(0xFFF5F5F5),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: const AppIcon(
                   Icons.notes_outlined,
                   size: 24,
                   color: Colors.black87,

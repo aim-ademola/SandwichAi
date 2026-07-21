@@ -1,6 +1,7 @@
 // presentation/product_intake_details_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -21,7 +22,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: const AppIcon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
@@ -100,7 +101,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                     _buildInfoRow(
                       'Intake Date',
                       DateFormat(
-                        'MMMM dd, yyyy • hh:mm a',
+                        'MMMM dd, yyyy â€¢ hh:mm a',
                       ).format(intake.intakeDate),
                       Icons.calendar_today,
                     ),
@@ -180,7 +181,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                     _buildInfoRow(
                       'Created At',
                       DateFormat(
-                        'MMM dd, yyyy • hh:mm a',
+                        'MMM dd, yyyy â€¢ hh:mm a',
                       ).format(intake.createdAt),
                       Icons.add_circle_outline,
                     ),
@@ -188,7 +189,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                     _buildInfoRow(
                       'Last Updated',
                       DateFormat(
-                        'MMM dd, yyyy • hh:mm a',
+                        'MMM dd, yyyy â€¢ hh:mm a',
                       ).format(intake.updatedAt),
                       Icons.update,
                     ),
@@ -242,7 +243,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                     color: kPrimary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.inventory_2, color: kPrimary, size: 28),
+                  child: AppIcon(Icons.inventory_2, color: kPrimary, size: 28),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -311,7 +312,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: color ?? Colors.grey.shade600),
+              AppIcon(icon, size: 16, color: color ?? Colors.grey.shade600),
               const SizedBox(width: 6),
               Text(
                 label,
@@ -380,7 +381,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Colors.grey.shade600),
+          AppIcon(icon, size: 20, color: Colors.grey.shade600),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -434,7 +435,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                   : Colors.red.shade100,
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: AppIcon(
               intake.qualityStatus ? Icons.check_circle : Icons.cancel,
               color: intake.qualityStatus
                   ? Colors.green.shade700
@@ -457,8 +458,8 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   intake.qualityStatus
-                      ? 'Quality Passed ✓'
-                      : 'Quality Failed ✗',
+                      ? 'Quality Passed âœ“'
+                      : 'Quality Failed âœ—',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -517,7 +518,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: textColor),
+          AppIcon(icon, size: 16, color: textColor),
           const SizedBox(width: 6),
           Text(
             productType.displayName,

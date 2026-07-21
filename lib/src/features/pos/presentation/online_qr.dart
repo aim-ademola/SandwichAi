@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -85,7 +86,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
     );
   }
 
-  String _formatAmount(double amount) => '₦${amount.toStringAsFixed(2)}';
+  String _formatAmount(double amount) => 'â‚¦${amount.toStringAsFixed(2)}';
 
   String _formatExpiry(String dt) {
     try {
@@ -137,7 +138,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
         } else if (state is OnlinePaymentFailed) {
           _showFailureDialog(state.reason);
         }
-        // OnlinePaymentStillPending → do nothing
+        // OnlinePaymentStillPending â†’ do nothing
       },
       child: PopScope(
         canPop: false,
@@ -157,7 +158,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
               backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.close, color: Colors.black87),
+                icon: const AppIcon(Icons.close, color: Colors.black87),
                 onPressed: () async {
                   final leave = await _showExitDialog();
                   if (leave == true && context.mounted) {
@@ -220,7 +221,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline_rounded, color: kPrimary, size: 20),
+          AppIcon(Icons.info_outline_rounded, color: kPrimary, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -360,7 +361,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
               const SizedBox(width: 6),
               GestureDetector(
                 onTap: _copyReference,
-                child: Icon(
+                child: AppIcon(
                   Icons.copy_rounded,
                   size: 16,
                   color: kPrimary.withValues(alpha: 0.7),
@@ -386,7 +387,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
         ),
         const SizedBox(height: 10),
         Text(
-          'Waiting for payment confirmation…',
+          'Waiting for payment confirmationâ€¦',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 12,
             color: kprimaryTextColor2,
@@ -404,7 +405,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: _pollNow,
-            icon: const Icon(Icons.refresh_rounded, size: 18),
+            icon: const AppIcon(Icons.refresh_rounded, size: 18),
             label: Text(
               'Check Payment Status',
               style: WorkSansAppTextStyles.medium.copyWith(
@@ -457,7 +458,7 @@ class _OnlinePaymentQrScreenState extends State<OnlinePaymentQrScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            const Icon(Icons.cancel_rounded, color: Colors.red, size: 26),
+            const AppIcon(Icons.cancel_rounded, color: Colors.red, size: 26),
             const SizedBox(width: 10),
             Text(
               'Payment Failed',

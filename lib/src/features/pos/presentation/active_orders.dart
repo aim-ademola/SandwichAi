@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -272,7 +273,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                     ).withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
+                  child: AppIcon(
                     _getStatusIcon(order.status),
                     size: 21,
                     color: _getStatusColor(order.status),
@@ -303,7 +304,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                             borderRadius: BorderRadius.circular(6),
                             child: Padding(
                               padding: const EdgeInsets.all(4),
-                              child: Icon(
+                              child: AppIcon(
                                 Icons.copy_rounded,
                                 size: 15,
                                 color: context.modeTextMuted,
@@ -342,7 +343,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.person_outline_rounded,
                     size: 16,
                     color: context.modeTextMuted,
@@ -381,7 +382,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.info_outline_rounded,
                       size: 17,
                       color: context.modeError,
@@ -443,7 +444,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.payments_outlined,
                       size: 17,
                       color: context.modeWarning,
@@ -481,7 +482,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                             color: context.modeTextInverse,
                           ),
                         )
-                      : const Icon(Icons.check_circle_outline, size: 18),
+                      : const AppIcon(Icons.check_circle_outline, size: 18),
                   label: Text(
                     _confirmingOrderId == order.id
                         ? 'Confirming...'
@@ -598,7 +599,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: context.modeTextMuted),
+          AppIcon(icon, size: 14, color: context.modeTextMuted),
           const SizedBox(width: 5),
           Text(
             label,
@@ -685,7 +686,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.receipt_long_outlined,
               size: 80,
               color: context.modeTextMuted.withValues(alpha: 0.6),
@@ -715,7 +716,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                   const RefreshKitchenOrders(),
                 );
               },
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: const Text('Refresh'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,
@@ -744,7 +745,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               _getErrorIcon(state.errorType),
               size: 80,
               color: context.modeError,
@@ -774,7 +775,7 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
                   const LoadKitchenOrders(),
                 );
               },
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -128,7 +129,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
                       color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.tune_rounded,
                       color: context.modePrimary,
                       size: 24,
@@ -471,7 +472,7 @@ class _StockAdjustmentDialogState extends State<StockAdjustmentDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            AppIcon(
               icon,
               color: isSelected ? context.modeTextInverse : color,
               size: 24,

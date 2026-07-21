@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -74,7 +75,7 @@ class _GoodsReceivedHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: context.modeError),
+            AppIcon(Icons.error_outline, size: 64, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               'Error Loading Data',
@@ -96,7 +97,7 @@ class _GoodsReceivedHistoryScreenState
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _loadData,
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,
@@ -120,7 +121,7 @@ class _GoodsReceivedHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.inventory_2_outlined,
               size: 80,
               color: context.modeTextMuted.withValues(alpha: 0.45),
@@ -170,7 +171,7 @@ class _GoodsReceivedHistoryScreenState
   }
 
   Widget _buildReceiptCard(GoodsReceived receipt, double screenWidth) {
-    final dateFormat = DateFormat('MMM dd, yyyy • hh:mm a');
+    final dateFormat = DateFormat('MMM dd, yyyy â€¢ hh:mm a');
     final passRate = receipt.totalItems > 0
         ? (receipt.passedQC / receipt.totalItems * 100).toStringAsFixed(0)
         : '0';
@@ -219,7 +220,7 @@ class _GoodsReceivedHistoryScreenState
                         color: context.modePrimary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(
+                      child: AppIcon(
                         Icons.receipt_long,
                         color: context.modePrimary,
                         size: 24,
@@ -249,7 +250,7 @@ class _GoodsReceivedHistoryScreenState
                         ],
                       ),
                     ),
-                    Icon(
+                    AppIcon(
                       Icons.arrow_forward_ios,
                       size: 16,
                       color: context.modeTextMuted,
@@ -265,7 +266,7 @@ class _GoodsReceivedHistoryScreenState
                 const SizedBox(height: 8),
                 _buildInfoRow(
                   Icons.description,
-                  'Invoice: ${receipt.invoiceNo} • PO: ${receipt.poNumber}',
+                  'Invoice: ${receipt.invoiceNo} â€¢ PO: ${receipt.poNumber}',
                   screenWidth,
                 ),
                 const SizedBox(height: 8),
@@ -323,7 +324,7 @@ class _GoodsReceivedHistoryScreenState
   Widget _buildInfoRow(IconData icon, String text, double screenWidth) {
     return Row(
       children: [
-        Icon(
+        AppIcon(
           icon,
           size: _getIconSize(screenWidth),
           color: context.modeTextMuted,
@@ -411,7 +412,10 @@ class _GoodsReceivedHistoryScreenState
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, color: context.modeTextPrimary),
+                      icon: AppIcon(
+                        Icons.close,
+                        color: context.modeTextPrimary,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -436,7 +440,7 @@ class _GoodsReceivedHistoryScreenState
                       _buildDetailRow(
                         'Received At',
                         DateFormat(
-                          'MMM dd, yyyy • hh:mm a',
+                          'MMM dd, yyyy â€¢ hh:mm a',
                         ).format(receipt.receivedAt),
                       ),
                     ]),
@@ -596,7 +600,7 @@ class _GoodsReceivedHistoryScreenState
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.event, size: 14, color: context.modeTextMuted),
+                AppIcon(Icons.event, size: 14, color: context.modeTextMuted),
                 const SizedBox(width: 4),
                 Text(
                   'Expires: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(item.expiryDate!))}',

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/stock_notification_helper.dart';
@@ -40,7 +41,7 @@ class StockNotificationSettingsScreen extends StatelessWidget {
       elevation: 0,
       backgroundColor: context.modeSurface,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -70,7 +71,7 @@ class StockNotificationSettingsScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              AppIcon(
                 Icons.info_outline,
                 color: context.modePrimary,
                 size: _getHeaderIconSize(screenWidth),
@@ -229,7 +230,7 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
                       color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.notifications_active,
                       color: context.modePrimary,
                       size: _getMainIconSize(screenWidth),
@@ -352,7 +353,7 @@ class _NotificationTypeSettingsState extends State<NotificationTypeSettings> {
             color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
+          child: AppIcon(
             icon,
             color: iconColor,
             size: _getInfoIconSize(screenWidth),
@@ -620,7 +621,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                       color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.schedule,
                       color: context.modePrimary,
                       size: _getMainIconSize(screenWidth),
@@ -689,7 +690,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.access_time,
                           color: context.modePrimary,
                           size: _getSecondaryIconSize(screenWidth),
@@ -719,7 +720,7 @@ class _DailyStockCheckSettingsState extends State<DailyStockCheckSettings> {
                             ],
                           ),
                         ),
-                        Icon(
+                        AppIcon(
                           Icons.chevron_right,
                           color: context.modeTextSecondary,
                           size: _getSecondaryIconSize(screenWidth),

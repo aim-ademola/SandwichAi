@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +11,6 @@ import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/config/dev_login_config.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/config/responsive_config.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/navigation/department_navigation.dart';
 import 'package:sandwich_ai/src/features/auth/data/models/login_model.dart';
@@ -246,9 +246,10 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                           child: SizedBox(
                             width: loginIconSize,
                             height: loginIconSize,
-                            child: SvgPicture.asset(
-                              'assets/svg/person.svg',
-                              fit: BoxFit.contain,
+                            child: AppIcon(
+                              Icons.person_outline_rounded,
+                              color: context.modePrimary,
+                              size: loginIconSize,
                             ),
                           ),
                         ),
@@ -389,7 +390,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                                 );
                               },
                               suffixIcon: IconButton(
-                                icon: Icon(
+                                icon: AppIcon(
                                   obscurePassword
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
@@ -689,7 +690,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: AppIcon(
                   Icons.science_outlined,
                   color: context.modePrimary,
                   size: 19,

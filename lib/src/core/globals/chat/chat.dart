@@ -1,6 +1,7 @@
 // lib/src/features/chat/presentation/department_chat_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -74,7 +75,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   }
 
   void _onScroll() {
-    // Infinite scroll – load older messages when user scrolls to the very top
+    // Infinite scroll â€“ load older messages when user scrolls to the very top
     if (_scrollController.position.pixels <=
         _scrollController.position.minScrollExtent + 80) {
       final current = context.read<ChatBloc>().state;
@@ -121,7 +122,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
     super.dispose();
   }
-  //  Send text ──
+  //  Send text â”€â”€
 
   void _sendMessage() {
     final text = _messageController.text.trim();
@@ -156,14 +157,14 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         .toList();
   }
 
-  //  Send image ─
+  //  Send image â”€
 
   Future<void> _sendImageMessage(File imageFile) async {
     context.read<ChatBloc>().add(
       SendMessage(
         request: SendMessageRequest(
           chatRoomId: widget.roomId,
-          content: '📷 Photo',
+          content: 'ðŸ“· Photo',
           messageType: 'IMAGE',
           attachments: [imageFile.path],
         ),
@@ -177,7 +178,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       SendMessage(
         request: SendMessageRequest(
           chatRoomId: widget.roomId,
-          content: '📎 $fileName',
+          content: 'ðŸ“Ž $fileName',
           messageType: 'FILE',
           attachments: [file.path],
         ),
@@ -191,7 +192,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       SendMessage(
         request: SendMessageRequest(
           chatRoomId: widget.roomId,
-          content: '🎤 Voice message ${_formatDuration(duration)}',
+          content: 'ðŸŽ¤ Voice message ${_formatDuration(duration)}',
           messageType: 'VOICE',
           attachments: [filePath],
         ),
@@ -200,9 +201,9 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     _scrollToBottom();
   }
 
-  //  Mark read ──
+  //  Mark read â”€â”€
 
-  // In _markRoomAsRead — use .id not .messageId
+  // In _markRoomAsRead â€” use .id not .messageId
   void _markRoomAsRead(List<ChatMessageModel> messages) {
     if (messages.isEmpty) return;
 
@@ -237,7 +238,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     });
   }
 
-  //  Reply ─
+  //  Reply â”€
 
   void _cancelReply() => setState(() => _replyToMessage = null);
 
@@ -256,7 +257,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.reply, color: context.modePrimary),
+                leading: AppIcon(Icons.reply, color: context.modePrimary),
                 title: Text(
                   'Reply',
                   style: TextStyle(color: context.modeTextPrimary),
@@ -268,7 +269,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.copy, color: context.modePrimary),
+                leading: AppIcon(Icons.copy, color: context.modePrimary),
                 title: Text(
                   'Copy',
                   style: TextStyle(color: context.modeTextPrimary),
@@ -282,7 +283,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               ),
               Divider(height: 0, color: context.modeDivider),
               ListTile(
-                leading: Icon(Icons.close, color: context.modeTextSecondary),
+                leading: AppIcon(Icons.close, color: context.modeTextSecondary),
                 title: Text(
                   'Cancel',
                   style: TextStyle(color: context.modeTextPrimary),
@@ -442,7 +443,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(
+                leading: AppIcon(
                   room?.isMuted == true
                       ? Icons.notifications_active_outlined
                       : Icons.notifications_off_outlined,
@@ -467,7 +468,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(
+                leading: AppIcon(
                   room?.isStarred == true ? Icons.star : Icons.star_border,
                   color: context.modePrimary,
                 ),
@@ -488,7 +489,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(
+                leading: AppIcon(
                   room?.isPinned == true
                       ? Icons.push_pin
                       : Icons.push_pin_outlined,
@@ -511,7 +512,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.search, color: context.modePrimary),
+                leading: AppIcon(Icons.search, color: context.modePrimary),
                 title: Text(
                   'Search messages',
                   style: TextStyle(color: context.modeTextPrimary),
@@ -523,7 +524,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               ),
               Divider(height: 0, color: context.modeDivider),
               ListTile(
-                leading: Icon(Icons.close, color: context.modeTextSecondary),
+                leading: AppIcon(Icons.close, color: context.modeTextSecondary),
                 title: Text(
                   'Cancel',
                   style: TextStyle(color: context.modeTextPrimary),
@@ -537,7 +538,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     );
   }
 
-  //  Helpers ──
+  //  Helpers â”€â”€
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -602,7 +603,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               ),
               Divider(height: 0, color: context.modeDivider),
               ListTile(
-                leading: Icon(Icons.close, color: context.modeTextSecondary),
+                leading: AppIcon(Icons.close, color: context.modeTextSecondary),
                 title: Text(
                   'Cancel',
                   style: TextStyle(color: context.modeTextPrimary),
@@ -628,14 +629,14 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
           color: context.modePrimary.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: context.modePrimary),
+        child: AppIcon(icon, color: context.modePrimary),
       ),
       title: Text(label, style: TextStyle(color: context.modeTextPrimary)),
       onTap: onTap,
     );
   }
 
-  //  Build ──
+  //  Build â”€â”€
 
   @override
   Widget build(BuildContext context) {
@@ -725,7 +726,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       elevation: 1,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () {
           widget.showNavBarCallback?.call();
         },
@@ -739,7 +740,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               color: widget.department.color,
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: AppIcon(
               widget.department.icon,
               color: context.modeTextInverse,
               size: 20,
@@ -797,21 +798,21 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             ),
           ),
         IconButton(
-          icon: Icon(
+          icon: AppIcon(
             _isSearching ? Icons.search_off : Icons.search,
             color: context.modeTextPrimary,
           ),
           onPressed: _toggleSearch,
         ),
         IconButton(
-          icon: Icon(Icons.more_vert, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.more_vert, color: context.modeTextPrimary),
           onPressed: () => _showChatOptions(room),
         ),
       ],
     );
   }
 
-  //  Body states ─
+  //  Body states â”€
 
   Widget _buildBody(ChatState state, List<ChatMessageModel> messages) {
     if (state is ChatMessagesLoading && state.chatRoomId == widget.roomId) {
@@ -857,7 +858,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               color: widget.department.color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: AppIcon(
               widget.department.icon,
               size: 50,
               color: widget.department.color,
@@ -893,7 +894,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.wifi_off_rounded,
               size: 56,
               color: context.modeTextMuted,
@@ -922,7 +923,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     );
   }
 
-  //  Search overlay ─
+  //  Search overlay â”€
 
   Widget _buildSearchBar() {
     return Container(
@@ -945,7 +946,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                   fontSize: 14,
                   color: context.modeTextSecondary,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: AppIcon(
                   Icons.search,
                   color: context.modePrimary,
                   size: 20,
@@ -1052,7 +1053,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     );
   }
 
-  //  Date header ─
+  //  Date header â”€
 
   Widget _buildDateHeader(DateTime date) {
     return Padding(
@@ -1074,7 +1075,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     );
   }
 
-  //  Message bubble ─
+  //  Message bubble â”€
 
   Widget _buildMessageBubble(
     ChatMessageModel message,
@@ -1168,7 +1169,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                       if (message.isEdited) ...[
                         const SizedBox(width: 4),
                         Text(
-                          '• edited',
+                          'â€¢ edited',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 10,
                             color: context.modeTextSecondary,
@@ -1213,9 +1214,9 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   Widget _buildSendStatus(ChatMessageModel message) {
     if (message.id.startsWith('temp_')) {
-      return Icon(Icons.access_time, size: 14, color: context.modeTextMuted);
+      return AppIcon(Icons.access_time, size: 14, color: context.modeTextMuted);
     }
-    return Icon(Icons.done_all, size: 14, color: context.modeTextSecondary);
+    return AppIcon(Icons.done_all, size: 14, color: context.modeTextSecondary);
   }
 
   Widget _buildAvatar(ChatMessageModel message) {
@@ -1262,7 +1263,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         children: [
           Row(
             children: [
-              Icon(
+              AppIcon(
                 Icons.reply,
                 size: 14,
                 color: isMe
@@ -1329,14 +1330,14 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            AppIcon(
               Icons.insert_drive_file,
               color: isMe ? context.modeTextInverse : context.modePrimary,
             ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                message.content.replaceFirst('📎 ', ''),
+                message.content.replaceFirst('ðŸ“Ž ', ''),
                 style: TextStyle(
                   color: isMe
                       ? context.modeTextInverse
@@ -1368,7 +1369,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       color: isMe
           ? context.modeTextInverse.withValues(alpha: 0.2)
           : context.modeSurfaceAlt,
-      child: Icon(
+      child: AppIcon(
         Icons.image,
         size: 60,
         color: isMe ? context.modeTextInverse : context.modeTextSecondary,
@@ -1380,7 +1381,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
+        AppIcon(
           Icons.play_circle_filled,
           color: isMe ? context.modeTextInverse : context.modePrimary,
           size: 32,
@@ -1429,7 +1430,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     );
   }
 
-  //  Reply preview bar ──
+  //  Reply preview bar â”€â”€
 
   Widget _buildReplyPreview() {
     return Container(
@@ -1472,7 +1473,11 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.close, size: 20, color: context.modeTextSecondary),
+            icon: AppIcon(
+              Icons.close,
+              size: 20,
+              color: context.modeTextSecondary,
+            ),
             onPressed: _cancelReply,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -1539,11 +1544,11 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.delete_outline, color: context.modeError),
+              icon: AppIcon(Icons.delete_outline, color: context.modeError),
               onPressed: _cancelRecording,
             ),
             IconButton(
-              icon: Icon(Icons.send, color: context.modePrimary),
+              icon: AppIcon(Icons.send, color: context.modePrimary),
               onPressed: _stopRecording,
             ),
           ],
@@ -1552,7 +1557,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     );
   }
 
-  //  Message input bar ──
+  //  Message input bar â”€â”€
 
   Widget _buildMessageInput() {
     return Container(
@@ -1607,7 +1612,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(
+                icon: AppIcon(
                   Icons.send,
                   color: context.modeTextInverse,
                   size: 20,
@@ -1622,7 +1627,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     );
   }
 
-  //  Utils ──
+  //  Utils â”€â”€
 
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;

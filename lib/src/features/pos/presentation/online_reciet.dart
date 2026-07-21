@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -71,16 +72,16 @@ class _OnlineReceiptScreenState extends State<OnlineReceiptScreen>
 
   String _formatAmount(String amount) {
     try {
-      return '₦${double.parse(amount).toStringAsFixed(2)}';
+      return 'â‚¦${double.parse(amount).toStringAsFixed(2)}';
     } catch (_) {
-      return '₦$amount';
+      return 'â‚¦$amount';
     }
   }
 
   String _formatDate(String dt) {
     try {
       final wat = DateTime.parse(dt).toUtc().add(const Duration(hours: 1));
-      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
+      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(wat);
     } catch (_) {
       return dt;
     }
@@ -116,7 +117,7 @@ class _OnlineReceiptScreenState extends State<OnlineReceiptScreen>
     final brand = meta['cardBrand']?.toString() ?? '';
     final last4 = meta['cardLast4']?.toString() ?? '';
     if (brand.isNotEmpty && last4.isNotEmpty) {
-      return '${brand[0].toUpperCase()}${brand.substring(1)} •••• $last4';
+      return '${brand[0].toUpperCase()}${brand.substring(1)} â€¢â€¢â€¢â€¢ $last4';
     }
     return '';
   }
@@ -193,7 +194,7 @@ class _OnlineReceiptScreenState extends State<OnlineReceiptScreen>
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Text(
-                    '✓  Payment Completed',
+                    'âœ“  Payment Completed',
                     style: pw.TextStyle(
                       fontSize: 16,
                       fontWeight: pw.FontWeight.bold,
@@ -358,7 +359,7 @@ class _OnlineReceiptScreenState extends State<OnlineReceiptScreen>
                         color: Colors.green.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: const AppIcon(
                         Icons.check_circle_rounded,
                         color: Colors.green,
                         size: 54,
@@ -517,14 +518,14 @@ class _OnlineReceiptScreenState extends State<OnlineReceiptScreen>
                                 ),
                               ),
                             )
-                          : const Icon(
+                          : const AppIcon(
                               Icons.download_rounded,
                               color: Colors.white,
                               size: 20,
                             ),
                       label: Text(
                         _isGeneratingPdf
-                            ? 'Generating PDF…'
+                            ? 'Generating PDFâ€¦'
                             : 'Download Receipt',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 15,
@@ -543,7 +544,7 @@ class _OnlineReceiptScreenState extends State<OnlineReceiptScreen>
                   ),
                   const SizedBox(height: 10),
 
-                  // Done — marks session completed
+                  // Done â€” marks session completed
                   SizedBox(
                     width: double.infinity,
                     height: 54,

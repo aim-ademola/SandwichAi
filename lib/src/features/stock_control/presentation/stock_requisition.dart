@@ -243,7 +243,7 @@
 //                 backgroundColor: Colors.white,
 //                 elevation: 0,
 //                 leading: IconButton(
-//                   icon: const Icon(Icons.arrow_back, color: Colors.black),
+//                   icon: const AppIcon(Icons.arrow_back, color: Colors.black),
 //                   onPressed: () => Navigator.pop(context),
 //                 ),
 //                 title: Text(
@@ -449,7 +449,7 @@
 //                           ),
 //                         ),
 //                         IconButton(
-//                           icon: const Icon(Icons.close, size: 20),
+//                           icon: const AppIcon(Icons.close, size: 20),
 //                           color: Colors.red,
 //                           onPressed: () => _removeItem(index),
 //                         ),
@@ -573,7 +573,7 @@
 //             ),
 //             child: Row(
 //               children: [
-//                 Icon(Icons.search, color: kprimaryTextColor2, size: 20),
+//                 AppIcon(Icons.search, color: kprimaryTextColor2, size: 20),
 //                 const SizedBox(width: 12),
 //                 Expanded(
 //                   child: Text(
@@ -586,7 +586,7 @@
 //                     ),
 //                   ),
 //                 ),
-//                 Icon(
+//                 AppIcon(
 //                   _isOpened ? Icons.arrow_drop_down : Icons.arrow_drop_up,
 //                   color: kprimaryTextColor2,
 //                   size: 24,
@@ -635,7 +635,7 @@
 //                   fontSize: 14,
 //                   color: kprimaryTextColor2,
 //                 ),
-//                 prefixIcon: const Icon(Icons.search, size: 20),
+//                 prefixIcon: const AppIcon(Icons.search, size: 20),
 //                 border: OutlineInputBorder(
 //                   borderRadius: BorderRadius.circular(8),
 //                   borderSide: BorderSide(color: Colors.grey.shade300),
@@ -699,7 +699,7 @@
 //                                   color: kPrimary.withValues(alpha: 0.1),
 //                                   borderRadius: BorderRadius.circular(6),
 //                                 ),
-//                                 child: const Icon(
+//                                 child: const AppIcon(
 //                                   Icons.inventory_2_outlined,
 //                                   color: kPrimary,
 //                                   size: 18,
@@ -798,7 +798,7 @@
 //         //         color: kPrimary,
 //         //         borderRadius: BorderRadius.circular(8),
 //         //       ),
-//         //       child: const Icon(Icons.add, color: Colors.white, size: 24),
+//         //       child: const AppIcon(Icons.add, color: Colors.white, size: 24),
 //         //     ),
 //         //   ),
 //         // ),
@@ -822,7 +822,7 @@
 //             child: Column(
 //               mainAxisAlignment: MainAxisAlignment.center,
 //               children: [
-//                 Icon(Icons.error_outline, size: 60, color: Colors.red.shade300),
+//                 AppIcon(Icons.error_outline, size: 60, color: Colors.red.shade300),
 //                 const SizedBox(height: 16),
 //                 Text(
 //                   'Error loading transfers',
@@ -963,7 +963,7 @@
 //         child: Column(
 //           mainAxisAlignment: MainAxisAlignment.center,
 //           children: [
-//             Icon(icon, size: 80, color: Colors.grey.shade300),
+//             AppIcon(icon, size: 80, color: Colors.grey.shade300),
 //             const SizedBox(height: 24),
 //             Text(
 //               title,
@@ -992,7 +992,7 @@
 //     ProcessingTransferResponse transfer, {
 //     required bool isPending,
 //   }) {
-//     final dateFormat = DateFormat('MMM dd, yyyy • hh:mm a');
+//     final dateFormat = DateFormat('MMM dd, yyyy â€¢ hh:mm a');
 //     final formattedDate = dateFormat.format(transfer.createdAt);
 
 //     return Container(
@@ -1066,7 +1066,7 @@
 //           const SizedBox(height: 12),
 //           Row(
 //             children: [
-//               Icon(
+//               AppIcon(
 //                 Icons.inventory_2_outlined,
 //                 size: 18,
 //                 color: kprimaryTextColor2,
@@ -1086,7 +1086,7 @@
 //             Row(
 //               crossAxisAlignment: CrossAxisAlignment.start,
 //               children: [
-//                 Icon(Icons.note_outlined, size: 18, color: kprimaryTextColor2),
+//                 AppIcon(Icons.note_outlined, size: 18, color: kprimaryTextColor2),
 //                 const SizedBox(width: 8),
 //                 Expanded(
 //                   child: Text(
@@ -1117,7 +1117,7 @@
 //                   ),
 //                 ),
 //                 const SizedBox(width: 4),
-//                 const Icon(Icons.arrow_forward_ios, size: 14, color: kPrimary),
+//                 const AppIcon(Icons.arrow_forward_ios, size: 14, color: kPrimary),
 //               ],
 //             ),
 //           ),
@@ -1130,7 +1130,7 @@
 //     ProcessingTransferResponse transfer,
 //     bool isPending,
 //   ) {
-//     final dateFormat = DateFormat('MMMM dd, yyyy • hh:mm a');
+//     final dateFormat = DateFormat('MMMM dd, yyyy â€¢ hh:mm a');
 //     final formattedDate = dateFormat.format(transfer.createdAt);
 
 //     showModalBottomSheet(
@@ -1182,7 +1182,7 @@
 //                     ),
 //                   ),
 //                   IconButton(
-//                     icon: const Icon(Icons.close),
+//                     icon: const AppIcon(Icons.close),
 //                     onPressed: () => Navigator.pop(context),
 //                   ),
 //                 ],

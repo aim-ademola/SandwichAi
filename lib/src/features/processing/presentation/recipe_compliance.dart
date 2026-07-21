@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -385,7 +386,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
             ),
             child: Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.search,
                   color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
@@ -405,14 +406,14 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                   ),
                 ),
                 _isOpened
-                    ? Icon(
+                    ? AppIcon(
                         Icons.arrow_drop_down,
                         color: context.modeTextSecondary,
                         size: _getIconSize(screenWidth) + 4,
                       )
                     : Transform.rotate(
                         angle: -90 * 3.14159 / 180,
-                        child: Icon(
+                        child: AppIcon(
                           Icons.arrow_drop_down,
                           color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth) + 4,
@@ -467,14 +468,14 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                         fontSize: _getInputFontSize(screenWidth),
                         color: context.modeTextSecondary,
                       ),
-                      prefixIcon: Icon(
+                      prefixIcon: AppIcon(
                         Icons.search,
                         color: context.modeTextSecondary,
                         size: _getIconSize(screenWidth),
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
-                              icon: Icon(
+                              icon: AppIcon(
                                 Icons.clear,
                                 color: context.modeTextSecondary,
                                 size: _getIconSize(screenWidth),
@@ -516,7 +517,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                   onPressed: () {
                     context.read<RecipeComplianceBloc>().add(LoadMenuItems());
                   },
-                  icon: Icon(Icons.refresh, color: context.modePrimary),
+                  icon: AppIcon(Icons.refresh, color: context.modePrimary),
                 ),
               ),
             ],
@@ -589,7 +590,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                                     24,
                                                 color: context.modePrimary
                                                     .withValues(alpha: 0.1),
-                                                child: Icon(
+                                                child: AppIcon(
                                                   Icons.restaurant_menu,
                                                   color: context.modePrimary,
                                                   size: _getIconSize(
@@ -610,7 +611,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                             8,
                                           ),
                                         ),
-                                        child: Icon(
+                                        child: AppIcon(
                                           Icons.restaurant_menu,
                                           color: context.modePrimary,
                                           size: _getIconSize(screenWidth),
@@ -635,7 +636,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} • ${item.preparationTime} mins',
+                                      '${item.category} â€¢ ${item.preparationTime} mins',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(

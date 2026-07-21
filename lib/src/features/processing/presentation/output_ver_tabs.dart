@@ -1,6 +1,7 @@
 // presentation/output_verification_tab_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -47,7 +48,7 @@ class _OutputVerificationTabScreenState
             backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              icon: const AppIcon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(

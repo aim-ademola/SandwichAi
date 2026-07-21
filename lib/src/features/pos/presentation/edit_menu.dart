@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -178,7 +179,7 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(
+                          icon: const AppIcon(
                             Icons.close,
                             color: kprimaryTextColor2,
                           ),
@@ -344,7 +345,7 @@ class _EditMenuItemDialogState extends State<EditMenuItemDialog> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Price (₦)',
+                                'Price (â‚¦)',
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,

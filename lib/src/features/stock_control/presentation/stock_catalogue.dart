@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -61,7 +62,7 @@ class _StockCatalogScreenState extends State<StockCatalogScreen> {
       ),
       actions: [
         IconButton(
-          icon: Icon(
+          icon: AppIcon(
             _isTableView ? Icons.grid_view : Icons.table_chart,
             color: context.modeTextInverse,
           ),
@@ -73,7 +74,7 @@ class _StockCatalogScreenState extends State<StockCatalogScreen> {
           tooltip: _isTableView ? 'Card View' : 'Table View',
         ),
         IconButton(
-          icon: Icon(Icons.add, color: context.modeTextInverse),
+          icon: AppIcon(Icons.add, color: context.modeTextInverse),
           onPressed: () async {
             Navigator.push(
               context,

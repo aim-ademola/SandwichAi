@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -51,7 +52,7 @@ class FeatureUnavailableScreen extends StatelessWidget {
                     color: context.modeWarning.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: Icon(
+                  child: AppIcon(
                     Icons.lock_outline_rounded,
                     color: context.modeWarning,
                     size: 34,

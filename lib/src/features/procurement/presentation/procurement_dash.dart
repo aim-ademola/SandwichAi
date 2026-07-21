@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -101,7 +102,7 @@ class _ProcurementDashboardScreenState
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.menu, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
         onPressed: () {
           _scaffoldKey.currentState?.openDrawer();
         },
@@ -361,7 +362,7 @@ class _ProcurementDashboardScreenState
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              '₦350,000 / ₦500,000',
+              'â‚¦350,000 / â‚¦500,000',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: budgetFontSize,
                 fontWeight: FontWeight.w600,
@@ -720,7 +721,11 @@ class _ProcurementDashboardScreenState
                 color: context.modeTextPrimary,
               ),
             ),
-            Icon(Icons.chevron_right, color: context.modeTextMuted, size: 20),
+            AppIcon(
+              Icons.chevron_right,
+              color: context.modeTextMuted,
+              size: 20,
+            ),
           ],
         ),
       ),
@@ -750,7 +755,7 @@ class _ProcurementDashboardScreenState
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: context.modeError, size: 24),
+          AppIcon(Icons.error_outline, color: context.modeError, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -776,7 +781,7 @@ class _ProcurementDashboardScreenState
             ),
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: context.modeError),
+            icon: AppIcon(Icons.refresh, color: context.modeError),
             onPressed:
                 onRetry ??
                 () {
@@ -1004,7 +1009,7 @@ class _ProcurementDashboardScreenState
               color: iconBgColor,
               borderRadius: BorderRadius.circular(100),
             ),
-            child: Icon(icon, color: iconColor, size: iconSize * 0.5),
+            child: AppIcon(icon, color: iconColor, size: iconSize * 0.5),
           ),
           const SizedBox(width: 12),
           Expanded(

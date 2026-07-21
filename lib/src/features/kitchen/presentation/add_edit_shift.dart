@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -221,7 +222,10 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: Icon(Icons.close, color: context.modeTextPrimary),
+                      icon: AppIcon(
+                        Icons.close,
+                        color: context.modeTextPrimary,
+                      ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
@@ -347,7 +351,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                                 : context.modeTextSecondary,
                           ),
                         ),
-                        Icon(
+                        AppIcon(
                           Icons.calendar_today,
                           color: context.modePrimary,
                           size: 20,
@@ -433,7 +437,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                                       : context.modeTextSecondary,
                                 ),
                               ),
-                              Icon(
+                              AppIcon(
                                 Icons.access_time,
                                 color: context.modePrimary,
                                 size: 20,
@@ -476,7 +480,7 @@ class _AddShiftDialogState extends State<AddShiftDialog> {
                                       : context.modeTextSecondary,
                                 ),
                               ),
-                              Icon(
+                              AppIcon(
                                 Icons.access_time,
                                 color: context.modePrimary,
                                 size: 20,
@@ -651,7 +655,7 @@ class ShiftDetailsSheet extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: Icon(Icons.close, color: context.modeTextPrimary),
+                icon: AppIcon(Icons.close, color: context.modeTextPrimary),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),

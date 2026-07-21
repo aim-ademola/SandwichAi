@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -44,7 +45,7 @@ class OrderSummaryScreen extends StatefulWidget {
 }
 
 class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
-  //  Core calculations ─
+  //  Core calculations â”€
 
   double _calculateSubtotal() {
     double subtotal = 0;
@@ -68,11 +69,11 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
     return _taxableAmount() + _calculateTotalTax(salesTaxes);
   }
 
-  String _formatPrice(double price) => '₦${price.toStringAsFixed(2)}';
+  String _formatPrice(double price) => 'â‚¦${price.toStringAsFixed(2)}';
 
   bool get _isDineIn => _normalizeOrderType(widget.orderType) == 'DINE_IN';
 
-  //  Navigation ──
+  //  Navigation â”€â”€
 
   void _confirmOrder() {
     final items = widget.orderItems.entries.map((entry) {
@@ -145,7 +146,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
     }
   }
 
-  //  Build ─
+  //  Build â”€
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +192,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
             backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
+              icon: const AppIcon(Icons.arrow_back, color: kprimaryTextColor1),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -225,7 +226,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
 
               return Column(
                 children: [
-                  // ── Scrollable body ─
+                  // â”€â”€ Scrollable body â”€
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -287,7 +288,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                             const SizedBox(height: 12),
                           ],
 
-                          // ── Tax rows
+                          // â”€â”€ Tax rows
                           if (taxState is TaxConfigLoading)
                             _TaxLoadingRow()
                           else if (taxState is TaxConfigError)
@@ -343,7 +344,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                     ),
                   ),
 
-                  // ── Bottom CTA
+                  // â”€â”€ Bottom CTA
                   BlocBuilder<PosOrderBloc, PosOrderState>(
                     builder: (context, orderState) {
                       return _BottomCta(
@@ -374,7 +375,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
     );
   }
 
-  //  Helpers ──
+  //  Helpers â”€â”€
 
   Widget _buildSummaryRow(
     String label,
@@ -405,7 +406,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
   }
 }
 
-//  Sub-widgets ─
+//  Sub-widgets â”€
 
 class _OrderDetailsCard extends StatelessWidget {
   final OrderSummaryScreen widget;
@@ -425,7 +426,7 @@ class _OrderDetailsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              AppIcon(
                 _getOrderTypeIcon(widget.orderType),
                 color: kPrimary,
                 size: 20,
@@ -461,7 +462,7 @@ class _OrderDetailsCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  const AppIcon(
                     Icons.restaurant_menu_rounded,
                     color: kPrimary,
                     size: 18,
@@ -596,7 +597,7 @@ class _OrderItemCard extends StatelessWidget {
                       width: 48,
                       height: 48,
                       color: Colors.grey[300],
-                      child: const Icon(Icons.restaurant, size: 24),
+                      child: const AppIcon(Icons.restaurant, size: 24),
                     );
                   },
                 ),
@@ -646,7 +647,7 @@ class _OrderItemCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.edit_note, size: 16, color: kPrimary),
+                  const AppIcon(Icons.edit_note, size: 16, color: kPrimary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -760,7 +761,11 @@ class _TaxErrorRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, size: 16, color: Colors.red),
+          const AppIcon(
+            Icons.warning_amber_rounded,
+            size: 16,
+            color: Colors.red,
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: Text(

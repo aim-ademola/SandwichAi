@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -308,7 +309,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, color: context.modeTextSecondary),
+                      icon: AppIcon(
+                        Icons.close,
+                        color: context.modeTextSecondary,
+                      ),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -344,7 +348,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.lightbulb_outline,
                           color: context.modePrimary,
                           size: 24,
@@ -522,7 +526,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: context.modeError),
+                    AppIcon(Icons.error_outline, color: context.modeError),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -587,7 +591,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   fontSize: inputFontSize,
                   color: context.modeTextPrimary,
                 ),
-                icon: Icon(
+                icon: AppIcon(
                   Icons.keyboard_arrow_down,
                   color: context.modeTextSecondary,
                 ),
@@ -650,7 +654,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                         ),
                       ),
                     ),
-                    Icon(
+                    AppIcon(
                       Icons.check_circle,
                       color: Colors.green.shade600,
                       size: 20,
@@ -703,7 +707,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   color: context.modePrimary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: AppIcon(
                   Icons.help_outline,
                   size: 16,
                   color: context.modePrimary,
@@ -739,7 +743,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             fontSize: inputFontSize,
             color: context.modeTextPrimary,
           ),
-          icon: Icon(
+          icon: AppIcon(
             Icons.keyboard_arrow_down,
             color: context.modeTextSecondary,
           ),
@@ -778,7 +782,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   color: context.modePrimary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: AppIcon(
                   Icons.help_outline,
                   size: 16,
                   color: context.modePrimary,
@@ -814,7 +818,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             fontSize: inputFontSize,
             color: context.modeTextPrimary,
           ),
-          icon: Icon(
+          icon: AppIcon(
             Icons.keyboard_arrow_down,
             color: context.modeTextSecondary,
           ),
@@ -857,7 +861,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 color: context.modeTextPrimary,
               ),
             ),
-            Icon(
+            AppIcon(
               Icons.calendar_today_outlined,
               color: context.modeTextSecondary,
               size: 20,
@@ -924,7 +928,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               ),
               if (_lineItems.length > 1)
                 IconButton(
-                  icon: Icon(Icons.close, size: 20, color: context.modeError),
+                  icon: AppIcon(
+                    Icons.close,
+                    size: 20,
+                    color: context.modeError,
+                  ),
                   onPressed: () => _removeLineItem(index),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -1023,8 +1031,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       ),
                       child: Text(
                         item.selectedProductPrice != null
-                            ? '₦${NumberFormat('#,##0.00').format(item.selectedProductPrice)}'
-                            : '₦0.00',
+                            ? 'â‚¦${NumberFormat('#,##0.00').format(item.selectedProductPrice)}'
+                            : 'â‚¦0.00',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: inputFontSize,
                           color: context.modeTextPrimary,
@@ -1099,7 +1107,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     ),
                   ),
                   Text(
-                    '₦${NumberFormat('#,##0.00').format(item.total)}',
+                    'â‚¦${NumberFormat('#,##0.00').format(item.total)}',
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: labelFontSize + 1,
                       fontWeight: FontWeight.w700,
@@ -1182,7 +1190,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               fontSize: inputFontSize,
               color: context.modeTextPrimary,
             ),
-            icon: Icon(
+            icon: AppIcon(
               Icons.keyboard_arrow_down,
               color: context.modeTextSecondary,
             ),
@@ -1203,7 +1211,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '₦${NumberFormat('#,##0.00').format(double.parse(product.baseUnitPrice))} per ${product.unitType}',
+                      'â‚¦${NumberFormat('#,##0.00').format(double.parse(product.baseUnitPrice))} per ${product.unitType}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: inputFontSize - 2,
                         color: context.modeTextSecondary,
@@ -1262,7 +1270,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        icon: const Icon(Icons.add_circle_outline, size: 20),
+        icon: const AppIcon(Icons.add_circle_outline, size: 20),
         label: Text(
           'Add Another Item',
           style: WorkSansAppTextStyles.medium.copyWith(
@@ -1340,7 +1348,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 color: context.modePrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: context.modePrimary, size: 20),
+              child: AppIcon(icon, color: context.modePrimary, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1476,7 +1484,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 color: context.modeSuccess.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.check_circle,
                 color: context.modeSuccess,
                 size: 32,
@@ -1627,7 +1635,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       backgroundColor: context.modeSurface,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -1762,7 +1770,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                                       ),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: AppIcon(
                                       Icons.help_outline,
                                       size: 16,
                                       color: context.modePrimary,
@@ -1793,7 +1801,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                                       ),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: AppIcon(
                                       Icons.help_outline,
                                       size: 16,
                                       color: context.modePrimary,

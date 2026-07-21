@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 
@@ -203,7 +204,7 @@ class _EditorToolbar extends StatelessWidget {
             message: htmlMode ? 'HTML mode' : 'Rich editor mode',
             child: TextButton.icon(
               onPressed: onToggleMode,
-              icon: Icon(
+              icon: AppIcon(
                 htmlMode ? Icons.code_off : Icons.code,
                 size: 18,
                 color: context.modePrimary,
@@ -240,7 +241,7 @@ class _ToolButton extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       visualDensity: VisualDensity.compact,
-      icon: Icon(icon, size: 19, color: context.modeTextPrimary),
+      icon: AppIcon(icon, size: 19, color: context.modeTextPrimary),
       onPressed: onPressed,
     );
   }

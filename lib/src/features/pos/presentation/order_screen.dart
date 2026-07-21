@@ -3,8 +3,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -133,7 +133,7 @@ class _OrderScreenState extends State<OrderScreen>
       case MinimizedScreen.orderSummary:
         if (details == null) return;
         // Need menu items to reconstruct the orderedItemsMap.
-        // We push OrderSummaryScreen directly — it only needs the data maps.
+        // We push OrderSummaryScreen directly â€” it only needs the data maps.
         final menuState = context.read<MenuItemsBloc>().state;
         final allItems = menuState is MenuItemsLoaded
             ? menuState.menuItems
@@ -288,7 +288,7 @@ class _OrderScreenState extends State<OrderScreen>
     }
   }
 
-  // ── Item management ───────────────────────────────────────────────────────
+  // â”€â”€ Item management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   void _addItem(String itemId) {
     _orderItems[itemId] = (_orderItems[itemId] ?? 0) + 1;
@@ -618,7 +618,7 @@ class _OrderScreenState extends State<OrderScreen>
     }
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   @override
   Widget build(BuildContext context) {
@@ -708,7 +708,7 @@ class _OrderScreenState extends State<OrderScreen>
                 ),
               ),
               const SizedBox(width: 4),
-              Icon(
+              AppIcon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 22,
                 color: context.modeTextPrimary,
@@ -809,7 +809,7 @@ class _OrderScreenState extends State<OrderScreen>
                 ),
               ],
             ),
-            child: Icon(icon, size: 24, color: iconColor),
+            child: AppIcon(icon, size: 24, color: iconColor),
           ),
         ),
       ),
@@ -821,7 +821,11 @@ class _OrderScreenState extends State<OrderScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.restaurant_menu, size: 80, color: context.modeTextMuted),
+          AppIcon(
+            Icons.restaurant_menu,
+            size: 80,
+            color: context.modeTextMuted,
+          ),
           const SizedBox(height: 16),
           Text(
             state is MenuItemsError ? state.error : 'No menu items available',
@@ -837,7 +841,7 @@ class _OrderScreenState extends State<OrderScreen>
           ElevatedButton.icon(
             onPressed: () =>
                 context.read<MenuItemsBloc>().add(const LoadMenuItems()),
-            icon: const Icon(Icons.refresh),
+            icon: const AppIcon(Icons.refresh),
             label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.modePrimary,
@@ -873,7 +877,7 @@ class _OrderScreenState extends State<OrderScreen>
                   color: context.modePrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: AppIcon(
                   Icons.sticky_note_2_outlined,
                   size: 18,
                   color: context.modePrimary,
@@ -905,7 +909,7 @@ class _OrderScreenState extends State<OrderScreen>
                   ],
                 ),
               ),
-              Icon(Icons.edit_note_rounded, color: context.modeTextMuted),
+              AppIcon(Icons.edit_note_rounded, color: context.modeTextMuted),
             ],
           ),
         ),
@@ -1049,14 +1053,18 @@ class _OrderScreenState extends State<OrderScreen>
                                   ),
                                 ),
                                 const SizedBox(width: 5),
-                                SvgPicture.asset('assets/svg/view_order.svg'),
+                                AppIcon(
+                                  Icons.receipt_long_outlined,
+                                  color: context.modeTextInverse,
+                                  size: 18,
+                                ),
                               ],
                             ),
                           ),
                           const SizedBox(width: 5),
                           GestureDetector(
                             onTap: _showOrderActions,
-                            child: Icon(
+                            child: AppIcon(
                               Icons.more_vert,
                               color: context.modeTextInverse,
                               size: 22,
@@ -1180,7 +1188,7 @@ class _OrderScreenState extends State<OrderScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(
+                leading: AppIcon(
                   Icons.sticky_note_2_outlined,
                   color: sheetContext.modePrimary,
                 ),
@@ -1197,7 +1205,7 @@ class _OrderScreenState extends State<OrderScreen>
               ),
               Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
-                leading: Icon(
+                leading: AppIcon(
                   Icons.pause_circle_outline,
                   color: sheetContext.modeWarning,
                 ),
@@ -1212,9 +1220,8 @@ class _OrderScreenState extends State<OrderScreen>
               ),
               Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
-                leading: SvgPicture.asset(
-                  'assets/svg/delete.svg',
-                  // ignore: deprecated_member_use
+                leading: AppIcon(
+                  Icons.delete_sweep,
                   color: sheetContext.modePrimary,
                 ),
                 title: Text(
@@ -1229,7 +1236,7 @@ class _OrderScreenState extends State<OrderScreen>
               ),
               Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
-                leading: Icon(
+                leading: AppIcon(
                   Icons.delete_forever_outlined,
                   color: sheetContext.modeError,
                 ),
@@ -1244,7 +1251,7 @@ class _OrderScreenState extends State<OrderScreen>
               ),
               Divider(height: 0, color: sheetContext.modeDivider),
               ListTile(
-                leading: Icon(
+                leading: AppIcon(
                   Icons.close,
                   color: sheetContext.modeTextSecondary,
                 ),
@@ -1315,14 +1322,17 @@ class _OrderScreenState extends State<OrderScreen>
             fontSize: 14,
             color: context.modeTextMuted,
           ),
-          prefixIcon: Icon(
+          prefixIcon: AppIcon(
             Icons.search_rounded,
             color: context.modeTextPrimary,
             size: 22,
           ),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: Icon(Icons.close_rounded, color: context.modeTextMuted),
+                  icon: AppIcon(
+                    Icons.close_rounded,
+                    color: context.modeTextMuted,
+                  ),
                   onPressed: () {
                     _searchDebounce?.cancel();
                     _searchController.clear();
@@ -1336,7 +1346,7 @@ class _OrderScreenState extends State<OrderScreen>
                   tooltip: _showUnavailableItems
                       ? 'Available items only'
                       : 'Show unavailable items',
-                  icon: Icon(
+                  icon: AppIcon(
                     Icons.tune_rounded,
                     color: context.modeTextPrimary,
                     size: 20,
@@ -1492,7 +1502,7 @@ class _OrderScreenState extends State<OrderScreen>
               ),
               TextButton.icon(
                 onPressed: () => context.showAddMenuItemDialog(),
-                icon: const Icon(Icons.add_rounded, size: 20),
+                icon: const AppIcon(Icons.add_rounded, size: 20),
                 label: const Text('Add Item'),
                 style: TextButton.styleFrom(
                   foregroundColor: context.modePrimary,
@@ -1625,7 +1635,7 @@ class _OrderScreenState extends State<OrderScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.public_rounded, size: 12, color: context.modeTextMuted),
+          AppIcon(Icons.public_rounded, size: 12, color: context.modeTextMuted),
           const SizedBox(width: 5),
           Text(
             'Global',
@@ -1643,7 +1653,7 @@ class _OrderScreenState extends State<OrderScreen>
   Widget _buildMenuItemImage(ApiMenuItem item, bool isAvailable) {
     final imageUrl = item.imageUrl.trim();
     if (imageUrl.isEmpty) {
-      return Icon(
+      return AppIcon(
         Icons.restaurant_menu_rounded,
         size: 30,
         color: isAvailable ? context.modePrimary : context.modeTextMuted,
@@ -1658,7 +1668,7 @@ class _OrderScreenState extends State<OrderScreen>
         errorBuilder: (context, error, stackTrace) => Container(
           color: context.modePrimary.withValues(alpha: 0.08),
           alignment: Alignment.center,
-          child: Icon(
+          child: AppIcon(
             Icons.restaurant_menu_rounded,
             size: 30,
             color: isAvailable ? context.modePrimary : context.modeTextMuted,
@@ -1673,7 +1683,11 @@ class _OrderScreenState extends State<OrderScreen>
     if (imageUrl.isEmpty) {
       return Container(
         color: context.modeSurfaceAlt,
-        child: Icon(Icons.restaurant, size: 24, color: context.modeTextMuted),
+        child: AppIcon(
+          Icons.restaurant,
+          size: 24,
+          color: context.modeTextMuted,
+        ),
       );
     }
 
@@ -1682,7 +1696,11 @@ class _OrderScreenState extends State<OrderScreen>
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => Container(
         color: context.modeSurfaceAlt,
-        child: Icon(Icons.restaurant, size: 24, color: context.modeTextMuted),
+        child: AppIcon(
+          Icons.restaurant,
+          size: 24,
+          color: context.modeTextMuted,
+        ),
       ),
     );
   }
@@ -1738,7 +1756,7 @@ class _OrderScreenState extends State<OrderScreen>
                         borderRadius: BorderRadius.circular(14),
                       ),
                       alignment: Alignment.center,
-                      child: Icon(
+                      child: AppIcon(
                         Icons.block_rounded,
                         color: Colors.white.withValues(alpha: 0.92),
                         size: 20,
@@ -1782,7 +1800,7 @@ class _OrderScreenState extends State<OrderScreen>
                             color: context.modePrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Icon(
+                          child: AppIcon(
                             Icons.edit_note,
                             size: 14,
                             color: context.modePrimary,
@@ -1828,7 +1846,7 @@ class _OrderScreenState extends State<OrderScreen>
           ),
           const SizedBox(width: 6),
           IconButton(
-            icon: Icon(
+            icon: AppIcon(
               Icons.more_vert_rounded,
               color: context.modeTextPrimary,
               size: 20,
@@ -1844,7 +1862,7 @@ class _OrderScreenState extends State<OrderScreen>
               child: SizedBox(
                 width: 44,
                 height: 44,
-                child: Icon(
+                child: AppIcon(
                   Icons.drag_handle_rounded,
                   color: context.modeTextMuted,
                   size: 24,
@@ -1863,7 +1881,11 @@ class _OrderScreenState extends State<OrderScreen>
                 borderRadius: BorderRadius.circular(100),
                 border: Border.all(color: context.modeBorder),
               ),
-              child: Icon(Icons.block, size: 18, color: context.modeTextMuted),
+              child: AppIcon(
+                Icons.block,
+                size: 18,
+                color: context.modeTextMuted,
+              ),
             )
           else if (!isAdded)
             InkWell(
@@ -1881,7 +1903,7 @@ class _OrderScreenState extends State<OrderScreen>
                     color: context.modePrimary.withValues(alpha: 0.18),
                   ),
                 ),
-                child: Icon(
+                child: AppIcon(
                   Icons.add_rounded,
                   size: 23,
                   color: context.modePrimary,
@@ -1904,7 +1926,7 @@ class _OrderScreenState extends State<OrderScreen>
                       width: 28,
                       height: 28,
                       alignment: Alignment.center,
-                      child: Icon(
+                      child: AppIcon(
                         Icons.remove_rounded,
                         size: 18,
                         color: context.modePrimary,
@@ -1935,7 +1957,7 @@ class _OrderScreenState extends State<OrderScreen>
                       width: 28,
                       height: 28,
                       alignment: Alignment.center,
-                      child: Icon(
+                      child: AppIcon(
                         Icons.add,
                         size: 18,
                         color: isAvailable
@@ -2138,7 +2160,7 @@ class _BottomSheetAction extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: iconColor, size: 22),
+            AppIcon(icon, color: iconColor, size: 22),
             const SizedBox(width: 16),
             Expanded(
               child: Text(

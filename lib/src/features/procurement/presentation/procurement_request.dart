@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -79,7 +80,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.menu, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
         onPressed: () {},
       ),
       title: Text(
@@ -93,7 +94,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
       centerTitle: true,
       actions: [
         IconButton(
-          icon: Icon(
+          icon: AppIcon(
             Icons.notifications_outlined,
             color: context.modeTextPrimary,
           ),
@@ -154,7 +155,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
       ),
       child: Row(
         children: [
-          Icon(
+          AppIcon(
             Icons.search,
             color: context.modeTextMuted,
             size: _getSearchIconSize(screenWidth),
@@ -195,7 +196,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                   _searchQuery = '';
                 });
               },
-              child: Icon(
+              child: AppIcon(
                 Icons.clear,
                 color: context.modeTextMuted,
                 size: _getSearchIconSize(screenWidth),
@@ -300,7 +301,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'From: ${request.from} • ${request.timeAgo}',
+                'From: ${request.from} â€¢ ${request.timeAgo}',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: fromFontSize,
                   fontWeight: FontWeight.w400,
@@ -485,7 +486,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                 color: context.modeSurfaceMuted,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.check_circle_outline,
                 size: iconSize * 0.6,
                 color: context.modeTextMuted,

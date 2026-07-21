@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -97,11 +98,11 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
       ),
       actions: [
         // IconButton(
-        //   icon: const Icon(Icons.filter_list, color: Colors.black87),
+        //   icon: const AppIcon(Icons.filter_list, color: Colors.black87),
         //   onPressed: _showFilterSheet,
         // ),
         IconButton(
-          icon: Icon(Icons.refresh, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
           onPressed: () {
             context.read<SupplierBloc>().add(LoadSuppliers());
           },
@@ -124,10 +125,10 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
               hintStyle: WorkSansAppTextStyles.medium.copyWith(
                 color: context.modeTextMuted,
               ),
-              prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
+              prefixIcon: AppIcon(Icons.search, color: context.modeTextMuted),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: Icon(Icons.clear, color: context.modeTextMuted),
+                      icon: AppIcon(Icons.clear, color: context.modeTextMuted),
                       onPressed: () {
                         _searchController.clear();
                         context.read<SupplierBloc>().add(LoadSuppliers());
@@ -167,7 +168,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
               _selectedStatus!.replaceAll('_', ' '),
               style: WorkSansAppTextStyles.medium.copyWith(fontSize: 12),
             ),
-            deleteIcon: const Icon(Icons.close, size: 16),
+            deleteIcon: const AppIcon(Icons.close, size: 16),
             onDeleted: () {
               setState(() => _selectedStatus = null);
               context.read<SupplierBloc>().add(LoadSuppliers());
@@ -179,7 +180,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
               _selectedType!,
               style: WorkSansAppTextStyles.medium.copyWith(fontSize: 12),
             ),
-            deleteIcon: const Icon(Icons.close, size: 16),
+            deleteIcon: const AppIcon(Icons.close, size: 16),
             onDeleted: () {
               setState(() => _selectedType = null);
               context.read<SupplierBloc>().add(LoadSuppliers());
@@ -297,7 +298,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                               supplier.logo!,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
-                                return Icon(
+                                return AppIcon(
                                   Icons.business,
                                   size: 32,
                                   color: context.modeTextMuted,
@@ -305,7 +306,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                               },
                             ),
                           )
-                        : Icon(
+                        : AppIcon(
                             Icons.business,
                             size: 32,
                             color: context.modeTextMuted,
@@ -340,7 +341,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                                   ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: Icon(
+                                child: AppIcon(
                                   Icons.verified,
                                   size: 16,
                                   color: context.modeSuccess,
@@ -359,7 +360,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            Icon(
+                            AppIcon(
                               Icons.location_on,
                               size: 14,
                               color: context.modeTextMuted,
@@ -452,7 +453,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          AppIcon(icon, size: 14, color: color),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
@@ -475,7 +476,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          AppIcon(
             Icons.inventory_2_outlined,
             size: 80,
             color: context.modeTextMuted,
@@ -509,7 +510,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 80, color: context.modeError),
+            AppIcon(Icons.error_outline, size: 80, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               'Oops! Something went wrong',
@@ -534,7 +535,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
               onPressed: () {
                 context.read<SupplierBloc>().add(LoadSuppliers());
               },
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,

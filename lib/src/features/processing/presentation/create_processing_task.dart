@@ -1,6 +1,7 @@
 // presentation/create_processing_task_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -440,7 +441,7 @@ class _CreateProcessingTaskScreenState
             ),
             child: Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.search,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth),
@@ -460,14 +461,14 @@ class _CreateProcessingTaskScreenState
                   ),
                 ),
                 _isOpened
-                    ? Icon(
+                    ? AppIcon(
                         Icons.arrow_drop_down,
                         color: kprimaryTextColor2,
                         size: _getIconSize(screenWidth) + 4,
                       )
                     : Transform.rotate(
                         angle: -90 * 3.14159 / 180,
-                        child: Icon(
+                        child: AppIcon(
                           Icons.arrow_drop_down,
                           color: kprimaryTextColor2,
                           size: _getIconSize(screenWidth) + 4,
@@ -522,14 +523,14 @@ class _CreateProcessingTaskScreenState
                         fontSize: _getInputFontSize(screenWidth),
                         color: kprimaryTextColor2,
                       ),
-                      prefixIcon: Icon(
+                      prefixIcon: AppIcon(
                         Icons.search,
                         color: kprimaryTextColor2,
                         size: _getIconSize(screenWidth),
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
-                              icon: Icon(
+                              icon: AppIcon(
                                 Icons.clear,
                                 color: kprimaryTextColor2,
                                 size: _getIconSize(screenWidth),
@@ -568,7 +569,7 @@ class _CreateProcessingTaskScreenState
                   onPressed: () {
                     context.read<RecipeComplianceBloc>().add(LoadMenuItems());
                   },
-                  icon: const Icon(Icons.refresh),
+                  icon: const AppIcon(Icons.refresh),
                 ),
               ),
             ],
@@ -641,7 +642,7 @@ class _CreateProcessingTaskScreenState
                                                 color: kPrimary.withValues(
                                                   alpha: 0.1,
                                                 ),
-                                                child: Icon(
+                                                child: AppIcon(
                                                   Icons.restaurant_menu,
                                                   color: kPrimary,
                                                   size: _getIconSize(
@@ -662,7 +663,7 @@ class _CreateProcessingTaskScreenState
                                             8,
                                           ),
                                         ),
-                                        child: Icon(
+                                        child: AppIcon(
                                           Icons.restaurant_menu,
                                           color: kPrimary,
                                           size: _getIconSize(screenWidth),
@@ -687,7 +688,7 @@ class _CreateProcessingTaskScreenState
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} • ${item.preparationTime} mins',
+                                      '${item.category} â€¢ ${item.preparationTime} mins',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(
@@ -864,7 +865,7 @@ class _CreateProcessingTaskScreenState
             ),
             child: Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.calendar_today,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth),
@@ -884,7 +885,7 @@ class _CreateProcessingTaskScreenState
                     ),
                   ),
                 ),
-                Icon(
+                AppIcon(
                   Icons.arrow_forward_ios,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth) - 4,

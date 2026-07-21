@@ -1,6 +1,7 @@
 // lib/src/core/globals/chat/chat_rooms_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -82,7 +83,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: context.modeTextPrimary),
+            icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
             onPressed: () =>
                 context.read<ChatBloc>().add(const LoadChatRooms()),
           ),
@@ -159,7 +160,11 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                     color: context.modePrimary.withValues(alpha: 0.18),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(dept.icon, color: context.modePrimary, size: 22),
+                  child: AppIcon(
+                    dept.icon,
+                    color: context.modePrimary,
+                    size: 22,
+                  ),
                 ),
                 if (room.isPinned)
                   Positioned(
@@ -172,7 +177,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                         color: context.modePrimary,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
+                      child: AppIcon(
                         Icons.push_pin,
                         size: 10,
                         color: context.modeTextInverse,
@@ -242,13 +247,13 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (room.isStarred)
-                            Icon(
+                            AppIcon(
                               Icons.star,
                               size: 14,
                               color: context.modeWarning,
                             ),
                           if (room.isMuted)
-                            Icon(
+                            AppIcon(
                               Icons.notifications_off,
                               size: 14,
                               color: context.modeTextSecondary,
@@ -296,15 +301,15 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
 
     switch (room.type) {
       case 'BRANCH':
-        label = '🏪 Branch Chat';
+        label = 'ðŸª Branch Chat';
         color = context.modePrimary;
         break;
       case 'GENERAL':
-        label = '🌐 General Org Chat';
+        label = 'ðŸŒ General Org Chat';
         color = context.modePrimary;
         break;
       case 'DEPARTMENT':
-        label = '👥 ${room.department ?? 'Departmental'} Departmental Chat';
+        label = 'ðŸ‘¥ ${room.department ?? 'Departmental'} Departmental Chat';
         color = context.modePrimary;
         break;
       default:
@@ -327,7 +332,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          AppIcon(
             Icons.chat_bubble_outline,
             size: 64,
             color: context.modeTextMuted.withValues(alpha: 0.55),
@@ -361,7 +366,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.error_outline_outlined,
               size: 56,
               color: context.modeError,

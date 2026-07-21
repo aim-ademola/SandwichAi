@@ -176,7 +176,7 @@
 //               shape: BoxShape.circle,
 //               color: kPrimary,
 //             ),
-//             child: const Icon(Icons.access_time, size: 40, color: Colors.white),
+//             child: const AppIcon(Icons.access_time, size: 40, color: Colors.white),
 //           ),
 //         ),
 //       ],
@@ -249,7 +249,7 @@
 //           const SizedBox(height: 12),
 //           _buildDetailRow(
 //             'Amount',
-//             '₦${double.parse(payment.amount).toStringAsFixed(2)}',
+//             'â‚¦${double.parse(payment.amount).toStringAsFixed(2)}',
 //             screenWidth,
 //             isAmount: true,
 //           ),
@@ -345,7 +345,7 @@
 //                   ),
 //                 );
 //               },
-//               icon: const Icon(Icons.refresh, size: 20),
+//               icon: const AppIcon(Icons.refresh, size: 20),
 //               label: Text(
 //                 'Refresh Status',
 //                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -457,7 +457,7 @@
 //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
 //         title: Row(
 //           children: [
-//             const Icon(Icons.cancel, color: Colors.red, size: 28),
+//             const AppIcon(Icons.cancel, color: Colors.red, size: 28),
 //             const SizedBox(width: 12),
 //             Text(
 //               'Payment Rejected',

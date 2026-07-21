@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -251,7 +252,7 @@ class _ReportScaffold extends StatelessWidget {
           backgroundColor: context.modeSurface,
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+            icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
@@ -264,7 +265,7 @@ class _ReportScaffold extends StatelessWidget {
           ),
           actions: [
             IconButton(
-              icon: Icon(Icons.refresh, color: context.modePrimary),
+              icon: AppIcon(Icons.refresh, color: context.modePrimary),
               onPressed: onRefresh,
             ),
           ],
@@ -341,7 +342,7 @@ class _CenteredMessage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: context.modeTextMuted),
+            AppIcon(icon, size: 56, color: context.modeTextMuted),
             const SizedBox(height: 12),
             Text(
               title,
@@ -510,8 +511,8 @@ class _RawStockList extends StatelessWidget {
           title: name.isEmpty ? 'Stock item' : name,
           subtitle: 'Current: ${stock.isEmpty ? '0' : stock} $unit',
           trailing: highlightNegative
-              ? Icon(Icons.trending_down, color: context.modeError)
-              : Icon(Icons.lock_outline, color: context.modePrimary),
+              ? AppIcon(Icons.trending_down, color: context.modeError)
+              : AppIcon(Icons.lock_outline, color: context.modePrimary),
         );
       },
       separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -565,7 +566,7 @@ class _ReorderCard extends StatelessWidget {
                   color: context.modeTextInverse,
                 ),
               )
-            : Icon(
+            : AppIcon(
                 isAcknowledged
                     ? Icons.check_circle
                     : Icons.check_circle_outline,
@@ -617,7 +618,7 @@ class _ReportCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.inventory_2_outlined, color: context.modePrimary),
+            AppIcon(Icons.inventory_2_outlined, color: context.modePrimary),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -697,7 +698,7 @@ void _showBatches(
                     subtitle:
                         'Qty: ${batch.quantity} ${batch.unit} | Expiry: ${batch.expiryDate?.toIso8601String().split('T').first ?? 'N/A'}',
                     trailing: IconButton(
-                      icon: const Icon(Icons.edit_outlined),
+                      icon: const AppIcon(Icons.edit_outlined),
                       onPressed: () => _showEditBatchDialog(
                         sheetContext,
                         repository,

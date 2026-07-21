@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -29,7 +30,7 @@ class OrderDetailScreen extends StatelessWidget {
           elevation: 0,
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+            icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
             onPressed: onBack ?? () => Navigator.pop(context),
           ),
           title: Text(
@@ -157,7 +158,7 @@ class OrderDetailScreen extends StatelessWidget {
                               ),
                             );
                           },
-                          child: Icon(
+                          child: AppIcon(
                             Icons.copy,
                             size: 20,
                             color: context.modePrimary,
@@ -201,7 +202,7 @@ class OrderDetailScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.table_restaurant,
                   size: 18,
                   color: context.modeTextSecondary,
@@ -381,7 +382,7 @@ class OrderDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '×${item.quantity}',
+              'Ã—${item.quantity}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize,
                 fontWeight: FontWeight.w600,
@@ -390,7 +391,7 @@ class OrderDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '₦${item.totalPrice}',
+              'â‚¦${item.totalPrice}',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: textSize,
                 fontWeight: FontWeight.w700,
@@ -533,7 +534,7 @@ class OrderDetailScreen extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () => _openPayment(context),
-              icon: const Icon(Icons.payments_outlined),
+              icon: const AppIcon(Icons.payments_outlined),
               label: Text(
                 'Take Payment',
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -597,7 +598,7 @@ class OrderDetailScreen extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: onConfirmPending,
-              icon: const Icon(Icons.check_circle_outline),
+              icon: const AppIcon(Icons.check_circle_outline),
               label: Text(
                 'Confirm Order',
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -789,7 +790,7 @@ class OrderDetailScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.info_outline, color: context.modeWarning, size: 20),
+              AppIcon(Icons.info_outline, color: context.modeWarning, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Special Instructions',
@@ -830,7 +831,11 @@ class OrderDetailScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.cancel_outlined, color: context.modeError, size: 20),
+              AppIcon(
+                Icons.cancel_outlined,
+                color: context.modeError,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Cancellation reason',
@@ -912,7 +917,7 @@ class OrderDetailScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: context.modeTextSecondary),
+        AppIcon(icon, size: 20, color: context.modeTextSecondary),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -951,8 +956,8 @@ class OrderDetailScreen extends StatelessWidget {
     final parsedAmount = double.tryParse(amount.replaceAll('-', '')) ?? 0;
     final formattedAmount = NumberFormat('#,##0.##').format(parsedAmount);
     final displayAmount = amount.startsWith('-')
-        ? '-₦$formattedAmount'
-        : '₦$formattedAmount';
+        ? '-â‚¦$formattedAmount'
+        : 'â‚¦$formattedAmount';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1004,7 +1009,7 @@ class OrderDetailScreen extends StatelessWidget {
       }
 
       final wat = dateTime.toUtc().add(const Duration(hours: 1));
-      return DateFormat('MMM dd, yyyy • hh:mm a').format(wat);
+      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(wat);
     } catch (_) {
       return dt.toString();
     }

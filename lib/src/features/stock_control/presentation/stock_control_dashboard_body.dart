@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
@@ -58,7 +59,7 @@ class _StockControlDashboardBodyScreenState
   }
 
   String _formatCurrency(double value) {
-    final formatter = NumberFormat.currency(symbol: '₦', decimalDigits: 2);
+    final formatter = NumberFormat.currency(symbol: 'â‚¦', decimalDigits: 2);
     return formatter.format(value);
   }
 
@@ -82,7 +83,7 @@ class _StockControlDashboardBodyScreenState
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.inventory_2_outlined,
                       size: 48,
                       color: context.modeTextMuted,
@@ -119,7 +120,7 @@ class _StockControlDashboardBodyScreenState
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.inventory_2_outlined,
                       size: 48,
                       color: context.modeTextMuted,
@@ -176,7 +177,7 @@ class _StockControlDashboardBodyScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               _getErrorIcon(state.errorType),
               size: 64,
               color: context.modeError,
@@ -433,7 +434,11 @@ class _StockControlDashboardBodyScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(shortcut.icon, color: context.modePrimary, size: 22),
+                    AppIcon(
+                      shortcut.icon,
+                      color: context.modePrimary,
+                      size: 22,
+                    ),
                     const SizedBox(height: 10),
                     Text(
                       shortcut.title,
@@ -534,7 +539,7 @@ class _StockControlDashboardBodyScreenState
               color: context.modePrimary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
+            child: AppIcon(
               Icons.account_balance_wallet_outlined,
               color: context.modePrimary,
               size: 24,
@@ -569,7 +574,9 @@ class _StockControlDashboardBodyScreenState
                     );
                   },
                   child: Text(
-                    isValueVisible ? _formatCurrency(totalValue) : '••••••',
+                    isValueVisible
+                        ? _formatCurrency(totalValue)
+                        : 'â€¢â€¢â€¢â€¢â€¢â€¢',
                     key: ValueKey(isValueVisible),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -587,7 +594,7 @@ class _StockControlDashboardBodyScreenState
           IconButton(
             tooltip: isValueVisible ? 'Hide value' : 'Show value',
             onPressed: onToggleVisibility,
-            icon: Icon(
+            icon: AppIcon(
               isValueVisible
                   ? Icons.visibility_off_outlined
                   : Icons.visibility_outlined,
@@ -694,7 +701,7 @@ class _StockControlDashboardBodyScreenState
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${item.itemCount} items • ${_formatCurrency(item.totalValue)}',
+                  '${item.itemCount} items â€¢ ${_formatCurrency(item.totalValue)}',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: detailsFontSize - 1,
                     fontWeight: FontWeight.w400,
@@ -753,7 +760,7 @@ class _StockControlDashboardBodyScreenState
           width: 45,
           height: 45,
           errorBuilder: (context, error, stackTrace) {
-            return Icon(
+            return AppIcon(
               Icons.inventory_2,
               size: 45,
               color: context.modeTextMuted,
@@ -1069,7 +1076,7 @@ class _StockControlDashboardBodyScreenState
             ),
             child: Row(
               children: [
-                Icon(Icons.show_chart, color: context.modeTextMuted),
+                AppIcon(Icons.show_chart, color: context.modeTextMuted),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(

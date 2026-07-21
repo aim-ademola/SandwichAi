@@ -171,7 +171,7 @@
 //     };
 //   }
 
-//   // ─── Build ────────────────────────────────────────────────────────────────
+//   // â”€â”€â”€ Build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   @override
 //   Widget build(BuildContext context) {
@@ -219,8 +219,8 @@
 //                 final isRefreshing = state is StockRequestRefreshing;
 
 //                 // Server state machine groupings:
-//                 // "Pending" tab  → PENDING, APPROVED, IN_QUEUE  (still actionable)
-//                 // "Completed" tab→ COMPLETED, REJECTED, CANCELLED (terminal)
+//                 // "Pending" tab  â†’ PENDING, APPROVED, IN_QUEUE  (still actionable)
+//                 // "Completed" tabâ†’ COMPLETED, REJECTED, CANCELLED (terminal)
 //                 final pending = actualRequests
 //                     .where(
 //                       (r) =>
@@ -228,7 +228,7 @@
 //                           r.status == 'APPROVED' ||
 //                           r.status == 'IN_QUEUE' ||
 //                           r.status == 'PROCESSING',
-//                     ) // ← add
+//                     ) // â† add
 //                     .toList();
 
 //                 final completed = actualRequests
@@ -283,7 +283,7 @@
 //     );
 //   }
 
-//   // ─── State helpers ────────────────────────────────────────────────────────
+//   // â”€â”€â”€ State helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   List<StockRequest> _extractRequests(StockRequestState state) {
 //     if (state is StockRequestListLoaded) return state.requests;
@@ -305,14 +305,14 @@
 //   bool _isAnyActionInProgress(StockRequestState state, String requestId) =>
 //       state is StockRequestActionInProgress && state.requestId == requestId;
 
-//   // ─── App Bar ──────────────────────────────────────────────────────────────
+//   // â”€â”€â”€ App Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   PreferredSizeWidget _buildAppBar(double screenWidth) {
 //     return AppBar(
 //       backgroundColor: Colors.white,
 //       elevation: 0,
 //       leading: IconButton(
-//         icon: Icon(
+//         icon: AppIcon(
 //           Icons.arrow_back,
 //           color: kprimaryTextColor1,
 //           size: _getIconSize(screenWidth),
@@ -331,7 +331,7 @@
 //     );
 //   }
 
-//   // ─── Tab Bar ──────────────────────────────────────────────────────────────
+//   // â”€â”€â”€ Tab Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   Widget _buildTabBar(double screenWidth) {
 //     return Container(
@@ -359,7 +359,7 @@
 //     );
 //   }
 
-//   // ─── Loading / Empty ──────────────────────────────────────────────────────
+//   // â”€â”€â”€ Loading / Empty â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   Widget _buildLoadingState() {
 //     return Center(
@@ -383,7 +383,7 @@
 //                 color: kPrimary.withValues(alpha: 0.1),
 //                 shape: BoxShape.circle,
 //               ),
-//               child: Icon(
+//               child: AppIcon(
 //                 Icons.inbox_outlined,
 //                 size: _getEmptyIconSize(screenWidth) * 0.5,
 //                 color: kPrimary,
@@ -413,7 +413,7 @@
 //     );
 //   }
 
-//   // ─── List ─────────────────────────────────────────────────────────────────
+//   // â”€â”€â”€ List â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   Widget _buildRequestsList(
 //     List<StockRequest> requests,
@@ -442,7 +442,7 @@
 //     );
 //   }
 
-//   // ─── Card ─────────────────────────────────────────────────────────────────
+//   // â”€â”€â”€ Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   Widget _buildRequestCard(
 //     StockRequest request,
@@ -473,7 +473,7 @@
 //           child: Column(
 //             crossAxisAlignment: CrossAxisAlignment.start,
 //             children: [
-//               // ── Header row ──
+//               // â”€â”€ Header row â”€â”€
 //               Row(
 //                 children: [
 //                   Container(
@@ -501,16 +501,16 @@
 
 //               SizedBox(height: _getFieldSpacing(screenWidth)),
 
-//               // ── Items ──
+//               // â”€â”€ Items â”€â”€
 //               _buildItemsSection(request, screenWidth),
 
-//               // ── Notes ──
+//               // â”€â”€ Notes â”€â”€
 //               if (request.notes.isNotEmpty) ...[
 //                 const SizedBox(height: 8),
 //                 Row(
 //                   crossAxisAlignment: CrossAxisAlignment.start,
 //                   children: [
-//                     Icon(
+//                     AppIcon(
 //                       Icons.note_outlined,
 //                       size: _getIconSize(screenWidth) - 2,
 //                       color: kprimaryTextColor2,
@@ -535,7 +535,7 @@
 //               Divider(height: 1, color: Colors.grey.shade200),
 //               SizedBox(height: _getFieldSpacing(screenWidth)),
 
-//               // ── Footer chips ──
+//               // â”€â”€ Footer chips â”€â”€
 //               Row(
 //                 children: [
 //                   _buildInfoChip(
@@ -560,7 +560,7 @@
 //                 ],
 //               ),
 
-//               // ── Action buttons ──
+//               // â”€â”€ Action buttons â”€â”€
 //               if (showActions) ...[
 //                 SizedBox(height: _getFieldSpacing(screenWidth)),
 //                 _buildActionButtons(request, screenWidth, state, anyInProgress),
@@ -572,13 +572,13 @@
 //     );
 //   }
 
-//   // ─── Action Buttons ───────────────────────────────────────────────────────
+//   // â”€â”€â”€ Action Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   /// Server state machine:
-//   ///   PENDING  → approve, reject
-//   ///   APPROVED → queue (→ IN_QUEUE), cancel
-//   ///   IN_QUEUE → complete, cancel
-//   ///   COMPLETED / REJECTED / CANCELLED → (terminal — no actions)
+//   ///   PENDING  â†’ approve, reject
+//   ///   APPROVED â†’ queue (â†’ IN_QUEUE), cancel
+//   ///   IN_QUEUE â†’ complete, cancel
+//   ///   COMPLETED / REJECTED / CANCELLED â†’ (terminal â€” no actions)
 //   Widget _buildActionButtons(
 //     StockRequest request,
 //     double screenWidth,
@@ -694,7 +694,7 @@
 //                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
 //                 ),
 //               )
-//             : Icon(config.icon, size: _getIconSize(screenWidth) - 4),
+//             : AppIcon(config.icon, size: _getIconSize(screenWidth) - 4),
 //         label: Text(
 //           inProgress ? '${config.label}...' : config.label,
 //           style: WorkSansAppTextStyles.medium.copyWith(
@@ -707,7 +707,7 @@
 //     );
 //   }
 
-//   // ─── Items Section ────────────────────────────────────────────────────────
+//   // â”€â”€â”€ Items Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   Widget _buildItemsSection(StockRequest request, double screenWidth) {
 //     final items = request.items;
@@ -715,7 +715,7 @@
 //     if (items.isEmpty) {
 //       return Row(
 //         children: [
-//           Icon(
+//           AppIcon(
 //             Icons.inventory_outlined,
 //             size: _getIconSize(screenWidth) - 2,
 //             color: kprimaryTextColor2,
@@ -743,7 +743,7 @@
 //           children: [
 //             Row(
 //               children: [
-//                 Icon(
+//                 AppIcon(
 //                   Icons.inventory_outlined,
 //                   size: _getIconSize(screenWidth) - 2,
 //                   color: kprimaryTextColor2,
@@ -833,7 +833,7 @@
 //                         ),
 //                       ),
 //                       const SizedBox(width: 4),
-//                       Icon(
+//                       AppIcon(
 //                         showAll
 //                             ? Icons.keyboard_arrow_up
 //                             : Icons.keyboard_arrow_down,
@@ -850,7 +850,7 @@
 //     );
 //   }
 
-//   // ─── Small Widgets ────────────────────────────────────────────────────────
+//   // â”€â”€â”€ Small Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   Widget _buildStatusBadge(String status, double screenWidth) {
 //     return Container(
@@ -884,7 +884,7 @@
 //       child: Row(
 //         mainAxisSize: MainAxisSize.min,
 //         children: [
-//           Icon(icon, size: _getIconSize(screenWidth) - 6, color: kPrimary),
+//           AppIcon(icon, size: _getIconSize(screenWidth) - 6, color: kPrimary),
 //           const SizedBox(width: 4),
 //           Text(
 //             label,
@@ -899,7 +899,7 @@
 //     );
 //   }
 
-//   // ─── Status helpers ───────────────────────────────────────────────────────
+//   // â”€â”€â”€ Status helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   Color _getStatusColor(String status) {
 //     return switch (status.toUpperCase()) {
@@ -943,7 +943,7 @@
 //     }
 //   }
 
-//   // ─── Responsive sizing ────────────────────────────────────────────────────
+//   // â”€â”€â”€ Responsive sizing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 //   double _getHorizontalPadding(double w) => w < 360
 //       ? 16
@@ -1007,7 +1007,7 @@
 //       : 120;
 // }
 
-// // ─── Private config classes ───────────────────────────────────────────────────
+// // â”€â”€â”€ Private config classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // class _ActionDialogConfig {
 //   final String title;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 
@@ -46,14 +47,14 @@ class SandwichAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget? _buildLeading(BuildContext context) {
     if (onMenuPressed != null) {
       return IconButton(
-        icon: Icon(Icons.menu, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
         onPressed: onMenuPressed,
       );
     }
 
     if (showBackButton) {
       return IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: onBackPressed ?? () => Navigator.maybePop(context),
       );
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
@@ -17,14 +18,14 @@ class MinimizeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      tooltip: 'Minimize — switch session',
+      tooltip: 'Minimize â€” switch session',
       icon: Container(
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: kPrimary.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Icon(Icons.minimize_rounded, color: kPrimary, size: 18),
+        child: const AppIcon(Icons.minimize_rounded, color: kPrimary, size: 18),
       ),
       onPressed: () => _minimize(context),
     );

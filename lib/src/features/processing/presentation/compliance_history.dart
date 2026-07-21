@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -310,7 +311,7 @@ class _RecipeComplianceHistoryScreenState
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return DateFormat('MMM dd, yyyy • hh:mm a').format(date);
+      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(date);
     } catch (e) {
       return dateString;
     }
@@ -356,7 +357,7 @@ class _RecipeComplianceHistoryScreenState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.assessment_outlined,
                           size: 64,
                           color: context.modeTextMuted,
@@ -379,7 +380,7 @@ class _RecipeComplianceHistoryScreenState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.error_outline,
                           size: 64,
                           color: context.modeTextMuted,
@@ -646,7 +647,7 @@ class _RecipeComplianceHistoryScreenState
               color: iconBgColor,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: iconColor, size: 20),
+            child: AppIcon(icon, color: iconColor, size: 20),
           ),
           const SizedBox(height: 12),
           Text(
@@ -757,7 +758,7 @@ class _RecipeComplianceHistoryScreenState
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(
+              AppIcon(
                 Icons.calendar_today,
                 size: 14,
                 color: context.modeTextSecondary,
@@ -787,7 +788,7 @@ class _RecipeComplianceHistoryScreenState
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          AppIcon(icon, size: 14, color: color),
           const SizedBox(width: 4),
           Flexible(
             child: Text(

@@ -1,6 +1,7 @@
 // presentation/create_output_verification_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -360,7 +361,7 @@ class _CreateOutputVerificationScreenState
       ),
       child: Row(
         children: [
-          Icon(
+          AppIcon(
             Icons.check_circle,
             color: Colors.green,
             size: _getIconSize(screenWidth),
@@ -444,7 +445,7 @@ class _CreateOutputVerificationScreenState
             ),
             child: Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.restaurant_menu,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth),
@@ -463,7 +464,7 @@ class _CreateOutputVerificationScreenState
                     ),
                   ),
                 ),
-                Icon(
+                AppIcon(
                   _isDropdownOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth) + 4,
@@ -512,14 +513,14 @@ class _CreateOutputVerificationScreenState
                   fontSize: _getInputFontSize(screenWidth),
                   color: kprimaryTextColor2,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: AppIcon(
                   Icons.search,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth),
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(
+                        icon: AppIcon(
                           Icons.clear,
                           color: kprimaryTextColor2,
                           size: _getIconSize(screenWidth),
@@ -608,7 +609,7 @@ class _CreateOutputVerificationScreenState
                                       width: 50,
                                       height: 50,
                                       color: kPrimary.withValues(alpha: 0.1),
-                                      child: Icon(
+                                      child: AppIcon(
                                         Icons.restaurant,
                                         color: kPrimary,
                                       ),

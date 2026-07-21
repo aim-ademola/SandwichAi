@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -621,7 +622,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                 right: horizontalPadding,
                                 top: _getVerticalPadding(
                                   screenWidth,
-                                ), // ← ADD TOP PADDING
+                                ), // â† ADD TOP PADDING
                                 bottom: _getVerticalPadding(screenWidth),
                               ),
                               child: Form(
@@ -709,7 +710,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(
+        icon: AppIcon(
           Icons.arrow_back,
           color: context.modeTextPrimary,
           size: _getIconSize(screenWidth),
@@ -727,10 +728,10 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       centerTitle: true,
       actions: [
         IconButton(
-          icon: Icon(Icons.info_outline, color: context.modePrimary),
+          icon: AppIcon(Icons.info_outline, color: context.modePrimary),
           onPressed: () {
             _showSnackBar(
-              '💡 Tip: Use Quick Add to automatically add low stock items!',
+              'ðŸ’¡ Tip: Use Quick Add to automatically add low stock items!',
             );
           },
         ),
@@ -755,7 +756,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.auto_awesome, color: context.modePrimary, size: 24),
+          AppIcon(Icons.auto_awesome, color: context.modePrimary, size: 24),
           SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -811,7 +812,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               ),
             ),
             SizedBox(width: 8),
-            Icon(
+            AppIcon(
               Icons.help_outline,
               color: context.modePrimary,
               size: _getIconSize(screenWidth) - 4,
@@ -845,7 +846,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
             ),
             child: Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.search,
                   color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
@@ -863,7 +864,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     ),
                   ),
                 ),
-                Icon(
+                AppIcon(
                   _isOpened ? Icons.arrow_drop_down : Icons.arrow_drop_up,
                   color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth) + 4,
@@ -914,14 +915,14 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                   fontSize: _getInputFontSize(screenWidth),
                   color: context.modeTextSecondary,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: AppIcon(
                   Icons.search,
                   color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(
+                        icon: AppIcon(
                           Icons.clear,
                           color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth),
@@ -1023,7 +1024,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Icon(
+                                child: AppIcon(
                                   Icons.inventory_2_outlined,
                                   color: context.modePrimary,
                                   size: _getIconSize(screenWidth) - 4,
@@ -1047,7 +1048,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} • ${item.unit}',
+                                      '${item.category} â€¢ ${item.unit}',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(
@@ -1084,7 +1085,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome, color: context.modePrimary, size: 20),
+              AppIcon(Icons.auto_awesome, color: context.modePrimary, size: 20),
               SizedBox(width: 8),
               Text(
                 'Auto-filled Data',
@@ -1223,7 +1224,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
             height: _getButtonHeight(screenWidth) - 8,
             child: OutlinedButton.icon(
               onPressed: _addItemToList,
-              icon: Icon(
+              icon: AppIcon(
                 Icons.add_circle_outline,
                 size: _getIconSize(screenWidth),
                 color: context.modePrimary,
@@ -1271,7 +1272,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 16),
+              AppIcon(icon, color: color, size: 16),
               SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -1351,7 +1352,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                       color: context.modePrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.inventory_2,
                       color: context.modePrimary,
                       size: _getIconSize(screenWidth) - 4,
@@ -1382,7 +1383,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: AppIcon(
                       Icons.delete_outline,
                       color: context.modeError,
                       size: _getIconSize(screenWidth),

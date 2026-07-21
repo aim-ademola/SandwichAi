@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -59,7 +60,7 @@ class _MyTaskScreenState extends State<MyTaskScreen>
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: const AppIcon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(
@@ -191,7 +192,7 @@ class _MyTaskScreenState extends State<MyTaskScreen>
                   ).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: AppIcon(
                   Icons.error_outline,
                   color: _getPriorityColor(task.priority),
                   size: iconSize,
@@ -229,7 +230,7 @@ class _MyTaskScreenState extends State<MyTaskScreen>
           // Due date
           Row(
             children: [
-              Icon(
+              AppIcon(
                 Icons.access_time,
                 size: iconSize - 4,
                 color: Colors.grey[600],

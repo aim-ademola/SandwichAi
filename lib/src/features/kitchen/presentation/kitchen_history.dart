@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -216,7 +217,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.date_range, color: context.modePrimary),
+                  AppIcon(Icons.date_range, color: context.modePrimary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -249,7 +250,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
                 });
                 context.read<KitchenShiftBloc>().add(const ClearShiftFilters());
               },
-              icon: const Icon(Icons.clear, size: 18),
+              icon: const AppIcon(Icons.clear, size: 18),
               label: Text('Clear Filters'),
               style: TextButton.styleFrom(foregroundColor: context.modePrimary),
             ),
@@ -344,7 +345,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: _getIconSize(screenWidth) + 4),
+          AppIcon(icon, color: color, size: _getIconSize(screenWidth) + 4),
           SizedBox(height: _getFieldSpacing(screenWidth) / 2),
           Text(
             value,
@@ -428,7 +429,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
           color: _getShiftTypeColor(shift.shiftType).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(
+        child: AppIcon(
           _getShiftTypeIcon(shift.shiftType),
           color: _getShiftTypeColor(shift.shiftType),
           size: 24,
@@ -447,7 +448,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         children: [
           const SizedBox(height: 4),
           Text(
-            '${shift.formattedDate} • ${shift.shiftTypeDisplay}',
+            '${shift.formattedDate} â€¢ ${shift.shiftTypeDisplay}',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getCaptionFontSize(screenWidth),
               color: context.modeTextSecondary,
@@ -522,7 +523,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.history,
               size: 80,
               color: context.modeTextMuted.withValues(alpha: 0.5),
@@ -561,7 +562,7 @@ class _KitchenShiftHistoryScreenState extends State<KitchenShiftHistoryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.error_outline,
               size: 80,
               color: context.modeError.withValues(alpha: 0.5),

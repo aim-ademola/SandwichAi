@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -196,7 +197,7 @@ class _CompleteStockRequestDetailsScreenState
     };
   }
 
-  // ─── Build ────────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +261,7 @@ class _CompleteStockRequestDetailsScreenState
                         return _buildEmptyState(screenWidth);
                       }
 
-                      // All tabs share the same list — the API already
+                      // All tabs share the same list â€” the API already
                       // filtered it by status when the tab was tapped.
                       // We just render the list with the correct showActions
                       // flag for the current tab.
@@ -284,7 +285,7 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // ─── State helpers ────────────────────────────────────────────────────────
+  // â”€â”€â”€ State helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   List<StockRequest> _extractRequests(StockRequestState state) {
     if (state is StockRequestListLoaded) return state.requests;
@@ -306,14 +307,14 @@ class _CompleteStockRequestDetailsScreenState
   bool _isAnyActionInProgress(StockRequestState state, String requestId) =>
       state is StockRequestActionInProgress && state.requestId == requestId;
 
-  // ─── App Bar ──────────────────────────────────────────────────────────────
+  // â”€â”€â”€ App Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   PreferredSizeWidget _buildAppBar(double screenWidth) {
     return AppBar(
       backgroundColor: context.modeSurface,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(
+        icon: AppIcon(
           Icons.arrow_back,
           color: context.modeTextPrimary,
           size: _getIconSize(screenWidth),
@@ -332,7 +333,7 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // ─── Tab Bar ──────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Tab Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildTabBar(double screenWidth) {
     return Container(
@@ -378,7 +379,7 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // ─── Loading / Empty ──────────────────────────────────────────────────────
+  // â”€â”€â”€ Loading / Empty â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildLoadingState() {
     return Center(
@@ -402,7 +403,7 @@ class _CompleteStockRequestDetailsScreenState
                 color: context.modePrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.inbox_outlined,
                 size: _getEmptyIconSize(screenWidth) * 0.5,
                 color: context.modePrimary,
@@ -432,7 +433,7 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // ─── List ─────────────────────────────────────────────────────────────────
+  // â”€â”€â”€ List â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildRequestsList(
     List<StockRequest> requests,
@@ -457,7 +458,7 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // ─── Card ─────────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildRequestCard(
     StockRequest request,
@@ -525,7 +526,7 @@ class _CompleteStockRequestDetailsScreenState
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.note_outlined,
                       size: _getIconSize(screenWidth) - 2,
                       color: context.modeTextSecondary,
@@ -582,7 +583,7 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // ─── Action Buttons ───────────────────────────────────────────────────────
+  // â”€â”€â”€ Action Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildActionButtons(
     StockRequest request,
@@ -717,7 +718,7 @@ class _CompleteStockRequestDetailsScreenState
                   ),
                 ),
               )
-            : Icon(config.icon, size: _getIconSize(screenWidth) - 4),
+            : AppIcon(config.icon, size: _getIconSize(screenWidth) - 4),
         label: Text(
           inProgress ? '${config.label}...' : config.label,
           style: WorkSansAppTextStyles.medium.copyWith(
@@ -730,7 +731,7 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // ─── Items Section ────────────────────────────────────────────────────────
+  // â”€â”€â”€ Items Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildItemsSection(StockRequest request, double screenWidth) {
     final items = request.items;
@@ -738,7 +739,7 @@ class _CompleteStockRequestDetailsScreenState
     if (items.isEmpty) {
       return Row(
         children: [
-          Icon(
+          AppIcon(
             Icons.inventory_outlined,
             size: _getIconSize(screenWidth) - 2,
             color: context.modeTextSecondary,
@@ -766,7 +767,7 @@ class _CompleteStockRequestDetailsScreenState
           children: [
             Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.inventory_outlined,
                   size: _getIconSize(screenWidth) - 2,
                   color: context.modeTextSecondary,
@@ -856,7 +857,7 @@ class _CompleteStockRequestDetailsScreenState
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(
+                      AppIcon(
                         Icons.keyboard_arrow_down,
                         size: _getIconSize(screenWidth) - 4,
                         color: context.modePrimary,
@@ -871,7 +872,7 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // ─── Small Widgets ────────────────────────────────────────────────────────
+  // â”€â”€â”€ Small Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildStatusBadge(String status, double screenWidth) {
     return Container(
@@ -905,7 +906,7 @@ class _CompleteStockRequestDetailsScreenState
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          AppIcon(
             icon,
             size: _getIconSize(screenWidth) - 6,
             color: context.modePrimary,
@@ -924,7 +925,7 @@ class _CompleteStockRequestDetailsScreenState
     );
   }
 
-  // ─── Status helpers ───────────────────────────────────────────────────────
+  // â”€â”€â”€ Status helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Color _getStatusColor(String status) {
     return switch (status.toUpperCase()) {
@@ -966,7 +967,7 @@ class _CompleteStockRequestDetailsScreenState
     }
   }
 
-  // ─── Responsive sizing ────────────────────────────────────────────────────
+  // â”€â”€â”€ Responsive sizing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   double _getHorizontalPadding(double w) => w < 360
       ? 16
@@ -1030,7 +1031,7 @@ class _CompleteStockRequestDetailsScreenState
       : 120;
 }
 
-// ─── Private config classes ───────────────────────────────────────────────────
+// â”€â”€â”€ Private config classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _ActionDialogConfig {
   final String title;

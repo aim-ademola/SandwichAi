@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -79,7 +80,7 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
                 color: Colors.green.shade50,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: const AppIcon(
                 Icons.check_circle,
                 color: Colors.green,
                 size: 40,
@@ -151,7 +152,7 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: const AppIcon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
@@ -349,7 +350,7 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
                   ),
                 ),
                 isExpanded: true,
-                icon: Icon(
+                icon: AppIcon(
                   Icons.keyboard_arrow_down,
                   color: kprimaryTextColor2,
                 ),
@@ -429,7 +430,7 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.pending_actions_outlined,
               size: 80,
               color: Colors.grey.shade400,
@@ -527,7 +528,7 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.business_center,
                     size: 14,
                     color: kprimaryTextColor2,
@@ -541,7 +542,7 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Icon(
+                  AppIcon(
                     Icons.calendar_today,
                     size: 14,
                     color: kprimaryTextColor2,
@@ -605,7 +606,7 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.check_circle_outline,
               size: 80,
               color: Colors.grey.shade400,
@@ -705,7 +706,7 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.business_center,
                     size: 14,
                     color: kprimaryTextColor2,
@@ -723,7 +724,7 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.calendar_today,
                     size: 14,
                     color: kprimaryTextColor2,
@@ -741,7 +742,11 @@ class _POSRequisitionScreenState extends State<POSRequisitionScreen>
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(Icons.check_circle, size: 14, color: kprimaryTextColor2),
+                  AppIcon(
+                    Icons.check_circle,
+                    size: 14,
+                    color: kprimaryTextColor2,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Completed: ${requisition['completedDate']}',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -256,7 +257,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                 color: context.modeSuccess.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.check_circle,
                 color: context.modeSuccess,
                 size: 40,
@@ -608,7 +609,11 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
               ),
               child: Row(
                 children: [
-                  Icon(Icons.attach_file, color: context.modePrimary, size: 24),
+                  AppIcon(
+                    Icons.attach_file,
+                    color: context.modePrimary,
+                    size: 24,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -656,7 +661,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.image, color: context.modePrimary, size: 24),
+                    AppIcon(Icons.image, color: context.modePrimary, size: 24),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -669,7 +674,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 20),
+                      icon: const AppIcon(Icons.close, size: 20),
                       onPressed: () => _removeFile(index),
                       color: context.modeError,
                     ),
@@ -730,7 +735,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: context.modeError),
+              AppIcon(Icons.error_outline, size: 64, color: context.modeError),
               const SizedBox(height: 16),
               Text(
                 'Failed to load complaints',
@@ -769,7 +774,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               Icons.feedback_outlined,
               size: 80,
               color: context.modeTextMuted,
@@ -1041,7 +1046,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                         color: context.modePrimary.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
+                      child: AppIcon(
                         Icons.edit_note_outlined,
                         color: context.modePrimary,
                       ),
@@ -1059,7 +1064,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(dialogContext),
-                      icon: Icon(Icons.close, color: context.modeTextMuted),
+                      icon: AppIcon(Icons.close, color: context.modeTextMuted),
                     ),
                   ],
                 ),
@@ -1181,7 +1186,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen>
               fontSize: 14,
               color: context.modeTextMuted,
             ),
-            prefixIcon: Icon(icon, color: context.modeTextMuted, size: 20),
+            prefixIcon: AppIcon(icon, color: context.modeTextMuted, size: 20),
             filled: true,
             fillColor: context.modeSurfaceAlt,
             enabledBorder: OutlineInputBorder(

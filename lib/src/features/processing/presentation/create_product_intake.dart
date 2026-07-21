@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -232,7 +233,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const AppIcon(Icons.close),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -265,7 +266,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.lightbulb_outline,
                           color: kPrimary,
                           size: 24,
@@ -312,7 +313,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                 color: kPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: kPrimary, size: 20),
+              child: AppIcon(icon, color: kPrimary, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -503,7 +504,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                 color: Colors.green.shade50,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.check_circle,
                 color: Colors.green.shade600,
                 size: 32,
@@ -710,7 +711,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                                       color: kPrimary.withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
+                                    child: const AppIcon(
                                       Icons.help_outline,
                                       size: 16,
                                       color: kPrimary,
@@ -770,7 +771,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                                                 ),
                                                 shape: BoxShape.circle,
                                               ),
-                                              child: const Icon(
+                                              child: const AppIcon(
                                                 Icons.help_outline,
                                                 size: 16,
                                                 color: kPrimary,
@@ -808,7 +809,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                                       color: kPrimary.withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
+                                    child: const AppIcon(
                                       Icons.help_outline,
                                       size: 16,
                                       color: kPrimary,
@@ -940,7 +941,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    AppIcon(Icons.error_outline, color: Colors.red.shade700),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -1017,7 +1018,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.inventory_2_outlined, color: kPrimary),
+                const AppIcon(Icons.inventory_2_outlined, color: kPrimary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -1032,7 +1033,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     ),
                   ),
                 ),
-                Icon(
+                AppIcon(
                   _isInventoryPickerOpen
                       ? Icons.keyboard_arrow_up
                       : Icons.keyboard_arrow_down,
@@ -1083,11 +1084,14 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                   fontSize: inputFontSize,
                   color: const Color(0xFF9E9E9E),
                 ),
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF9E9E9E)),
+                prefixIcon: const AppIcon(
+                  Icons.search,
+                  color: Color(0xFF9E9E9E),
+                ),
                 suffixIcon: _inventorySearchController.text.isEmpty
                     ? null
                     : IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const AppIcon(Icons.clear),
                         onPressed: _inventorySearchController.clear,
                       ),
                 border: OutlineInputBorder(
@@ -1222,7 +1226,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         fontSize: inputFontSize,
         color: Colors.black,
       ),
-      icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF9E9E9E)),
+      icon: const AppIcon(Icons.keyboard_arrow_down, color: Color(0xFF9E9E9E)),
       items: ProductType.values.map((type) {
         return DropdownMenuItem<ProductType>(
           value: type,
@@ -1266,7 +1270,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         fontSize: inputFontSize,
         color: Colors.black,
       ),
-      icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF9E9E9E)),
+      icon: const AppIcon(Icons.keyboard_arrow_down, color: Color(0xFF9E9E9E)),
       selectedItemBuilder: (context) {
         return Unit.values.map((unit) {
           return Align(
@@ -1328,7 +1332,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.check_circle,
                     color: _qualityStatus ? Colors.green.shade600 : Colors.grey,
                     size: 20,
@@ -1374,7 +1378,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.cancel,
                     color: !_qualityStatus ? Colors.red.shade600 : Colors.grey,
                     size: 20,
@@ -1465,7 +1469,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    AppIcon(Icons.error_outline, color: Colors.red.shade700),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -1541,7 +1545,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                   fontSize: inputFontSize,
                   color: Colors.black,
                 ),
-                icon: const Icon(
+                icon: const AppIcon(
                   Icons.keyboard_arrow_down,
                   color: Color(0xFF9E9E9E),
                 ),
@@ -1577,7 +1581,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          '${employee.employeeId} • ${employee.role}',
+                          '${employee.employeeId} â€¢ ${employee.role}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: inputFontSize - 2,
                             color: Colors.grey,

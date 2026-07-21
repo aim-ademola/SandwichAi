@@ -1,5 +1,6 @@
 import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -140,7 +141,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () {
           // Auto-save when leaving the screen
           _savePrinters();
@@ -159,19 +160,19 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
       actions: [
         // Save button
         IconButton(
-          icon: Icon(Icons.save, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.save, color: context.modeTextPrimary),
           onPressed: _savePrinters,
           tooltip: 'Save Settings',
         ),
         // Add manually button
         IconButton(
-          icon: Icon(Icons.add, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.add, color: context.modeTextPrimary),
           onPressed: _showAddPrinterDialog,
           tooltip: 'Add Manually',
         ),
         // More options
         PopupMenuButton<String>(
-          icon: Icon(Icons.more_vert, color: context.modeTextPrimary),
+          icon: AppIcon(Icons.more_vert, color: context.modeTextPrimary),
           color: context.modeSurface,
           onSelected: (value) {
             switch (value) {
@@ -188,7 +189,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               value: 'summary',
               child: Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.info_outline,
                     size: 20,
                     color: context.modeTextSecondary,
@@ -205,7 +206,11 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               value: 'clear',
               child: Row(
                 children: [
-                  Icon(Icons.delete_sweep, size: 20, color: context.modeError),
+                  AppIcon(
+                    Icons.delete_sweep,
+                    size: 20,
+                    color: context.modeError,
+                  ),
                   const SizedBox(width: 12),
                   Text('Clear All', style: TextStyle(color: context.modeError)),
                 ],
@@ -218,9 +223,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
   }
 
   Widget _buildScanSection() {
-    final scannerEnabled = FeatureRegistry.isEnabled(
-      AppFeature.scanner,
-    );
+    final scannerEnabled = FeatureRegistry.isEnabled(AppFeature.scanner);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -241,7 +244,11 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   color: context.modePrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.search, color: context.modePrimary, size: 22),
+                child: AppIcon(
+                  Icons.search,
+                  color: context.modePrimary,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -349,7 +356,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.radar, size: 20),
+                        const AppIcon(Icons.radar, size: 20),
                         const SizedBox(width: 8),
                         Text(
                           _getScanButtonText(),
@@ -417,7 +424,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 ],
               ),
               IconButton(
-                icon: Icon(
+                icon: AppIcon(
                   Icons.clear,
                   size: 20,
                   color: context.modeTextSecondary,
@@ -466,7 +473,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 color: connectionColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(connectionIcon, color: connectionColor, size: 22),
+              child: AppIcon(connectionIcon, color: connectionColor, size: 22),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -518,7 +525,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 ],
               ),
             ),
-            Icon(
+            AppIcon(
               Icons.arrow_forward_ios,
               size: 16,
               color: context.modeTextMuted,
@@ -578,7 +585,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 padding: const EdgeInsets.all(32.0),
                 child: Column(
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.print_disabled,
                       size: 48,
                       color: context.modeTextMuted,
@@ -640,7 +647,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 color: statusColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(connectionIcon, color: statusColor, size: 22),
+              child: AppIcon(connectionIcon, color: statusColor, size: 22),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -721,7 +728,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                 ),
               ),
             const SizedBox(width: 8),
-            Icon(
+            AppIcon(
               Icons.arrow_forward_ios,
               size: 16,
               color: context.modeTextMuted,
@@ -1094,7 +1101,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                         RadioListTile<PrinterConnectionType>(
                           title: Row(
                             children: [
-                              Icon(
+                              AppIcon(
                                 Icons.wifi,
                                 size: 20,
                                 color: Color(0xFF2196F3),
@@ -1120,7 +1127,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                         RadioListTile<PrinterConnectionType>(
                           title: Row(
                             children: [
-                              Icon(
+                              AppIcon(
                                 Icons.bluetooth,
                                 size: 20,
                                 color: Color(0xFF3F51B5),
@@ -1146,7 +1153,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                         RadioListTile<PrinterConnectionType>(
                           title: Row(
                             children: [
-                              Icon(
+                              AppIcon(
                                 Icons.usb,
                                 size: 20,
                                 color: Color(0xFF9C27B0),
@@ -1172,7 +1179,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
                         RadioListTile<PrinterConnectionType>(
                           title: Row(
                             children: [
-                              Icon(
+                              AppIcon(
                                 Icons.cable,
                                 size: 20,
                                 color: Color(0xFFFF9800),
@@ -1508,12 +1515,12 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
             ),
             const SizedBox(height: 24),
             ListTile(
-              leading: const Icon(Icons.print, color: Color(0xFF2196F3)),
+              leading: const AppIcon(Icons.print, color: Color(0xFF2196F3)),
               title: Text(
                 'Test Print',
                 style: TextStyle(color: context.modeTextPrimary),
               ),
-              trailing: Icon(
+              trailing: AppIcon(
                 Icons.arrow_forward_ios,
                 size: 16,
                 color: context.modeTextMuted,
@@ -1524,12 +1531,12 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen>
               },
             ),
             ListTile(
-              leading: Icon(Icons.delete, color: context.modeError),
+              leading: AppIcon(Icons.delete, color: context.modeError),
               title: Text(
                 'Remove Printer',
                 style: TextStyle(color: context.modeError),
               ),
-              trailing: Icon(
+              trailing: AppIcon(
                 Icons.arrow_forward_ios,
                 size: 16,
                 color: context.modeTextMuted,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -27,7 +28,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -139,7 +140,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                '₦${_formatAmount(order.totalAmountDouble)}',
+                'â‚¦${_formatAmount(order.totalAmountDouble)}',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getAmountFontSize(screenWidth),
                   fontWeight: FontWeight.bold,
@@ -300,7 +301,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
               child: _buildItemDetail(
                 context,
                 'Unit Cost',
-                '₦${_formatAmount(item.unitCostDouble)}',
+                'â‚¦${_formatAmount(item.unitCostDouble)}',
                 screenWidth,
               ),
             ),
@@ -321,7 +322,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
               child: _buildItemDetail(
                 context,
                 'Total Cost',
-                '₦${_formatAmount(item.totalCostDouble)}',
+                'â‚¦${_formatAmount(item.totalCostDouble)}',
                 screenWidth,
                 highlight: true,
               ),
@@ -377,7 +378,11 @@ class ProcurementDetailsScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.note_alt_outlined, color: context.modeWarning, size: 20),
+          AppIcon(
+            Icons.note_alt_outlined,
+            color: context.modeWarning,
+            size: 20,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -494,7 +499,7 @@ class ProcurementDetailsScreen extends StatelessWidget {
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: color, size: 20),
+          child: AppIcon(icon, color: color, size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/account_profile_screen.dart';
@@ -111,7 +112,7 @@ class _PremiumDrawerHeader extends StatelessWidget {
                       BlendMode.srcIn,
                     ),
                     errorBuilder: (context, error, stackTrace) {
-                      return Icon(
+                      return AppIcon(
                         Icons.restaurant_menu_rounded,
                         color: context.modePrimary,
                         size: 24,
@@ -168,7 +169,7 @@ class _PremiumDrawerHeader extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.auto_graph_rounded,
                   color: Colors.white.withValues(alpha: 0.92),
                   size: 18,
@@ -246,7 +247,7 @@ class _AppDrawerAccountMenuState extends State<AppDrawerAccountMenu> {
             _formatDisplayLabel(user!.department),
           if ((user?.role ?? '').trim().isNotEmpty)
             _formatDisplayLabel(user!.role),
-        ].join(' • ');
+        ].join(' â€¢ ');
 
         return Material(
           color: Colors.transparent,
@@ -302,7 +303,7 @@ class _AppDrawerAccountMenuState extends State<AppDrawerAccountMenu> {
                       ],
                     ),
                   ),
-                  Icon(
+                  AppIcon(
                     Icons.keyboard_arrow_right_rounded,
                     color: context.modeTextMuted,
                   ),
@@ -391,7 +392,7 @@ class AppDrawerThemeSwitch extends StatelessWidget {
                       : context.modePrimary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: AppIcon(
                   isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
                   color: isDark ? context.modePrimaryBlue : context.modePrimary,
                   size: 21,
@@ -494,7 +495,7 @@ class _ThemeModeButton extends StatelessWidget {
           color: selected ? context.modePrimary : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(
+        child: AppIcon(
           icon,
           size: 18,
           color: selected ? context.modeTextInverse : context.modeTextMuted,
@@ -552,7 +553,7 @@ class AppDrawerItem extends StatelessWidget {
                   color: itemColor.withValues(alpha: isLogout ? 0.1 : 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: itemColor, size: 20),
+                child: AppIcon(icon, color: itemColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -569,7 +570,7 @@ class AppDrawerItem extends StatelessWidget {
               ),
               if (badge != null) ...[const SizedBox(width: 8), badge!],
               const SizedBox(width: 8),
-              Icon(Icons.chevron_right_rounded, color: itemColor, size: 20),
+              AppIcon(Icons.chevron_right_rounded, color: itemColor, size: 20),
             ],
           ),
         ),

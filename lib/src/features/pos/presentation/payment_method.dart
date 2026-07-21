@@ -2,6 +2,7 @@ import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
@@ -86,7 +87,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   String? _mainOrderId;
 
   /// Prefer the sessionId passed from the parent. Falls back to the
-  /// cubit's active session — covers both fresh navigation and resume paths.
+  /// cubit's active session â€” covers both fresh navigation and resume paths.
   String? _sessionId;
 
   final List<_PaymentMethodOption> _options = const [
@@ -99,7 +100,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     _PaymentMethodOption(
       method: _PaymentMethod.cardOrBankTransfer,
       title: 'Card / Bank Transfer',
-      subtitle: 'Pay via Paystack — scan QR or link',
+      subtitle: 'Pay via Paystack â€” scan QR or link',
       icon: Icons.credit_card_rounded,
     ),
   ];
@@ -277,7 +278,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              icon: const AppIcon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.of(context).pop(),
             ),
             title: Text(
@@ -345,7 +346,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Total: ₦${widget.totalAmount.toStringAsFixed(2)}',
+            'Total: â‚¦${widget.totalAmount.toStringAsFixed(2)}',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -406,7 +407,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 color: selected ? kPrimary : kPrimary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
+              child: AppIcon(
                 opt.icon,
                 color: selected ? Colors.white : kPrimary,
                 size: w < 360 ? 22 : 24,
@@ -450,7 +451,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 color: selected ? kPrimary : Colors.transparent,
               ),
               child: selected
-                  ? const Icon(Icons.check, color: Colors.white, size: 13)
+                  ? const AppIcon(Icons.check, color: Colors.white, size: 13)
                   : null,
             ),
           ],
@@ -581,7 +582,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   }
 
   void _createOrderAndPay() {
-    _showLoading('Creating order…');
+    _showLoading('Creating orderâ€¦');
 
     context.read<OrderSessionCubit>().markPaymentStarted(
       method: _selectedMethod == _PaymentMethod.cash
@@ -621,7 +622,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       return;
     }
 
-    _showLoading('Processing payment…');
+    _showLoading('Processing paymentâ€¦');
     AppLogger.log('=== PROCESS PAYMENT ===');
     AppLogger.log('orderType: ${widget.orderType}');
     AppLogger.log('createdOrderId: $_createdOrderId');
@@ -952,7 +953,10 @@ class _EmailComposerDialogState extends State<_EmailComposerDialog> {
                     IconButton(
                       tooltip: 'Close',
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: Icon(Icons.close, color: context.modeTextSecondary),
+                      icon: AppIcon(
+                        Icons.close,
+                        color: context.modeTextSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -1012,7 +1016,7 @@ class _EmailComposerDialogState extends State<_EmailComposerDialog> {
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: _submit,
-                        icon: const Icon(Icons.check, size: 18),
+                        icon: const AppIcon(Icons.check, size: 18),
                         label: const Text('Continue'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.modePrimary,

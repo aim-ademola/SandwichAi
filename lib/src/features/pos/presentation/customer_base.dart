@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -56,9 +57,9 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
   }
 
   String _formatCurrency(double? amount) {
-    if (amount == null) return '₦0.00';
+    if (amount == null) return 'â‚¦0.00';
     final formatter = NumberFormat('#,##0.00', 'en_US');
-    return '₦${formatter.format(amount)}';
+    return 'â‚¦${formatter.format(amount)}';
   }
 
   Color _getMembershipColor(String? tier) {
@@ -112,10 +113,13 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   fontSize: 14,
                   color: context.modeTextMuted,
                 ),
-                prefixIcon: Icon(Icons.search, color: context.modeTextMuted),
+                prefixIcon: AppIcon(Icons.search, color: context.modeTextMuted),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(Icons.clear, color: context.modeTextMuted),
+                        icon: AppIcon(
+                          Icons.clear,
+                          color: context.modeTextMuted,
+                        ),
                         onPressed: () {
                           _searchController.clear();
                           _onSearchChanged('');

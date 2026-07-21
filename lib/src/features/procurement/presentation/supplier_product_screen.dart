@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -59,7 +60,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
       backgroundColor: context.modeSurface,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.pop(context),
       ),
       flexibleSpace: FlexibleSpaceBar(
@@ -96,7 +97,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                   widget.supplier.logo!,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
+                                    return AppIcon(
                                       Icons.business,
                                       size: 32,
                                       color: context.modeTextMuted,
@@ -104,7 +105,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                   },
                                 ),
                               )
-                            : Icon(
+                            : AppIcon(
                                 Icons.business,
                                 size: 32,
                                 color: context.modeTextMuted,
@@ -140,7 +141,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                                       ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Icon(
+                                    child: AppIcon(
                                       Icons.verified,
                                       size: 18,
                                       color: context.modeTextInverse,
@@ -251,7 +252,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 16, color: color),
+          child: AppIcon(icon, size: 16, color: color),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -341,7 +342,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Icon(
+            AppIcon(
               Icons.arrow_drop_down,
               size: 20,
               color: value != null
@@ -434,7 +435,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Center(
-                                child: Icon(
+                                child: AppIcon(
                                   Icons.fastfood,
                                   size: 40,
                                   color: context.modeTextMuted,
@@ -444,7 +445,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                           ),
                         )
                       : Center(
-                          child: Icon(
+                          child: AppIcon(
                             Icons.fastfood,
                             size: 40,
                             color: context.modeTextMuted,
@@ -467,7 +468,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          AppIcon(
                             Icons.star,
                             size: 12,
                             color: context.modeTextInverse,
@@ -551,7 +552,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          AppIcon(
             Icons.inventory_2_outlined,
             size: 80,
             color: context.modeTextMuted,
@@ -577,7 +578,7 @@ class _SupplierProductsScreenState extends State<SupplierProductsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 80, color: context.modeError),
+            AppIcon(Icons.error_outline, size: 80, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               state.error,

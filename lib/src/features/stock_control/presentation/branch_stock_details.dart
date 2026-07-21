@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -79,7 +80,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                 color: const Color(0xFFFFEBEE),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
+              child: const AppIcon(
                 Icons.warning_rounded,
                 color: Color(0xFFEF4444),
                 size: 24,
@@ -177,7 +178,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(icon, color: kPrimary),
+            AppIcon(icon, color: kPrimary),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -238,7 +239,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
           ),
           centerTitle: true,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
+            icon: const AppIcon(Icons.arrow_back, color: kprimaryTextColor1),
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
@@ -246,7 +247,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               builder: (context, state) {
                 if (state is BranchStockDetailsLoaded) {
                   return PopupMenuButton<String>(
-                    icon: const Icon(
+                    icon: const AppIcon(
                       Icons.more_vert,
                       color: kprimaryTextColor1,
                     ),
@@ -309,7 +310,11 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                         value: 'adjust',
                         child: Row(
                           children: [
-                            Icon(Icons.tune_rounded, size: 20, color: kPrimary),
+                            AppIcon(
+                              Icons.tune_rounded,
+                              size: 20,
+                              color: kPrimary,
+                            ),
                             const SizedBox(width: 12),
                             Text(
                               'Adjust Stock',
@@ -325,7 +330,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                         value: 'allow_negative',
                         child: Row(
                           children: [
-                            Icon(
+                            AppIcon(
                               Icons.exposure_minus_1,
                               size: 20,
                               color: kPrimary,
@@ -345,7 +350,11 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                         value: 'lock',
                         child: Row(
                           children: [
-                            Icon(Icons.lock_outline, size: 20, color: kPrimary),
+                            AppIcon(
+                              Icons.lock_outline,
+                              size: 20,
+                              color: kPrimary,
+                            ),
                             const SizedBox(width: 12),
                             Text(
                               'Lock Item',
@@ -361,7 +370,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                         value: 'unlock',
                         child: Row(
                           children: [
-                            Icon(
+                            AppIcon(
                               Icons.lock_open_outlined,
                               size: 20,
                               color: kPrimary,
@@ -381,7 +390,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            const Icon(
+                            const AppIcon(
                               Icons.delete_outline,
                               size: 20,
                               color: kPrimary,
@@ -502,7 +511,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.grey.shade400),
+            AppIcon(Icons.error_outline, size: 64, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
               error,
@@ -690,7 +699,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            AppIcon(
                               isCritical
                                   ? Icons.warning_rounded
                                   : Icons.info_outline,
@@ -726,7 +735,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                     //   width: double.infinity,
                     //   child: ElevatedButton.icon(
                     //     onPressed: () => _showAdjustmentDialog(details),
-                    //     // icon: const Icon(Icons.tune_rounded, size: 20),
+                    //     // icon: const AppIcon(Icons.tune_rounded, size: 20),
                     //     label: Text(
                     //       'Adjust Stock',
                     //       style: WorkSansAppTextStyles.medium.copyWith(
@@ -958,7 +967,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: iconColor, size: 22),
+            child: AppIcon(icon, color: iconColor, size: 22),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1022,7 +1031,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               color: kPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: kPrimary, size: 22),
+            child: AppIcon(icon, color: kPrimary, size: 22),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1074,7 +1083,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               if (isWarning) ...[
-                const Icon(
+                const AppIcon(
                   Icons.warning_rounded,
                   size: 16,
                   color: Color(0xFFF59E0B),

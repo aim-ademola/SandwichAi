@@ -41,9 +41,9 @@
 //   String _formatPrice(String price) {
 //     try {
 //       final amount = double.parse(price);
-//       return '₦${amount.toStringAsFixed(2)}';
+//       return 'â‚¦${amount.toStringAsFixed(2)}';
 //     } catch (e) {
-//       return '₦$price';
+//       return 'â‚¦$price';
 //     }
 //   }
 
@@ -172,7 +172,7 @@
 //                   mainAxisAlignment: pw.MainAxisAlignment.center,
 //                   children: [
 //                     pw.Text(
-//                       '✓ ',
+//                       'âœ“ ',
 //                       style: pw.TextStyle(
 //                         fontSize: 24,
 //                         color: PdfColors.green,
@@ -360,7 +360,7 @@
 //                   color: Colors.green.withValues(alpha: 0.1),
 //                   shape: BoxShape.circle,
 //                 ),
-//                 child: const Icon(
+//                 child: const AppIcon(
 //                   Icons.check_circle,
 //                   color: Colors.green,
 //                   size: 50,
@@ -520,7 +520,7 @@
 //                             ),
 //                           ),
 //                         )
-//                       : const Icon(Icons.download, color: Colors.white),
+//                       : const AppIcon(Icons.download, color: Colors.white),
 //                   label: Text(
 //                     _isGeneratingPdf ? 'Generating PDF...' : 'Download as PDF',
 //                     style: WorkSansAppTextStyles.medium.copyWith(

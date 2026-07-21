@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -194,7 +195,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     );
   }
 
-  // ── AppBar ─────────────────────────────────────────────────────────────────
+  // â”€â”€ AppBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -202,7 +203,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.menu_rounded, color: context.modeTextPrimary),
+        icon: AppIcon(Icons.menu_rounded, color: context.modeTextPrimary),
         onPressed: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       title: Text(
@@ -217,7 +218,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
       actions: [
         const NotificationBellAction(margin: EdgeInsets.zero),
         IconButton(
-          icon: Icon(Icons.refresh_rounded, color: context.modePrimary),
+          icon: AppIcon(Icons.refresh_rounded, color: context.modePrimary),
           onPressed: () => _dispatch(const RefreshDashboardData()),
         ),
       ],
@@ -228,7 +229,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     );
   }
 
-  // ── Loaded state ───────────────────────────────────────────────────────────
+  // â”€â”€ Loaded state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildLoadedState(
     KitchenDashboardData data,
@@ -279,7 +280,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     );
   }
 
-  // ── Stats row ──────────────────────────────────────────────────────────────
+  // â”€â”€ Stats row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildStatsRow(KitchenDashboardData data) {
     return Row(
@@ -332,7 +333,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                 color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: color, size: 18),
+              child: AppIcon(icon, color: color, size: 18),
             ),
             const SizedBox(width: 10),
             Column(
@@ -364,12 +365,12 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     );
   }
 
-  // ── Order card ─────────────────────────────────────────────────────────────
+  // â”€â”€ Order card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Widget _buildOrderCard(KitchenOrder order) {
     final cfg = _statusConfig(order.status);
 
-    // ✅ Use realActions — not cfg.actions (which has empty stubs)
+    // âœ… Use realActions â€” not cfg.actions (which has empty stubs)
     final actions = _resolveActions(order);
     final isUpdating = _updatingOrderId == order.id;
     final kitchenNote = _kitchenNotePreview(order.specialInstructions);
@@ -396,7 +397,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Left status panel ──
+              // â”€â”€ Left status panel â”€â”€
               Container(
                 width: 52,
                 color: cfg.color,
@@ -404,7 +405,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(cfg.icon, color: context.modeTextInverse, size: 20),
+                    AppIcon(cfg.icon, color: context.modeTextInverse, size: 20),
                     RotatedBox(
                       quarterTurns: 3,
                       child: Text(
@@ -423,7 +424,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                 ),
               ),
 
-              // ── Card body ──
+              // â”€â”€ Card body â”€â”€
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -455,7 +456,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  AppIcon(
                                     Icons.table_restaurant_rounded,
                                     size: 11,
                                     color: context.modeTextMuted,
@@ -540,7 +541,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
+                              AppIcon(
                                 Icons.info_outline_rounded,
                                 size: 13,
                                 color: context.modeWarning,
@@ -561,7 +562,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                         ),
                       ],
 
-                      // ✅ Action buttons using resolvedActions
+                      // âœ… Action buttons using resolvedActions
                       if (actions.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         if (isUpdating)
@@ -629,7 +630,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     );
   }
 
-  // ── Status config (icons + colors + labels only — NO actions here) ─────────
+  // â”€â”€ Status config (icons + colors + labels only â€” NO actions here) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   _StatusConfig _statusConfig(String status) {
     switch (status.toUpperCase()) {
@@ -690,7 +691,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     }
   }
 
-  // ── Actions (real callbacks — the only place actions are defined) ──────────
+  // â”€â”€ Actions (real callbacks â€” the only place actions are defined) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   List<_OrderAction> _resolveActions(KitchenOrder order) {
     switch (order.status.toUpperCase()) {
@@ -766,7 +767,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
     }
   }
 
-  // ── Empty / Error / Loading ────────────────────────────────────────────────
+  // â”€â”€ Empty / Error / Loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   String _kitchenNotePreview(String? value) {
     final note = value?.trim();
@@ -825,7 +826,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                 color: context.modePrimary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.receipt_long_rounded,
                 size: 36,
                 color: context.modePrimary,
@@ -889,7 +890,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
       padding: const EdgeInsets.symmetric(vertical: 60),
       child: Column(
         children: [
-          Icon(
+          AppIcon(
             Icons.inbox_rounded,
             size: 48,
             color: context.modeTextMuted.withValues(alpha: 0.45),
@@ -917,7 +918,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
       DashboardErrorType.timeout: (
         Icons.timer_off_rounded,
         'Timed out',
-        'The request took too long — pull down to retry',
+        'The request took too long â€” pull down to retry',
       ),
       DashboardErrorType.server: (
         Icons.cloud_off_rounded,
@@ -943,7 +944,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
                 color: context.modeError.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 32, color: context.modeError),
+              child: AppIcon(icon, size: 32, color: context.modeError),
             ),
             const SizedBox(height: 20),
             Text(
@@ -1120,7 +1121,7 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
   }
 }
 
-// ── Data classes ───────────────────────────────────────────────────────────────
+// â”€â”€ Data classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _OrderAction {
   const _OrderAction({

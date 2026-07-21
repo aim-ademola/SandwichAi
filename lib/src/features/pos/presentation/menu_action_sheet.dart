@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
 class BottomSheetAction extends StatelessWidget {
@@ -34,7 +35,7 @@ class BottomSheetAction extends StatelessWidget {
                 color: iconColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor, size: 22),
+              child: AppIcon(icon, color: iconColor, size: 22),
             ),
             const SizedBox(width: 16),
             Expanded(

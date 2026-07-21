@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
@@ -160,7 +161,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                         _getBorderRadius(screenWidth),
                       ),
                     ),
-                    child: Icon(
+                    child: AppIcon(
                       Icons.help_outline,
                       color: kPrimary,
                       size: _getIconSize(screenWidth) + 4,
@@ -178,7 +179,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: AppIcon(
                       Icons.close,
                       color: kprimaryTextColor2,
                       size: _getIconSize(screenWidth),
@@ -229,7 +230,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(
+                                AppIcon(
                                   Icons.lightbulb_outline,
                                   color: kPrimary,
                                   size: _getIconSize(screenWidth) - 2,
@@ -649,7 +650,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                         const TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
-                                    prefixText: '₦ ',
+                                    prefixText: 'â‚¦ ',
                                     screenWidth: screenWidth,
                                     onHelpTap: () => _showHelpBottomSheet(
                                       title: 'Unit Cost',
@@ -704,7 +705,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
       backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(
+        icon: AppIcon(
           Icons.arrow_back,
           color: kprimaryTextColor1,
           size: _getIconSize(screenWidth),
@@ -762,7 +763,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                 ],
                 screenWidth: screenWidth,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.help_outline,
                 color: kPrimary,
                 size: _getIconSize(screenWidth) - 4,
@@ -801,7 +802,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
             ),
             child: Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.search,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth),
@@ -821,14 +822,14 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                 ),
                 if (widget.itemId == null)
                   _isOpened
-                      ? Icon(
+                      ? AppIcon(
                           Icons.arrow_drop_down,
                           color: kprimaryTextColor2,
                           size: _getIconSize(screenWidth) + 4,
                         )
                       : Transform.rotate(
                           angle: -90 * 3.14159 / 180,
-                          child: Icon(
+                          child: AppIcon(
                             Icons.arrow_drop_down,
                             color: kprimaryTextColor2,
                             size: _getIconSize(screenWidth) + 4,
@@ -878,14 +879,14 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                   fontSize: _getInputFontSize(screenWidth),
                   color: kprimaryTextColor2,
                 ),
-                prefixIcon: Icon(
+                prefixIcon: AppIcon(
                   Icons.search,
                   color: kprimaryTextColor2,
                   size: _getIconSize(screenWidth),
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(
+                        icon: AppIcon(
                           Icons.clear,
                           color: kprimaryTextColor2,
                           size: _getIconSize(screenWidth),
@@ -990,7 +991,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                   color: kPrimary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Icon(
+                                child: AppIcon(
                                   Icons.inventory_2_outlined,
                                   color: kPrimary,
                                   size: _getIconSize(screenWidth) - 4,
@@ -1014,7 +1015,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} • ${item.storage}',
+                                      '${item.category} â€¢ ${item.storage}',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(
@@ -1065,7 +1066,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               SizedBox(width: 8),
               GestureDetector(
                 onTap: onHelpTap,
-                child: Icon(
+                child: AppIcon(
                   Icons.help_outline,
                   color: kPrimary,
                   size: _getIconSize(screenWidth) - 4,
@@ -1186,7 +1187,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                 ],
                 screenWidth: screenWidth,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.help_outline,
                 color: kPrimary,
                 size: _getIconSize(screenWidth) - 4,
@@ -1212,7 +1213,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                   fontWeight: FontWeight.w400,
                   color: kprimaryTextColor2,
                 ),
-                suffixIcon: Icon(
+                suffixIcon: AppIcon(
                   Icons.calendar_today,
                   color: kPrimary,
                   size: _getIconSize(screenWidth),

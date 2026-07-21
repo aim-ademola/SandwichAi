@@ -1,6 +1,7 @@
 // presentation/output_verification_history_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -104,7 +105,11 @@ class _OutputVerificationHistoryScreenState
                 color: kPrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.fact_check_outlined, size: 50, color: kPrimary),
+              child: AppIcon(
+                Icons.fact_check_outlined,
+                size: 50,
+                color: kPrimary,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
@@ -137,7 +142,7 @@ class _OutputVerificationHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            AppIcon(
               _getErrorIcon(state.errorType),
               size: 64,
               color: const Color(0xFFE53935),
@@ -167,7 +172,7 @@ class _OutputVerificationHistoryScreenState
                   const LoadOutputVerifications(),
                 );
               },
-              icon: const Icon(Icons.refresh, color: Colors.white),
+              icon: const AppIcon(Icons.refresh, color: Colors.white),
               label: Text(
                 'Retry',
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -243,7 +248,7 @@ class _OutputVerificationHistoryScreenState
                           width: 60,
                           height: 60,
                           color: kPrimary.withValues(alpha: 0.2),
-                          child: Icon(Icons.restaurant, color: kPrimary),
+                          child: AppIcon(Icons.restaurant, color: kPrimary),
                         );
                       },
                     ),
@@ -256,7 +261,7 @@ class _OutputVerificationHistoryScreenState
                       color: kPrimary.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(Icons.restaurant, color: kPrimary),
+                    child: AppIcon(Icons.restaurant, color: kPrimary),
                   ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -389,7 +394,7 @@ class _OutputVerificationHistoryScreenState
                 // Timestamp
                 Row(
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.access_time,
                       size: 14,
                       color: kprimaryTextColor2,
@@ -421,7 +426,7 @@ class _OutputVerificationHistoryScreenState
   ) {
     return Column(
       children: [
-        Icon(icon, color: color, size: _getIconSize(screenWidth)),
+        AppIcon(icon, color: color, size: _getIconSize(screenWidth)),
         const SizedBox(height: 6),
         Text(
           value,
@@ -452,7 +457,7 @@ class _OutputVerificationHistoryScreenState
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
+        AppIcon(
           icon,
           size: _getIconSize(screenWidth) - 4,
           color: kprimaryTextColor2,
@@ -560,7 +565,7 @@ class _OutputVerificationHistoryScreenState
       } else if (difference.inDays < 7) {
         return '${difference.inDays}d ago';
       } else {
-        return DateFormat('MMM d, yyyy • HH:mm').format(dateTime);
+        return DateFormat('MMM d, yyyy â€¢ HH:mm').format(dateTime);
       }
     } catch (e) {
       return timestamp;

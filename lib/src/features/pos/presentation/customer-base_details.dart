@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -27,9 +28,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   }
 
   String _formatCurrency(double? amount) {
-    if (amount == null) return '₦0.00';
+    if (amount == null) return 'â‚¦0.00';
     final formatter = NumberFormat('#,##0.00', 'en_US');
-    return '₦${formatter.format(amount)}';
+    return 'â‚¦${formatter.format(amount)}';
   }
 
   String _formatDate(String? dateString) {
@@ -122,7 +123,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: kprimaryTextColor1),
+          icon: const AppIcon(Icons.arrow_back, color: kprimaryTextColor1),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -187,7 +188,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  AppIcon(
                     Icons.error_outline,
                     size: 64,
                     color: Colors.red.shade300,
@@ -294,7 +295,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              AppIcon(
                                 Icons.workspace_premium,
                                 size: 18,
                                 color: _getMembershipColor(
@@ -332,7 +333,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                       );
                                     });
                               },
-                              icon: const Icon(Icons.edit_outlined, size: 18),
+                              icon: const AppIcon(
+                                Icons.edit_outlined,
+                                size: 18,
+                              ),
                               label: Text(
                                 'Edit',
                                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -359,7 +363,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () => _showDeleteDialog(customer),
-                              icon: const Icon(Icons.delete_outline, size: 18),
+                              icon: const AppIcon(
+                                Icons.delete_outline,
+                                size: 18,
+                              ),
                               label: Text(
                                 'Delete',
                                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -591,7 +598,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: AppIcon(icon, color: color, size: 24),
           ),
           const SizedBox(height: 12),
           Text(
@@ -666,7 +673,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: kprimaryTextColor2),
+          AppIcon(icon, size: 20, color: kprimaryTextColor2),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -704,7 +711,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: kprimaryTextColor2),
+          AppIcon(icon, size: 20, color: kprimaryTextColor2),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

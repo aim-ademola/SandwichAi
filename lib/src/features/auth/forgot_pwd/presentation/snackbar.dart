@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/features/auth/forgot_pwd/bloc/state.dart';
 
 void showErrorSnackBar(
@@ -38,7 +39,7 @@ void showErrorSnackBar(
     SnackBar(
       content: Row(
         children: [
-          Icon(icon, color: Colors.white, size: 20),
+          AppIcon(icon, color: Colors.white, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -66,7 +67,7 @@ void showSuccessSnackBar(String message, BuildContext context) {
     SnackBar(
       content: Row(
         children: [
-          const Icon(Icons.check_circle, color: Colors.white, size: 20),
+          const AppIcon(Icons.check_circle, color: Colors.white, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

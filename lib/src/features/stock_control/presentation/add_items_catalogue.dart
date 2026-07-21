@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/branch_stock_model.dart';
@@ -171,7 +172,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
           ),
           const Spacer(),
           IconButton(
-            icon: Icon(
+            icon: AppIcon(
               Icons.close,
               size: _getIconSize(screenWidth),
               color: context.modeTextMuted,
@@ -342,7 +343,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
                   return 'Required';
                 }
                 if (int.tryParse(value) == null || int.parse(value) < 1) {
-                  return 'Must be ≥ 1';
+                  return 'Must be â‰¥ 1';
                 }
                 return null;
               },
@@ -479,7 +480,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
                 vertical: _getInputPadding(screenWidth),
               ),
             ),
-            icon: Icon(
+            icon: AppIcon(
               Icons.arrow_drop_down,
               color: context.modeTextMuted,
               size: _getIconSize(screenWidth),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -94,7 +95,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             backgroundColor: const Color(0xFFF8F6F6),
             elevation: 0,
             leading: IconButton(
-              icon: Icon(
+              icon: AppIcon(
                 Icons.arrow_back_ios,
                 color: kprimaryTextColor1,
                 size: responsive.getIconSize(screenWidth),
@@ -164,7 +165,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 );
                               },
                               suffixIcon: IconButton(
-                                icon: Icon(
+                                icon: AppIcon(
                                   obscure
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
@@ -219,7 +220,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 );
                               },
                               suffixIcon: IconButton(
-                                icon: Icon(
+                                icon: AppIcon(
                                   obscure
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
@@ -278,7 +279,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               },
                               onSubmitted: (_) => _handleChangePassword(),
                               suffixIcon: IconButton(
-                                icon: Icon(
+                                icon: AppIcon(
                                   obscure
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,

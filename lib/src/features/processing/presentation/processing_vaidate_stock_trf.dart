@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -197,7 +198,7 @@ class _ValidateStockTransferToProcessingcreenState
                 backgroundColor: Colors.white,
                 elevation: 0,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  icon: const AppIcon(Icons.arrow_back, color: Colors.black),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: Text(
@@ -263,7 +264,11 @@ class _ValidateStockTransferToProcessingcreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 60, color: Colors.red.shade300),
+                AppIcon(
+                  Icons.error_outline,
+                  size: 60,
+                  color: Colors.red.shade300,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Error loading transfers',
@@ -404,7 +409,7 @@ class _ValidateStockTransferToProcessingcreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 80, color: Colors.grey.shade300),
+            AppIcon(icon, size: 80, color: Colors.grey.shade300),
             const SizedBox(height: 24),
             Text(
               title,
@@ -433,7 +438,7 @@ class _ValidateStockTransferToProcessingcreenState
     ProcessingTransferResponse transfer, {
     required bool isPending,
   }) {
-    final dateFormat = DateFormat('MMM dd, yyyy • hh:mm a');
+    final dateFormat = DateFormat('MMM dd, yyyy â€¢ hh:mm a');
     final formattedDate = dateFormat.format(transfer.createdAt);
 
     return Container(
@@ -507,7 +512,7 @@ class _ValidateStockTransferToProcessingcreenState
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(
+              AppIcon(
                 Icons.inventory_2_outlined,
                 size: 18,
                 color: kprimaryTextColor2,
@@ -527,7 +532,11 @@ class _ValidateStockTransferToProcessingcreenState
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.note_outlined, size: 18, color: kprimaryTextColor2),
+                AppIcon(
+                  Icons.note_outlined,
+                  size: 18,
+                  color: kprimaryTextColor2,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -563,7 +572,7 @@ class _ValidateStockTransferToProcessingcreenState
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(
+                      const AppIcon(
                         Icons.arrow_forward_ios,
                         size: 14,
                         color: kPrimary,
@@ -587,7 +596,7 @@ class _ValidateStockTransferToProcessingcreenState
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          const AppIcon(
                             Icons.check_circle_outline,
                             size: 16,
                             color: Colors.white,
@@ -618,7 +627,7 @@ class _ValidateStockTransferToProcessingcreenState
     ProcessingTransferResponse transfer,
     bool isPending,
   ) {
-    final dateFormat = DateFormat('MMMM dd, yyyy • hh:mm a');
+    final dateFormat = DateFormat('MMMM dd, yyyy â€¢ hh:mm a');
     final formattedDate = dateFormat.format(transfer.createdAt);
 
     showModalBottomSheet(
@@ -670,7 +679,7 @@ class _ValidateStockTransferToProcessingcreenState
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const AppIcon(Icons.close),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -1086,7 +1095,7 @@ class __ValidateTransferBottomSheetState
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const AppIcon(Icons.close),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],

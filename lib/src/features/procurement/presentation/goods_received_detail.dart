@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -119,7 +120,7 @@ class _GoodsReceivedDetailScreenState extends State<GoodsReceivedDetailScreen> {
           backgroundColor: context.modeSurface,
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: context.modeTextPrimary),
+            icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(widget.title),
@@ -129,7 +130,7 @@ class _GoodsReceivedDetailScreenState extends State<GoodsReceivedDetailScreen> {
                 final receipt = state.detail;
                 if (receipt == null) return const SizedBox.shrink();
                 return IconButton(
-                  icon: Icon(Icons.fact_check_outlined, color: kPrimary),
+                  icon: AppIcon(Icons.fact_check_outlined, color: kPrimary),
                   onPressed: () => _showQcDialog(receipt),
                 );
               },

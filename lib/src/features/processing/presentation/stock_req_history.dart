@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -260,7 +261,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                 color: context.modePrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.inbox_outlined,
                 size: _getEmptyIconSize(screenWidth) * 0.5,
                 color: context.modePrimary,
@@ -327,7 +328,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                 color: context.modePrimary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: AppIcon(
                 Icons.inbox_outlined,
                 size: 36,
                 color: context.modePrimary,
@@ -405,7 +406,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
+                    AppIcon(
                       Icons.note_outlined,
                       size: _getIconSize(screenWidth) - 2,
                       color: context.modeTextSecondary,
@@ -465,7 +466,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
     if (items.isEmpty) {
       return Row(
         children: [
-          Icon(
+          AppIcon(
             Icons.inventory_outlined,
             size: _getIconSize(screenWidth) - 2,
             color: context.modeTextSecondary,
@@ -493,7 +494,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
           children: [
             Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.inventory_outlined,
                   size: _getIconSize(screenWidth) - 2,
                   color: context.modeTextSecondary,
@@ -589,7 +590,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(
+                      AppIcon(
                         showAll
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
@@ -638,7 +639,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          AppIcon(
             icon,
             size: _getIconSize(screenWidth) - 6,
             color: context.modePrimary,
@@ -662,7 +663,7 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
     return FloatingActionButton.extended(
       onPressed: _navigateToCreateRequest,
       backgroundColor: context.modePrimary,
-      icon: Icon(
+      icon: AppIcon(
         Icons.add,
         size: _getIconSize(screenWidth),
         color: context.modeTextInverse,

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
@@ -101,32 +101,26 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(
-                icon: 'assets/svg/home.svg',
-                activeIcon: 'assets/svg/home.svg',
+                icon: HugeIcons.strokeRoundedDashboardSquare01,
+                activeIcon: HugeIcons.strokeRoundedDashboardSquare01,
                 label: 'Home',
                 index: 0,
               ),
-              // _buildNavItem(
-              //   icon: 'assets/svg/table.svg',
-              //   activeIcon: 'assets/svg/table.svg',
-              //   label: 'Table',
-              //   index: 1,
-              // ),
               _buildNavItem(
-                icon: 'assets/svg/procuremnt_order.svg',
-                activeIcon: 'assets/svg/procuremnt_order.svg',
+                icon: HugeIcons.strokeRoundedInvoice03,
+                activeIcon: HugeIcons.strokeRoundedInvoice03,
                 label: 'New Order',
                 index: 1,
               ),
               _buildNavItem(
-                icon: 'assets/svg/bx_cart.svg',
-                activeIcon: 'assets/svg/bx_cart.svg',
+                icon: HugeIcons.strokeRoundedShoppingCart02,
+                activeIcon: HugeIcons.strokeRoundedShoppingCart02,
                 label: 'Active Orders',
                 index: 2,
               ),
               _buildNavItem(
-                icon: 'assets/svg/chat.svg',
-                activeIcon: 'assets/svg/chat.svg',
+                icon: HugeIcons.strokeRoundedMessage01,
+                activeIcon: HugeIcons.strokeRoundedMessage01,
                 label: 'Chat',
                 index: 3,
               ),
@@ -138,8 +132,8 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
   }
 
   Widget _buildNavItem({
-    required String icon,
-    required String activeIcon,
+    required List<List<dynamic>> icon,
+    required List<List<dynamic>> activeIcon,
     required String label,
     required int index,
   }) {
@@ -165,14 +159,11 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset(
-                  isActive ? activeIcon : icon,
-                  colorFilter: ColorFilter.mode(
-                    isActive ? activeColor : inactiveColor,
-                    BlendMode.srcIn,
-                  ),
-                  width: 24,
-                  height: 24,
+                HugeIcon(
+                  icon: isActive ? activeIcon : icon,
+                  color: isActive ? activeColor : inactiveColor,
+                  size: 24,
+                  strokeWidth: 1.8,
                 ),
                 const SizedBox(height: 4),
                 Text(

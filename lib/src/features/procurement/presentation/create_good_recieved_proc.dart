@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -299,7 +300,10 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, color: context.modeTextPrimary),
+                      icon: AppIcon(
+                        Icons.close,
+                        color: context.modeTextPrimary,
+                      ),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -332,7 +336,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        AppIcon(
                           Icons.lightbulb_outline,
                           color: context.modePrimary,
                           size: 24,
@@ -379,7 +383,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 color: context.modePrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: context.modePrimary, size: 20),
+              child: AppIcon(icon, color: context.modePrimary, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -489,7 +493,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         color: context.modePrimary,
                       ),
                     )
-                  : const Icon(Icons.download_done_outlined, size: 18),
+                  : const AppIcon(Icons.download_done_outlined, size: 18),
               label: Text(
                 isLoading ? 'Loading PO...' : 'Prefill from PO',
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -507,7 +511,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
             ),
             OutlinedButton.icon(
               onPressed: isLoading ? null : _markPoComplete,
-              icon: const Icon(Icons.task_alt, size: 18),
+              icon: const AppIcon(Icons.task_alt, size: 18),
               label: Text(
                 'Mark PO Complete',
                 style: WorkSansAppTextStyles.medium.copyWith(
@@ -572,7 +576,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
             children: [
               Row(
                 children: [
-                  Icon(
+                  AppIcon(
                     isComplete
                         ? Icons.check_circle_outline
                         : Icons.local_shipping_outlined,
@@ -680,7 +684,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                             color: context.modePrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: AppIcon(
                             Icons.help_outline,
                             size: 16,
                             color: context.modePrimary,
@@ -704,7 +708,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                             color: context.modePrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: AppIcon(
                             Icons.help_outline,
                             size: 16,
                             color: context.modePrimary,
@@ -762,7 +766,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                             color: context.modePrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: AppIcon(
                             Icons.help_outline,
                             size: 16,
                             color: context.modePrimary,
@@ -792,7 +796,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                             color: context.modePrimary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: AppIcon(
                             Icons.help_outline,
                             size: 16,
                             color: context.modePrimary,
@@ -890,7 +894,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: context.modeError),
+                    AppIcon(Icons.error_outline, color: context.modeError),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -943,7 +947,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      AppIcon(
                         Icons.business,
                         color: context.modePrimary,
                         size: _getIconSize(screenWidth),
@@ -960,7 +964,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                           ),
                         ),
                       ),
-                      Icon(
+                      AppIcon(
                         Icons.arrow_drop_down,
                         color: context.modePrimary,
                         size: 24,
@@ -1022,7 +1026,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                               ),
                             ),
                             IconButton(
-                              icon: Icon(
+                              icon: AppIcon(
                                 Icons.close,
                                 color: context.modeTextPrimary,
                               ),
@@ -1039,13 +1043,13 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                           onChanged: (value) => setState(() {}),
                           decoration: InputDecoration(
                             hintText: 'Search suppliers...',
-                            prefixIcon: Icon(
+                            prefixIcon: AppIcon(
                               Icons.search,
                               color: context.modePrimary,
                             ),
                             suffixIcon: searchController.text.isNotEmpty
                                 ? IconButton(
-                                    icon: Icon(
+                                    icon: AppIcon(
                                       Icons.clear,
                                       color: context.modeTextMuted,
                                     ),
@@ -1079,7 +1083,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  AppIcon(
                                     Icons.search_off,
                                     size: 64,
                                     color: context.modeTextMuted,
@@ -1116,7 +1120,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                     ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Icon(
+                                  child: AppIcon(
                                     Icons.business,
                                     color: context.modePrimary,
                                     size: 24,
@@ -1133,7 +1137,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                   ),
                                 ),
                                 trailing: isSelected
-                                    ? Icon(
+                                    ? AppIcon(
                                         Icons.check_circle,
                                         color: context.modePrimary,
                                       )
@@ -1209,7 +1213,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
               fontWeight: FontWeight.w400,
             ),
             prefixIcon: icon != null
-                ? Icon(
+                ? AppIcon(
                     icon,
                     color: context.modePrimary,
                     size: _getIconSize(screenWidth),
@@ -1270,7 +1274,11 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
               ),
               if (_selectedItems.length > 1)
                 IconButton(
-                  icon: Icon(Icons.close, size: 20, color: context.modeError),
+                  icon: AppIcon(
+                    Icons.close,
+                    size: 20,
+                    color: context.modeError,
+                  ),
                   onPressed: () {
                     setState(() {
                       _selectedItems[index].dispose(); // ADD THIS
@@ -1421,7 +1429,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
             ),
             child: Row(
               children: [
-                Icon(
+                AppIcon(
                   Icons.inventory_2,
                   color: context.modePrimary,
                   size: _getIconSize(screenWidth),
@@ -1438,7 +1446,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                     ),
                   ),
                 ),
-                Icon(
+                AppIcon(
                   Icons.arrow_drop_down,
                   color: context.modePrimary,
                   size: 24,
@@ -1499,7 +1507,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                               ),
                             ),
                             IconButton(
-                              icon: Icon(
+                              icon: AppIcon(
                                 Icons.close,
                                 color: context.modeTextPrimary,
                               ),
@@ -1516,13 +1524,13 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                           onChanged: (value) => setDialogState(() {}),
                           decoration: InputDecoration(
                             hintText: 'Search items...',
-                            prefixIcon: Icon(
+                            prefixIcon: AppIcon(
                               Icons.search,
                               color: context.modePrimary,
                             ),
                             suffixIcon: searchController.text.isNotEmpty
                                 ? IconButton(
-                                    icon: Icon(
+                                    icon: AppIcon(
                                       Icons.clear,
                                       color: context.modeTextMuted,
                                     ),
@@ -1556,7 +1564,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  AppIcon(
                                     Icons.search_off,
                                     size: 64,
                                     color: context.modeTextMuted,
@@ -1606,7 +1614,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                     ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Icon(
+                                  child: AppIcon(
                                     Icons.inventory_2,
                                     color: context.modePrimary,
                                     size: 24,
@@ -1623,7 +1631,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                   ),
                                 ),
                                 subtitle: Text(
-                                  '${invItem.category} • ${invItem.unit} • SKU: ${invItem.sku}',
+                                  '${invItem.category} â€¢ ${invItem.unit} â€¢ SKU: ${invItem.sku}',
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 12,
                                     color: context.modeTextSecondary,
@@ -1631,7 +1639,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                 ),
 
                                 trailing: isSelected
-                                    ? Icon(
+                                    ? AppIcon(
                                         Icons.check_circle,
                                         color: context.modePrimary,
                                       )
@@ -1836,7 +1844,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         : context.modeTextSecondary,
                   ),
                 ),
-                Icon(
+                AppIcon(
                   Icons.calendar_today,
                   color: context.modePrimary,
                   size: _getIconSize(screenWidth),
@@ -1869,7 +1877,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        icon: const Icon(Icons.add_circle_outline, size: 20),
+        icon: const AppIcon(Icons.add_circle_outline, size: 20),
         label: Text(
           selectedItems.isEmpty ? 'Add an Item' : ' Add Another Item',
           style: WorkSansAppTextStyles.medium.copyWith(

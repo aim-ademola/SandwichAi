@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -60,7 +61,7 @@ class _KitchenOrderHistoryScreenState extends State<KitchenOrderHistoryScreen> {
               onPressed: () => context.read<KitchenOrdersBloc>().add(
                 const RefreshKitchenOrders(),
               ),
-              icon: Icon(Icons.refresh_rounded, color: context.modePrimary),
+              icon: AppIcon(Icons.refresh_rounded, color: context.modePrimary),
             ),
           ],
         ),
@@ -200,7 +201,7 @@ class _KitchenOrderHistoryScreenState extends State<KitchenOrderHistoryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: context.modeTextMuted),
+            AppIcon(icon, size: 64, color: context.modeTextMuted),
             const SizedBox(height: 14),
             Text(
               title,
@@ -223,7 +224,7 @@ class _KitchenOrderHistoryScreenState extends State<KitchenOrderHistoryScreen> {
             const SizedBox(height: 18),
             ElevatedButton.icon(
               onPressed: onAction,
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(Icons.refresh),
               label: Text(actionLabel),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.modePrimary,
@@ -378,7 +379,7 @@ class _InfoChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 15, color: context.modeTextMuted),
+        AppIcon(icon, size: 15, color: context.modeTextMuted),
         const SizedBox(width: 5),
         Text(
           label,

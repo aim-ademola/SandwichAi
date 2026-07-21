@@ -15,6 +15,7 @@ class AppEnvironment {
     required this.appName,
     required this.apiBaseUrl,
     required this.aiBaseUrl,
+    required this.aiApiKey,
     required this.docsUrl,
     required this.devOrganizationCode,
     required this.devUsers,
@@ -30,6 +31,7 @@ class AppEnvironment {
       appName: 'SandwichAi Dev',
       apiBaseUrl: _stagingApiBaseUrl,
       aiBaseUrl: _stagingAiBaseUrl,
+      aiApiKey: String.fromEnvironment('SANDWICHAI_AI_API_KEY'),
       docsUrl: _stagingAiDocsUrl,
       devOrganizationCode: 'ORG-001',
       devUsers: [
@@ -69,6 +71,7 @@ class AppEnvironment {
       appName: 'SandwichAi Staging',
       apiBaseUrl: _stagingApiBaseUrl,
       aiBaseUrl: _stagingAiBaseUrl,
+      aiApiKey: String.fromEnvironment('SANDWICHAI_AI_API_KEY'),
       docsUrl: _stagingAiDocsUrl,
       devOrganizationCode: 'ORG-005',
       devUsers: [],
@@ -88,6 +91,7 @@ class AppEnvironment {
       appName: 'SandwichAi',
       apiBaseUrl: _productionApiBaseUrl,
       aiBaseUrl: _productionAiBaseUrl,
+      aiApiKey: String.fromEnvironment('SANDWICHAI_AI_API_KEY'),
       docsUrl: 'https://sandwichai-api-3wcql.ondigitalocean.app/api/docs',
       devOrganizationCode: '',
       devUsers: [],
@@ -106,6 +110,7 @@ class AppEnvironment {
   final String appName;
   final String apiBaseUrl;
   final String aiBaseUrl;
+  final String aiApiKey;
   final String docsUrl;
   final String devOrganizationCode;
   final List<AppEnvironmentUser> devUsers;

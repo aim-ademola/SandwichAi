@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+﻿import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -332,9 +332,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.requestingDepartment.trim().isEmpty
-                            ? 'Unknown department'
-                            : order.requestingDepartment,
+                        order.departmentLabel,
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: supplierFontSize,
                           fontWeight: FontWeight.bold,

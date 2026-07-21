@@ -26,6 +26,7 @@ import 'package:sandwich_ai/src/features/processing/data/repo/req_stock.dart'
 import 'package:sandwich_ai/src/features/processing/data/repo/stock_request_repo.dart';
 import 'package:sandwich_ai/src/features/processing/data/repo/wasage_analysis_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/order_list_repo.dart';
+import 'package:sandwich_ai/src/features/procurement/data/repository/procurement_good_received_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/procurement_performance_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/procurement_order_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/purchase_order_repo.dart';
@@ -130,6 +131,9 @@ class RepositoryProviders {
     ),
     RepositoryProvider<ProcurementPerformanceRepositoryInterface>(
       create: (context) => ProcurementPerformanceRepository(),
+    ),
+    RepositoryProvider<GoodsReceivedRepositoryInterface>(
+      create: (context) => GoodsReceivedRepository(),
     ),
     RepositoryProvider<KitchenDashboardRepositoryInterface>(
       create: (context) => KitchenDashboardRepository(),

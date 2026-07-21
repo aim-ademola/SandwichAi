@@ -24,21 +24,18 @@ class RecipeComplianceRepository extends BaseRepository
     try {
       // Make the API call and wrap it in ApiResponse
       final apiCall = _apiClient
-          .get('kitchen/menu-items')
+          .get(
+            'kitchen/menu-items',
+            queryParameters: branchId.trim().isEmpty
+                ? null
+                : {'branchId': branchId},
+          )
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
               throw TimeoutException('Request timed out. Please try again.');
             },
-          )
-          .then((response) {
-            // Just wrap the response.data in ApiResponse.success
-            return ApiResponse.success(response.data);
-          })
-          .catchError((error) {
-            // Handle any errors from the API call
-            return ApiResponse.error(error);
-          });
+          );
 
       // Use handleListResponse to parse the list
       final listResponse = await handleListResponse<MenuItem>(

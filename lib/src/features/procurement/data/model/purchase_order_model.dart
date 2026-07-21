@@ -118,84 +118,81 @@ class PurchaseOrder {
 
   factory PurchaseOrder.fromJson(Map<String, dynamic> json) {
     return PurchaseOrder(
-      id: json['id'] as String,
-      orderNumber: json['orderNumber'] as String,
-      buyerId: json['buyerId'] as String,
-      buyerBranchId: json['buyerBranchId'] as String,
-      supplierId: json['supplierId'] as String,
-      buyerEmail: json['buyerEmail'] as String?,
-      buyerPhone: json['buyerPhone'] as String?,
-      status: json['status'] as String,
-      priority: json['priority'] as String,
-      orderDate: DateTime.parse(json['orderDate'] as String),
-      expectedDeliveryDate: DateTime.parse(
-        json['expectedDeliveryDate'] as String,
+      id: _string(json['id']),
+      orderNumber: _string(json['orderNumber'] ?? json['orderNo']),
+      buyerId: _string(json['buyerId']),
+      buyerBranchId: _string(json['buyerBranchId'] ?? json['branchId']),
+      supplierId: _string(json['supplierId']),
+      buyerEmail: _nullableString(json['buyerEmail']),
+      buyerPhone: _nullableString(json['buyerPhone']),
+      status: _string(json['status'], fallback: 'UNKNOWN'),
+      priority: _string(json['priority'], fallback: 'NORMAL'),
+      orderDate: _date(json['orderDate'] ?? json['createdAt']),
+      expectedDeliveryDate: _date(
+        json['expectedDeliveryDate'] ?? json['deliveryDate'],
       ),
       confirmedDeliveryDate: json['confirmedDeliveryDate'] != null
-          ? DateTime.parse(json['confirmedDeliveryDate'] as String)
+          ? _date(json['confirmedDeliveryDate'])
           : null,
       actualDeliveryDate: json['actualDeliveryDate'] != null
-          ? DateTime.parse(json['actualDeliveryDate'] as String)
+          ? _date(json['actualDeliveryDate'])
           : null,
-      availabilityStatus: json['availabilityStatus'] as String?,
-      subtotal: (json['subtotal'] as num).toDouble(),
-      tax: (json['tax'] as num).toDouble(),
-      totalAmount: (json['totalAmount'] as num).toDouble(),
-      currency: json['currency'] as String,
-      paymentTerm: json['paymentTerm'] as String,
-      paymentStatus: json['paymentStatus'] as String,
+      availabilityStatus: _nullableString(json['availabilityStatus']),
+      subtotal: _double(json['subtotal']),
+      tax: _double(json['tax']),
+      totalAmount: _double(json['totalAmount'] ?? json['amount']),
+      currency: _string(json['currency'], fallback: 'NGN'),
+      paymentTerm: _string(json['paymentTerm']),
+      paymentStatus: _string(json['paymentStatus'], fallback: 'PENDING'),
       paymentDueDate: json['paymentDueDate'] != null
-          ? DateTime.parse(json['paymentDueDate'] as String)
+          ? _date(json['paymentDueDate'])
           : null,
-      deliveryAddress: json['deliveryAddress'] as String,
-      deliveryCity: json['deliveryCity'] as String,
-      deliveryState: json['deliveryState'] as String,
-      deliveryZipCode: json['deliveryZipCode'] as String?,
-      deliveryInstructions: json['deliveryInstructions'] as String?,
-      deliveryStatus: json['deliveryStatus'] as String?,
-      trackingNumber: json['trackingNumber'] as String?,
-      courierName: json['courierName'] as String?,
-      acceptedAt: json['acceptedAt'] != null
-          ? DateTime.parse(json['acceptedAt'] as String)
-          : null,
-      acceptedBy: json['acceptedBy'] as String?,
-      declinedAt: json['declinedAt'] != null
-          ? DateTime.parse(json['declinedAt'] as String)
-          : null,
-      declinedBy: json['declinedBy'] as String?,
-      declineReason: json['declineReason'] as String?,
-      alternativeSuggestions: json['alternativeSuggestions'] as String?,
+      deliveryAddress: _string(json['deliveryAddress']),
+      deliveryCity: _string(json['deliveryCity']),
+      deliveryState: _string(json['deliveryState']),
+      deliveryZipCode: _nullableString(json['deliveryZipCode']),
+      deliveryInstructions: _nullableString(json['deliveryInstructions']),
+      deliveryStatus: _nullableString(json['deliveryStatus']),
+      trackingNumber: _nullableString(json['trackingNumber']),
+      courierName: _nullableString(json['courierName']),
+      acceptedAt: json['acceptedAt'] != null ? _date(json['acceptedAt']) : null,
+      acceptedBy: _nullableString(json['acceptedBy']),
+      declinedAt: json['declinedAt'] != null ? _date(json['declinedAt']) : null,
+      declinedBy: _nullableString(json['declinedBy']),
+      declineReason: _nullableString(json['declineReason']),
+      alternativeSuggestions: _nullableString(json['alternativeSuggestions']),
       completedAt: json['completedAt'] != null
-          ? DateTime.parse(json['completedAt'] as String)
+          ? _date(json['completedAt'])
           : null,
-      confirmedBy: json['confirmedBy'] as String?,
+      confirmedBy: _nullableString(json['confirmedBy']),
       cancelledAt: json['cancelledAt'] != null
-          ? DateTime.parse(json['cancelledAt'] as String)
+          ? _date(json['cancelledAt'])
           : null,
-      cancelledBy: json['cancelledBy'] as String?,
-      cancellationReason: json['cancellationReason'] as String?,
-      buyerNotes: json['buyerNotes'] as String?,
-      supplierNotes: json['supplierNotes'] as String?,
-      internalNotes: json['internalNotes'] as String?,
+      cancelledBy: _nullableString(json['cancelledBy']),
+      cancellationReason: _nullableString(json['cancellationReason']),
+      buyerNotes: _nullableString(json['buyerNotes']),
+      supplierNotes: _nullableString(json['supplierNotes']),
+      internalNotes: _nullableString(json['internalNotes']),
       attachments: json['attachments'] != null
           ? List<String>.from(json['attachments'] as List)
           : null,
-      qcStatus: json['qcStatus'] as String?,
-      qcNotes: json['qcNotes'] as String?,
-      qcPerformedBy: json['qcPerformedBy'] as String?,
+      qcStatus: _nullableString(json['qcStatus']),
+      qcNotes: _nullableString(json['qcNotes']),
+      qcPerformedBy: _nullableString(json['qcPerformedBy']),
       qcPerformedAt: json['qcPerformedAt'] != null
-          ? DateTime.parse(json['qcPerformedAt'] as String)
+          ? _date(json['qcPerformedAt'])
           : null,
       isEarlyDelivery: json['isEarlyDelivery'] as bool?,
       isOnTimeDelivery: json['isOnTimeDelivery'] as bool?,
       isLateDelivery: json['isLateDelivery'] as bool?,
-      primaryCategory: json['primaryCategory'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      items: (json['items'] as List)
-          .map((item) => OrderItem.fromJson(item as Map<String, dynamic>))
+      primaryCategory: _nullableString(json['primaryCategory']),
+      createdAt: _date(json['createdAt']),
+      updatedAt: _date(json['updatedAt'] ?? json['createdAt']),
+      items: _list(json['items'] ?? json['orderItems'])
+          .whereType<Map>()
+          .map((item) => OrderItem.fromJson(Map<String, dynamic>.from(item)))
           .toList(),
-      supplier: SupplierInfo.fromJson(json['supplier'] as Map<String, dynamic>),
+      supplier: SupplierInfo.fromJson(_map(json['supplier'])),
     );
   }
 }
@@ -233,19 +230,19 @@ class OrderItem {
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      id: json['id'] as String,
-      purchaseOrderId: json['purchaseOrderId'] as String,
-      productId: json['productId'] as String,
-      productName: json['productName'] as String,
-      productCode: json['productCode'] as String,
-      productImage: json['productImage'] as String?,
-      quantityOrdered: (json['quantityOrdered'] as num).toDouble(),
-      unit: json['unit'] as String,
-      unitPrice: (json['unitPrice'] as num).toDouble(),
-      tax: (json['tax'] as num).toDouble(),
-      totalPrice: (json['totalPrice'] as num).toDouble(),
-      status: json['status'] as String,
-      notes: json['notes'] as String?,
+      id: _string(json['id']),
+      purchaseOrderId: _string(json['purchaseOrderId']),
+      productId: _string(json['productId']),
+      productName: _string(json['productName']),
+      productCode: _string(json['productCode']),
+      productImage: _nullableString(json['productImage']),
+      quantityOrdered: _double(json['quantityOrdered']),
+      unit: _string(json['unit']),
+      unitPrice: _double(json['unitPrice']),
+      tax: _double(json['tax']),
+      totalPrice: _double(json['totalPrice']),
+      status: _string(json['status'], fallback: 'PENDING'),
+      notes: _nullableString(json['notes']),
     );
   }
 }
@@ -271,17 +268,13 @@ class SupplierInfo {
 
   factory SupplierInfo.fromJson(Map<String, dynamic> json) {
     return SupplierInfo(
-      id: json['id'] as String,
-      supplierId: json['supplierId'] as String,
-      businessName: json['businessName'] as String,
-      email: json['email'] as String,
-      phone: json['phone'] as String,
-      averageRating: json['averageRating'] != null
-          ? (json['averageRating'] as num).toDouble()
-          : null,
-      onTimeDeliveryRate: json['onTimeDeliveryRate'] != null
-          ? (json['onTimeDeliveryRate'] as num).toDouble()
-          : null,
+      id: _string(json['id']),
+      supplierId: _string(json['supplierId']),
+      businessName: _string(json['businessName'], fallback: 'Unknown Supplier'),
+      email: _string(json['email']),
+      phone: _string(json['phone']),
+      averageRating: _nullableDouble(json['averageRating']),
+      onTimeDeliveryRate: _nullableDouble(json['onTimeDeliveryRate']),
     );
   }
 }
@@ -346,4 +339,46 @@ int _parseInt(dynamic value, int fallback) {
   if (value is num) return value.toInt();
   if (value is String) return int.tryParse(value) ?? fallback;
   return fallback;
+}
+
+String _string(dynamic value, {String fallback = ''}) {
+  if (value == null) return fallback;
+  final text = value.toString();
+  return text.isEmpty ? fallback : text;
+}
+
+String? _nullableString(dynamic value) {
+  if (value == null) return null;
+  final text = value.toString();
+  return text.isEmpty ? null : text;
+}
+
+double _double(dynamic value, {double fallback = 0}) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? fallback;
+  return fallback;
+}
+
+double? _nullableDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+DateTime _date(dynamic value) {
+  if (value is DateTime) return value;
+  if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+  return DateTime.now();
+}
+
+Map<String, dynamic> _map(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return const <String, dynamic>{};
+}
+
+List<dynamic> _list(dynamic value) {
+  if (value is List) return value;
+  return const <dynamic>[];
 }

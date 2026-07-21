@@ -65,6 +65,13 @@ class WastageAnalysisRepository extends BaseRepository
       AppLogger.log('Response Data: ${response.data}');
       AppLogger.log('==================================');
 
+      if (!response.isSuccess) {
+        final message =
+            response.error?.message ??
+            'Unable to analyze wastage. Please try again later.';
+        return ApiResponse.errorMessage(message);
+      }
+
       // Handle null or empty response data
       if (response.data == null) {
         AppLogger.log('Response data is null - returning empty analysis');

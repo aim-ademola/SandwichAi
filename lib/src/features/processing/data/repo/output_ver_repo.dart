@@ -32,14 +32,13 @@ class OutputVerificationRepository extends BaseRepository
     try {
       final listResponse = await handleListResponse<MenuItem>(
         _apiClient
-            .get('kitchen/menu-items')
+            .get('kitchen/menu-items', queryParameters: {'branchId': branchId})
             .timeout(
               const Duration(seconds: 30),
               onTimeout: () {
                 throw TimeoutException('Request timed out. Please try again.');
               },
-            )
-            .then((response) => ApiResponse.success(response.data)),
+            ),
         (json) => MenuItem.fromJson(json),
       );
 

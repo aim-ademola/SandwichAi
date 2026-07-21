@@ -108,11 +108,7 @@ class ProcurementRequest {
           : null,
       totalAmount: _parseToString(json['totalAmount']),
       notes: json['notes'] != null ? _parseToString(json['notes']) : null,
-      requestingDepartment: _parseToString(
-        json['requestingDepartment'] ??
-            json['department'] ??
-            json['requestedByDepartment'],
-      ),
+      requestingDepartment: _readDepartment(json),
       createdAt: _parseToString(json['createdAt']),
       updatedAt: _parseToString(json['updatedAt']),
       items: _asList(json['items'])
@@ -136,6 +132,16 @@ class ProcurementRequest {
   double get totalAmountDouble => double.tryParse(totalAmount) ?? 0.0;
 
   int get itemCount => items.length;
+
+  String get departmentLabel {
+    final department = _formatDepartmentName(requestingDepartment);
+    if (department.isNotEmpty) return department;
+
+    final branchName = _formatDepartmentName(branch.name);
+    if (branchName.isNotEmpty) return branchName;
+
+    return 'Unknown department';
+  }
 
   String get formattedExpectedDelivery {
     if (expectedDelivery == null || expectedDelivery!.isEmpty) return 'Not set';
@@ -298,4 +304,65 @@ Map<String, dynamic> _asMap(dynamic value) {
 List<dynamic> _asList(dynamic value) {
   if (value is List) return value;
   return const [];
+}
+
+String _readDepartment(Map<String, dynamic> json) {
+  final candidates = [
+    json['requestingDepartment'],
+    json['requestingDepartmentName'],
+    json['requestedByDepartment'],
+    json['departmentName'],
+    json['department'],
+    _pickName(json['requestingDepartmentInfo']),
+    _pickName(json['departmentInfo']),
+    _pickName(json['departmentDetails']),
+    _pickName(json['requestedByEmployee']),
+    _pickName(json['requestedByUser']),
+    _pickName(json['employee']),
+    _pickName(json['user']),
+  ];
+
+  for (final candidate in candidates) {
+    final text = _string(candidate).trim();
+    if (text.isNotEmpty) return text;
+  }
+
+  return '';
+}
+
+String _pickName(dynamic value) {
+  final map = _asMap(value);
+  if (map.isEmpty) return '';
+
+  final candidates = [
+    map['name'],
+    map['departmentName'],
+    map['department'],
+    map['title'],
+    map['label'],
+  ];
+
+  for (final candidate in candidates) {
+    final text = _string(candidate).trim();
+    if (text.isNotEmpty) return text;
+  }
+
+  return '';
+}
+
+String _formatDepartmentName(String value) {
+  final cleaned = value.replaceAll('_', ' ').trim();
+  if (cleaned.isEmpty) return '';
+
+  final hasReadableCase = cleaned.contains(RegExp(r'[a-z]'));
+  if (hasReadableCase) return cleaned;
+
+  return cleaned
+      .split(RegExp(r'\s+'))
+      .where((word) => word.isNotEmpty)
+      .map((word) {
+        final lower = word.toLowerCase();
+        return '${lower[0].toUpperCase()}${lower.substring(1)}';
+      })
+      .join(' ');
 }

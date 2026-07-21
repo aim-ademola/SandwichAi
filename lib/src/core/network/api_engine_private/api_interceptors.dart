@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:sandwich_ai/src/core/auth/session_expiry_handler.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_public/api_constants.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Auth Interceptor
@@ -18,16 +19,29 @@ class AuthInterceptor extends Interceptor {
       AppLogger.log('Token Gotten =====> $token');
       options.headers['Authorization'] = 'Bearer $token';
     }
+
+    if (_isAiRequest(options)) {
+      final aiApiKey = ApiConstants.aiApiKey.trim();
+      if (aiApiKey.isNotEmpty) {
+        options.headers['X-API-Key'] = aiApiKey;
+      }
+    }
     super.onRequest(options, handler);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401) {
+    if (err.response?.statusCode == 401 && !_isAiRequest(err.requestOptions)) {
       await SessionExpiryHandler.handleUnauthorized();
     }
 
     super.onError(err, handler);
+  }
+
+  bool _isAiRequest(RequestOptions options) {
+    final aiBaseUrl = ApiConstants.aiBaseUrl;
+    final uri = options.uri.toString();
+    return uri.startsWith(aiBaseUrl) || options.path.startsWith(aiBaseUrl);
   }
 }
 

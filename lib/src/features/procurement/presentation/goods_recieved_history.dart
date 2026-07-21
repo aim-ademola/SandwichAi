@@ -11,6 +11,7 @@ import 'package:sandwich_ai/src/features/procurement/presentation/goods_received
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_received_bloc/state.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/goods_received_advanced_cubit/goods_received_advanced_cubit.dart';
 
 class GoodsReceivedHistoryScreen extends StatefulWidget {
   const GoodsReceivedHistoryScreen({super.key});
@@ -196,12 +197,16 @@ class _GoodsReceivedHistoryScreenState
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
+            final advancedCubit = context.read<GoodsReceivedAdvancedCubit>();
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => GoodsReceivedDetailScreen(
-                  receiptId: receipt.id,
-                  title: receipt.receiptNo,
+                builder: (_) => BlocProvider.value(
+                  value: advancedCubit,
+                  child: GoodsReceivedDetailScreen(
+                    receiptId: receipt.id,
+                    title: receipt.receiptNo,
+                  ),
                 ),
               ),
             );

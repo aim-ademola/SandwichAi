@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
@@ -141,10 +142,19 @@ class PurchaseOrdersRepository extends BaseRepository
             return ApiResponse.errorMessage('Invalid response from server');
           }
 
-          final ordersResponse = OrdersListResponse.fromJson(
-            Map<String, dynamic>.from(data),
-          );
-          return ApiResponse.success(ordersResponse);
+          try {
+            final ordersResponse = OrdersListResponse.fromJson(
+              Map<String, dynamic>.from(data),
+            );
+            return ApiResponse.success(ordersResponse);
+          } on Object catch (error, stackTrace) {
+            AppLogger.log('Purchase orders parse error: $error');
+            AppLogger.log('Purchase orders response: $data');
+            AppLogger.log('Purchase orders stack: $stackTrace');
+            return ApiResponse.errorMessage(
+              'Invalid purchase orders response format.',
+            );
+          }
         },
         error: (error) => ApiResponse.error(error),
       );
@@ -255,9 +265,18 @@ class PurchaseOrdersRepository extends BaseRepository
           if (data is! Map) {
             return ApiResponse.errorMessage('Invalid response from server');
           }
-          return ApiResponse.success(
-            OrdersListResponse.fromJson(Map<String, dynamic>.from(data)),
-          );
+          try {
+            return ApiResponse.success(
+              OrdersListResponse.fromJson(Map<String, dynamic>.from(data)),
+            );
+          } on Object catch (error, stackTrace) {
+            AppLogger.log('Purchase orders parse error: $error');
+            AppLogger.log('Purchase orders response: $data');
+            AppLogger.log('Purchase orders stack: $stackTrace');
+            return ApiResponse.errorMessage(
+              'Invalid purchase orders response format.',
+            );
+          }
         },
         error: (error) => ApiResponse.error(error),
       );

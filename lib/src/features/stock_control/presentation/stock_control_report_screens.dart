@@ -55,13 +55,15 @@ class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
                 children: [
                   if (summary != null) _ExpirySummaryGrid(summary: summary),
                   if (summary != null) const SizedBox(height: 16),
-                  ...report.items.map(
-                    (item) => _ExpiryItemCard(
+                  ...report.items.indexed.expand((entry) sync* {
+                    final (index, item) = entry;
+                    if (index > 0) yield const SizedBox(height: 12);
+                    yield _ExpiryItemCard(
                       item: item,
                       branchId: _branchId,
                       onBatchUpdated: _load,
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               );
             }(),

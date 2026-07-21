@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:sandwich_ai/src/core/auth/session_expiry_handler.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -22,55 +23,12 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    // Handle 401 errors by refreshing token
-    // if (err.response?.statusCode == 401) {
-    //   try {
-    //     final success = await _refreshToken();
-    //     if (success) {
-    //       // Retry the original request
-    //       final response = await Dio().fetch(err.requestOptions);
-    //       return handler.resolve(response);
-    //     }
-    //   } catch (e) {
-    //     // Refresh failed, redirect to login
-    //     await _redirectToLogin();
-    //   }
-    // }
+    if (err.response?.statusCode == 401) {
+      await SessionExpiryHandler.handleUnauthorized();
+    }
 
     super.onError(err, handler);
   }
-
-  // Future<bool> _refreshToken() async {
-  //   try {
-  //     final prefs = await SharedPreferences.getInstance();
-  //     final refreshToken = prefs.getString('refresh_token');
-
-  //     if (refreshToken == null) return false;
-
-  //     final dio = Dio();
-  //     final response = await dio.post(
-  //       '/auth/refresh',
-  //       data: {'refresh_token': refreshToken},
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final newToken = response.data['access_token'];
-  //       await prefs.setString('auth_token', newToken);
-  //       return true;
-  //     }
-
-  //     return false;
-  //   } catch (e) {
-  //     return false;
-  //   }
-  // }
-
-  // Future<void> _redirectToLogin() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.clear();
-  //   // Navigate to login screen
-  //   // You can use your navigation logic here
-  // }
 }
 
 // Retry Interceptor

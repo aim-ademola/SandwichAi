@@ -257,6 +257,7 @@ class AuthCacheHelper {
       await _box.delete(_keyOrgName);
       await _box.delete(_keyEmpId);
       await _box.delete(_keyDptName);
+      await _box.delete(_userId);
 
       // Note: Don't clear remembered credentials on logout
       // Only clear them if user explicitly unchecks remember me

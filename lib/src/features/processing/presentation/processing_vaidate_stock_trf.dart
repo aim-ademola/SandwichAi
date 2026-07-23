@@ -146,10 +146,11 @@ class _ValidateStockTransferToProcessingcreenState
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: Colors.white,
+            color: context.modeTextInverse,
           ),
         ),
-        backgroundColor: backgroundColor ?? (isError ? Colors.red : kGreen),
+        backgroundColor:
+            backgroundColor ?? (isError ? context.modeError : kGreen),
         behavior: SnackBarBehavior.floating,
         duration: Duration(seconds: isError ? 3 : 2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -193,12 +194,16 @@ class _ValidateStockTransferToProcessingcreenState
           return DefaultTextStyle.merge(
             style: WorkSansAppTextStyles.medium,
             child: Scaffold(
-              backgroundColor: const Color(0xFFF8F6F6),
+              backgroundColor: context.modeBackground,
               appBar: AppBar(
-                backgroundColor: Colors.white,
+                backgroundColor: context.modeSurface,
+                surfaceTintColor: Colors.transparent,
                 elevation: 0,
                 leading: IconButton(
-                  icon: const AppIcon(Icons.arrow_back, color: Colors.black),
+                  icon: AppIcon(
+                    Icons.arrow_back,
+                    color: context.modeTextPrimary,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: Text(
@@ -206,7 +211,7 @@ class _ValidateStockTransferToProcessingcreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 centerTitle: true,
@@ -214,12 +219,12 @@ class _ValidateStockTransferToProcessingcreenState
               body: Column(
                 children: [
                   Container(
-                    color: Colors.white,
+                    color: context.modeSurface,
                     child: TabBar(
                       controller: _tabController,
-                      labelColor: kPrimary,
-                      unselectedLabelColor: kprimaryTextColor2,
-                      indicatorColor: kPrimary,
+                      labelColor: context.modePrimary,
+                      unselectedLabelColor: context.modeTextSecondary,
+                      indicatorColor: context.modePrimary,
                       indicatorWeight: 3,
                       labelStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 15,
@@ -267,7 +272,7 @@ class _ValidateStockTransferToProcessingcreenState
                 AppIcon(
                   Icons.error_outline,
                   size: 60,
-                  color: Colors.red.shade300,
+                  color: context.modeError,
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -275,7 +280,7 @@ class _ValidateStockTransferToProcessingcreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -286,7 +291,7 @@ class _ValidateStockTransferToProcessingcreenState
                     textAlign: TextAlign.center,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ),
@@ -306,7 +311,7 @@ class _ValidateStockTransferToProcessingcreenState
                   child: Text(
                     'Retry',
                     style: WorkSansAppTextStyles.medium.copyWith(
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -409,14 +414,14 @@ class _ValidateStockTransferToProcessingcreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(icon, size: 80, color: Colors.grey.shade300),
+            AppIcon(icon, size: 80, color: context.modeTextMuted),
             const SizedBox(height: 24),
             Text(
               title,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -425,7 +430,7 @@ class _ValidateStockTransferToProcessingcreenState
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -438,19 +443,19 @@ class _ValidateStockTransferToProcessingcreenState
     ProcessingTransferResponse transfer, {
     required bool isPending,
   }) {
-    final dateFormat = DateFormat('MMM dd, yyyy â€¢ hh:mm a');
+    final dateFormat = DateFormat('MMM dd, yyyy • hh:mm a');
     final formattedDate = dateFormat.format(transfer.createdAt);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.modeBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.modeTextPrimary.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -471,7 +476,7 @@ class _ValidateStockTransferToProcessingcreenState
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -479,7 +484,7 @@ class _ValidateStockTransferToProcessingcreenState
                       formattedDate,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -508,21 +513,21 @@ class _ValidateStockTransferToProcessingcreenState
             ],
           ),
           const SizedBox(height: 12),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           const SizedBox(height: 12),
           Row(
             children: [
               AppIcon(
                 Icons.inventory_2_outlined,
                 size: 18,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
               const SizedBox(width: 8),
               Text(
                 '${transfer.items.length} item(s)',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
@@ -535,7 +540,7 @@ class _ValidateStockTransferToProcessingcreenState
                 AppIcon(
                   Icons.note_outlined,
                   size: 18,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -543,7 +548,7 @@ class _ValidateStockTransferToProcessingcreenState
                     transfer.notes!,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 13,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -568,7 +573,7 @@ class _ValidateStockTransferToProcessingcreenState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: kPrimary,
+                          color: context.modePrimary,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -596,10 +601,10 @@ class _ValidateStockTransferToProcessingcreenState
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const AppIcon(
+                          AppIcon(
                             Icons.check_circle_outline,
                             size: 16,
-                            color: Colors.white,
+                            color: context.modeTextInverse,
                           ),
                           const SizedBox(width: 6),
                           Text(
@@ -607,7 +612,7 @@ class _ValidateStockTransferToProcessingcreenState
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: context.modeTextInverse,
                             ),
                           ),
                         ],
@@ -627,7 +632,7 @@ class _ValidateStockTransferToProcessingcreenState
     ProcessingTransferResponse transfer,
     bool isPending,
   ) {
-    final dateFormat = DateFormat('MMMM dd, yyyy â€¢ hh:mm a');
+    final dateFormat = DateFormat('MMMM dd, yyyy • hh:mm a');
     final formattedDate = dateFormat.format(transfer.createdAt);
 
     showModalBottomSheet(
@@ -638,8 +643,8 @@ class _ValidateStockTransferToProcessingcreenState
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.85,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: context.modeSurface,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -651,7 +656,7 @@ class _ValidateStockTransferToProcessingcreenState
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                border: Border(bottom: BorderSide(color: context.modeBorder)),
               ),
               child: Row(
                 children: [
@@ -664,7 +669,7 @@ class _ValidateStockTransferToProcessingcreenState
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: kprimaryTextColor1,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -672,7 +677,7 @@ class _ValidateStockTransferToProcessingcreenState
                           'Batch: ${transfer.batchCode}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
@@ -704,7 +709,7 @@ class _ValidateStockTransferToProcessingcreenState
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -715,9 +720,9 @@ class _ValidateStockTransferToProcessingcreenState
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: context.modeSurfaceAlt,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: context.modeBorder),
                         ),
                         child: Row(
                           children: [
@@ -734,7 +739,7 @@ class _ValidateStockTransferToProcessingcreenState
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: kPrimary,
+                                    color: context.modePrimary,
                                   ),
                                 ),
                               ),
@@ -750,7 +755,7 @@ class _ValidateStockTransferToProcessingcreenState
                                         .copyWith(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
-                                          color: kprimaryTextColor1,
+                                          color: context.modeTextPrimary,
                                         ),
                                   ),
                                   const SizedBox(height: 2),
@@ -759,7 +764,7 @@ class _ValidateStockTransferToProcessingcreenState
                                     style: WorkSansAppTextStyles.medium
                                         .copyWith(
                                           fontSize: 13,
-                                          color: kprimaryTextColor2,
+                                          color: context.modeTextSecondary,
                                         ),
                                   ),
                                 ],
@@ -792,7 +797,7 @@ class _ValidateStockTransferToProcessingcreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ),
@@ -801,7 +806,7 @@ class _ValidateStockTransferToProcessingcreenState
               value,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -928,14 +933,14 @@ class __ValidateTransferBottomSheetState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         content: Text(
           'There are quantity differences between sent and received items. Please add a variance note to explain the difference.',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
         ),
         actions: [
@@ -945,7 +950,7 @@ class __ValidateTransferBottomSheetState
               'Cancel',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ),
@@ -1021,10 +1026,11 @@ class __ValidateTransferBottomSheetState
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: Colors.white,
+            color: context.modeTextInverse,
           ),
         ),
-        backgroundColor: backgroundColor ?? (isError ? Colors.red : kPrimary),
+        backgroundColor:
+            backgroundColor ?? (isError ? context.modeError : kPrimary),
         behavior: SnackBarBehavior.floating,
         duration: Duration(seconds: isError ? 3 : 2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -1038,8 +1044,8 @@ class __ValidateTransferBottomSheetState
     if (!_isInitialized) {
       return Container(
         height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: context.modeSurface,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -1053,8 +1059,8 @@ class __ValidateTransferBottomSheetState
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: context.modeSurface,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -1067,7 +1073,7 @@ class __ValidateTransferBottomSheetState
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              border: Border(bottom: BorderSide(color: context.modeBorder)),
             ),
             child: Row(
               children: [
@@ -1080,7 +1086,7 @@ class __ValidateTransferBottomSheetState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -1088,7 +1094,7 @@ class __ValidateTransferBottomSheetState
                         'Batch: ${widget.transfer.batchCode}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ],
@@ -1119,7 +1125,7 @@ class __ValidateTransferBottomSheetState
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1132,9 +1138,9 @@ class __ValidateTransferBottomSheetState
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
+                        color: context.modeSurfaceAlt,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: context.modeBorder),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1155,7 +1161,7 @@ class __ValidateTransferBottomSheetState
                                         .copyWith(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
-                                          color: kPrimary,
+                                          color: context.modePrimary,
                                         ),
                                   ),
                                 ),
@@ -1167,7 +1173,7 @@ class __ValidateTransferBottomSheetState
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: kprimaryTextColor1,
+                                    color: context.modeTextPrimary,
                                   ),
                                 ),
                               ),
@@ -1181,7 +1187,7 @@ class __ValidateTransferBottomSheetState
                                   'Qty Sent: ${item.qtySent}',
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 13,
-                                    color: kprimaryTextColor2,
+                                    color: context.modeTextSecondary,
                                   ),
                                 ),
                               ),
@@ -1198,14 +1204,14 @@ class __ValidateTransferBottomSheetState
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: kprimaryTextColor1,
+                                    color: context.modeTextPrimary,
                                   ),
                                   decoration: InputDecoration(
                                     labelText: 'Received',
                                     labelStyle: WorkSansAppTextStyles.medium
                                         .copyWith(
                                           fontSize: 12,
-                                          color: kprimaryTextColor2,
+                                          color: context.modeTextSecondary,
                                         ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
@@ -1232,9 +1238,9 @@ class __ValidateTransferBottomSheetState
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
+                      color: context.modeSurfaceAlt,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: context.modeBorder),
                     ),
                     child: Row(
                       children: [
@@ -1252,7 +1258,7 @@ class __ValidateTransferBottomSheetState
                             'Quality check passed',
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 14,
-                              color: kprimaryTextColor1,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                         ),
@@ -1266,7 +1272,7 @@ class __ValidateTransferBottomSheetState
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1276,13 +1282,13 @@ class __ValidateTransferBottomSheetState
                     cursorColor: kPrimary,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Add note if quantities differ...',
                       hintStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -1312,7 +1318,7 @@ class __ValidateTransferBottomSheetState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
                     ),

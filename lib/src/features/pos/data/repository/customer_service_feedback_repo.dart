@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
@@ -288,6 +289,20 @@ class CustomerServiceFeedbackRepository extends BaseRepository
   }
 
   String _messageFor(dynamic error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map) {
+        final message = data['message'] ?? data['error'];
+        if (message != null && message.toString().trim().isNotEmpty) {
+          return message.toString();
+        }
+      }
+
+      if (error.message?.trim().isNotEmpty == true) {
+        return error.message!;
+      }
+    }
+
     final message = error.toString();
     return message.isEmpty ? 'An error occurred. Please try again.' : message;
   }

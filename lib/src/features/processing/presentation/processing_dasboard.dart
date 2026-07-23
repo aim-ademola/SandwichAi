@@ -223,7 +223,10 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final spacing = 16.0;
-        final cardWidth = (constraints.maxWidth - spacing) / 2;
+        final useSingleColumn = constraints.maxWidth < 360;
+        final cardWidth = useSingleColumn
+            ? constraints.maxWidth
+            : (constraints.maxWidth - spacing) / 2;
 
         return Wrap(
           spacing: spacing,
@@ -242,7 +245,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               width: cardWidth,
               child: _buildMetricCard(
                 title: 'Waste Today',
-                value: 'â‚¦${_formatNumber(data.wasteToday.value)}',
+                value: '₦${_formatNumber(data.wasteToday.value)}',
                 subtitle: '${data.wasteToday.count} items',
                 trend: null,
               ),
@@ -263,54 +266,70 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
         ? (trend.startsWith('+') ? context.modeSuccess : context.modeError)
         : null;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.modeBorder, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 14,
-              height: 1.3,
-              color: context.modeTextSecondary,
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 180;
+
+        return Container(
+          padding: EdgeInsets.all(compact ? 14 : 18),
+          decoration: BoxDecoration(
+            color: context.modeSurface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.modeBorder, width: 1),
           ),
-          const SizedBox(height: 16),
-          Text(
-            value,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              color: context.modeTextPrimary,
-              height: 1.0,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 13,
+                  height: 1.25,
+                  color: context.modeTextSecondary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: compact ? 26 : 30,
+                    fontWeight: FontWeight.w700,
+                    color: context.modeTextPrimary,
+                    height: 1.0,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (trend != null)
+                Text(
+                  trend,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: trendColor,
+                  ),
+                )
+              else if (subtitle != null)
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 12,
+                    color: context.modeTextMuted,
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: 8),
-          if (trend != null)
-            Text(
-              trend,
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: trendColor,
-              ),
-            )
-          else if (subtitle != null)
-            Text(
-              subtitle,
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 13,
-                color: context.modeTextMuted,
-              ),
-            ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -536,25 +555,29 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: AppIcon(
-                  Icons.check_circle,
-                  color: statusColor,
-                  size: 22,
+                child: Center(
+                  child: AppIcon(
+                    Icons.check_circle,
+                    color: statusColor,
+                    size: 18,
+                  ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       verification.productName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -564,6 +587,8 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'By ${verification.verifiedBy}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
                         color: context.modeTextMuted,
@@ -574,8 +599,8 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+                  horizontal: 10,
+                  vertical: 5,
                 ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.1),
@@ -583,8 +608,10 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                 ),
                 child: Text(
                   verification.status,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: statusColor,
                   ),

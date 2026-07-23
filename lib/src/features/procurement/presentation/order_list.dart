@@ -12,7 +12,9 @@ import 'package:sandwich_ai/src/features/procurement/procurement_blocs/order_lis
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/order_list-bloc/state.dart';
 
 class OrdersListScreen extends StatefulWidget {
-  const OrdersListScreen({super.key});
+  final bool showAppBar;
+
+  const OrdersListScreen({super.key, this.showAppBar = true});
 
   @override
   State<OrdersListScreen> createState() => _OrdersListScreenState();
@@ -113,12 +115,14 @@ class _OrdersListScreenState extends State<OrdersListScreen>
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
-      child: Scaffold(
-        backgroundColor: context.modeBackground,
-        appBar: _buildAppBar(context),
-        body: _buildBody(context),
-        // floatingActionButton: _buildFAB(),
-      ),
+      child: widget.showAppBar
+          ? Scaffold(
+              backgroundColor: context.modeBackground,
+              appBar: _buildAppBar(context),
+              body: _buildBody(context),
+              // floatingActionButton: _buildFAB(),
+            )
+          : _buildBody(context),
     );
   }
 

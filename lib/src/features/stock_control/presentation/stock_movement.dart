@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -276,6 +277,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
             ),
           ),
           centerTitle: true,
+          leading: const DrawerToggleButton(),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 10),

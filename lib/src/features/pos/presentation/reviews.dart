@@ -5,7 +5,9 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/customer_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/customer_service_feedback_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/repository/customer_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/customer_service_feedback_repo.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/widgets/pos_design_system.dart';
 
@@ -17,6 +19,9 @@ class ReviewsScreen extends StatefulWidget {
 }
 
 class _ReviewsScreenState extends State<ReviewsScreen> {
+  static _ReviewDraft? _createReviewDraft;
+  static const _newCustomerValue = '__new_customer__';
+
   final _titleController = TextEditingController();
   final _commentController = TextEditingController();
   final _customerNameController = TextEditingController();
@@ -32,7 +37,10 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   int _ambience = 5;
   bool _wouldRecommend = true;
   bool _isAnonymous = false;
+  String _selectedCustomerId = _newCustomerValue;
+  List<CustomerModel> _customers = [];
   List<CustomerServiceRecord> _reviews = [];
+  bool _isLoadingCustomers = false;
   bool _isLoading = false;
   bool _isSubmitting = false;
   String? _error;
@@ -40,11 +48,35 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   void initState() {
     super.initState();
+    _restoreCreateDraft();
+    _loadCustomers();
     _loadReviews();
+  }
+
+  Future<void> _loadCustomers() async {
+    setState(() => _isLoadingCustomers = true);
+
+    final response = await context
+        .read<CustomerRepositoryInterface>()
+        .getCustomers(limit: 100);
+
+    if (!mounted) return;
+    response.when(
+      success: (customersResponse) {
+        setState(() {
+          _customers = customersResponse.data;
+          _isLoadingCustomers = false;
+        });
+      },
+      error: (_) {
+        setState(() => _isLoadingCustomers = false);
+      },
+    );
   }
 
   @override
   void dispose() {
+    _saveCreateDraft();
     _titleController.dispose();
     _commentController.dispose();
     _customerNameController.dispose();
@@ -158,6 +190,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     _customerEmailController.clear();
     _orderIdController.clear();
     _reviewSourceController.text = 'Internal';
+    _selectedCustomerId = _newCustomerValue;
     _rating = 5;
     _foodQuality = 5;
     _serviceQuality = 5;
@@ -166,6 +199,118 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     _ambience = 5;
     _wouldRecommend = true;
     _isAnonymous = false;
+    _createReviewDraft = null;
+  }
+
+  void _saveCreateDraft() {
+    if (!_hasCreateDraftContent()) {
+      _createReviewDraft = null;
+      return;
+    }
+
+    _createReviewDraft = _ReviewDraft(
+      title: _titleController.text,
+      comment: _commentController.text,
+      customerName: _customerNameController.text,
+      customerPhone: _customerPhoneController.text,
+      customerEmail: _customerEmailController.text,
+      orderId: _orderIdController.text,
+      reviewSource: _reviewSourceController.text,
+      selectedCustomerId: _selectedCustomerId,
+      rating: _rating,
+      foodQuality: _foodQuality,
+      serviceQuality: _serviceQuality,
+      cleanliness: _cleanliness,
+      valueForMoney: _valueForMoney,
+      ambience: _ambience,
+      wouldRecommend: _wouldRecommend,
+      isAnonymous: _isAnonymous,
+    );
+  }
+
+  bool _hasCreateDraftContent() {
+    return _titleController.text.trim().isNotEmpty ||
+        _commentController.text.trim().isNotEmpty ||
+        _customerNameController.text.trim().isNotEmpty ||
+        _customerPhoneController.text.trim().isNotEmpty ||
+        _customerEmailController.text.trim().isNotEmpty ||
+        _orderIdController.text.trim().isNotEmpty ||
+        _selectedCustomerId != _newCustomerValue ||
+        (_reviewSourceController.text.trim().isNotEmpty &&
+            _reviewSourceController.text.trim() != 'Internal') ||
+        _rating != 5 ||
+        _foodQuality != 5 ||
+        _serviceQuality != 5 ||
+        _cleanliness != 5 ||
+        _valueForMoney != 5 ||
+        _ambience != 5 ||
+        !_wouldRecommend ||
+        _isAnonymous;
+  }
+
+  void _restoreCreateDraft() {
+    final draft = _createReviewDraft;
+    if (draft == null) return;
+
+    _titleController.text = draft.title;
+    _commentController.text = draft.comment;
+    _customerNameController.text = draft.customerName;
+    _customerPhoneController.text = draft.customerPhone;
+    _customerEmailController.text = draft.customerEmail;
+    _orderIdController.text = draft.orderId;
+    _reviewSourceController.text = draft.reviewSource.trim().isEmpty
+        ? 'Internal'
+        : draft.reviewSource;
+    _selectedCustomerId = draft.selectedCustomerId;
+    _rating = draft.rating;
+    _foodQuality = draft.foodQuality;
+    _serviceQuality = draft.serviceQuality;
+    _cleanliness = draft.cleanliness;
+    _valueForMoney = draft.valueForMoney;
+    _ambience = draft.ambience;
+    _wouldRecommend = draft.wouldRecommend;
+    _isAnonymous = draft.isAnonymous;
+  }
+
+  void _selectCustomer(String? customerId) {
+    if (customerId == null) return;
+
+    setState(() {
+      _selectedCustomerId = customerId;
+      if (customerId == _newCustomerValue) {
+        _customerNameController.clear();
+        _customerPhoneController.clear();
+        _customerEmailController.clear();
+        return;
+      }
+
+      final customer = _customers.firstWhere(
+        (item) => item.id == customerId,
+        orElse: () => CustomerModel(
+          id: '',
+          phone: '',
+          email: '',
+          name: '',
+          organizationId: '',
+          totalOrders: 0,
+          totalSpent: 0,
+          loyaltyPoints: 0,
+          membershipTier: '',
+          isActive: true,
+          isBlacklisted: false,
+          allowsMarketing: false,
+          allowsSMS: false,
+          allowsEmail: false,
+          createdAt: '',
+          updatedAt: '',
+        ),
+      );
+
+      if (customer.id.isEmpty) return;
+      _customerNameController.text = customer.name;
+      _customerPhoneController.text = customer.phone;
+      _customerEmailController.text = customer.email;
+    });
   }
 
   Future<void> _deleteReview(CustomerServiceRecord review) async {
@@ -336,38 +481,82 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PosPageScaffold(
-      title: 'Reviews',
-      body: RefreshIndicator(
-        color: context.modePrimary,
-        onRefresh: _loadReviews,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+    return DefaultTabController(
+      length: 2,
+      child: PosPageScaffold(
+        title: 'Reviews',
+        body: Column(
           children: [
-            _buildCreateReviewCard(),
-            const SizedBox(height: 22),
-            PosSectionHeader(
-              title: 'Customer Reviews',
-              countLabel:
-                  '${_reviews.length} item${_reviews.length == 1 ? '' : 's'}',
+            Container(
+              color: context.modeBackground,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: PosSurfaceCard(
+                padding: EdgeInsets.zero,
+                child: TabBar(
+                  labelColor: context.modePrimary,
+                  unselectedLabelColor: context.modeTextSecondary,
+                  indicatorColor: context.modePrimary,
+                  indicatorWeight: 3,
+                  labelStyle: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  unselectedLabelStyle: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  tabs: const [
+                    Tab(text: 'Create Review'),
+                    Tab(text: 'Review List'),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 12),
-            if (_isLoading)
-              Center(
-                child: CircularProgressIndicator(color: context.modePrimary),
-              )
-            else if (_error != null)
-              _buildMessage('Failed to load reviews', _error!)
-            else if (_reviews.isEmpty)
-              const PosEmptyState(
-                icon: HugeIcons.strokeRoundedStar,
-                title: 'No reviews yet',
-                message: 'Submitted customer reviews will appear here.',
-              )
-            else
-              ..._reviews.map(_buildReviewCard),
+            const SizedBox(height: 8),
+            Expanded(
+              child: TabBarView(
+                children: [_buildCreateReviewTab(), _buildReviewsListTab()],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCreateReviewTab() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [_buildCreateReviewCard()],
+    );
+  }
+
+  Widget _buildReviewsListTab() {
+    return RefreshIndicator(
+      color: context.modePrimary,
+      onRefresh: _loadReviews,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          PosSectionHeader(
+            title: 'Customer Reviews',
+            countLabel:
+                '${_reviews.length} item${_reviews.length == 1 ? '' : 's'}',
+          ),
+          const SizedBox(height: 12),
+          if (_isLoading)
+            Center(child: CircularProgressIndicator(color: context.modePrimary))
+          else if (_error != null)
+            _buildMessage('Failed to load reviews', _error!)
+          else if (_reviews.isEmpty)
+            const PosEmptyState(
+              icon: HugeIcons.strokeRoundedStar,
+              title: 'No reviews yet',
+              message: 'Submitted customer reviews will appear here.',
+            )
+          else
+            ..._reviews.map(_buildReviewCard),
+        ],
       ),
     );
   }
@@ -430,6 +619,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             ),
             children: [
               const SizedBox(height: 8),
+              _buildCustomerDropdown(),
+              const SizedBox(height: 12),
               _buildTextField(
                 controller: _customerNameController,
                 label: 'Customer Name',
@@ -551,6 +742,58 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         labelText: label,
         border: const OutlineInputBorder(),
       ),
+    );
+  }
+
+  Widget _buildCustomerDropdown() {
+    final hasSelectedCustomer =
+        _selectedCustomerId == _newCustomerValue ||
+        _customers.any((customer) => customer.id == _selectedCustomerId);
+
+    return DropdownButtonFormField<String>(
+      initialValue: hasSelectedCustomer
+          ? _selectedCustomerId
+          : _newCustomerValue,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: 'Customer',
+        border: const OutlineInputBorder(),
+        suffixIcon: _isLoadingCustomers
+            ? Padding(
+                padding: const EdgeInsets.all(14),
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: context.modePrimary,
+                  ),
+                ),
+              )
+            : null,
+      ),
+      dropdownColor: context.modeSurface,
+      items: [
+        const DropdownMenuItem(
+          value: _newCustomerValue,
+          child: Text('New customer'),
+        ),
+        ..._customers.map(
+          (customer) => DropdownMenuItem(
+            value: customer.id,
+            child: Text(
+              [
+                customer.name.trim().isEmpty
+                    ? 'Unnamed customer'
+                    : customer.name,
+                if (customer.phone.trim().isNotEmpty) customer.phone,
+              ].join(' - '),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ],
+      onChanged: _selectCustomer,
     );
   }
 
@@ -759,4 +1002,42 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       ),
     );
   }
+}
+
+class _ReviewDraft {
+  final String title;
+  final String comment;
+  final String customerName;
+  final String customerPhone;
+  final String customerEmail;
+  final String orderId;
+  final String reviewSource;
+  final String selectedCustomerId;
+  final int rating;
+  final int foodQuality;
+  final int serviceQuality;
+  final int cleanliness;
+  final int valueForMoney;
+  final int ambience;
+  final bool wouldRecommend;
+  final bool isAnonymous;
+
+  const _ReviewDraft({
+    required this.title,
+    required this.comment,
+    required this.customerName,
+    required this.customerPhone,
+    required this.customerEmail,
+    required this.orderId,
+    required this.reviewSource,
+    required this.selectedCustomerId,
+    required this.rating,
+    required this.foodQuality,
+    required this.serviceQuality,
+    required this.cleanliness,
+    required this.valueForMoney,
+    required this.ambience,
+    required this.wouldRecommend,
+    required this.isAnonymous,
+  });
 }

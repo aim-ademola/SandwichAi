@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -103,7 +104,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
       child: Scaffold(
         key: _scaffoldKey,
         drawer: ProcessingAppDrawer(),
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: BlocListener<RecipeForecastBloc, RecipeForecastState>(
           listener: (context, state) {
@@ -114,14 +115,14 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                     state.error,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                     ),
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadiusGeometry.circular(12),
                   ),
                   behavior: SnackBarBehavior.floating,
-                  backgroundColor: Colors.red,
+                  backgroundColor: context.modeError,
                   duration: const Duration(seconds: 4),
                 ),
               );
@@ -152,29 +153,31 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
       title: Text(
         'AI Recipe Calculator',
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
+      leading: const DrawerToggleButton(),
       actions: [
         BlocBuilder<RecipeForecastBloc, RecipeForecastState>(
           builder: (context, state) {
             if (state is RecipeForecastCalculated) {
               return IconButton(
-                icon: const AppIcon(Icons.refresh, color: Colors.black),
+                icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
                 onPressed: _resetCalculator,
                 tooltip: 'Reset',
               );
             }
             return IconButton(
-              icon: const AppIcon(Icons.refresh, color: Colors.black),
+              icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
               onPressed: () {
                 context.read<MenuItemsBloc>().add(const LoadMenuItems());
               },
@@ -191,9 +194,9 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Form(
         key: _formKey,
@@ -205,13 +208,13 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
+                    color: context.modeSurfaceAlt,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const AppIcon(
+                  child: AppIcon(
                     Icons.calculate_outlined,
                     size: 24,
-                    color: Colors.black87,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -220,7 +223,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -249,7 +252,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.w400,
-                color: Colors.black,
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -306,7 +309,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextSecondary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -320,9 +323,9 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                     vertical: 16,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8F6F6),
+                    color: context.modeSurfaceAlt,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE0E0E0)),
+                    border: Border.all(color: context.modeBorder),
                   ),
                   child: Row(
                     children: [
@@ -333,8 +336,8 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             color: _selectedMenuItem != null
-                                ? Colors.black87
-                                : const Color(0xFF9E9E9E),
+                                ? context.modeTextPrimary
+                                : context.modeTextMuted,
                           ),
                         ),
                       ),
@@ -342,7 +345,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                         _showDropdown
                             ? Icons.arrow_drop_up
                             : Icons.arrow_drop_down,
-                        color: Colors.black87,
+                        color: context.modeTextPrimary,
                       ),
                     ],
                   ),
@@ -362,12 +365,12 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: context.modeTextPrimary.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -384,11 +387,11 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 hintText: 'Search menu items...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: const Color(0xFF9E9E9E),
+                  color: context.modeTextMuted,
                 ),
                 prefixIcon: AppIconSlot(Icons.search, size: 20),
                 filled: true,
-                fillColor: const Color(0xFFF8F6F6),
+                fillColor: context.modeSurfaceAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -400,7 +403,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
               ),
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.black87,
+                color: context.modeTextPrimary,
               ),
             ),
           ),
@@ -415,7 +418,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                         AppIcon(
                           Icons.search_off,
                           size: 48,
-                          color: const Color(0xFF9E9E9E).withValues(alpha: 0.5),
+                          color: context.modeTextMuted.withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 12),
                         Text(
@@ -423,7 +426,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF757575),
+                            color: context.modeTextSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -431,7 +434,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                           'Try adjusting your search',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: const Color(0xFF9E9E9E),
+                            color: context.modeTextMuted,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -442,10 +445,10 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                     shrinkWrap: true,
                     padding: const EdgeInsets.only(bottom: 8),
                     itemCount: _filteredMenuItems.length,
-                    separatorBuilder: (context, index) => const Divider(
+                    separatorBuilder: (context, index) => Divider(
                       height: 1,
                       thickness: 1,
-                      color: Color(0xFFF5F5F5),
+                      color: context.modeDivider,
                     ),
                     itemBuilder: (context, index) {
                       final item = _filteredMenuItems[index];
@@ -461,20 +464,20 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                           });
                         },
                         selected: isSelected,
-                        selectedTileColor: const Color(0xFFF5F5F5),
+                        selectedTileColor: context.modeSurfaceAlt,
                         title: Text(
                           item.dishName,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         subtitle: Text(
                           item.category,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: const Color(0xFF757575),
+                            color: context.modeTextSecondary,
                           ),
                         ),
                         trailing: isSelected
@@ -502,16 +505,16 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF757575),
+            color: context.modeTextSecondary,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F6F6),
+            color: context.modeSurfaceAlt,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE0E0E0)),
+            border: Border.all(color: context.modeBorder),
           ),
           child: Row(
             children: [
@@ -528,7 +531,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 'Loading menu items...',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
-                  color: const Color(0xFF9E9E9E),
+                  color: context.modeTextMuted,
                 ),
               ),
             ],
@@ -547,31 +550,27 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF757575),
+            color: context.modeTextSecondary,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.red.shade50,
+            color: context.modeError.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.red.shade200),
+            border: Border.all(color: context.modeError.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
-              AppIcon(
-                Icons.error_outline,
-                color: Colors.red.shade700,
-                size: 20,
-              ),
+              AppIcon(Icons.error_outline, color: context.modeError, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   error,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: Colors.red.shade700,
+                    color: context.modeError,
                   ),
                 ),
               ),
@@ -591,23 +590,23 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF757575),
+            color: context.modeTextSecondary,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F6F6),
+            color: context.modeSurfaceAlt,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE0E0E0)),
+            border: Border.all(color: context.modeBorder),
           ),
           child: Column(
             children: [
               AppIcon(
                 Icons.restaurant_menu,
                 size: 48,
-                color: const Color(0xFF9E9E9E).withValues(alpha: 0.5),
+                color: context.modeTextMuted.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 12),
               Text(
@@ -615,7 +614,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextSecondary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -623,7 +622,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 'Add menu items to get started',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 12,
-                  color: const Color(0xFF9E9E9E),
+                  color: context.modeTextMuted,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -643,7 +642,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF757575),
+            color: context.modeTextSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -654,25 +653,25 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
             hintText: 'Enter servings',
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: const Color(0xFF9E9E9E),
+              color: context.modeTextMuted,
             ),
             filled: true,
-            fillColor: const Color(0xFFF8F6F6),
+            fillColor: context.modeSurfaceAlt,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              borderSide: BorderSide(color: context.modeBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              borderSide: BorderSide(color: context.modeBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.black, width: 2),
+              borderSide: BorderSide(color: context.modePrimary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: context.modeError),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -682,7 +681,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           ),
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: Colors.black87,
+            color: context.modeTextPrimary,
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -710,10 +709,10 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           child: ElevatedButton(
             onPressed: isCalculating ? null : _calculateRecipe,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: const Color(0xFFE0E0E0),
-              disabledForegroundColor: const Color(0xFF9E9E9E),
+              backgroundColor: context.modePrimary,
+              foregroundColor: context.modeTextInverse,
+              disabledBackgroundColor: context.modeSurfaceMuted,
+              disabledForegroundColor: context.modeTextMuted,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -739,7 +738,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: context.modeTextInverse,
                         ),
                       ),
                     ],
@@ -922,7 +921,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                     ],
                   ),
                   Text(
-                    'â‚¦${forecast.estimatedCost!.toStringAsFixed(2)}',
+                    '₦${forecast.estimatedCost!.toStringAsFixed(2)}',
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -980,9 +979,9 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -992,13 +991,13 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: context.modeSurfaceAlt,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const AppIcon(
+                child: AppIcon(
                   Icons.shopping_basket_outlined,
                   size: 24,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1011,14 +1010,14 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     Text(
                       '${forecast.ingredients.length} items',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -1031,11 +1030,8 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: forecast.ingredients.length,
-            separatorBuilder: (context, index) => const Divider(
-              height: 24,
-              color: Color(0xFFF5F5F5),
-              thickness: 1,
-            ),
+            separatorBuilder: (context, index) =>
+                Divider(height: 24, color: context.modeDivider, thickness: 1),
             itemBuilder: (context, index) {
               final ingredient = forecast.ingredients[index];
               return _buildIngredientItem(ingredient);
@@ -1058,7 +1054,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
+              color: context.modeSurfaceAlt,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const AppIcon(Icons.circle, size: 12, color: kPrimary),
@@ -1073,7 +1069,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -1087,7 +1083,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                             'Original: ',
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 12,
-                              color: const Color(0xFF9E9E9E),
+                              color: context.modeTextMuted,
                             ),
                           ),
                           Text(
@@ -1095,7 +1091,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF757575),
+                              color: context.modeTextSecondary,
                             ),
                           ),
                         ],
@@ -1107,7 +1103,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                             'Scaled: ',
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 12,
-                              color: const Color(0xFF9E9E9E),
+                              color: context.modeTextMuted,
                             ),
                           ),
                           Text(
@@ -1133,7 +1129,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                     'No scaling needed',
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 12,
-                      color: const Color(0xFF9E9E9E),
+                      color: context.modeTextMuted,
                     ),
                   ),
                 ],
@@ -1146,7 +1142,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
             decoration: BoxDecoration(
               color: hasScaling
                   ? kPrimary.withValues(alpha: 0.1)
-                  : const Color(0xFFF5F5F5),
+                  : context.modeSurfaceAlt,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: hasScaling
@@ -1163,7 +1159,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: hasScaling ? kPrimary : Colors.black87,
+                    color: hasScaling ? kPrimary : context.modeTextPrimary,
                   ),
                 ),
                 Text(
@@ -1171,7 +1167,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: hasScaling ? kPrimary : const Color(0xFF757575),
+                    color: hasScaling ? kPrimary : context.modeTextSecondary,
                   ),
                 ),
               ],
@@ -1187,9 +1183,9 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1199,13 +1195,13 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: context.modeSurfaceAlt,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const AppIcon(
+                child: AppIcon(
                   Icons.notes_outlined,
                   size: 24,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1214,7 +1210,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
@@ -1223,14 +1219,14 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8F6F6),
+              color: context.modeSurfaceAlt,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               forecast.preparationNotes,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.black87,
+                color: context.modeTextPrimary,
                 height: 1.5,
               ),
             ),

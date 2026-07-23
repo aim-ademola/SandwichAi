@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -13,6 +14,7 @@ import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 
 import 'package:sandwich_ai/src/features/processing/presentation/processing_dasboard.dart';
+import 'package:sandwich_ai/src/features/processing/presentation/processing_drawer.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/recipe_calc.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/ai_wastage_analysis.dart';
 
@@ -34,6 +36,7 @@ class ProcessingBottomNavBar extends StatefulWidget {
 }
 
 class ProcessingBottomNavBarState extends State<ProcessingBottomNavBar> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late int _currentIndex;
   late List<Widget> _pages;
 
@@ -68,7 +71,12 @@ class ProcessingBottomNavBarState extends State<ProcessingBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      key: _scaffoldKey,
+      drawer: ProcessingAppDrawer(),
+      body: AppDrawerScope(
+        openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+        child: IndexedStack(index: _currentIndex, children: _pages),
+      ),
       backgroundColor: context.modeBackground,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

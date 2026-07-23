@@ -3,7 +3,8 @@ import 'package:sandwich_ai/src/core/config/app_environment.dart';
 class ApiConstants {
   static String get baseUrl => AppEnvironment.current.apiBaseUrl;
   static String get aiBaseUrl => AppEnvironment.current.aiBaseUrl;
-  static String get aiApiKey => AppEnvironment.current.aiApiKey;
+  static String get platformApiKey => AppEnvironment.current.platformApiKey;
+  static String get internalApiKey => AppEnvironment.current.internalApiKey;
 
   // Timeout configurations
   static const Duration connectTimeout = Duration(seconds: 30);

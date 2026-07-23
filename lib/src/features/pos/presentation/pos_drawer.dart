@@ -23,8 +23,7 @@ class PosAppDrawer extends StatelessWidget {
           icon: Icons.feedback_outlined,
           title: 'Complaints',
           onTap: () {
-            Navigator.pop(context);
-            context.push('/complaints');
+            _closeDrawerAndPush(context, '/complaints');
           },
         ),
         const SizedBox(height: 8),
@@ -33,8 +32,7 @@ class PosAppDrawer extends StatelessWidget {
           icon: Icons.reviews_outlined,
           title: 'Reviews',
           onTap: () {
-            Navigator.pop(context);
-            context.push('/reviews');
+            _closeDrawerAndPush(context, '/reviews');
           },
         ),
         const SizedBox(height: 8),
@@ -43,7 +41,7 @@ class PosAppDrawer extends StatelessWidget {
           icon: Icons.person_2_outlined,
           title: 'Capture Customer Details',
           onTap: () {
-            context.push('/customer-dtls');
+            _closeDrawerAndPush(context, '/customer-dtls');
           },
         ),
         const SizedBox(height: 8),
@@ -52,11 +50,14 @@ class PosAppDrawer extends StatelessWidget {
           icon: Icons.call_made,
           title: 'Stock Requisition',
           onTap: () {
-            Navigator.push(
+            _closeDrawerAndOpen(
               context,
-              CupertinoPageRoute(
-                builder: (_) => ProcesssingToStockRequisitionTabScreen(
-                  dpt: 'CUSTOMER_SERVICE',
+              () => Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (_) => ProcesssingToStockRequisitionTabScreen(
+                    dpt: 'CUSTOMER_SERVICE',
+                  ),
                 ),
               ),
             );
@@ -68,7 +69,7 @@ class PosAppDrawer extends StatelessWidget {
           icon: Icons.people_alt_outlined,
           title: 'Manage Customers',
           onTap: () {
-            context.push('/customer-list');
+            _closeDrawerAndPush(context, '/customer-list');
           },
         ),
         const SizedBox(height: 8),
@@ -77,15 +78,18 @@ class PosAppDrawer extends StatelessWidget {
           icon: Icons.print_outlined,
           title: 'Printer Settings',
           onTap: () {
-            Navigator.push(
+            _closeDrawerAndOpen(
               context,
-              CupertinoPageRoute(
-                builder: (_) => FeatureRegistry.isEnabled(AppFeature.printer)
-                    ? const PrinterSettingsScreen()
-                    : const FeatureUnavailableScreen(
-                        feature: AppFeature.printer,
-                        title: 'Printer Settings',
-                      ),
+              () => Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (_) => FeatureRegistry.isEnabled(AppFeature.printer)
+                      ? const PrinterSettingsScreen()
+                      : const FeatureUnavailableScreen(
+                          feature: AppFeature.printer,
+                          title: 'Printer Settings',
+                        ),
+                ),
               ),
             );
           },
@@ -107,5 +111,21 @@ class PosAppDrawer extends StatelessWidget {
       onTap: onTap,
       isLogout: isLogout,
     );
+  }
+
+  void _closeDrawerAndPush(BuildContext context, String location) {
+    _closeDrawerAndOpen(context, () => context.push(location));
+  }
+
+  void _closeDrawerAndOpen(BuildContext context, VoidCallback open) {
+    final scaffoldState = Scaffold.maybeOf(context);
+    if (scaffoldState?.isDrawerOpen ?? false) {
+      scaffoldState!.closeDrawer();
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      open();
+    });
   }
 }

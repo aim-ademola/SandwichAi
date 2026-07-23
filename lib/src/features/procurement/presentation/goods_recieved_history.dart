@@ -76,7 +76,11 @@ class _GoodsReceivedHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(Icons.error_outline, size: 64, color: context.modeError),
+            _buildStateIcon(
+              Icons.error_outline,
+              color: context.modeError,
+              backgroundColor: context.modeError.withValues(alpha: 0.1),
+            ),
             const SizedBox(height: 16),
             Text(
               'Error Loading Data',
@@ -122,10 +126,10 @@ class _GoodsReceivedHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(
+            _buildStateIcon(
               Icons.inventory_2_outlined,
-              size: 80,
-              color: context.modeTextMuted.withValues(alpha: 0.45),
+              color: context.modeTextMuted,
+              backgroundColor: context.modeSurfaceAlt,
             ),
             const SizedBox(height: 16),
             Text(
@@ -172,10 +176,11 @@ class _GoodsReceivedHistoryScreenState
   }
 
   Widget _buildReceiptCard(GoodsReceived receipt, double screenWidth) {
-    final dateFormat = DateFormat('MMM dd, yyyy â€¢ hh:mm a');
+    final dateFormat = DateFormat('MMM dd, yyyy - hh:mm a');
     final passRate = receipt.totalItems > 0
         ? (receipt.passedQC / receipt.totalItems * 100).toStringAsFixed(0)
         : '0';
+    final isCompact = screenWidth < 380;
 
     return Container(
       margin: EdgeInsets.only(bottom: _getSpacing(screenWidth)),
@@ -218,17 +223,21 @@ class _GoodsReceivedHistoryScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      width: 34,
+                      height: 34,
                       decoration: BoxDecoration(
                         color: context.modePrimary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: AppIcon(
-                        Icons.receipt_long,
-                        color: context.modePrimary,
-                        size: 24,
+                      child: Center(
+                        child: AppIcon(
+                          Icons.receipt_long,
+                          color: context.modePrimary,
+                          size: 17,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -238,6 +247,8 @@ class _GoodsReceivedHistoryScreenState
                         children: [
                           Text(
                             receipt.receiptNo,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: _getTitleFontSize(screenWidth),
                               fontWeight: FontWeight.w600,
@@ -247,6 +258,8 @@ class _GoodsReceivedHistoryScreenState
                           const SizedBox(height: 2),
                           Text(
                             receipt.supplierName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: _getLabelFontSize(screenWidth),
                               color: context.modeTextSecondary,
@@ -255,10 +268,16 @@ class _GoodsReceivedHistoryScreenState
                         ],
                       ),
                     ),
-                    AppIcon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: context.modeTextMuted,
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Center(
+                        child: AppIcon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: context.modeTextMuted,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -271,7 +290,7 @@ class _GoodsReceivedHistoryScreenState
                 const SizedBox(height: 8),
                 _buildInfoRow(
                   Icons.description,
-                  'Invoice: ${receipt.invoiceNo} â€¢ PO: ${receipt.poNumber}',
+                  _buildInvoicePoText(receipt),
                   screenWidth,
                 ),
                 const SizedBox(height: 8),
@@ -288,6 +307,7 @@ class _GoodsReceivedHistoryScreenState
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: _buildQualityChip(
@@ -309,7 +329,7 @@ class _GoodsReceivedHistoryScreenState
                       const SizedBox(width: 8),
                       Expanded(
                         child: _buildQualityChip(
-                          'Pass Rate',
+                          isCompact ? 'Rate' : 'Pass Rate',
                           '$passRate%',
                           context.modePrimary,
                           screenWidth,
@@ -328,16 +348,25 @@ class _GoodsReceivedHistoryScreenState
 
   Widget _buildInfoRow(IconData icon, String text, double screenWidth) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        AppIcon(
-          icon,
-          size: _getIconSize(screenWidth),
-          color: context.modeTextMuted,
+        SizedBox(
+          width: 22,
+          height: 22,
+          child: Center(
+            child: AppIcon(
+              icon,
+              size: _getIconSize(screenWidth),
+              color: context.modeTextMuted,
+            ),
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getLabelFontSize(screenWidth),
               color: context.modeTextSecondary,
@@ -356,17 +385,23 @@ class _GoodsReceivedHistoryScreenState
   ) {
     return Column(
       children: [
-        Text(
-          value,
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: _getTitleFontSize(screenWidth),
-            fontWeight: FontWeight.w700,
-            color: color,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: _getTitleFontSize(screenWidth),
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 11,
             color: context.modeTextSecondary,
@@ -445,7 +480,7 @@ class _GoodsReceivedHistoryScreenState
                       _buildDetailRow(
                         'Received At',
                         DateFormat(
-                          'MMM dd, yyyy â€¢ hh:mm a',
+                          'MMM dd, yyyy - hh:mm a',
                         ).format(receipt.receivedAt),
                       ),
                     ]),
@@ -522,6 +557,8 @@ class _GoodsReceivedHistoryScreenState
           Expanded(
             child: Text(
               value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -555,6 +592,8 @@ class _GoodsReceivedHistoryScreenState
               Expanded(
                 child: Text(
                   item.itemName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -563,6 +602,7 @@ class _GoodsReceivedHistoryScreenState
                 ),
               ),
               Container(
+                constraints: const BoxConstraints(maxWidth: 110),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.1),
@@ -570,6 +610,8 @@ class _GoodsReceivedHistoryScreenState
                 ),
                 child: Text(
                   item.qcStatus,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -605,13 +647,27 @@ class _GoodsReceivedHistoryScreenState
             const SizedBox(height: 8),
             Row(
               children: [
-                AppIcon(Icons.event, size: 14, color: context.modeTextMuted),
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: Center(
+                    child: AppIcon(
+                      Icons.event,
+                      size: 14,
+                      color: context.modeTextMuted,
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 4),
-                Text(
-                  'Expires: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(item.expiryDate!))}',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 13,
-                    color: context.modeTextSecondary,
+                Expanded(
+                  child: Text(
+                    'Expires: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(item.expiryDate!))}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 13,
+                      color: context.modeTextSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -636,6 +692,8 @@ class _GoodsReceivedHistoryScreenState
         const SizedBox(height: 2),
         Text(
           value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -650,5 +708,31 @@ class _GoodsReceivedHistoryScreenState
   double _getSpacing(double width) => width < 600 ? 12 : 16;
   double _getTitleFontSize(double width) => width < 600 ? 16 : 17;
   double _getLabelFontSize(double width) => width < 600 ? 14 : 15;
-  double _getIconSize(double width) => width < 600 ? 18 : 20;
+  double _getIconSize(double width) => 16;
+
+  String _buildInvoicePoText(GoodsReceived receipt) {
+    final parts = [
+      if (receipt.invoiceNo.trim().isNotEmpty)
+        'Invoice: ${receipt.invoiceNo.trim()}',
+      if (receipt.poNumber.trim().isNotEmpty) 'PO: ${receipt.poNumber.trim()}',
+    ];
+
+    return parts.isEmpty ? 'No invoice or PO number' : parts.join(' - ');
+  }
+
+  Widget _buildStateIcon(
+    IconData icon, {
+    required Color color,
+    required Color backgroundColor,
+  }) {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Center(child: AppIcon(icon, size: 28, color: color)),
+    );
+  }
 }

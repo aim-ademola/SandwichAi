@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -46,6 +47,7 @@ class _KitchenOrderHistoryScreenState extends State<KitchenOrderHistoryScreen> {
           backgroundColor: context.modeSurface,
           elevation: 0,
           surfaceTintColor: Colors.transparent,
+          leading: const DrawerToggleButton(),
           title: Text(
             'Order History',
             style: WorkSansAppTextStyles.medium.copyWith(

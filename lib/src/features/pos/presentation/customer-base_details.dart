@@ -28,9 +28,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   }
 
   String _formatCurrency(double? amount) {
-    if (amount == null) return 'â‚¦0.00';
+    if (amount == null) return '₦0.00';
     final formatter = NumberFormat('#,##0.00', 'en_US');
-    return 'â‚¦${formatter.format(amount)}';
+    return '₦${formatter.format(amount)}';
   }
 
   String _formatDate(String? dateString) {
@@ -54,28 +54,41 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       case 'platinum':
         return const Color(0xFFE5E4E2);
       default:
-        return kprimaryTextColor2;
+        return context.modeTextSecondary;
     }
+  }
+
+  List<BoxShadow> _cardShadow(BuildContext context) {
+    return [
+      BoxShadow(
+        color: Colors.black.withValues(
+          alpha: Theme.of(context).brightness == Brightness.dark ? 0.16 : 0.04,
+        ),
+        blurRadius: 8,
+        offset: const Offset(0, 2),
+      ),
+    ];
   }
 
   void _showDeleteDialog(CustomerModel customer) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.modeSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Delete Customer',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         content: Text(
           'Are you sure you want to delete ${customer.name}? This action cannot be undone.',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
         ),
         actions: [
@@ -86,7 +99,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ),
@@ -118,12 +131,13 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: context.modeBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.modeSurface,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const AppIcon(Icons.arrow_back, color: kprimaryTextColor1),
+          icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -131,7 +145,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         centerTitle: true,
@@ -178,8 +192,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         builder: (context, state) {
           if (state is CustomerDetailLoading ||
               state is CustomerActionLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: kPrimary),
+            return Center(
+              child: CircularProgressIndicator(color: context.modePrimary),
             );
           }
 
@@ -191,7 +205,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   AppIcon(
                     Icons.error_outline,
                     size: 64,
-                    color: Colors.red.shade300,
+                    color: context.modeError,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -199,7 +213,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -207,7 +221,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                     state.error,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -230,14 +244,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    color: context.modeSurface,
+                    boxShadow: _cardShadow(context),
                   ),
                   child: Column(
                     children: [
@@ -267,7 +275,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 22,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -276,7 +284,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         customer.phone,
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 15,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                       ...[
@@ -324,14 +332,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         children: [
                           Expanded(
                             child: OutlinedButton.icon(
-                              onPressed: () {
-                                context
-                                    .push('/edit-customer', extra: customer)
-                                    .then((_) {
-                                      context.read<CustomerBloc>().add(
-                                        LoadCustomerById(widget.customerId),
-                                      );
-                                    });
+                              onPressed: () async {
+                                await context.push(
+                                  '/edit-customer',
+                                  extra: customer,
+                                );
+                                if (!context.mounted) return;
+                                context.read<CustomerBloc>().add(
+                                  LoadCustomerById(widget.customerId),
+                                );
                               },
                               icon: const AppIcon(
                                 Icons.edit_outlined,
@@ -406,7 +415,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -579,15 +588,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: context.modeBorder.withValues(alpha: 0.55)),
+        boxShadow: _cardShadow(context),
       ),
       child: Column(
         children: [
@@ -598,7 +602,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: AppIcon(icon, color: color, size: 24),
+            child: AppIconSlot(icon, color: color, size: 24),
           ),
           const SizedBox(height: 12),
           Text(
@@ -606,7 +610,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -614,7 +618,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -633,15 +637,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: context.modeBorder.withValues(alpha: 0.55)),
+          boxShadow: _cardShadow(context),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -651,7 +650,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -673,7 +672,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppIcon(icon, size: 20, color: kprimaryTextColor2),
+          AppIconSlot(icon, size: 20, color: context.modeTextSecondary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -683,7 +682,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   label,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -691,7 +690,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                   value,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: valueColor ?? kprimaryTextColor1,
+                    color: valueColor ?? context.modeTextPrimary,
                   ),
                 ),
               ],
@@ -711,14 +710,14 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          AppIcon(icon, size: 20, color: kprimaryTextColor2),
+          AppIconSlot(icon, size: 20, color: context.modeTextSecondary),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
           ),

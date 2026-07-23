@@ -141,9 +141,20 @@ class _GoodsReceivedOverviewScreenState
               ),
               child: Row(
                 children: [
-                  AppIcon(
-                    Icons.inventory_2_outlined,
-                    color: context.modePrimary,
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: context.modePrimary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: AppIcon(
+                        Icons.inventory_2_outlined,
+                        color: context.modePrimary,
+                        size: 18,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -152,6 +163,8 @@ class _GoodsReceivedOverviewScreenState
                       children: [
                         Text(
                           item.itemName.isEmpty ? 'Stock item' : item.itemName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -161,6 +174,8 @@ class _GoodsReceivedOverviewScreenState
                         const SizedBox(height: 3),
                         Text(
                           'Current: ${item.currentStock} | Suggested: ${item.suggestedQty}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
                             color: context.modeTextMuted,
@@ -171,6 +186,8 @@ class _GoodsReceivedOverviewScreenState
                   ),
                   Text(
                     item.urgency,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -254,8 +271,15 @@ class _InfoPanel extends StatelessWidget {
         border: Border.all(color: context.modeBorder),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          AppIcon(icon, color: context.modeTextMuted),
+          SizedBox(
+            width: 32,
+            height: 32,
+            child: Center(
+              child: AppIcon(icon, color: context.modeTextMuted, size: 18),
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

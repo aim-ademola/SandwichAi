@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 
 class SandwichAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -50,6 +51,11 @@ class SandwichAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
         onPressed: onMenuPressed,
       );
+    }
+
+    final drawerScope = AppDrawerScope.maybeOf(context);
+    if (!showBackButton && drawerScope != null) {
+      return const DrawerToggleButton();
     }
 
     if (showBackButton) {

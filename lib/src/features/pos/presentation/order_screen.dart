@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -761,6 +762,7 @@ class _OrderScreenState extends State<OrderScreen>
       ),
       leadingWidth: 78,
       actions: [
+        const DrawerToggleButton(),
         _buildHeaderIconButton(
           icon: Icons.refresh_rounded,
           onTap: () =>

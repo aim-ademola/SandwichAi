@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -780,6 +781,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         ],
       ),
       actions: [
+        const DrawerToggleButton(),
         if (room?.unreadCount != null && room!.unreadCount > 0)
           Container(
             margin: const EdgeInsets.symmetric(vertical: 12),

@@ -35,13 +35,12 @@ import 'package:sandwich_ai/src/features/pos/presentation/reviews.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/table_view.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/output_ver_tabs.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_vaidate_stock_trf.dart';
-import 'package:sandwich_ai/src/features/procurement/presentation/order_list.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/processing_requsition.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/recipe_compliance_tabs.dart';
-import 'package:sandwich_ai/src/features/procurement/presentation/order_form.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_dash.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_request.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procuremnt_purchase_req.dart';
+import 'package:sandwich_ai/src/features/procurement/presentation/purchase_orders_tab.dart';
 import 'package:sandwich_ai/src/features/splash/splash.dart';
 
 class AppRouter {
@@ -355,7 +354,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           return CupertinoPage(
             key: state.pageKey,
-            child: const OrderFormScreen(),
+            child: const PurchaseOrdersTabScreen(initialIndex: 0),
           );
         },
       ),
@@ -365,7 +364,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           return CupertinoPage(
             key: state.pageKey,
-            child: const OrdersListScreen(),
+            child: const PurchaseOrdersTabScreen(initialIndex: 1),
           );
         },
       ),

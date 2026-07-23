@@ -201,8 +201,8 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: context.modeSurface,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
@@ -233,7 +233,10 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const AppIcon(Icons.close),
+                      icon: AppIcon(
+                        Icons.close,
+                        color: context.modeTextPrimary,
+                      ),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -245,7 +248,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                   subtitle,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
-                    color: Colors.grey.shade600,
+                    color: context.modeTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -277,7 +280,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                             tip,
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 13,
-                              color: Colors.black87,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                         ),
@@ -300,9 +303,9 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: context.modeSurfaceAlt,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: context.modeBorder),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,7 +328,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: context.modeTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -333,7 +336,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     description,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 13,
-                      color: Colors.grey.shade700,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
@@ -364,7 +367,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: fontSize,
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: context.modeTextPrimary,
           ),
         ),
         if (showHelp) const SizedBox(width: 6),
@@ -399,28 +402,28 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
           validator: validator,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: inputFontSize,
-            color: Colors.black,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: inputFontSize,
-              color: const Color(0xFFBDBDBD),
+              color: context.modeTextMuted,
               fontWeight: FontWeight.w400,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+              borderSide: BorderSide(color: context.modeBorder, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+              borderSide: BorderSide(color: context.modeBorder, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -428,11 +431,11 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
+              borderSide: BorderSide(color: context.modeError, width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.red, width: 2),
+              borderSide: BorderSide(color: context.modeError, width: 2),
             ),
           ),
         ),
@@ -484,7 +487,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: context.modeError,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -501,12 +504,12 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
+                color: context.modeSuccess.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: AppIcon(
                 Icons.check_circle,
-                color: Colors.green.shade600,
+                color: context.modeSuccess,
                 size: 32,
               ),
             ),
@@ -856,17 +859,22 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                 // Loading Overlay
                 if (productIntakeState is ProductIntakeCreating)
                   Container(
-                    color: Colors.black54,
-                    child: const Center(
+                    color: context.modeTextPrimary.withValues(alpha: 0.54),
+                    child: Center(
                       child: Card(
                         child: Padding(
-                          padding: EdgeInsets.all(24.0),
+                          padding: const EdgeInsets.all(24.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              CircularProgressIndicator(color: kPrimary),
-                              SizedBox(height: 16),
-                              Text('Recording product intake...'),
+                              const CircularProgressIndicator(color: kPrimary),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Recording product intake...',
+                                style: TextStyle(
+                                  color: context.modeTextPrimary,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -902,13 +910,13 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE0E0E0)),
+                  border: Border.all(color: context.modeBorder),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
@@ -916,8 +924,11 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                         color: kPrimary,
                       ),
                     ),
-                    SizedBox(width: 12),
-                    Text('Loading items...'),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Loading items...',
+                      style: TextStyle(color: context.modeTextPrimary),
+                    ),
                   ],
                 ),
               ),
@@ -935,18 +946,20 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: context.modeError.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
+                  border: Border.all(
+                    color: context.modeError.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    AppIcon(Icons.error_outline, color: Colors.red.shade700),
+                    AppIcon(Icons.error_outline, color: context.modeError),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Failed to load items',
-                        style: TextStyle(color: Colors.red.shade700),
+                        style: TextStyle(color: context.modeError),
                       ),
                     ),
                     TextButton(
@@ -984,11 +997,14 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: context.modeSurfaceAlt,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE0E0E0)),
+                border: Border.all(color: context.modeBorder),
               ),
-              child: const Text('No items available'),
+              child: Text(
+                'No items available',
+                style: TextStyle(color: context.modeTextSecondary),
+              ),
             ),
           ],
         );
@@ -1012,9 +1028,9 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE0E0E0)),
+              border: Border.all(color: context.modeBorder),
             ),
             child: Row(
               children: [
@@ -1028,8 +1044,8 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: inputFontSize,
                       color: _selectedItem == null
-                          ? const Color(0xFF9E9E9E)
-                          : Colors.black,
+                          ? context.modeTextMuted
+                          : context.modeTextPrimary,
                     ),
                   ),
                 ),
@@ -1037,7 +1053,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                   _isInventoryPickerOpen
                       ? Icons.keyboard_arrow_up
                       : Icons.keyboard_arrow_down,
-                  color: const Color(0xFF9E9E9E),
+                  color: context.modeTextMuted,
                 ),
               ],
             ),
@@ -1055,12 +1071,12 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
     return Container(
       constraints: const BoxConstraints(maxHeight: 320),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: context.modeTextPrimary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1076,15 +1092,18 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
               cursorColor: kPrimary,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: inputFontSize,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Type to search...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: inputFontSize,
-                  color: const Color(0xFF9E9E9E),
+                  color: context.modeTextMuted,
                 ),
-                prefixIcon: AppIconSlot(Icons.search, color: Color(0xFF9E9E9E)),
+                prefixIcon: AppIconSlot(
+                  Icons.search,
+                  color: context.modeTextMuted,
+                ),
                 suffixIcon: _inventorySearchController.text.isEmpty
                     ? null
                     : IconButton(
@@ -1093,7 +1112,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                       ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                  borderSide: BorderSide(color: context.modeBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -1102,7 +1121,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           Expanded(
             child: _filteredInventoryItems.isEmpty
                 ? Center(
@@ -1110,7 +1129,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                       'No items found',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: inputFontSize,
-                        color: Colors.grey,
+                        color: context.modeTextMuted,
                       ),
                     ),
                   )
@@ -1171,7 +1190,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: inputFontSize,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: context.modeTextPrimary,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -1181,7 +1200,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                                 overflow: TextOverflow.ellipsis,
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: inputFontSize - 2,
-                                  color: Colors.grey,
+                                  color: context.modeTextMuted,
                                 ),
                               ),
                             ],
@@ -1199,20 +1218,21 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
   Widget _buildProductTypeDropdown(double inputFontSize) {
     return DropdownButtonFormField<ProductType>(
       initialValue: _selectedProductType,
+      isExpanded: true,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: context.modeSurface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+          borderSide: BorderSide(color: context.modeBorder, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+          borderSide: BorderSide(color: context.modeBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -1221,13 +1241,17 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
       ),
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: inputFontSize,
-        color: Colors.black,
+        color: context.modeTextPrimary,
       ),
-      icon: const AppIcon(Icons.keyboard_arrow_down, color: Color(0xFF9E9E9E)),
+      icon: AppIcon(Icons.keyboard_arrow_down, color: context.modeTextMuted),
       items: ProductType.values.map((type) {
         return DropdownMenuItem<ProductType>(
           value: type,
-          child: Text(type.displayName),
+          child: Text(
+            type.displayName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         );
       }).toList(),
       onChanged: (value) {
@@ -1243,20 +1267,22 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
   Widget _buildUnitDropdown(double inputFontSize) {
     return DropdownButtonFormField<Unit>(
       initialValue: _selectedUnit,
+      isExpanded: true,
+      menuMaxHeight: 320,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: context.modeSurface,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
+          horizontal: 12,
           vertical: 16,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+          borderSide: BorderSide(color: context.modeBorder, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+          borderSide: BorderSide(color: context.modeBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -1265,9 +1291,13 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
       ),
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: inputFontSize,
-        color: Colors.black,
+        color: context.modeTextPrimary,
       ),
-      icon: const AppIcon(Icons.keyboard_arrow_down, color: Color(0xFF9E9E9E)),
+      icon: AppIcon(
+        Icons.keyboard_arrow_down,
+        color: context.modeTextMuted,
+        size: 20,
+      ),
       selectedItemBuilder: (context) {
         return Unit.values.map((unit) {
           return Align(
@@ -1278,7 +1308,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
               overflow: TextOverflow.ellipsis,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: inputFontSize,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
             ),
           );
@@ -1291,6 +1321,10 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             unit.displayName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: inputFontSize,
+              color: context.modeTextPrimary,
+            ),
           ),
         );
       }).toList(),
@@ -1317,12 +1351,14 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: _qualityStatus ? Colors.green.shade50 : Colors.white,
+                color: _qualityStatus
+                    ? context.modeSuccess.withValues(alpha: 0.1)
+                    : context.modeSurface,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: _qualityStatus
-                      ? Colors.green.shade600
-                      : const Color(0xFFE0E0E0),
+                      ? context.modeSuccess
+                      : context.modeBorder,
                   width: _qualityStatus ? 2 : 1,
                 ),
               ),
@@ -1331,7 +1367,9 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                 children: [
                   AppIcon(
                     Icons.check_circle,
-                    color: _qualityStatus ? Colors.green.shade600 : Colors.grey,
+                    color: _qualityStatus
+                        ? context.modeSuccess
+                        : context.modeTextMuted,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -1340,8 +1378,8 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: inputFontSize,
                       color: _qualityStatus
-                          ? Colors.green.shade700
-                          : Colors.grey.shade700,
+                          ? context.modeSuccess
+                          : context.modeTextSecondary,
                       fontWeight: _qualityStatus
                           ? FontWeight.w600
                           : FontWeight.w400,
@@ -1363,12 +1401,14 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: !_qualityStatus ? Colors.red.shade50 : Colors.white,
+                color: !_qualityStatus
+                    ? context.modeError.withValues(alpha: 0.1)
+                    : context.modeSurface,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: !_qualityStatus
-                      ? Colors.red.shade600
-                      : const Color(0xFFE0E0E0),
+                      ? context.modeError
+                      : context.modeBorder,
                   width: !_qualityStatus ? 2 : 1,
                 ),
               ),
@@ -1377,7 +1417,9 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                 children: [
                   AppIcon(
                     Icons.cancel,
-                    color: !_qualityStatus ? Colors.red.shade600 : Colors.grey,
+                    color: !_qualityStatus
+                        ? context.modeError
+                        : context.modeTextMuted,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -1386,8 +1428,8 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: inputFontSize,
                       color: !_qualityStatus
-                          ? Colors.red.shade700
-                          : Colors.grey.shade700,
+                          ? context.modeError
+                          : context.modeTextSecondary,
                       fontWeight: !_qualityStatus
                           ? FontWeight.w600
                           : FontWeight.w400,
@@ -1427,13 +1469,13 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE0E0E0)),
+                  border: Border.all(color: context.modeBorder),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
@@ -1441,8 +1483,11 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                         color: kPrimary,
                       ),
                     ),
-                    SizedBox(width: 12),
-                    Text('Loading employees...'),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Loading employees...',
+                      style: TextStyle(color: context.modeTextPrimary),
+                    ),
                   ],
                 ),
               ),
@@ -1460,18 +1505,20 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: context.modeError.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
+                  border: Border.all(
+                    color: context.modeError.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    AppIcon(Icons.error_outline, color: Colors.red.shade700),
+                    AppIcon(Icons.error_outline, color: context.modeError),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Failed to load employees',
-                        style: TextStyle(color: Colors.red.shade700),
+                        style: TextStyle(color: context.modeError),
                       ),
                     ),
                     TextButton(
@@ -1510,28 +1557,22 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                   hintText: 'Select employee',
                   hintStyle: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: inputFontSize,
-                    color: const Color(0xFFBDBDBD),
+                    color: context.modeTextMuted,
                     fontWeight: FontWeight.w400,
                   ),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.modeSurface,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: context.modeBorder, width: 1),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
+                    borderSide: BorderSide(color: context.modeBorder, width: 1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -1540,11 +1581,11 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                 ),
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: inputFontSize,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
-                icon: const AppIcon(
+                icon: AppIcon(
                   Icons.keyboard_arrow_down,
-                  color: Color(0xFF9E9E9E),
+                  color: context.modeTextMuted,
                 ),
                 selectedItemBuilder: (context) {
                   return state.employees.map((employee) {
@@ -1556,7 +1597,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: inputFontSize,
-                          color: Colors.black,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                     );
@@ -1573,15 +1614,15 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                           employee.fullName,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: inputFontSize,
-                            color: Colors.black,
+                            color: context.modeTextPrimary,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          '${employee.employeeId} â€¢ ${employee.role}',
+                          '${employee.employeeId} • ${employee.role}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: inputFontSize - 2,
-                            color: Colors.grey,
+                            color: context.modeTextMuted,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1621,11 +1662,14 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: context.modeSurfaceAlt,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE0E0E0)),
+                border: Border.all(color: context.modeBorder),
               ),
-              child: const Text('No employees available'),
+              child: Text(
+                'No employees available',
+                style: TextStyle(color: context.modeTextSecondary),
+              ),
             ),
           ],
         );
@@ -1640,7 +1684,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
         onPressed: _submitForm,
         style: ElevatedButton.styleFrom(
           backgroundColor: kPrimary,
-          foregroundColor: Colors.white,
+          foregroundColor: context.modeTextInverse,
           elevation: 2,
           shadowColor: kPrimary.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(

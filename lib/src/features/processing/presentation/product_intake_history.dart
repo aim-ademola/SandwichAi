@@ -58,7 +58,7 @@ class _ProductIntakeHistoryScreenState
     return BlocBuilder<ProductIntakeBloc, ProductIntakeState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           body: Column(
             children: [
               // Search Bar
@@ -76,30 +76,30 @@ class _ProductIntakeHistoryScreenState
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.white,
+      color: context.modeSurface,
       child: TextField(
         controller: _searchController,
         onChanged: _onSearch,
         cursorColor: kPrimary,
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 15,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
         decoration: InputDecoration(
           hintText: 'Search by product name, batch ID, or issued by...',
           hintStyle: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 15,
-            color: Colors.grey.shade500,
+            color: context.modeTextMuted,
           ),
-          prefixIcon: AppIconSlot(Icons.search, color: Color(0xFF9E9E9E)),
+          prefixIcon: AppIconSlot(Icons.search, color: context.modeTextMuted),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: const AppIcon(Icons.clear, color: Color(0xFF9E9E9E)),
+                  icon: AppIcon(Icons.clear, color: context.modeTextMuted),
                   onPressed: _clearSearch,
                 )
               : null,
           filled: true,
-          fillColor: Colors.grey.shade50,
+          fillColor: context.modeSurfaceAlt,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 12,
@@ -161,7 +161,7 @@ class _ProductIntakeHistoryScreenState
             },
           ),
           Container(
-            color: Colors.black12,
+            color: context.modeTextPrimary.withValues(alpha: 0.12),
             child: const Center(
               child: CircularProgressIndicator(color: kPrimary),
             ),
@@ -179,7 +179,7 @@ class _ProductIntakeHistoryScreenState
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.modeBorder),
       ),
       child: InkWell(
         onTap: () {
@@ -206,7 +206,7 @@ class _ProductIntakeHistoryScreenState
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -228,7 +228,7 @@ class _ProductIntakeHistoryScreenState
                   AppIcon(
                     Icons.inventory_2_outlined,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: context.modeTextMuted,
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -246,14 +246,18 @@ class _ProductIntakeHistoryScreenState
               // Batch ID
               Row(
                 children: [
-                  AppIcon(Icons.qr_code, size: 16, color: Colors.grey.shade600),
+                  AppIcon(
+                    Icons.qr_code,
+                    size: 16,
+                    color: context.modeTextMuted,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       'Batch: ${intake.stockBatchId}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
-                        color: Colors.grey.shade700,
+                        color: context.modeTextSecondary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -269,16 +273,16 @@ class _ProductIntakeHistoryScreenState
                   AppIcon(
                     Icons.calendar_today_outlined,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: context.modeTextMuted,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     DateFormat(
-                      'MMM dd, yyyy â€¢ hh:mm a',
+                      'MMM dd, yyyy • hh:mm a',
                     ).format(intake.intakeDate),
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 13,
-                      color: Colors.grey.shade700,
+                      color: context.modeTextSecondary,
                     ),
                   ),
                 ],
@@ -291,7 +295,7 @@ class _ProductIntakeHistoryScreenState
                   AppIcon(
                     Icons.person_outline,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: context.modeTextMuted,
                   ),
                   const SizedBox(width: 6),
                   Expanded(
@@ -299,7 +303,7 @@ class _ProductIntakeHistoryScreenState
                       'Issued by: ${intake.issuedBy}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
-                        color: Colors.grey.shade700,
+                        color: context.modeTextSecondary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -318,10 +322,12 @@ class _ProductIntakeHistoryScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: qualityStatus ? Colors.green.shade50 : Colors.red.shade50,
+        color: qualityStatus
+            ? context.modeSuccess.withValues(alpha: 0.1)
+            : context.modeError.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: qualityStatus ? Colors.green.shade600 : Colors.red.shade600,
+          color: qualityStatus ? context.modeSuccess : context.modeError,
           width: 1,
         ),
       ),
@@ -331,7 +337,7 @@ class _ProductIntakeHistoryScreenState
           AppIcon(
             qualityStatus ? Icons.check_circle : Icons.cancel,
             size: 14,
-            color: qualityStatus ? Colors.green.shade600 : Colors.red.shade600,
+            color: qualityStatus ? context.modeSuccess : context.modeError,
           ),
           const SizedBox(width: 4),
           Text(
@@ -339,9 +345,7 @@ class _ProductIntakeHistoryScreenState
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: qualityStatus
-                  ? Colors.green.shade700
-                  : Colors.red.shade700,
+              color: qualityStatus ? context.modeSuccess : context.modeError,
             ),
           ),
         ],
@@ -356,18 +360,18 @@ class _ProductIntakeHistoryScreenState
 
     switch (productType) {
       case ProductType.rawMaterial:
-        bgColor = Colors.orange.shade50;
-        textColor = Colors.orange.shade700;
+        bgColor = context.modeWarning.withValues(alpha: 0.1);
+        textColor = context.modeWarning;
         icon = Icons.grass;
         break;
       case ProductType.semiProcessed:
-        bgColor = Colors.blue.shade50;
-        textColor = Colors.blue.shade700;
+        bgColor = context.modeInfo.withValues(alpha: 0.1);
+        textColor = context.modeInfo;
         icon = Icons.settings;
         break;
       case ProductType.finishedProduct:
-        bgColor = Colors.purple.shade50;
-        textColor = Colors.purple.shade700;
+        bgColor = context.modePrimaryAlt.withValues(alpha: 0.1);
+        textColor = context.modePrimaryAlt;
         icon = Icons.check_circle;
         break;
     }
@@ -406,7 +410,7 @@ class _ProductIntakeHistoryScreenState
             AppIcon(
               isSearching ? Icons.search_off : Icons.inventory_2_outlined,
               size: 80,
-              color: Colors.grey.shade400,
+              color: context.modeTextMuted,
             ),
             const SizedBox(height: 16),
             Text(
@@ -414,7 +418,7 @@ class _ProductIntakeHistoryScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -424,7 +428,7 @@ class _ProductIntakeHistoryScreenState
                   : 'Product intakes will appear here once created',
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -462,14 +466,14 @@ class _ProductIntakeHistoryScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(icon, size: 80, color: Colors.red.shade300),
+            AppIcon(icon, size: 80, color: context.modeError),
             const SizedBox(height: 16),
             Text(
               title,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -477,7 +481,7 @@ class _ProductIntakeHistoryScreenState
               message,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: context.modeTextSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -490,7 +494,7 @@ class _ProductIntakeHistoryScreenState
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: kPrimary,
-                foregroundColor: Colors.white,
+                foregroundColor: context.modeTextInverse,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -52,6 +53,7 @@ class _StockCatalogScreenState extends State<StockCatalogScreen> {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       centerTitle: true,
+      leading: DrawerToggleButton(color: context.modeTextInverse),
       title: Text(
         'Stock Catalog',
         style: WorkSansAppTextStyles.medium.copyWith(

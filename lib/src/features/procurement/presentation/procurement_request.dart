@@ -301,7 +301,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'From: ${request.from} â€¢ ${request.timeAgo}',
+                'From: ${request.from} - ${request.timeAgo}',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: fromFontSize,
                   fontWeight: FontWeight.w400,

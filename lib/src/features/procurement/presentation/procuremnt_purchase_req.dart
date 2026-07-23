@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -69,12 +70,7 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
       backgroundColor: context.modeSurface,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      leading: IconButton(
-        icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
-        onPressed: () {
-          _scaffoldKey.currentState?.openDrawer();
-        },
-      ),
+      leading: const DrawerToggleButton(),
       title: Text(
         'Procurement Requests',
         style: WorkSansAppTextStyles.medium.copyWith(
@@ -416,7 +412,8 @@ class _ProcurementOrdersScreenState extends State<ProcurementOrdersScreen>
                     Navigator.push(
                       context,
                       CupertinoPageRoute(
-                        builder: (context) => OrderFormScreen(),
+                        builder: (context) =>
+                            OrderFormScreen(sourceRequest: order),
                       ),
                     );
                   },

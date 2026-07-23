@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 
 import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_dash.dart';
+import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_drawer.dart';
 import 'package:sandwich_ai/src/features/kitchen/presentation/kitchen_order_history.dart';
 
 class KitchenBottomNavBar extends StatefulWidget {
@@ -23,6 +25,7 @@ class KitchenBottomNavBar extends StatefulWidget {
 }
 
 class _KitchenBottomNavBarState extends State<KitchenBottomNavBar> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late int _currentIndex;
   late List<Widget> _pages;
 
@@ -37,7 +40,12 @@ class _KitchenBottomNavBarState extends State<KitchenBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      key: _scaffoldKey,
+      drawer: KitchenAppDrawer(),
+      body: AppDrawerScope(
+        openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+        child: IndexedStack(index: _currentIndex, children: _pages),
+      ),
       backgroundColor: context.modeBackground,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

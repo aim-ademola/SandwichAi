@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/procurement_order_model.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_draft_model.dart'
     show OrderItemRequest;
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/bloc.dart';
@@ -16,7 +17,14 @@ import 'package:sandwich_ai/src/features/procurement/procurement_blocs/supplier_
 import 'package:intl/intl.dart';
 
 class OrderFormScreen extends StatefulWidget {
-  const OrderFormScreen({super.key});
+  final ProcurementRequest? sourceRequest;
+  final bool showAppBar;
+
+  const OrderFormScreen({
+    super.key,
+    this.sourceRequest,
+    this.showAppBar = true,
+  });
 
   @override
   State<OrderFormScreen> createState() => _OrderFormScreenState();
@@ -54,7 +62,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   ];
 
   // Line items with product selection
-  final List<OrderLineItem> _lineItems = [OrderLineItem()];
+  final List<OrderLineItem> _lineItems = [];
 
   // Track if products are currently being loaded
   bool _isLoadingProducts = false;
@@ -64,6 +72,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     super.initState();
     _poNumberController.text = 'Auto-generated';
     _orderDateController.text = DateFormat('MM/dd/yyyy').format(DateTime.now());
+    _prefillFromSourceRequest();
 
     // Load suppliers
     context.read<SupplierBloc>().add(LoadSuppliers());
@@ -89,6 +98,107 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     setState(() {
       _lineItems.add(OrderLineItem());
     });
+  }
+
+  void _prefillFromSourceRequest() {
+    final request = widget.sourceRequest;
+    if (request == null || request.items.isEmpty) {
+      _lineItems.add(OrderLineItem());
+      return;
+    }
+
+    _selectedPriority = request.priority.trim().isEmpty
+        ? _selectedPriority
+        : request.priority;
+    _noteController.text = [
+      if (request.requestId.trim().isNotEmpty)
+        'From procurement request ${request.requestId}',
+      if (request.notes?.trim().isNotEmpty == true) request.notes!.trim(),
+    ].join('\n');
+
+    if (request.expectedDelivery?.trim().isNotEmpty == true) {
+      final parsedDate = DateTime.tryParse(request.expectedDelivery!.trim());
+      if (parsedDate != null && !parsedDate.isBefore(DateTime.now())) {
+        _expectedDeliveryDate = parsedDate;
+      }
+    }
+
+    _lineItems.addAll(
+      request.items.map(
+        (item) => OrderLineItem.fromRequestItem(
+          requestedItemId: item.itemId,
+          requestedItemName: item.item.itemName,
+          quantity: item.qtyNeeded,
+          unit: item.item.unit,
+        ),
+      ),
+    );
+  }
+
+  void _clearSelectedProducts() {
+    for (final item in _lineItems) {
+      item.selectedProductId = null;
+      item.selectedProductName = null;
+      item.selectedProductPrice = null;
+      item.calculateTotal();
+    }
+  }
+
+  void _matchRequestedItemsToSupplierProducts(List<dynamic> products) {
+    var changed = false;
+    for (final item in _lineItems) {
+      if (item.selectedProductId != null ||
+          item.requestedItemName.trim().isEmpty) {
+        continue;
+      }
+
+      final match = _findMatchingProduct(products, item.requestedItemName);
+      if (match == null) continue;
+
+      final productId = _dynamicString(match.id);
+      if (productId.isEmpty) continue;
+
+      item.selectedProductId = productId;
+      item.selectedProductName = _dynamicString(match.productName);
+      item.selectedProductPrice = double.tryParse(
+        _dynamicString(match.baseUnitPrice),
+      );
+      item.calculateTotal();
+      changed = true;
+    }
+
+    if (changed) setState(() {});
+  }
+
+  dynamic _findMatchingProduct(List<dynamic> products, String itemName) {
+    final target = _normalizeItemName(itemName);
+    if (target.isEmpty) return null;
+
+    for (final product in products) {
+      if (_normalizeItemName(_dynamicString(product.productName)) == target) {
+        return product;
+      }
+    }
+
+    for (final product in products) {
+      final productName = _normalizeItemName(
+        _dynamicString(product.productName),
+      );
+      if (productName.contains(target) || target.contains(productName)) {
+        return product;
+      }
+    }
+
+    return null;
+  }
+
+  String _normalizeItemName(String value) {
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
+  }
+
+  String _dynamicString(dynamic value) {
+    if (value == null) return '';
+    return value.toString();
   }
 
   void _removeLineItem(int index) {
@@ -134,6 +244,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     context.read<SupplierBloc>().add(
       LoadSupplierProducts(supplierId: supplierId),
     );
+  }
+
+  void _changeSupplier() {
+    context.read<SupplierBloc>().add(LoadSuppliers());
   }
 
   void _showPaymentTermsHelp() {
@@ -616,6 +730,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     setState(() {
                       _selectedSupplierId = value;
                       _selectedSupplierName = supplier.businessName;
+                      _clearSelectedProducts();
                     });
                     _loadSupplierProducts(value);
                   }
@@ -632,34 +747,52 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             children: [
               _buildLabel('Supplier', labelFontSize),
               const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: context.modeSurface,
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _changeSupplier,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: context.modeBorder),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _selectedSupplierName!,
-                        style: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: inputFontSize,
-                          color: context.modeTextPrimary,
+                  child: Ink(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.modeSurface,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: context.modeBorder),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _selectedSupplierName!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: inputFontSize,
+                              color: context.modeTextPrimary,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Change',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: context.modePrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        AppIcon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: context.modePrimary,
+                          size: 20,
+                        ),
+                      ],
                     ),
-                    AppIcon(
-                      Icons.check_circle,
-                      color: Colors.green.shade600,
-                      size: 20,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -941,6 +1074,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           ),
           const SizedBox(height: 16),
 
+          if (item.requestedItemName.trim().isNotEmpty) ...[
+            _buildRequestedItemBanner(item, inputFontSize),
+            const SizedBox(height: 16),
+          ],
+
           // Product Dropdown
           _buildLabel('Product', labelFontSize),
           const SizedBox(height: 8),
@@ -1123,6 +1261,47 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     );
   }
 
+  Widget _buildRequestedItemBanner(OrderLineItem item, double inputFontSize) {
+    final quantity = item.quantityController.text.trim();
+    final unit = item.requestedUnit.trim();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.modePrimary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.modePrimary.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Requested item',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: inputFontSize - 2,
+              fontWeight: FontWeight.w600,
+              color: context.modePrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            [
+              item.requestedItemName,
+              if (quantity.isNotEmpty)
+                'Qty: $quantity${unit.isNotEmpty ? ' $unit' : ''}',
+            ].join(' - '),
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: inputFontSize - 1,
+              fontWeight: FontWeight.w500,
+              color: context.modeTextPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildProductDropdown(OrderLineItem item, double inputFontSize) {
     return BlocBuilder<SupplierBloc, SupplierState>(
       builder: (context, state) {
@@ -1157,8 +1336,15 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         }
 
         if (state is SupplierProductsLoaded) {
+          final productIds = state.products
+              .map((product) => product.id)
+              .whereType<String>()
+              .toSet();
+
           return DropdownButtonFormField<String>(
-            initialValue: item.selectedProductId,
+            initialValue: productIds.contains(item.selectedProductId)
+                ? item.selectedProductId
+                : null,
             isExpanded: true,
             decoration: InputDecoration(
               hintText: 'Select a product',
@@ -1211,7 +1397,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '₦${NumberFormat('#,##0.00').format(double.parse(product.baseUnitPrice))} per ${product.unitType}',
+                      '₦${NumberFormat('#,##0.00').format(double.tryParse(product.baseUnitPrice) ?? 0)} per ${product.unitType}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: inputFontSize - 2,
                         color: context.modeTextSecondary,
@@ -1228,7 +1414,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 setState(() {
                   item.selectedProductId = value;
                   item.selectedProductName = product.productName;
-                  item.selectedProductPrice = double.parse(
+                  item.selectedProductPrice = double.tryParse(
                     product.baseUnitPrice,
                   );
                   item.calculateTotal();
@@ -1408,6 +1594,14 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       // Build items list
       final items = <OrderItemRequest>[];
       for (var lineItem in _lineItems) {
+        if (lineItem.requestedItemName.trim().isNotEmpty &&
+            lineItem.selectedProductId == null) {
+          _showErrorSnackBar(
+            'Please match ${lineItem.requestedItemName} to a supplier product',
+          );
+          return;
+        }
+
         if (lineItem.selectedProductId != null &&
             lineItem.quantityController.text.isNotEmpty) {
           final quantity = double.tryParse(lineItem.quantityController.text);
@@ -1611,6 +1805,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               setState(() {
                 _isLoadingProducts = false;
               });
+              _matchRequestedItemsToSupplierProducts(state.products);
             } else if (state is SupplierError && _isLoadingProducts) {
               setState(() {
                 _isLoadingProducts = false;
@@ -1621,11 +1816,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       ],
       child: DefaultTextStyle.merge(
         style: WorkSansAppTextStyles.medium,
-        child: Scaffold(
-          backgroundColor: context.modeBackground,
-          appBar: _buildAppBar(context),
-          body: _buildBody(context),
-        ),
+        child: widget.showAppBar
+            ? Scaffold(
+                backgroundColor: context.modeBackground,
+                appBar: _buildAppBar(context),
+                body: _buildBody(context),
+              )
+            : _buildBody(context),
       ),
     );
   }
@@ -1975,9 +2172,33 @@ class OrderLineItem {
   String? selectedProductName;
   double? selectedProductPrice;
   double? total;
+  final String requestedItemId;
+  final String requestedItemName;
+  final String requestedUnit;
 
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
+
+  OrderLineItem({
+    this.requestedItemId = '',
+    this.requestedItemName = '',
+    this.requestedUnit = '',
+  });
+
+  factory OrderLineItem.fromRequestItem({
+    required String requestedItemId,
+    required String requestedItemName,
+    required String quantity,
+    required String unit,
+  }) {
+    final item = OrderLineItem(
+      requestedItemId: requestedItemId,
+      requestedItemName: requestedItemName,
+      requestedUnit: unit,
+    );
+    item.quantityController.text = quantity;
+    return item;
+  }
 
   void calculateTotal() {
     if (selectedProductPrice != null && quantityController.text.isNotEmpty) {

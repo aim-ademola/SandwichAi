@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -42,7 +43,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
       child: Scaffold(
         key: _scaffoldKey,
         drawer: widget.isFromStock ? SizedBox() : ProcessingAppDrawer(),
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(),
         body: BlocConsumer<WastageAnalysisBloc, WastageAnalysisState>(
           listener: (context, state) {
@@ -53,10 +54,10 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                     state.error,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: 14,
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                     ),
                   ),
-                  backgroundColor: Colors.red,
+                  backgroundColor: context.modeError,
                   duration: const Duration(seconds: 4),
                 ),
               );
@@ -92,29 +93,42 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: widget.isFromStock
           ? IconButton(
-              icon: const AppIcon(Icons.arrow_back, color: Colors.black),
+              icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
               onPressed: () => Navigator.pop(context),
             )
-          : SizedBox(),
+          : IconButton(
+              icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
+              tooltip: 'Open drawer',
+              onPressed: _openDrawer,
+            ),
       title: Text(
         'AI Wastage Analysis',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: Colors.black,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
       actions: [
+        if (widget.isFromStock)
+          IconButton(
+            icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
+            tooltip: 'Open drawer',
+            onPressed: _openDrawer,
+          ),
         BlocBuilder<WastageAnalysisBloc, WastageAnalysisState>(
           builder: (context, state) {
             if (state is WastageAnalysisLoaded) {
               return IconButton(
-                icon: const AppIcon(Icons.refresh, color: Colors.black),
+                icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
                 onPressed: () {
                   context.read<WastageAnalysisBloc>().add(
                     RefreshWastageAnalysis(daysBack: _selectedPeriod),
@@ -124,7 +138,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               );
             }
             return IconButton(
-              icon: const AppIcon(Icons.refresh, color: Colors.black),
+              icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
               onPressed: () {
                 context.read<WastageAnalysisBloc>().add(
                   LoadWastageAnalysis(daysBack: 30),
@@ -136,6 +150,16 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
         ),
       ],
     );
+  }
+
+  void _openDrawer() {
+    final scopedDrawer = AppDrawerScope.maybeOf(context);
+    if (scopedDrawer != null) {
+      scopedDrawer.openDrawer();
+      return;
+    }
+
+    _scaffoldKey.currentState?.openDrawer();
   }
 
   Widget _buildInitialState() {
@@ -161,7 +185,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: context.modeTextPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -172,7 +196,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
                 height: 1.5,
               ),
             ),
@@ -200,13 +224,13 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: context.modeSurfaceAlt,
                 shape: BoxShape.circle,
               ),
               child: AppIcon(
                 Icons.inventory_2_outlined,
                 size: 64,
-                color: Colors.grey.shade400,
+                color: context.modeTextMuted,
               ),
             ),
             const SizedBox(height: 24),
@@ -215,7 +239,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Colors.black,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -224,7 +248,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: const Color(0xFF757575),
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -286,9 +310,9 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Row(
         children: _periods.map((period) {
@@ -313,7 +337,9 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: isSelected ? Colors.white : const Color(0xFF757575),
+                    color: isSelected
+                        ? context.modeTextInverse
+                        : context.modeTextSecondary,
                   ),
                 ),
               ),
@@ -467,7 +493,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
             child: Column(
               children: [
                 Text(
-                  'â‚¦${NumberFormat('#,##0.00').format(impact.totalValueLost)}',
+                  '₦${NumberFormat('#,##0.00').format(impact.totalValueLost)}',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
@@ -504,7 +530,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'â‚¦${NumberFormat('#,##0').format(impact.avgDailyLoss)}',
+                        '₦${NumberFormat('#,##0').format(impact.avgDailyLoss)}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -627,9 +653,9 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -639,13 +665,13 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: context.modeSurfaceAlt,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const AppIcon(
+                child: AppIcon(
                   Icons.pie_chart,
                   size: 24,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -658,7 +684,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
 
@@ -666,7 +692,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                       'Breakdown by reason',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -732,7 +758,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -740,7 +766,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                           '${pattern.occurrences} occurrence${pattern.occurrences > 1 ? 's' : ''}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: const Color(0xFF757575),
+                            color: context.modeTextSecondary,
                           ),
                         ),
                       ],
@@ -750,7 +776,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'â‚¦${NumberFormat('#,##0').format(pattern.totalValueLost)}',
+                        '₦${NumberFormat('#,##0').format(pattern.totalValueLost)}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -761,7 +787,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                         '${percentage.toStringAsFixed(1)}%',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 12,
-                          color: const Color(0xFF757575),
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ],
@@ -769,7 +795,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -821,9 +847,9 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -833,13 +859,13 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: context.modeError.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: AppIcon(
                   Icons.warning_amber_rounded,
                   size: 24,
-                  color: Colors.red.shade700,
+                  color: context.modeError,
                 ),
               ),
               const SizedBox(width: 12),
@@ -852,14 +878,14 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     Text(
                       'Most frequently wasted',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -873,7 +899,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: items.length,
             separatorBuilder: (context, index) =>
-                const Divider(height: 20, color: Color(0xFFF5F5F5)),
+                Divider(height: 20, color: context.modeDivider),
             itemBuilder: (context, index) {
               final item = items[index];
               final riskLevel = _calculateRiskLevel(item);
@@ -920,7 +946,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                                 style: WorkSansAppTextStyles.medium.copyWith(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
+                                  color: context.modeTextPrimary,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -953,7 +979,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                                     style: WorkSansAppTextStyles.medium
                                         .copyWith(
                                           fontSize: 12,
-                                          color: const Color(0xFF9E9E9E),
+                                          color: context.modeTextMuted,
                                         ),
                                   ),
                                 ],
@@ -965,7 +991,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              'â‚¦${NumberFormat('#,##0').format(item.totalValueLost)}',
+                              '₦${NumberFormat('#,##0').format(item.totalValueLost)}',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
@@ -976,7 +1002,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                               'Lost',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 11,
-                                color: const Color(0xFF9E9E9E),
+                                color: context.modeTextMuted,
                               ),
                             ),
                           ],
@@ -1016,12 +1042,12 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F6F6),
+        color: context.modeSurfaceAlt,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          AppIcon(icon, size: 16, color: const Color(0xFF757575)),
+          AppIcon(icon, size: 16, color: context.modeTextSecondary),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -1031,7 +1057,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                   label,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 10,
-                    color: const Color(0xFF9E9E9E),
+                    color: context.modeTextMuted,
                   ),
                 ),
                 Text(
@@ -1039,7 +1065,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ],
@@ -1064,9 +1090,9 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1076,13 +1102,13 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: context.modeWarning.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: AppIcon(
                   Icons.error_outline,
                   size: 24,
-                  color: Colors.orange.shade700,
+                  color: context.modeWarning,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1095,14 +1121,14 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     Text(
                       'Items exceeding normal wastage',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -1121,9 +1147,11 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               return Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: context.modeWarning.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange.shade200),
+                  border: Border.all(
+                    color: context.modeWarning.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1136,7 +1164,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                              color: context.modeTextPrimary,
                             ),
                           ),
                         ),
@@ -1146,15 +1174,15 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.orange.shade100,
+                            color: context.modeWarning.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            '${anomaly.deviationScore.toStringAsFixed(1)}Ïƒ',
+                            '${anomaly.deviationScore.toStringAsFixed(1)}σ',
                             style: WorkSansAppTextStyles.medium.copyWith(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: Colors.orange.shade900,
+                              color: context.modeWarning,
                             ),
                           ),
                         ),
@@ -1162,10 +1190,10 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${anomaly.quantity} ${anomaly.unit} â€¢ ${_formatReason(anomaly.reason)}',
+                      '${anomaly.quantity} ${anomaly.unit} • ${_formatReason(anomaly.reason)}',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 13,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -1176,15 +1204,15 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                           DateFormat('MMM d, yyyy').format(anomaly.date),
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: const Color(0xFF9E9E9E),
+                            color: context.modeTextMuted,
                           ),
                         ),
                         Text(
-                          'â‚¦${NumberFormat('#,##0').format(anomaly.valueLost)}',
+                          '₦${NumberFormat('#,##0').format(anomaly.valueLost)}',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: Colors.orange.shade700,
+                            color: context.modeWarning,
                           ),
                         ),
                       ],
@@ -1207,14 +1235,12 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.orange.shade700.withValues(alpha: 0.1),
-            Colors.orange.shade700.withValues(alpha: 0.05),
+            context.modeWarning.withValues(alpha: 0.12),
+            context.modeWarning.withValues(alpha: 0.06),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.orange.shade700.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: context.modeWarning.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1224,7 +1250,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade700,
+                  color: context.modeWarning,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const AppIcon(
@@ -1243,14 +1269,14 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                     Text(
                       'Action steps to reduce wastage',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -1276,7 +1302,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade700,
+                      color: context.modeWarning,
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -1296,7 +1322,7 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
                       recommendation,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 14,
-                        color: Colors.black87,
+                        color: context.modeTextPrimary,
                         height: 1.5,
                       ),
                     ),
@@ -1314,20 +1340,20 @@ class _WastageAnalysisScreenState extends State<WastageAnalysisScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const AppIcon(Icons.schedule, size: 16, color: Color(0xFF9E9E9E)),
+          AppIcon(Icons.schedule, size: 16, color: context.modeTextMuted),
           const SizedBox(width: 8),
           Text(
-            'Generated on ${DateFormat('MMM d, yyyy â€¢ h:mm a').format(generatedAt)}',
+            'Generated on ${DateFormat('MMM d, yyyy • h:mm a').format(generatedAt)}',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: const Color(0xFF9E9E9E),
+              color: context.modeTextMuted,
             ),
           ),
         ],

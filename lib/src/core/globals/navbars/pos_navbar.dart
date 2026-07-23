@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -8,6 +9,7 @@ import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/active_orders.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/order_session_entry.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_dashboard.dart';
+import 'package:sandwich_ai/src/features/pos/presentation/pos_drawer.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/pos_showcase_scope.dart';
 import 'package:showcaseview/showcaseview.dart';
 
@@ -26,6 +28,7 @@ class PosBottomNavBar extends StatefulWidget {
 }
 
 class PosBottomNavBarState extends State<PosBottomNavBar> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late int _currentIndex;
   late List<Widget> _pages;
   late final ShowcaseView _showcaseView;
@@ -71,7 +74,12 @@ class PosBottomNavBarState extends State<PosBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      key: _scaffoldKey,
+      drawer: const PosAppDrawer(),
+      body: AppDrawerScope(
+        openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+        child: IndexedStack(index: _currentIndex, children: _pages),
+      ),
       backgroundColor: context.modeBackground,
       bottomNavigationBar: _buildBottomNavBar(),
     );

@@ -1379,7 +1379,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   String _formatTimelineDate(String value) {
     final parsed = DateTime.tryParse(value);
     if (parsed == null) return value.isEmpty ? 'Date unavailable' : value;
-    return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(parsed);
+    return DateFormat('MMM dd, yyyy - hh:mm a').format(parsed);
   }
 
   Widget _buildTimelineItem(String title, String date) {

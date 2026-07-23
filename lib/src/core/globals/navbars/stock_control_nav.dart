@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_catalogue.dart';
+import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_drawer.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_dashboard.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_movement.dart';
 
@@ -30,6 +32,7 @@ class StockControlBottomNavBar extends StatefulWidget {
 }
 
 class StockControlBottomNavBarState extends State<StockControlBottomNavBar> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late int _currentIndex;
   late List<Widget> _pages;
 
@@ -64,7 +67,12 @@ class StockControlBottomNavBarState extends State<StockControlBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      key: _scaffoldKey,
+      drawer: StockControlAppDrawer(),
+      body: AppDrawerScope(
+        openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+        child: IndexedStack(index: _currentIndex, children: _pages),
+      ),
       backgroundColor: context.modeBackground,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

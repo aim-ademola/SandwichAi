@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -73,6 +74,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
         surfaceTintColor: Colors.transparent,
 
         centerTitle: true,
+        leading: const DrawerToggleButton(),
         title: Text(
           'Chat Rooms',
           style: WorkSansAppTextStyles.medium.copyWith(

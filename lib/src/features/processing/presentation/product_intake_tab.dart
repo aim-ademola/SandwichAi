@@ -56,12 +56,12 @@ class _ProductIntakeTabScreenState extends State<ProductIntakeTabScreen>
       child: DefaultTextStyle.merge(
         style: WorkSansAppTextStyles.medium,
         child: Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: context.modeSurface,
             elevation: 0,
             leading: IconButton(
-              icon: const AppIcon(Icons.arrow_back, color: Colors.black),
+              icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -69,18 +69,18 @@ class _ProductIntakeTabScreenState extends State<ProductIntakeTabScreen>
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             centerTitle: true,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(50),
               child: Container(
-                color: Colors.white,
+                color: context.modeSurface,
                 child: TabBar(
                   controller: _tabController,
                   labelColor: kPrimary,
-                  unselectedLabelColor: kprimaryTextColor2,
+                  unselectedLabelColor: context.modeTextSecondary,
                   indicatorColor: kPrimary,
                   indicatorWeight: 3,
                   labelStyle: WorkSansAppTextStyles.medium.copyWith(

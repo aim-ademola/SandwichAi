@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_dash.dart';
+import 'package:sandwich_ai/src/features/procurement/presentation/procurement_drawer.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procuremnt_purchase_req.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/supplier_list.dart';
 
@@ -24,6 +26,7 @@ class ProcuremntBottomNavBar extends StatefulWidget {
 }
 
 class _ProcuremntBottomNavBarState extends State<ProcuremntBottomNavBar> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late int _currentIndex;
   late List<Widget> _pages;
 
@@ -38,7 +41,12 @@ class _ProcuremntBottomNavBarState extends State<ProcuremntBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      key: _scaffoldKey,
+      drawer: ProcurementAppDrawer(),
+      body: AppDrawerScope(
+        openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+        child: IndexedStack(index: _currentIndex, children: _pages),
+      ),
       backgroundColor: context.modeBackground,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

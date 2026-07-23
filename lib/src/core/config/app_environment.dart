@@ -15,7 +15,8 @@ class AppEnvironment {
     required this.appName,
     required this.apiBaseUrl,
     required this.aiBaseUrl,
-    required this.aiApiKey,
+    required this.platformApiKey,
+    required this.internalApiKey,
     required this.docsUrl,
     required this.devOrganizationCode,
     required this.devUsers,
@@ -24,6 +25,14 @@ class AppEnvironment {
   static const _stagingApiBaseUrl = 'https://api-staging.sandwichai.co/';
   static const _stagingAiBaseUrl = 'https://ai-staging.sandwichai.co/api/ai/';
   static const _stagingAiDocsUrl = 'https://ai-staging.sandwichai.co/docs';
+  static const _platformApiKey = String.fromEnvironment(
+    'PLATFORM_API_KEY',
+    defaultValue: 'bMVIZGebFpHMcqr4x1PXl3qMdb2x4yBp6SJKa7G8uTQ',
+  );
+  static const _internalApiKey = String.fromEnvironment(
+    'INTERNAL_API_KEY',
+    defaultValue: 'wvgixl618kFqmSJsv_xS7oCi1lEGADXyYk09X1BHXhs',
+  );
 
   factory AppEnvironment.dev() {
     return const AppEnvironment(
@@ -31,7 +40,8 @@ class AppEnvironment {
       appName: 'SandwichAi Dev',
       apiBaseUrl: _stagingApiBaseUrl,
       aiBaseUrl: _stagingAiBaseUrl,
-      aiApiKey: String.fromEnvironment('SANDWICHAI_AI_API_KEY'),
+      platformApiKey: _platformApiKey,
+      internalApiKey: _internalApiKey,
       docsUrl: _stagingAiDocsUrl,
       devOrganizationCode: 'ORG-001',
       devUsers: [
@@ -71,7 +81,8 @@ class AppEnvironment {
       appName: 'SandwichAi Staging',
       apiBaseUrl: _stagingApiBaseUrl,
       aiBaseUrl: _stagingAiBaseUrl,
-      aiApiKey: String.fromEnvironment('SANDWICHAI_AI_API_KEY'),
+      platformApiKey: _platformApiKey,
+      internalApiKey: _internalApiKey,
       docsUrl: _stagingAiDocsUrl,
       devOrganizationCode: 'ORG-005',
       devUsers: [],
@@ -91,7 +102,8 @@ class AppEnvironment {
       appName: 'SandwichAi',
       apiBaseUrl: _productionApiBaseUrl,
       aiBaseUrl: _productionAiBaseUrl,
-      aiApiKey: String.fromEnvironment('SANDWICHAI_AI_API_KEY'),
+      platformApiKey: _platformApiKey,
+      internalApiKey: _internalApiKey,
       docsUrl: 'https://sandwichai-api-3wcql.ondigitalocean.app/api/docs',
       devOrganizationCode: '',
       devUsers: [],
@@ -110,7 +122,8 @@ class AppEnvironment {
   final String appName;
   final String apiBaseUrl;
   final String aiBaseUrl;
-  final String aiApiKey;
+  final String platformApiKey;
+  final String internalApiKey;
   final String docsUrl;
   final String devOrganizationCode;
   final List<AppEnvironmentUser> devUsers;

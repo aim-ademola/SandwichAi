@@ -70,10 +70,13 @@ class _CreateProcessingTaskScreenState
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: kPrimary,
+              brightness: Theme.of(context).brightness,
               primary: kPrimary,
-              onPrimary: Colors.white,
-              onSurface: kprimaryTextColor1,
+              onPrimary: context.modeTextInverse,
+              onSurface: context.modeTextPrimary,
+              surface: context.modeSurface,
             ),
           ),
           child: child!,
@@ -88,10 +91,13 @@ class _CreateProcessingTaskScreenState
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
-              colorScheme: ColorScheme.light(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: kPrimary,
+                brightness: Theme.of(context).brightness,
                 primary: kPrimary,
-                onPrimary: Colors.white,
-                onSurface: kprimaryTextColor1,
+                onPrimary: context.modeTextInverse,
+                onSurface: context.modeTextPrimary,
+                surface: context.modeSurface,
               ),
             ),
             child: child!,
@@ -140,14 +146,14 @@ class _CreateProcessingTaskScreenState
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           content: Text(
             'This menu item does not have a recipe attached. You can still create the task, but recipe details will be missing.',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 15,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
           actions: [
@@ -157,7 +163,7 @@ class _CreateProcessingTaskScreenState
                 'Cancel',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 15,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
               ),
             ),
@@ -176,7 +182,7 @@ class _CreateProcessingTaskScreenState
                 'Continue',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 15,
-                  color: Colors.white,
+                  color: context.modeTextInverse,
                 ),
               ),
             ),
@@ -237,11 +243,11 @@ class _CreateProcessingTaskScreenState
         content: Text(
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
-            color: Colors.white,
+            color: context.modeTextInverse,
             fontSize: 14,
           ),
         ),
-        backgroundColor: isError ? const Color(0xFFE53935) : kGreen,
+        backgroundColor: isError ? context.modeError : kGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -397,7 +403,7 @@ class _CreateProcessingTaskScreenState
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: _getSectionTitleFontSize(screenWidth),
         fontWeight: FontWeight.w600,
-        color: kprimaryTextColor1,
+        color: context.modeTextPrimary,
       ),
     );
   }
@@ -411,7 +417,7 @@ class _CreateProcessingTaskScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -428,13 +434,13 @@ class _CreateProcessingTaskScreenState
               vertical: _getInputPaddingVertical(screenWidth),
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
               border: Border.all(
                 color: _selectedMenuItem == null && !_isSearching
-                    ? const Color(0xFFE0E0E0)
+                    ? context.modeBorder
                     : kPrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
@@ -443,7 +449,7 @@ class _CreateProcessingTaskScreenState
               children: [
                 AppIcon(
                   Icons.search,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 const SizedBox(width: 12),
@@ -455,22 +461,22 @@ class _CreateProcessingTaskScreenState
                       fontSize: _getInputFontSize(screenWidth),
                       fontWeight: FontWeight.w400,
                       color: _selectedMenuItem != null
-                          ? kprimaryTextColor1
-                          : kprimaryTextColor2,
+                          ? context.modeTextPrimary
+                          : context.modeTextSecondary,
                     ),
                   ),
                 ),
                 _isOpened
                     ? AppIcon(
                         Icons.arrow_drop_down,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                         size: _getIconSize(screenWidth) + 4,
                       )
                     : Transform.rotate(
                         angle: -90 * 3.14159 / 180,
                         child: AppIcon(
                           Icons.arrow_drop_down,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth) + 4,
                         ),
                       ),
@@ -490,12 +496,12 @@ class _CreateProcessingTaskScreenState
     return Container(
       constraints: const BoxConstraints(maxHeight: 300),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: context.modeTextPrimary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -515,24 +521,24 @@ class _CreateProcessingTaskScreenState
                     autofocus: true,
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getInputFontSize(screenWidth),
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Type to search...',
                       hintStyle: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getInputFontSize(screenWidth),
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                       prefixIcon: AppIconSlot(
                         Icons.search,
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                         size: _getIconSize(screenWidth),
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: AppIcon(
                                 Icons.clear,
-                                color: kprimaryTextColor2,
+                                color: context.modeTextSecondary,
                                 size: _getIconSize(screenWidth),
                               ),
                               onPressed: () {
@@ -547,7 +553,7 @@ class _CreateProcessingTaskScreenState
                         borderRadius: BorderRadius.circular(
                           _getBorderRadius(screenWidth),
                         ),
-                        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                        borderSide: BorderSide(color: context.modeBorder),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(
@@ -574,7 +580,7 @@ class _CreateProcessingTaskScreenState
               ),
             ],
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           Expanded(
             child: _filteredMenuItems.isEmpty
                 ? Center(
@@ -586,7 +592,7 @@ class _CreateProcessingTaskScreenState
                         'No menu items found',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getInputFontSize(screenWidth),
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ),
@@ -615,7 +621,7 @@ class _CreateProcessingTaskScreenState
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.grey.shade200,
+                                color: context.modeBorder,
                                 width: 1,
                               ),
                             ),
@@ -683,18 +689,18 @@ class _CreateProcessingTaskScreenState
                                               screenWidth,
                                             ),
                                             fontWeight: FontWeight.w600,
-                                            color: kprimaryTextColor1,
+                                            color: context.modeTextPrimary,
                                           ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} â€¢ ${item.preparationTime} mins',
+                                      '${item.category} • ${item.preparationTime} mins',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(
                                               screenWidth,
                                             ),
-                                            color: kprimaryTextColor2,
+                                            color: context.modeTextSecondary,
                                           ),
                                     ),
                                   ],
@@ -729,7 +735,7 @@ class _CreateProcessingTaskScreenState
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.grey.withValues(alpha: 0.1),
+                                    color: context.modeSurfaceAlt,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -739,7 +745,7 @@ class _CreateProcessingTaskScreenState
                                           fontSize: _getCaptionFontSize(
                                             screenWidth,
                                           ),
-                                          color: Colors.grey[600],
+                                          color: context.modeTextMuted,
                                           fontWeight: FontWeight.w600,
                                         ),
                                   ),
@@ -765,7 +771,7 @@ class _CreateProcessingTaskScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -787,10 +793,10 @@ class _CreateProcessingTaskScreenState
     Color chipColor;
     switch (priority) {
       case 1:
-        chipColor = const Color(0xFFE53935);
+        chipColor = context.modeError;
         break;
       case 2:
-        chipColor = const Color(0xFFFFA726);
+        chipColor = context.modeWarning;
         break;
       case 3:
         chipColor = kGreen;
@@ -810,10 +816,12 @@ class _CreateProcessingTaskScreenState
           vertical: _getInputPaddingVertical(screenWidth),
         ),
         decoration: BoxDecoration(
-          color: isSelected ? chipColor.withValues(alpha: 0.1) : Colors.white,
+          color: isSelected
+              ? chipColor.withValues(alpha: 0.1)
+              : context.modeSurface,
           borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
           border: Border.all(
-            color: isSelected ? chipColor : const Color(0xFFE0E0E0),
+            color: isSelected ? chipColor : context.modeBorder,
             width: isSelected ? 2 : 1.5,
           ),
         ),
@@ -823,7 +831,7 @@ class _CreateProcessingTaskScreenState
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? chipColor : kprimaryTextColor2,
+              color: isSelected ? chipColor : context.modeTextSecondary,
             ),
           ),
         ),
@@ -840,7 +848,7 @@ class _CreateProcessingTaskScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -852,13 +860,13 @@ class _CreateProcessingTaskScreenState
               vertical: _getInputPaddingVertical(screenWidth),
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
               border: Border.all(
                 color: _estimatedCompletionTime == null
-                    ? const Color(0xFFE0E0E0)
+                    ? context.modeBorder
                     : kPrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
@@ -867,7 +875,7 @@ class _CreateProcessingTaskScreenState
               children: [
                 AppIcon(
                   Icons.calendar_today,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 const SizedBox(width: 12),
@@ -880,14 +888,14 @@ class _CreateProcessingTaskScreenState
                       fontSize: _getInputFontSize(screenWidth),
                       fontWeight: FontWeight.w400,
                       color: _estimatedCompletionTime != null
-                          ? kprimaryTextColor1
-                          : kprimaryTextColor2,
+                          ? context.modeTextPrimary
+                          : context.modeTextSecondary,
                     ),
                   ),
                 ),
                 AppIcon(
                   Icons.arrow_forward_ios,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth) - 4,
                 ),
               ],
@@ -921,7 +929,7 @@ class _CreateProcessingTaskScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -931,34 +939,28 @@ class _CreateProcessingTaskScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
@@ -970,19 +972,13 @@ class _CreateProcessingTaskScreenState
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE53935),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeError, width: 1.5),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE53935),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeError, width: 1.5),
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: _getInputPaddingHorizontal(screenWidth),
@@ -1012,7 +1008,7 @@ class _CreateProcessingTaskScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -1022,34 +1018,28 @@ class _CreateProcessingTaskScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
@@ -1093,7 +1083,7 @@ class _CreateProcessingTaskScreenState
                     width: _getIconSize(screenWidth),
                     child: const CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(kWhite),
                     ),
                   )
                 : Text(
@@ -1101,7 +1091,7 @@ class _CreateProcessingTaskScreenState
                     style: WorkSansAppTextStyles.medium.copyWith(
                       fontSize: _getButtonFontSize(screenWidth),
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: context.modeTextInverse,
                     ),
                   ),
           ),

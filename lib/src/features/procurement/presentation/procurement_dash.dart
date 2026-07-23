@@ -151,8 +151,6 @@ class _ProcurementDashboardScreenState
                     _buildSuppliersSection(constraints.maxWidth),
 
                     const SizedBox(height: 60),
-                    _buildActionButtons(constraints.maxWidth),
-                    const SizedBox(height: 50),
                   ],
                 ),
               ),
@@ -1041,71 +1039,6 @@ class _ProcurementDashboardScreenState
     );
   }
 
-  Widget _buildActionButtons(double width) {
-    final buttonHeight = _getButtonHeight(width);
-    final buttonFontSize = _getButtonFontSize(width);
-
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: buttonHeight,
-            child: ElevatedButton(
-              onPressed: () {
-                context.push('/order-form');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.modePrimary,
-                foregroundColor: context.modeTextInverse,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                'New Order',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: buttonFontSize,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                  color: context.modeTextInverse,
-                ),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: _getCardSpacing(width)),
-        Expanded(
-          child: SizedBox(
-            height: buttonHeight,
-            child: OutlinedButton(
-              onPressed: () {
-                context.push('/order-list');
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: context.modePrimary,
-                side: BorderSide(color: context.modePrimary, width: 1.5),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                'View All Order',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: buttonFontSize,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                  color: context.modePrimary,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   // Responsive sizing functions
   double _getHorizontalPadding(double width) {
     if (width < 360) return 16;
@@ -1202,18 +1135,6 @@ class _ProcurementDashboardScreenState
     if (width < 360) return 12;
     if (width < 600) return 13;
     return 14;
-  }
-
-  double _getButtonHeight(double width) {
-    if (width < 360) return 48;
-    if (width < 600) return 52;
-    return 56;
-  }
-
-  double _getButtonFontSize(double width) {
-    if (width < 360) return 14;
-    if (width < 600) return 15;
-    return 16;
   }
 
   Widget _buildSupplierChart(SupplierStats stats) {

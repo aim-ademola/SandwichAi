@@ -17,12 +17,12 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: context.modeSurface,
           elevation: 0,
           leading: IconButton(
-            icon: const AppIcon(Icons.arrow_back, color: Colors.black),
+            icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
@@ -30,7 +30,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           centerTitle: true,
@@ -42,26 +42,30 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header Card with Product Name and Quality Status
-                _buildHeaderCard(),
+                _buildHeaderCard(context),
                 const SizedBox(height: 16),
 
                 // Product Information
                 _buildSectionCard(
+                  context,
                   title: 'Product Information',
                   children: [
                     _buildInfoRow(
+                      context,
                       'Product Name',
                       intake.productName,
                       Icons.inventory_2,
                     ),
-                    _buildDivider(),
+                    _buildDivider(context),
                     _buildInfoRow(
+                      context,
                       'Product Type',
                       intake.productType.displayName,
                       Icons.category,
                     ),
-                    _buildDivider(),
+                    _buildDivider(context),
                     _buildInfoRow(
+                      context,
                       'Quantity Received',
                       '${intake.qtyReceived} ${intake.unit.displayName}',
                       Icons.scale,
@@ -69,14 +73,20 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                       isBold: true,
                     ),
                     if (intake.item != null) ...[
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildInfoRow(
+                        context,
                         'Category',
                         intake.item!.category,
                         Icons.label,
                       ),
-                      _buildDivider(),
-                      _buildInfoRow('SKU', intake.item!.sku, Icons.qr_code_2),
+                      _buildDivider(context),
+                      _buildInfoRow(
+                        context,
+                        'SKU',
+                        intake.item!.sku,
+                        Icons.qr_code_2,
+                      ),
                     ],
                   ],
                 ),
@@ -84,24 +94,28 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
 
                 // Batch Information
                 _buildSectionCard(
+                  context,
                   title: 'Batch Information',
                   children: [
                     _buildInfoRow(
+                      context,
                       'Stock Batch ID',
                       intake.stockBatchId,
                       Icons.qr_code,
                     ),
-                    _buildDivider(),
+                    _buildDivider(context),
                     _buildInfoRow(
+                      context,
                       'Issued By',
                       intake.issuedBy,
                       Icons.person_outline,
                     ),
-                    _buildDivider(),
+                    _buildDivider(context),
                     _buildInfoRow(
+                      context,
                       'Intake Date',
                       DateFormat(
-                        'MMMM dd, yyyy â€¢ hh:mm a',
+                        'MMMM dd, yyyy • hh:mm a',
                       ).format(intake.intakeDate),
                       Icons.calendar_today,
                     ),
@@ -111,35 +125,41 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
 
                 // Quality Status
                 _buildSectionCard(
+                  context,
                   title: 'Quality Status',
-                  children: [_buildQualityStatusRow()],
+                  children: [_buildQualityStatusRow(context)],
                 ),
                 const SizedBox(height: 16),
 
                 // Branch Information
                 if (intake.branch != null) ...[
                   _buildSectionCard(
+                    context,
                     title: 'Branch Information',
                     children: [
                       _buildInfoRow(
+                        context,
                         'Branch Name',
                         intake.branch!.name,
                         Icons.store,
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildInfoRow(
+                        context,
                         'Branch Code',
                         intake.branch!.branchCode,
                         Icons.tag,
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildInfoRow(
+                        context,
                         'Location',
                         '${intake.branch!.city}, ${intake.branch!.state}',
                         Icons.location_on,
                       ),
-                      _buildDivider(),
+                      _buildDivider(context),
                       _buildInfoRow(
+                        context,
                         'Address',
                         intake.branch!.address,
                         Icons.place,
@@ -152,20 +172,21 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                 // Notes
                 if (intake.notes != null && intake.notes!.isNotEmpty) ...[
                   _buildSectionCard(
+                    context,
                     title: 'Notes',
                     children: [
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: context.modeSurfaceAlt,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           intake.notes!,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 14,
-                            color: Colors.grey.shade800,
+                            color: context.modeTextPrimary,
                           ),
                         ),
                       ),
@@ -176,25 +197,29 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
 
                 // Timestamps
                 _buildSectionCard(
+                  context,
                   title: 'System Information',
                   children: [
                     _buildInfoRow(
+                      context,
                       'Created At',
                       DateFormat(
-                        'MMM dd, yyyy â€¢ hh:mm a',
+                        'MMM dd, yyyy • hh:mm a',
                       ).format(intake.createdAt),
                       Icons.add_circle_outline,
                     ),
-                    _buildDivider(),
+                    _buildDivider(context),
                     _buildInfoRow(
+                      context,
                       'Last Updated',
                       DateFormat(
-                        'MMM dd, yyyy â€¢ hh:mm a',
+                        'MMM dd, yyyy • hh:mm a',
                       ).format(intake.updatedAt),
                       Icons.update,
                     ),
-                    _buildDivider(),
+                    _buildDivider(context),
                     _buildInfoRow(
+                      context,
                       'Intake ID',
                       intake.id,
                       Icons.fingerprint,
@@ -211,12 +236,12 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderCard() {
+  Widget _buildHeaderCard(BuildContext context) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.modeBorder),
       ),
       child: Container(
         width: double.infinity,
@@ -255,11 +280,11 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: Colors.black,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      _buildProductTypeBadge(intake.productType),
+                      _buildProductTypeBadge(context, intake.productType),
                     ],
                   ),
                 ),
@@ -270,6 +295,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildQuickStat(
+                    context,
                     'Quantity',
                     '${intake.qtyReceived} ${intake.unit.displayName}',
                     Icons.scale,
@@ -278,12 +304,13 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildQuickStat(
+                    context,
                     'Quality',
                     intake.qualityStatus ? 'Passed' : 'Failed',
                     intake.qualityStatus ? Icons.check_circle : Icons.cancel,
                     color: intake.qualityStatus
-                        ? Colors.green.shade600
-                        : Colors.red.shade600,
+                        ? context.modeSuccess
+                        : context.modeError,
                   ),
                 ),
               ],
@@ -295,6 +322,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildQuickStat(
+    BuildContext context,
     String label,
     String value,
     IconData icon, {
@@ -303,22 +331,22 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.modeBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              AppIcon(icon, size: 16, color: color ?? Colors.grey.shade600),
+              AppIcon(icon, size: 16, color: color ?? context.modeTextMuted),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: context.modeTextMuted,
                 ),
               ),
             ],
@@ -329,7 +357,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: color ?? Colors.black,
+              color: color ?? context.modeTextPrimary,
             ),
           ),
         ],
@@ -337,7 +365,8 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionCard({
+  Widget _buildSectionCard(
+    BuildContext context, {
     required String title,
     required List<Widget> children,
   }) {
@@ -345,7 +374,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: context.modeBorder),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -369,6 +398,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow(
+    BuildContext context,
     String label,
     String value,
     IconData icon, {
@@ -381,7 +411,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppIcon(icon, size: 20, color: Colors.grey.shade600),
+          AppIcon(icon, size: 20, color: context.modeTextMuted),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -391,7 +421,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                   label,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: context.modeTextMuted,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -400,7 +430,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 15,
                     fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
-                    color: valueColor ?? Colors.black,
+                    color: valueColor ?? context.modeTextPrimary,
                     fontFamily: isMonospace ? 'monospace' : null,
                   ),
                 ),
@@ -412,16 +442,18 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQualityStatusRow() {
+  Widget _buildQualityStatusRow(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: intake.qualityStatus ? Colors.green.shade50 : Colors.red.shade50,
+        color: intake.qualityStatus
+            ? context.modeSuccess.withValues(alpha: 0.1)
+            : context.modeError.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: intake.qualityStatus
-              ? Colors.green.shade200
-              : Colors.red.shade200,
+              ? context.modeSuccess.withValues(alpha: 0.35)
+              : context.modeError.withValues(alpha: 0.35),
           width: 1.5,
         ),
       ),
@@ -431,15 +463,15 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: intake.qualityStatus
-                  ? Colors.green.shade100
-                  : Colors.red.shade100,
+                  ? context.modeSuccess.withValues(alpha: 0.16)
+                  : context.modeError.withValues(alpha: 0.16),
               shape: BoxShape.circle,
             ),
             child: AppIcon(
               intake.qualityStatus ? Icons.check_circle : Icons.cancel,
               color: intake.qualityStatus
-                  ? Colors.green.shade700
-                  : Colors.red.shade700,
+                  ? context.modeSuccess
+                  : context.modeError,
               size: 28,
             ),
           ),
@@ -452,20 +484,18 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                   'Quality Check',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: Colors.grey.shade700,
+                    color: context.modeTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  intake.qualityStatus
-                      ? 'Quality Passed âœ“'
-                      : 'Quality Failed âœ—',
+                  intake.qualityStatus ? 'Quality Passed' : 'Quality Failed',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: intake.qualityStatus
-                        ? Colors.green.shade700
-                        : Colors.red.shade700,
+                        ? context.modeSuccess
+                        : context.modeError,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -475,7 +505,7 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
                       : 'Product failed quality inspection',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ],
@@ -486,25 +516,25 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductTypeBadge(ProductType productType) {
+  Widget _buildProductTypeBadge(BuildContext context, ProductType productType) {
     Color bgColor;
     Color textColor;
     IconData icon;
 
     switch (productType) {
       case ProductType.rawMaterial:
-        bgColor = Colors.orange.shade50;
-        textColor = Colors.orange.shade700;
+        bgColor = context.modeWarning.withValues(alpha: 0.1);
+        textColor = context.modeWarning;
         icon = Icons.grass;
         break;
       case ProductType.semiProcessed:
-        bgColor = Colors.blue.shade50;
-        textColor = Colors.blue.shade700;
+        bgColor = context.modeInfo.withValues(alpha: 0.1);
+        textColor = context.modeInfo;
         icon = Icons.settings;
         break;
       case ProductType.finishedProduct:
-        bgColor = Colors.purple.shade50;
-        textColor = Colors.purple.shade700;
+        bgColor = context.modePrimaryAlt.withValues(alpha: 0.1);
+        textColor = context.modePrimaryAlt;
         icon = Icons.check_circle;
         break;
     }
@@ -533,10 +563,10 @@ class ProductIntakeDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Divider(height: 1, color: Colors.grey.shade200),
+      child: Divider(height: 1, color: context.modeDivider),
     );
   }
 }

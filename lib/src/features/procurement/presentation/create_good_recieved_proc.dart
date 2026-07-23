@@ -1633,7 +1633,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                   ),
                                 ),
                                 subtitle: Text(
-                                  '${invItem.category} â€¢ ${invItem.unit} â€¢ SKU: ${invItem.sku}',
+                                  '${invItem.category} - ${invItem.unit} - SKU: ${invItem.sku}',
                                   style: WorkSansAppTextStyles.medium.copyWith(
                                     fontSize: 12,
                                     color: context.modeTextSecondary,

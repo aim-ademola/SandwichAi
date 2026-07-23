@@ -2,6 +2,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/globals/app_drawer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -64,6 +65,15 @@ class _ProcurementAppDrawerContentState
       moduleSubtitle: 'Supplier orders and received goods',
       footerChildren: const [AppDrawerThemeSwitch()],
       children: [
+        _buildDrawerItem(
+          context,
+          icon: Icons.receipt_long_outlined,
+          title: 'Purchase Orders',
+          onTap: () {
+            _closeDrawerAndPush(context, '/order-form');
+          },
+        ),
+        const SizedBox(height: 8),
         Showcase(
           key: _goodsReceivedKey,
           description:
@@ -77,9 +87,12 @@ class _ProcurementAppDrawerContentState
             icon: Icons.call_received_outlined,
             title: 'Good Received Log',
             onTap: () {
-              Navigator.push(
+              _closeDrawerAndOpen(
                 context,
-                CupertinoPageRoute(builder: (_) => GoodsReceivedTabScreen()),
+                () => Navigator.push(
+                  context,
+                  CupertinoPageRoute(builder: (_) => GoodsReceivedTabScreen()),
+                ),
               );
             },
           ),
@@ -128,5 +141,21 @@ class _ProcurementAppDrawerContentState
       onTap: onTap,
       isLogout: isLogout,
     );
+  }
+
+  void _closeDrawerAndPush(BuildContext context, String location) {
+    _closeDrawerAndOpen(context, () => context.push(location));
+  }
+
+  void _closeDrawerAndOpen(BuildContext context, VoidCallback open) {
+    final scaffoldState = Scaffold.maybeOf(context);
+    if (scaffoldState?.isDrawerOpen ?? false) {
+      scaffoldState!.closeDrawer();
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      open();
+    });
   }
 }

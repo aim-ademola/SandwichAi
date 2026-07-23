@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
+import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -88,6 +89,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       centerTitle: true,
+      leading: const DrawerToggleButton(),
       title: Text(
         'Suppliers',
         style: WorkSansAppTextStyles.medium.copyWith(

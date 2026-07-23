@@ -21,9 +21,13 @@ class AuthInterceptor extends Interceptor {
     }
 
     if (_isAiRequest(options)) {
-      final aiApiKey = ApiConstants.aiApiKey.trim();
-      if (aiApiKey.isNotEmpty) {
-        options.headers['X-API-Key'] = aiApiKey;
+      final platformApiKey = ApiConstants.platformApiKey.trim();
+      final internalApiKey = ApiConstants.internalApiKey.trim();
+      if (platformApiKey.isNotEmpty) {
+        options.headers['X-API-Key'] = platformApiKey;
+      }
+      if (internalApiKey.isNotEmpty) {
+        options.headers['X-Internal-API-Key'] = internalApiKey;
       }
     }
     super.onRequest(options, handler);

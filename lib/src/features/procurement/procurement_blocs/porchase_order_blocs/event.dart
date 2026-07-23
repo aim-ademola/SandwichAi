@@ -48,6 +48,49 @@ class CreateOrder extends OrderEvent {
   ];
 }
 
+class BulkCreateOrders extends OrderEvent {
+  final int count;
+  final String supplierId;
+  final String priority;
+  final String expectedDeliveryDate;
+  final String paymentTerm;
+  final String deliveryAddress;
+  final String deliveryCity;
+  final String deliveryState;
+  final String? deliveryInstructions;
+  final String? buyerNotes;
+  final List<OrderItemRequest> items;
+
+  const BulkCreateOrders({
+    required this.count,
+    required this.supplierId,
+    required this.priority,
+    required this.expectedDeliveryDate,
+    required this.paymentTerm,
+    required this.deliveryAddress,
+    required this.deliveryCity,
+    required this.deliveryState,
+    this.deliveryInstructions,
+    this.buyerNotes,
+    required this.items,
+  });
+
+  @override
+  List<Object?> get props => [
+    count,
+    supplierId,
+    priority,
+    expectedDeliveryDate,
+    paymentTerm,
+    deliveryAddress,
+    deliveryCity,
+    deliveryState,
+    deliveryInstructions,
+    buyerNotes,
+    items,
+  ];
+}
+
 class ResetOrderState extends OrderEvent {
   const ResetOrderState();
 }

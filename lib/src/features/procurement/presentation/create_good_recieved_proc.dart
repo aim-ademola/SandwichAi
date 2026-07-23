@@ -102,6 +102,17 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     _showSnackBar('Purchase order prefilled');
   }
 
+  Future<void> _loadPoReceipts() async {
+    final poId = _poNumberController.text.trim();
+    if (poId.isEmpty) {
+      _showSnackBar('Enter a PO number first', isError: true);
+      return;
+    }
+    await context
+        .read<GoodsReceivedAdvancedCubit>()
+        .loadGoodsReceivedByPurchaseOrder(poId);
+  }
+
   Future<void> _markPoComplete() async {
     final poId = _poNumberController.text.trim();
     if (poId.isEmpty) {
@@ -528,6 +539,25 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                 ),
               ),
             ),
+            OutlinedButton.icon(
+              onPressed: isLoading ? null : _loadPoReceipts,
+              icon: const AppIcon(Icons.receipt_long_outlined, size: 18),
+              label: Text(
+                'View PO Receipts',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: _getCaptionFontSize(screenWidth) + 1,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.modeTextPrimary,
+                disabledForegroundColor: context.modeTextSecondary,
+                side: BorderSide(color: context.modeBorder),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
           ],
         );
       },
@@ -608,6 +638,125 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   _buildPoStatusMetric('Pending', status.pendingQty),
                 ],
               ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPoReceiptsPanel() {
+    return BlocBuilder<GoodsReceivedAdvancedCubit, GoodsReceivedAdvancedState>(
+      builder: (context, state) {
+        if (state.poReceiptsStatus == GoodsReceivedAdvancedStatus.initial) {
+          return const SizedBox.shrink();
+        }
+
+        if (state.poReceiptsStatus == GoodsReceivedAdvancedStatus.loading) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: LinearProgressIndicator(color: context.modePrimary),
+          );
+        }
+
+        if (state.poReceiptsStatus == GoodsReceivedAdvancedStatus.error) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              state.poReceiptsError ?? 'Could not load PO receipts.',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 12,
+                color: context.modeError,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          );
+        }
+
+        if (state.poReceipts.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              'No goods receipts recorded for this PO yet.',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 12,
+                color: context.modeTextSecondary,
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: context.modeSurfaceAlt,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: context.modeBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  AppIcon(
+                    Icons.receipt_long_outlined,
+                    color: context.modePrimary,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Goods received against PO',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 13,
+                      color: context.modeTextPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ...state.poReceipts
+                  .take(4)
+                  .map(
+                    (receipt) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              receipt.receiptNo.isEmpty
+                                  ? receipt.id
+                                  : receipt.receiptNo,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 12,
+                                color: context.modeTextPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '${receipt.totalItems} items | QC ${receipt.passedQC}/${receipt.totalItems}',
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: 12,
+                              color: context.modeTextSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              if (state.poReceipts.length > 4)
+                Text(
+                  '+${state.poReceipts.length - 4} more receipts',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 12,
+                    color: context.modePrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
             ],
           ),
         );
@@ -744,6 +893,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                   SizedBox(height: _getSpacing(screenWidth)),
                   _buildPoActions(screenWidth),
                   _buildPoDeliveryStatus(),
+                  _buildPoReceiptsPanel(),
                   SizedBox(height: _getFieldSpacing(screenWidth)),
                   _buildTextField(
                     controller: _receivedByController,

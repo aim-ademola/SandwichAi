@@ -1471,29 +1471,58 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   }
 
   Widget _buildSubmitButton(double fontSize, double screenWidth) {
-    return SizedBox(
-      height: _getSubmitButtonHeight(screenWidth),
-      child: ElevatedButton(
-        onPressed: _submitForm,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: context.modePrimary,
-          foregroundColor: context.modeTextInverse,
-          elevation: 2,
-          shadowColor: context.modePrimary.withValues(alpha: 0.4),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          height: _getSubmitButtonHeight(screenWidth),
+          child: ElevatedButton(
+            onPressed: _submitForm,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.modePrimary,
+              foregroundColor: context.modeTextInverse,
+              elevation: 2,
+              shadowColor: context.modePrimary.withValues(alpha: 0.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Submit Purchase Order',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+                color: context.modeTextInverse,
+              ),
+            ),
           ),
         ),
-        child: Text(
-          'Submit Purchase Order',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: fontSize,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-            color: context.modeTextInverse,
+        const SizedBox(height: 10),
+        SizedBox(
+          height: _getSubmitButtonHeight(screenWidth),
+          child: OutlinedButton.icon(
+            onPressed: _showBulkCreateDialog,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: context.modePrimary,
+              side: BorderSide(color: context.modePrimary),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            icon: const AppIcon(Icons.playlist_add_check_outlined, size: 19),
+            label: Text(
+              'Bulk Create',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+                color: context.modePrimary,
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -1566,6 +1595,74 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     );
   }
 
+  List<OrderItemRequest>? _buildOrderItemsFromForm() {
+    final items = <OrderItemRequest>[];
+    for (var lineItem in _lineItems) {
+      if (lineItem.requestedItemName.trim().isNotEmpty &&
+          lineItem.selectedProductId == null) {
+        _showErrorSnackBar(
+          'Please match ${lineItem.requestedItemName} to a supplier product',
+        );
+        return null;
+      }
+
+      if (lineItem.selectedProductId != null &&
+          lineItem.quantityController.text.isNotEmpty) {
+        final quantity = double.tryParse(lineItem.quantityController.text);
+        if (quantity == null || quantity <= 0) {
+          _showErrorSnackBar('Please enter valid quantities');
+          return null;
+        }
+
+        items.add(
+          OrderItemRequest(
+            productId: lineItem.selectedProductId!,
+            quantityOrdered: quantity,
+            notes: lineItem.noteController.text.isNotEmpty
+                ? lineItem.noteController.text
+                : null,
+          ),
+        );
+      }
+    }
+
+    if (items.isEmpty) {
+      _showErrorSnackBar(
+        'Please add at least one item with a product and quantity',
+      );
+      return null;
+    }
+    return items;
+  }
+
+  String? _validatedPaymentTerm() {
+    String finalPaymentTerm = _selectedPaymentTerm;
+    if (_selectedPaymentTerm == 'CUSTOM') {
+      if (_customPaymentTermController.text.isEmpty) {
+        _showErrorSnackBar('Please specify custom payment terms');
+        return null;
+      }
+      finalPaymentTerm = _customPaymentTermController.text;
+    }
+    return finalPaymentTerm;
+  }
+
+  bool _validateOrderHeader() {
+    if (_selectedSupplierId == null) {
+      _showErrorSnackBar('Please select a supplier');
+      return false;
+    }
+
+    if (_deliveryAddressController.text.isEmpty ||
+        _deliveryCityController.text.isEmpty ||
+        _deliveryStateController.text.isEmpty) {
+      _showErrorSnackBar('Please fill in all delivery information');
+      return false;
+    }
+
+    return true;
+  }
+
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       if (_selectedSupplierId == null) {
@@ -1581,53 +1678,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         return;
       }
 
-      // Validate custom payment term
-      String finalPaymentTerm = _selectedPaymentTerm;
-      if (_selectedPaymentTerm == 'CUSTOM') {
-        if (_customPaymentTermController.text.isEmpty) {
-          _showErrorSnackBar('Please specify custom payment terms');
-          return;
-        }
-        finalPaymentTerm = _customPaymentTermController.text;
-      }
+      final finalPaymentTerm = _validatedPaymentTerm();
+      if (finalPaymentTerm == null) return;
 
-      // Build items list
-      final items = <OrderItemRequest>[];
-      for (var lineItem in _lineItems) {
-        if (lineItem.requestedItemName.trim().isNotEmpty &&
-            lineItem.selectedProductId == null) {
-          _showErrorSnackBar(
-            'Please match ${lineItem.requestedItemName} to a supplier product',
-          );
-          return;
-        }
-
-        if (lineItem.selectedProductId != null &&
-            lineItem.quantityController.text.isNotEmpty) {
-          final quantity = double.tryParse(lineItem.quantityController.text);
-          if (quantity == null || quantity <= 0) {
-            _showErrorSnackBar('Please enter valid quantities');
-            return;
-          }
-
-          items.add(
-            OrderItemRequest(
-              productId: lineItem.selectedProductId!,
-              quantityOrdered: quantity,
-              notes: lineItem.noteController.text.isNotEmpty
-                  ? lineItem.noteController.text
-                  : null,
-            ),
-          );
-        }
-      }
-
-      if (items.isEmpty) {
-        _showErrorSnackBar(
-          'Please add at least one item with a product and quantity',
-        );
-        return;
-      }
+      final items = _buildOrderItemsFromForm();
+      if (items == null) return;
 
       // Submit order
       context.read<OrderBloc>().add(
@@ -1651,6 +1706,76 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         ),
       );
     }
+  }
+
+  Future<void> _showBulkCreateDialog() async {
+    if (!_formKey.currentState!.validate() || !_validateOrderHeader()) return;
+    final finalPaymentTerm = _validatedPaymentTerm();
+    if (finalPaymentTerm == null) return;
+    final items = _buildOrderItemsFromForm();
+    if (items == null) return;
+
+    final countController = TextEditingController(text: '2');
+    final count = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.modeSurface,
+        title: const Text('Bulk Create Purchase Orders'),
+        content: TextField(
+          controller: countController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Number of matching orders',
+            helperText: 'Creates multiple purchase orders from this form.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(
+                dialogContext,
+                int.tryParse(countController.text.trim()),
+              );
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+    countController.dispose();
+
+    if (!mounted) return;
+    if (count == null) return;
+    if (count < 2) {
+      _showErrorSnackBar('Enter 2 or more orders for bulk create');
+      return;
+    }
+
+    context.read<OrderBloc>().add(
+      BulkCreateOrders(
+        count: count,
+        supplierId: _selectedSupplierId!,
+        priority: _selectedPriority,
+        expectedDeliveryDate: DateFormat(
+          'yyyy-MM-dd',
+        ).format(_expectedDeliveryDate),
+        paymentTerm: finalPaymentTerm,
+        deliveryAddress: _deliveryAddressController.text,
+        deliveryCity: _deliveryCityController.text,
+        deliveryState: _deliveryStateController.text,
+        deliveryInstructions: _deliveryInstructionsController.text.isNotEmpty
+            ? _deliveryInstructionsController.text
+            : null,
+        buyerNotes: _noteController.text.isNotEmpty
+            ? _noteController.text
+            : null,
+        items: items,
+      ),
+    );
   }
 
   void _showErrorSnackBar(String message) {
@@ -1772,6 +1897,15 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           listener: (context, state) {
             if (state is OrderCreated) {
               _showSuccessDialog(state.orderNumber);
+            } else if (state is BulkOrdersCreated) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: context.modeSuccess,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              context.read<OrderBloc>().add(const ResetOrderState());
             } else if (state is OrderError) {
               String message = 'Failed to create order';
 

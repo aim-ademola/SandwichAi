@@ -118,13 +118,21 @@ class GoodsReceivedAdvancedCubit extends Cubit<GoodsReceivedAdvancedState> {
         .getGoodsReceivedPrefill(poId);
     final statusResponse = await _goodsReceivedRepository
         .getPurchaseOrderDeliveryStatus(poId);
+    final receiptsResponse = await _goodsReceivedRepository
+        .getGoodsReceivedByPurchaseOrder(poId);
 
     if (prefillResponse.isSuccess && prefillResponse.data != null) {
       emit(
         state.copyWith(
           prefillStatus: GoodsReceivedAdvancedStatus.loaded,
+          poReceiptsStatus:
+              receiptsResponse.data == null || receiptsResponse.data!.isEmpty
+              ? GoodsReceivedAdvancedStatus.empty
+              : GoodsReceivedAdvancedStatus.loaded,
           prefill: prefillResponse.data,
           deliveryStatus: statusResponse.data,
+          poReceipts: receiptsResponse.data ?? const [],
+          poReceiptsError: receiptsResponse.error?.toString(),
         ),
       );
       return;
@@ -133,6 +141,11 @@ class GoodsReceivedAdvancedCubit extends Cubit<GoodsReceivedAdvancedState> {
     emit(
       state.copyWith(
         prefillStatus: GoodsReceivedAdvancedStatus.error,
+        poReceiptsStatus: receiptsResponse.isSuccess
+            ? GoodsReceivedAdvancedStatus.empty
+            : GoodsReceivedAdvancedStatus.error,
+        poReceipts: receiptsResponse.data ?? const [],
+        poReceiptsError: receiptsResponse.error?.toString(),
         prefillError:
             prefillResponse.error?.toString() ??
             statusResponse.error?.toString() ??
@@ -149,5 +162,32 @@ class GoodsReceivedAdvancedCubit extends Cubit<GoodsReceivedAdvancedState> {
       await loadPoPrefill(poId);
     }
     return response.isSuccess;
+  }
+
+  Future<void> loadGoodsReceivedByPurchaseOrder(String poId) async {
+    emit(
+      state.copyWith(
+        poReceiptsStatus: GoodsReceivedAdvancedStatus.loading,
+        clearPoReceiptsError: true,
+      ),
+    );
+    final response = await _goodsReceivedRepository
+        .getGoodsReceivedByPurchaseOrder(poId);
+    response.when(
+      success: (data) => emit(
+        state.copyWith(
+          poReceiptsStatus: data.isEmpty
+              ? GoodsReceivedAdvancedStatus.empty
+              : GoodsReceivedAdvancedStatus.loaded,
+          poReceipts: data,
+        ),
+      ),
+      error: (error) => emit(
+        state.copyWith(
+          poReceiptsStatus: GoodsReceivedAdvancedStatus.error,
+          poReceiptsError: error.toString(),
+        ),
+      ),
+    );
   }
 }

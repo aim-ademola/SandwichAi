@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_action_model.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/purchase_order_draft_model.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/purchase_order_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_order_blocs/event.dart';
@@ -18,12 +19,99 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     : _repository = repository,
       super(const OrderInitial()) {
     on<CreateOrder>(_onCreateOrder);
+    on<BulkCreateOrders>(_onBulkCreateOrders);
     on<SaveOrderDraft>(_onSaveOrderDraft);
     on<UpdateOrderDraft>(_onUpdateOrderDraft);
     on<LoadOrderDraft>(_onLoadOrderDraft);
     on<SubmitDraftForApproval>(_onSubmitDraftForApproval);
     on<ResetOrderState>(_onResetOrderState);
     _getBranchId();
+  }
+
+  Future<void> _onBulkCreateOrders(
+    BulkCreateOrders event,
+    Emitter<OrderState> emit,
+  ) async {
+    try {
+      emit(const OrderCreating());
+
+      if (event.count < 2) {
+        emit(
+          const OrderError(
+            error: 'Bulk create needs at least 2 orders.',
+            errorType: OrderErrorType.validation,
+          ),
+        );
+        return;
+      }
+
+      final buyerId = await AuthCacheHelper.instance.userID() ?? '';
+      final buyerBranchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+      final orgID = await AuthCacheHelper.instance.getOrgId() ?? '';
+
+      if (buyerId.isEmpty || buyerBranchId.isEmpty || orgID.isEmpty) {
+        emit(
+          const OrderError(
+            error: 'User session expired. Please log in again.',
+            errorType: OrderErrorType.validation,
+          ),
+        );
+        return;
+      }
+
+      Map<String, dynamic> buildOrderPayload(int index) {
+        return {
+          'supplierId': event.supplierId,
+          'buyerId': buyerId,
+          'buyerBranchId': buyerBranchId,
+          'priority': event.priority,
+          'expectedDeliveryDate': event.expectedDeliveryDate,
+          'paymentTerm': event.paymentTerm,
+          'organizationId': orgID,
+          'deliveryAddress': event.deliveryAddress,
+          'deliveryCity': event.deliveryCity,
+          'deliveryState': event.deliveryState,
+          if (event.deliveryInstructions?.trim().isNotEmpty == true)
+            'deliveryInstructions': event.deliveryInstructions,
+          if (event.buyerNotes?.trim().isNotEmpty == true)
+            'buyerNotes':
+                '${event.buyerNotes}\nBulk order ${index + 1} of ${event.count}',
+          if (event.buyerNotes?.trim().isNotEmpty != true)
+            'buyerNotes': 'Bulk order ${index + 1} of ${event.count}',
+          'items': event.items.map((item) => item.toJson()).toList(),
+        };
+      }
+
+      final request = BulkCreatePurchaseOrdersRequest(
+        orders: List.generate(event.count, buildOrderPayload),
+      );
+      final response = await _repository.bulkCreateOrders(request);
+
+      response.when(
+        success: (data) => emit(
+          BulkOrdersCreated(
+            message: data.message.isEmpty
+                ? '${event.count} purchase orders created.'
+                : data.message,
+            data: data.data,
+          ),
+        ),
+        error: (error) => emit(
+          OrderError(
+            error: error.message,
+            errorType: _determineErrorType(error.message),
+          ),
+        ),
+      );
+    } catch (e) {
+      AppLogger.log('Bulk order creation error: $e');
+      emit(
+        OrderError(
+          error: 'An unexpected error occurred: ${e.toString()}',
+          errorType: OrderErrorType.general,
+        ),
+      );
+    }
   }
 
   void _getBranchId() async {

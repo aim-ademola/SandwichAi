@@ -28,6 +28,16 @@ class OrderCreated extends OrderState {
   List<Object?> get props => [orderData, orderNumber];
 }
 
+class BulkOrdersCreated extends OrderState {
+  final String message;
+  final Map<String, dynamic> data;
+
+  const BulkOrdersCreated({required this.message, required this.data});
+
+  @override
+  List<Object?> get props => [message, data];
+}
+
 class OrderDraftSaving extends OrderState {
   const OrderDraftSaving();
 }

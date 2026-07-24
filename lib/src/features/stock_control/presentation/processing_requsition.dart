@@ -1461,7 +1461,7 @@ class _StockTransferToProcessingOrKItchenScreenState
     ProcessingTransferResponse transfer, {
     required bool isPending,
   }) {
-    final dateFormat = DateFormat('MMM dd, yyyy â€¢ hh:mm a');
+    final dateFormat = DateFormat('MMM dd, yyyy - hh:mm a');
     final formattedDate = dateFormat.format(transfer.createdAt);
 
     return Container(
@@ -1611,7 +1611,7 @@ class _StockTransferToProcessingOrKItchenScreenState
     ProcessingTransferResponse transfer,
     bool isPending,
   ) {
-    final dateFormat = DateFormat('MMMM dd, yyyy â€¢ hh:mm a');
+    final dateFormat = DateFormat('MMMM dd, yyyy - hh:mm a');
     final formattedDate = dateFormat.format(transfer.createdAt);
 
     showModalBottomSheet(

@@ -1882,7 +1882,7 @@ class _StockProcurementRequestScreenState
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} â€¢ ${item.unit}',
+                                      '${item.category} - ${item.unit}',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(
@@ -2001,7 +2001,7 @@ class _StockProcurementRequestScreenState
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Qty: ${item.qtyNeeded} ${itemInfo.unit} â€¢ ₦${item.unitCost.toStringAsFixed(2)} per unit',
+                          'Qty: ${item.qtyNeeded} ${itemInfo.unit} - NGN ${item.unitCost.toStringAsFixed(2)} per unit',
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: _getCaptionFontSize(screenWidth),
                             color: context.modeTextSecondary,

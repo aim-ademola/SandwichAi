@@ -77,8 +77,8 @@ class _PurchaseOrdersTabScreenState extends State<PurchaseOrdersTabScreen>
                   fontWeight: FontWeight.w600,
                 ),
                 tabs: const [
-                  Tab(text: 'Create Order'),
-                  Tab(text: 'Order List'),
+                  Tab(text: 'Create PO'),
+                  Tab(text: 'PO History'),
                 ],
               ),
             ),

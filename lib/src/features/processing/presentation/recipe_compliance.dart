@@ -386,10 +386,16 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
             ),
             child: Row(
               children: [
-                AppIcon(
-                  Icons.search,
-                  color: context.modeTextSecondary,
-                  size: _getIconSize(screenWidth),
+                SizedBox(
+                  width: _getIconSize(screenWidth) + 4,
+                  height: _getIconSize(screenWidth) + 4,
+                  child: Center(
+                    child: AppIcon(
+                      Icons.search,
+                      color: context.modeTextSecondary,
+                      size: _getIconSize(screenWidth),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -406,17 +412,29 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                   ),
                 ),
                 _isOpened
-                    ? AppIcon(
-                        Icons.arrow_drop_down,
-                        color: context.modeTextSecondary,
-                        size: _getIconSize(screenWidth) + 4,
+                    ? SizedBox(
+                        width: _getIconSize(screenWidth) + 8,
+                        height: _getIconSize(screenWidth) + 8,
+                        child: Center(
+                          child: AppIcon(
+                            Icons.arrow_drop_down,
+                            color: context.modeTextSecondary,
+                            size: _getIconSize(screenWidth) + 4,
+                          ),
+                        ),
                       )
                     : Transform.rotate(
                         angle: -90 * 3.14159 / 180,
-                        child: AppIcon(
-                          Icons.arrow_drop_down,
-                          color: context.modeTextSecondary,
-                          size: _getIconSize(screenWidth) + 4,
+                        child: SizedBox(
+                          width: _getIconSize(screenWidth) + 8,
+                          height: _getIconSize(screenWidth) + 8,
+                          child: Center(
+                            child: AppIcon(
+                              Icons.arrow_drop_down,
+                              color: context.modeTextSecondary,
+                              size: _getIconSize(screenWidth) + 4,
+                            ),
+                          ),
                         ),
                       ),
               ],
@@ -590,11 +608,13 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                                     24,
                                                 color: context.modePrimary
                                                     .withValues(alpha: 0.1),
-                                                child: AppIcon(
-                                                  Icons.restaurant_menu,
-                                                  color: context.modePrimary,
-                                                  size: _getIconSize(
-                                                    screenWidth,
+                                                child: Center(
+                                                  child: AppIcon(
+                                                    Icons.restaurant_menu,
+                                                    color: context.modePrimary,
+                                                    size: _getIconSize(
+                                                      screenWidth,
+                                                    ),
                                                   ),
                                                 ),
                                               );
@@ -611,10 +631,12 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                             8,
                                           ),
                                         ),
-                                        child: AppIcon(
-                                          Icons.restaurant_menu,
-                                          color: context.modePrimary,
-                                          size: _getIconSize(screenWidth),
+                                        child: Center(
+                                          child: AppIcon(
+                                            Icons.restaurant_menu,
+                                            color: context.modePrimary,
+                                            size: _getIconSize(screenWidth),
+                                          ),
                                         ),
                                       ),
                               ),
@@ -636,7 +658,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} â€¢ ${item.preparationTime} mins',
+                                      '${item.category} - ${item.preparationTime} mins',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(

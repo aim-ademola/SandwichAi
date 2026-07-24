@@ -219,11 +219,13 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> {
         setState(() {
           _selectedStatus = selected ? status : null;
         });
-        context.read<KitchenOrdersBloc>().add(
+        final bloc = context.read<KitchenOrdersBloc>();
+        bloc.add(
           FilterKitchenOrdersByStatus(
             status: status == _paymentPendingFilter ? null : status,
           ),
         );
+        bloc.add(const RefreshKitchenOrders());
       },
       backgroundColor: context.modeSurfaceAlt,
       selectedColor: context.modePrimary,

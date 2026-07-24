@@ -52,8 +52,27 @@ class PurchaseOrderApprovalStatus {
         data['orderId'] ?? data['purchaseOrderId'] ?? data['id'],
       ),
       status: _string(data['status']),
-      approvalStatus: _string(data['approvalStatus']),
-      currentApprover: _string(data['currentApprover']),
+      approvalStatus: _firstString([
+        data['approvalStatus'],
+        data['approval_status'],
+        data['approvalState'],
+        data['approval_state'],
+        data['currentApprovalStatus'],
+        data['current_approval_status'],
+        _nestedValue(data, const ['approval', 'status']),
+        _nestedValue(data, const ['approval', 'approvalStatus']),
+        _nestedValue(data, const ['purchaseOrder', 'approvalStatus']),
+        _nestedValue(data, const ['purchaseOrder', 'approval_status']),
+        data['status'],
+      ]),
+      currentApprover: _firstString([
+        data['currentApprover'],
+        data['current_approver'],
+        data['approver'],
+        data['approverName'],
+        _nestedValue(data, const ['currentApproval', 'approver']),
+        _nestedValue(data, const ['approval', 'currentApprover']),
+      ]),
       approvals: approvals,
       raw: json,
     );
@@ -147,3 +166,20 @@ Map<String, dynamic> _asMap(dynamic value) {
 }
 
 String _string(dynamic value) => value?.toString() ?? '';
+
+String _firstString(List<dynamic> values) {
+  for (final value in values) {
+    final text = _string(value).trim();
+    if (text.isNotEmpty) return text;
+  }
+  return '';
+}
+
+dynamic _nestedValue(Map<String, dynamic> source, List<String> path) {
+  dynamic current = source;
+  for (final key in path) {
+    if (current is! Map) return null;
+    current = current[key];
+  }
+  return current;
+}

@@ -650,7 +650,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                         const TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
-                                    prefixText: 'â‚¦ ',
+                                    prefixText: 'NGN ',
                                     screenWidth: screenWidth,
                                     onHelpTap: () => _showHelpBottomSheet(
                                       title: 'Unit Cost',
@@ -1015,7 +1015,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} â€¢ ${item.storage}',
+                                      '${item.category} - ${item.storage}',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(

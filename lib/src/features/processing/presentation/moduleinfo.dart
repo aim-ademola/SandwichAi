@@ -78,7 +78,7 @@ class ModuleInfoBottomSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "â€¢ $useCase",
+                  "- $useCase",
                   style: WorkSansAppTextStyles.medium.copyWith(fontSize: 13),
                 ),
                 SizedBox(height: 6),

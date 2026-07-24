@@ -1048,7 +1048,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${item.category} â€¢ ${item.unit}',
+                                      '${item.category} - ${item.unit}',
                                       style: WorkSansAppTextStyles.medium
                                           .copyWith(
                                             fontSize: _getCaptionFontSize(

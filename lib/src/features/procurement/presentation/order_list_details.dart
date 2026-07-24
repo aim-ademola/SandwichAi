@@ -1211,13 +1211,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
 
         final text = approval.approvalStatus.isNotEmpty
             ? approval.approvalStatus
-            : approval.status;
+            : 'Not available';
         return _buildSectionCard(
           title: 'Approval Status',
           icon: Icons.approval_outlined,
           child: Column(
             children: [
-              _buildInfoRow('Status', text.replaceAll('_', ' ')),
+              _buildInfoRow('Approval Status', text.replaceAll('_', ' ')),
               if (approval.currentApprover.isNotEmpty) ...[
                 const Divider(height: 24),
                 _buildInfoRow('Current Approver', approval.currentApprover),
@@ -1312,103 +1312,266 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
           );
         }
         if (state.timelineStatus == PurchaseOrderActionStatus.error) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                state.timelineError ?? 'Failed to load timeline.',
-                textAlign: TextAlign.center,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  color: context.modeTextSecondary,
-                ),
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(padding),
+            child: _buildSectionCard(
+              title: 'Order Timeline',
+              icon: Icons.timeline_outlined,
+              child: _buildTimelineMessage(
+                icon: Icons.error_outline,
+                title: 'Could not load timeline',
+                message: state.timelineError ?? 'Failed to load timeline.',
               ),
             ),
           );
         }
 
-        final events = state.timeline?.events ?? const [];
+        final events = _timelineEvents(state.timeline?.events);
         return SingleChildScrollView(
           padding: EdgeInsets.all(padding),
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-              Text(
-                'Order Timeline',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: context.modeTextPrimary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              if (events.isEmpty)
-                _buildTimelineItem(
-                  'Order Created',
-                  DateFormat('MMM dd, yyyy').format(widget.order.createdAt),
-                )
-              else
-                ...events.map((event) {
-                  final title =
-                      (event['title'] ??
-                              event['event'] ??
-                              event['status'] ??
-                              'Timeline Event')
-                          .toString();
-                  final date =
-                      (event['date'] ??
-                              event['createdAt'] ??
-                              event['timestamp'] ??
-                              '')
-                          .toString();
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _buildTimelineItem(
-                      title.replaceAll('_', ' '),
-                      _formatTimelineDate(date),
-                    ),
-                  );
-                }),
-              const SizedBox(height: 32),
-            ],
+          child: _buildSectionCard(
+            title: 'Order Timeline',
+            icon: Icons.timeline_outlined,
+            child: Column(
+              children: [
+                for (var index = 0; index < events.length; index++)
+                  _buildTimelineItem(
+                    events[index],
+                    isFirst: index == 0,
+                    isLast: index == events.length - 1,
+                  ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
+  List<_TimelineEventViewData> _timelineEvents(
+    List<Map<String, dynamic>>? rawEvents,
+  ) {
+    final events = rawEvents ?? const [];
+    if (events.isEmpty) {
+      return [
+        _TimelineEventViewData(
+          title: 'Order Created',
+          date: DateFormat(
+            'MMM dd, yyyy - hh:mm a',
+          ).format(widget.order.createdAt),
+          icon: Icons.add_task_outlined,
+          color: context.modeSuccess,
+        ),
+      ];
+    }
+
+    return events.map((event) {
+      final rawTitle =
+          (event['title'] ??
+                  event['event'] ??
+                  event['status'] ??
+                  event['action'] ??
+                  'Timeline Event')
+              .toString();
+      final date =
+          (event['date'] ??
+                  event['createdAt'] ??
+                  event['timestamp'] ??
+                  event['time'] ??
+                  '')
+              .toString();
+      final note =
+          (event['description'] ?? event['message'] ?? event['note'] ?? '')
+              .toString()
+              .trim();
+
+      return _TimelineEventViewData(
+        title: _formatTimelineTitle(rawTitle),
+        date: _formatTimelineDate(date),
+        note: note,
+        icon: _timelineIcon(rawTitle),
+        color: _timelineColor(rawTitle),
+      );
+    }).toList();
+  }
+
   String _formatTimelineDate(String value) {
     final parsed = DateTime.tryParse(value);
     if (parsed == null) return value.isEmpty ? 'Date unavailable' : value;
-    return DateFormat('MMM dd, yyyy - hh:mm a').format(parsed);
+    return DateFormat('MMM dd, yyyy - hh:mm a').format(parsed.toLocal());
   }
 
-  Widget _buildTimelineItem(String title, String date) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modeBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  String _formatTimelineTitle(String value) {
+    final spaced = value.replaceAll('_', ' ').replaceAll('-', ' ').trim();
+    if (spaced.isEmpty) return 'Timeline Event';
+    return spaced
+        .split(RegExp(r'\s+'))
+        .map((word) {
+          if (word.isEmpty) return word;
+          return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+        })
+        .join(' ');
+  }
+
+  IconData _timelineIcon(String value) {
+    final normalized = value.toLowerCase();
+    if (normalized.contains('approv')) return Icons.verified_outlined;
+    if (normalized.contains('reject') || normalized.contains('cancel')) {
+      return Icons.cancel_outlined;
+    }
+    if (normalized.contains('dispatch')) return Icons.local_shipping_outlined;
+    if (normalized.contains('deliver') || normalized.contains('complete')) {
+      return Icons.check_circle_outline;
+    }
+    if (normalized.contains('created') || normalized.contains('create')) {
+      return Icons.add_task_outlined;
+    }
+    return Icons.radio_button_checked;
+  }
+
+  Color _timelineColor(String value) {
+    final normalized = value.toLowerCase();
+    if (normalized.contains('reject') || normalized.contains('cancel')) {
+      return context.modeError;
+    }
+    if (normalized.contains('approv') ||
+        normalized.contains('deliver') ||
+        normalized.contains('complete')) {
+      return context.modeSuccess;
+    }
+    if (normalized.contains('dispatch')) return context.modeInfo;
+    return context.modePrimary;
+  }
+
+  Widget _buildTimelineItem(
+    _TimelineEventViewData event, {
+    required bool isFirst,
+    required bool isLast,
+  }) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SizedBox(
+            width: 36,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: isFirst ? Colors.transparent : context.modeDivider,
+                  ),
+                ),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: event.color.withValues(alpha: 0.14),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: event.color, width: 1.5),
+                  ),
+                  child: AppIcon(event.icon, size: 16, color: event.color),
+                ),
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: isLast ? Colors.transparent : context.modeDivider,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.only(bottom: isLast ? 0 : 14),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: context.modeSurfaceAlt,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: event.color.withValues(alpha: 0.22)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.title,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: context.modeTextPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      AppIcon(
+                        Icons.schedule_outlined,
+                        size: 14,
+                        color: context.modeTextMuted,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          event.date,
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 12,
+                            color: context.modeTextSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (event.note.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      event.note,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 12,
+                        color: context.modeTextSecondary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineMessage({
+    required IconData icon,
+    required String title,
+    required String message,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: Column(
+        children: [
+          AppIcon(icon, size: 42, color: context.modeTextMuted),
+          const SizedBox(height: 10),
           Text(
             title,
+            textAlign: TextAlign.center,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
               color: context.modeTextPrimary,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            date,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 13,
-              color: context.modeTextSecondary,
+          if (message.isNotEmpty) ...[
+            const SizedBox(height: 5),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 13,
+                color: context.modeTextSecondary,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -1627,4 +1790,20 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     if (width < 900) return 600;
     return 900;
   }
+}
+
+class _TimelineEventViewData {
+  final String title;
+  final String date;
+  final String note;
+  final IconData icon;
+  final Color color;
+
+  const _TimelineEventViewData({
+    required this.title,
+    required this.date,
+    this.note = '',
+    required this.icon,
+    required this.color,
+  });
 }

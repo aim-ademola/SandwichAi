@@ -90,14 +90,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       child: DefaultTextStyle.merge(
         style: WorkSansAppTextStyles.medium,
         child: Scaffold(
-          backgroundColor: const Color(0xFFF8F6F6),
+          backgroundColor: context.modeBackground,
           appBar: AppBar(
-            backgroundColor: const Color(0xFFF8F6F6),
+            backgroundColor: context.modeSurface,
+            surfaceTintColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
               icon: AppIcon(
                 Icons.arrow_back_ios,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
                 size: responsive.getIconSize(screenWidth),
               ),
               onPressed: () => context.pop(),
@@ -107,7 +108,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: responsive.getSubtitleFontSize(screenWidth) * 1.1,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             centerTitle: true,
@@ -169,7 +170,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   obscure
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
-                                  color: const Color(0xFF9E9E9E),
+                                  color: context.modeTextMuted,
                                   size: responsive.getIconSize(screenWidth),
                                 ),
                                 onPressed: () {
@@ -224,7 +225,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   obscure
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
-                                  color: const Color(0xFF9E9E9E),
+                                  color: context.modeTextMuted,
                                   size: responsive.getIconSize(screenWidth),
                                 ),
                                 onPressed: () {
@@ -283,7 +284,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   obscure
                                       ? Icons.visibility_off_outlined
                                       : Icons.visibility_outlined,
-                                  color: const Color(0xFF9E9E9E),
+                                  color: context.modeTextMuted,
                                   size: responsive.getIconSize(screenWidth),
                                 ),
                                 onPressed: () {
@@ -312,12 +313,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     ? null
                                     : _handleChangePassword,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: kPrimary,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: context.modePrimary,
+                                  foregroundColor: context.modeTextInverse,
                                   elevation: 0,
-                                  disabledBackgroundColor: kPrimary.withValues(
-                                    alpha: 0.6,
-                                  ),
+                                  disabledBackgroundColor: context.modePrimary
+                                      .withValues(alpha: 0.6),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
                                       responsive.getButtonBorderRadius(
@@ -327,14 +327,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   ),
                                 ),
                                 child: isLoading
-                                    ? const SizedBox(
+                                    ? SizedBox(
                                         height: 20,
                                         width: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
+                                                context.modeTextInverse,
                                               ),
                                         ),
                                       )
@@ -348,7 +348,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                                   ),
                                               fontWeight: FontWeight.w600,
                                               letterSpacing: 0.5,
-                                              color: kWhite,
+                                              color: context.modeTextInverse,
                                             ),
                                       ),
                               ),

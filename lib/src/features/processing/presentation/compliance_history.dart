@@ -311,7 +311,7 @@ class _RecipeComplianceHistoryScreenState
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(date);
+      return DateFormat('MMM dd, yyyy - hh:mm a').format(date);
     } catch (e) {
       return dateString;
     }
@@ -647,7 +647,7 @@ class _RecipeComplianceHistoryScreenState
               color: iconBgColor,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: AppIcon(icon, color: iconColor, size: 20),
+            child: Center(child: AppIcon(icon, color: iconColor, size: 20)),
           ),
           const SizedBox(height: 12),
           Text(

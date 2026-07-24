@@ -45,6 +45,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
   String? _selectedSupplierId;
   String? _selectedSupplierName;
+  List<dynamic> _availableSuppliers = [];
   String _selectedPriority = 'NORMAL';
   String _selectedPaymentTerm = 'NET_30';
   DateTime _expectedDeliveryDate = DateTime.now().add(const Duration(days: 7));
@@ -66,6 +67,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
   // Track if products are currently being loaded
   bool _isLoadingProducts = false;
+  bool _isChangingSupplier = false;
 
   @override
   void initState() {
@@ -247,6 +249,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   }
 
   void _changeSupplier() {
+    setState(() {
+      _isChangingSupplier = true;
+    });
     context.read<SupplierBloc>().add(LoadSuppliers());
   }
 
@@ -586,7 +591,24 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   Widget _buildSupplierDropdown(double labelFontSize, double inputFontSize) {
     return BlocBuilder<SupplierBloc, SupplierState>(
       builder: (context, state) {
-        if (state is SupplierLoading && _selectedSupplierId == null) {
+        if (state is SupplierListLoaded) {
+          _availableSuppliers = state.suppliers;
+        } else if (state is SupplierRefreshing) {
+          _availableSuppliers = state.currentSuppliers;
+        }
+
+        final shouldShowPicker =
+            _selectedSupplierId == null || _isChangingSupplier;
+
+        if (shouldShowPicker && _availableSuppliers.isNotEmpty) {
+          return _buildSupplierDropdownField(
+            suppliers: _availableSuppliers,
+            labelFontSize: labelFontSize,
+            inputFontSize: inputFontSize,
+          );
+        }
+
+        if (state is SupplierLoading && shouldShowPicker) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -623,7 +645,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           );
         }
 
-        if (state is SupplierError && _selectedSupplierId == null) {
+        if (state is SupplierError && shouldShowPicker) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -659,82 +681,6 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     ),
                   ],
                 ),
-              ),
-            ],
-          );
-        }
-
-        if (state is SupplierListLoaded) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLabel('Supplier', labelFontSize),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedSupplierId,
-                decoration: InputDecoration(
-                  hintText: 'Select a supplier',
-                  hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: inputFontSize,
-                    color: context.modeTextMuted,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  filled: true,
-                  fillColor: context.modeSurface,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: context.modeBorder, width: 1),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: context.modeBorder, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: context.modePrimary,
-                      width: 2,
-                    ),
-                  ),
-                ),
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: inputFontSize,
-                  color: context.modeTextPrimary,
-                ),
-                icon: AppIcon(
-                  Icons.keyboard_arrow_down,
-                  color: context.modeTextSecondary,
-                ),
-                dropdownColor: context.modeSurface,
-                items: state.suppliers.map((supplier) {
-                  return DropdownMenuItem<String>(
-                    value: supplier.id,
-                    child: Text(
-                      supplier.businessName,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: inputFontSize,
-                        color: context.modeTextPrimary,
-                      ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (String? value) {
-                  if (value != null) {
-                    final supplier = state.suppliers.firstWhere(
-                      (s) => s.id == value,
-                    );
-                    setState(() {
-                      _selectedSupplierId = value;
-                      _selectedSupplierName = supplier.businessName;
-                      _clearSelectedProducts();
-                    });
-                    _loadSupplierProducts(value);
-                  }
-                },
               ),
             ],
           );
@@ -821,6 +767,105 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildSupplierDropdownField({
+    required List<dynamic> suppliers,
+    required double labelFontSize,
+    required double inputFontSize,
+  }) {
+    final supplierIds = suppliers.map((supplier) => supplier.id).toSet();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel('Supplier', labelFontSize),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: supplierIds.contains(_selectedSupplierId)
+              ? _selectedSupplierId
+              : null,
+          isExpanded: true,
+          decoration: InputDecoration(
+            hintText: 'Select a supplier',
+            hintStyle: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: inputFontSize,
+              color: context.modeTextMuted,
+              fontWeight: FontWeight.w400,
+            ),
+            filled: true,
+            fillColor: context.modeSurface,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: context.modeBorder, width: 1),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: context.modeBorder, width: 1),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: context.modePrimary, width: 2),
+            ),
+          ),
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: inputFontSize,
+            color: context.modeTextPrimary,
+          ),
+          icon: AppIcon(
+            Icons.keyboard_arrow_down,
+            color: context.modeTextSecondary,
+          ),
+          dropdownColor: context.modeSurface,
+          selectedItemBuilder: (context) {
+            return suppliers.map((supplier) {
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  supplier.businessName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: inputFontSize,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+              );
+            }).toList();
+          },
+          items: suppliers.map((supplier) {
+            return DropdownMenuItem<String>(
+              value: supplier.id,
+              child: Text(
+                supplier.businessName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: inputFontSize,
+                  color: context.modeTextPrimary,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (String? value) {
+            if (value == null) return;
+
+            final supplier = suppliers.firstWhere((s) => s.id == value);
+            setState(() {
+              _selectedSupplierId = value;
+              _selectedSupplierName = supplier.businessName;
+              _isChangingSupplier = false;
+              _clearSelectedProducts();
+            });
+            _loadSupplierProducts(value);
+          },
+        ),
+      ],
     );
   }
 
@@ -1303,6 +1348,23 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   }
 
   Widget _buildProductDropdown(OrderLineItem item, double inputFontSize) {
+    if (_selectedSupplierId == null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: context.modeSurfaceAlt,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: context.modeBorder),
+        ),
+        child: Text(
+          'Select a supplier first to view products',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            color: context.modeTextSecondary,
+          ),
+        ),
+      );
+    }
+
     return BlocBuilder<SupplierBloc, SupplierState>(
       builder: (context, state) {
         if (_isLoadingProducts || state is SupplierLoading) {
@@ -1381,6 +1443,22 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               color: context.modeTextSecondary,
             ),
             dropdownColor: context.modeSurface,
+            selectedItemBuilder: (context) {
+              return state.products.map((product) {
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    product.productName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: inputFontSize,
+                      color: context.modeTextPrimary,
+                    ),
+                  ),
+                );
+              }).toList();
+            },
             items: state.products.map((product) {
               return DropdownMenuItem<String>(
                 value: product.id,
@@ -1394,6 +1472,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                         fontSize: inputFontSize,
                         color: context.modeTextPrimary,
                       ),
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
@@ -1402,6 +1481,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                         fontSize: inputFontSize - 2,
                         color: context.modeTextSecondary,
                       ),
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -1886,6 +1966,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       _lineItems.clear();
       _lineItems.add(OrderLineItem());
       _isLoadingProducts = false;
+      _isChangingSupplier = false;
     });
   }
 
@@ -2189,6 +2270,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                             // Line Items Section
                             _buildSectionHeader('Order Items', labelFontSize),
                             const SizedBox(height: 16),
+                            if (_selectedSupplierId == null) ...[
+                              _buildSupplierDropdown(
+                                labelFontSize,
+                                inputFontSize,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
 
                             ..._buildLineItems(
                               labelFontSize,

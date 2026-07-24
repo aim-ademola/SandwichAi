@@ -422,7 +422,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
           const SizedBox(height: 12),
           _buildInfoRow(
             'Total Amount',
-            'â‚¦${order.totalAmount}',
+            'NGN ${order.totalAmount}',
             textFontSize,
             isHighlight: true,
           ),
@@ -936,7 +936,7 @@ class _KitchenOrderDetailScreenState extends State<KitchenOrderDetailScreen> {
                 ],
                 const SizedBox(height: 4),
                 Text(
-                  'â‚¦${item.totalPrice}',
+                  'NGN ${item.totalPrice}',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: notesFontSize,
                     fontWeight: FontWeight.w600,

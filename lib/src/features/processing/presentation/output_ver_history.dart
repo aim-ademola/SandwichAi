@@ -565,7 +565,7 @@ class _OutputVerificationHistoryScreenState
       } else if (difference.inDays < 7) {
         return '${difference.inDays}d ago';
       } else {
-        return DateFormat('MMM d, yyyy â€¢ HH:mm').format(dateTime);
+        return DateFormat('MMM d, yyyy - HH:mm').format(dateTime);
       }
     } catch (e) {
       return timestamp;

@@ -44,10 +44,7 @@ class _StockControlAppDrawerContentState
   final GlobalKey _requisitionKey = GlobalKey();
   final GlobalKey _settleRequestsKey = GlobalKey();
   final GlobalKey _wastageLogsKey = GlobalKey();
-  final GlobalKey _expiryTrackingKey = GlobalKey();
-  final GlobalKey _lockedStockKey = GlobalKey();
-  final GlobalKey _negativeStockKey = GlobalKey();
-  final GlobalKey _reorderReportKey = GlobalKey();
+  final GlobalKey _reportsKey = GlobalKey();
   final GlobalKey _notificationSettingsKey = GlobalKey();
 
   @override
@@ -69,10 +66,7 @@ class _StockControlAppDrawerContentState
             _requisitionKey,
             _settleRequestsKey,
             _wastageLogsKey,
-            _expiryTrackingKey,
-            _lockedStockKey,
-            _negativeStockKey,
-            _reorderReportKey,
+            _reportsKey,
             _notificationSettingsKey,
           ]);
         }
@@ -174,88 +168,21 @@ class _StockControlAppDrawerContentState
         ),
         const SizedBox(height: 8),
         Showcase(
-          key: _expiryTrackingKey,
+          key: _reportsKey,
           description:
-              'Track expired and soon-to-expire stock batches before they create waste.',
+              'Open all stock reports, including expiry tracking, locked stock, negative stock, and reorder report.',
           targetBorderRadius: BorderRadius.circular(12),
           tooltipBackgroundColor: kPrimary,
           textColor: Colors.white,
           targetPadding: const EdgeInsets.all(8),
           child: _buildDrawerItem(
             context,
-            icon: Icons.event_busy_outlined,
-            title: 'Expiry Tracking',
+            icon: Icons.summarize_outlined,
+            title: 'Reports',
             onTap: () {
               Navigator.push(
                 context,
-                CupertinoPageRoute(
-                  builder: (_) => const ExpiryTrackingScreen(),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Showcase(
-          key: _lockedStockKey,
-          description:
-              'Review stock items that are locked from normal stock movement.',
-          targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
-          targetPadding: const EdgeInsets.all(8),
-          child: _buildDrawerItem(
-            context,
-            icon: Icons.lock_outline,
-            title: 'Locked Stock',
-            onTap: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(builder: (_) => const LockedStockScreen()),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Showcase(
-          key: _negativeStockKey,
-          description:
-              'Review stock records where quantity has gone below zero.',
-          targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
-          targetPadding: const EdgeInsets.all(8),
-          child: _buildDrawerItem(
-            context,
-            icon: Icons.trending_down,
-            title: 'Negative Stock Report',
-            onTap: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(
-                  builder: (_) => const NegativeStockReportScreen(),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Showcase(
-          key: _reorderReportKey,
-          description:
-              'Review items that need reorder attention and acknowledge them.',
-          targetBorderRadius: BorderRadius.circular(12),
-          tooltipBackgroundColor: kPrimary,
-          textColor: Colors.white,
-          targetPadding: const EdgeInsets.all(8),
-          child: _buildDrawerItem(
-            context,
-            icon: Icons.assignment_returned_outlined,
-            title: 'Reorder Report',
-            onTap: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(builder: (_) => const ReorderReportScreen()),
+                CupertinoPageRoute(builder: (_) => const StockReportsScreen()),
               );
             },
           ),

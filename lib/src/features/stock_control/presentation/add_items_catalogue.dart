@@ -343,7 +343,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
                   return 'Required';
                 }
                 if (int.tryParse(value) == null || int.parse(value) < 1) {
-                  return 'Must be â‰¥ 1';
+                  return 'Must be >= 1';
                 }
                 return null;
               },

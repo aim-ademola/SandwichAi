@@ -10,8 +10,121 @@ import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.
 import 'package:sandwich_ai/src/features/stock_control/data/model/stock_card_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/stock_card_repo.dart';
 
+class StockReportsScreen extends StatefulWidget {
+  const StockReportsScreen({super.key});
+
+  @override
+  State<StockReportsScreen> createState() => _StockReportsScreenState();
+}
+
+class _StockReportsScreenState extends State<StockReportsScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+  final GlobalKey<_ExpiryTrackingScreenState> _expiryKey = GlobalKey();
+  final GlobalKey<_LockedStockScreenState> _lockedKey = GlobalKey();
+  final GlobalKey<_NegativeStockReportScreenState> _negativeKey = GlobalKey();
+  final GlobalKey<_ReorderReportScreenState> _reorderKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _refreshCurrentReport() async {
+    switch (_tabController.index) {
+      case 0:
+        await _expiryKey.currentState?._load();
+      case 1:
+        await _lockedKey.currentState?._load();
+      case 2:
+        await _negativeKey.currentState?._load();
+      case 3:
+        await _reorderKey.currentState?._load();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle.merge(
+      style: WorkSansAppTextStyles.medium,
+      child: Scaffold(
+        backgroundColor: context.modeBackground,
+        appBar: AppBar(
+          backgroundColor: context.modeSurface,
+          elevation: 0,
+          leading: IconButton(
+            icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            'Reports',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              color: context.modeTextPrimary,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: AppIcon(Icons.refresh, color: context.modePrimary),
+              onPressed: _refreshCurrentReport,
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(52),
+            child: Container(
+              color: context.modeSurface,
+              child: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                labelColor: context.modePrimary,
+                unselectedLabelColor: context.modeTextSecondary,
+                indicatorColor: context.modePrimary,
+                indicatorWeight: 3,
+                labelStyle: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+                unselectedLabelStyle: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                tabs: const [
+                  Tab(text: 'Expiry'),
+                  Tab(text: 'Locked Stock'),
+                  Tab(text: 'Negative Stock'),
+                  Tab(text: 'Reorder'),
+                ],
+              ),
+            ),
+          ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            ExpiryTrackingScreen(key: _expiryKey, showAppBar: false),
+            LockedStockScreen(key: _lockedKey, showAppBar: false),
+            NegativeStockReportScreen(key: _negativeKey, showAppBar: false),
+            ReorderReportScreen(key: _reorderKey, showAppBar: false),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class ExpiryTrackingScreen extends StatefulWidget {
-  const ExpiryTrackingScreen({super.key});
+  final bool showAppBar;
+
+  const ExpiryTrackingScreen({super.key, this.showAppBar = true});
 
   @override
   State<ExpiryTrackingScreen> createState() => _ExpiryTrackingScreenState();
@@ -39,6 +152,7 @@ class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
     return _ReportScaffold(
       title: 'Expiry Tracking',
       onRefresh: _load,
+      showAppBar: widget.showAppBar,
       child: BlocBuilder<StockControlReportsCubit, StockControlReportsState>(
         builder: (context, state) {
           return _ReportStateBody(
@@ -75,7 +189,9 @@ class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
 }
 
 class LockedStockScreen extends StatefulWidget {
-  const LockedStockScreen({super.key});
+  final bool showAppBar;
+
+  const LockedStockScreen({super.key, this.showAppBar = true});
 
   @override
   State<LockedStockScreen> createState() => _LockedStockScreenState();
@@ -85,6 +201,10 @@ class _LockedStockScreenState extends State<LockedStockScreen> {
   @override
   void initState() {
     super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
     context.read<StockControlReportsCubit>().loadLockedStock();
   }
 
@@ -92,16 +212,15 @@ class _LockedStockScreenState extends State<LockedStockScreen> {
   Widget build(BuildContext context) {
     return _ReportScaffold(
       title: 'Locked Stock',
-      onRefresh: () =>
-          context.read<StockControlReportsCubit>().loadLockedStock(),
+      onRefresh: _load,
+      showAppBar: widget.showAppBar,
       child: BlocBuilder<StockControlReportsCubit, StockControlReportsState>(
         builder: (context, state) {
           return _ReportStateBody(
             status: state.lockedStatus,
             error: state.lockedError,
             emptyMessage: 'No locked stock found.',
-            onRetry: () =>
-                context.read<StockControlReportsCubit>().loadLockedStock(),
+            onRetry: _load,
             child: _RawStockList(items: state.lockedStock?.items ?? const []),
           );
         },
@@ -111,7 +230,9 @@ class _LockedStockScreenState extends State<LockedStockScreen> {
 }
 
 class NegativeStockReportScreen extends StatefulWidget {
-  const NegativeStockReportScreen({super.key});
+  final bool showAppBar;
+
+  const NegativeStockReportScreen({super.key, this.showAppBar = true});
 
   @override
   State<NegativeStockReportScreen> createState() =>
@@ -122,6 +243,10 @@ class _NegativeStockReportScreenState extends State<NegativeStockReportScreen> {
   @override
   void initState() {
     super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
     context.read<StockControlReportsCubit>().loadNegativeStockReport();
   }
 
@@ -129,17 +254,15 @@ class _NegativeStockReportScreenState extends State<NegativeStockReportScreen> {
   Widget build(BuildContext context) {
     return _ReportScaffold(
       title: 'Negative Stock Report',
-      onRefresh: () =>
-          context.read<StockControlReportsCubit>().loadNegativeStockReport(),
+      onRefresh: _load,
+      showAppBar: widget.showAppBar,
       child: BlocBuilder<StockControlReportsCubit, StockControlReportsState>(
         builder: (context, state) {
           return _ReportStateBody(
             status: state.negativeStatus,
             error: state.negativeError,
             emptyMessage: 'No negative stock found.',
-            onRetry: () => context
-                .read<StockControlReportsCubit>()
-                .loadNegativeStockReport(),
+            onRetry: _load,
             child: _RawStockList(
               items: state.negativeStockReport?.items ?? const [],
               highlightNegative: true,
@@ -152,7 +275,9 @@ class _NegativeStockReportScreenState extends State<NegativeStockReportScreen> {
 }
 
 class ReorderReportScreen extends StatefulWidget {
-  const ReorderReportScreen({super.key});
+  final bool showAppBar;
+
+  const ReorderReportScreen({super.key, this.showAppBar = true});
 
   @override
   State<ReorderReportScreen> createState() => _ReorderReportScreenState();
@@ -203,6 +328,7 @@ class _ReorderReportScreenState extends State<ReorderReportScreen> {
     return _ReportScaffold(
       title: 'Reorder Report',
       onRefresh: _load,
+      showAppBar: widget.showAppBar,
       child: BlocBuilder<StockControlReportsCubit, StockControlReportsState>(
         builder: (context, state) {
           final items = state.reorderReport?.items ?? const [];
@@ -236,12 +362,14 @@ class _ReorderReportScreenState extends State<ReorderReportScreen> {
 class _ReportScaffold extends StatelessWidget {
   final String title;
   final Widget child;
-  final Future<void> Function() onRefresh;
+  final Future<void> Function()? onRefresh;
+  final bool showAppBar;
 
   const _ReportScaffold({
     required this.title,
     required this.child,
-    required this.onRefresh,
+    this.onRefresh,
+    this.showAppBar = true,
   });
 
   @override
@@ -250,28 +378,34 @@ class _ReportScaffold extends StatelessWidget {
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
         backgroundColor: context.modeBackground,
-        appBar: AppBar(
-          backgroundColor: context.modeSurface,
-          elevation: 0,
-          leading: IconButton(
-            icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            title,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              color: context.modeTextPrimary,
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: AppIcon(Icons.refresh, color: context.modePrimary),
-              onPressed: onRefresh,
-            ),
-          ],
-        ),
+        appBar: showAppBar
+            ? AppBar(
+                backgroundColor: context.modeSurface,
+                elevation: 0,
+                leading: IconButton(
+                  icon: AppIcon(
+                    Icons.arrow_back,
+                    color: context.modeTextPrimary,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                title: Text(
+                  title,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    color: context.modeTextPrimary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                actions: [
+                  if (onRefresh != null)
+                    IconButton(
+                      icon: AppIcon(Icons.refresh, color: context.modePrimary),
+                      onPressed: onRefresh,
+                    ),
+                ],
+              )
+            : null,
         body: child,
       ),
     );

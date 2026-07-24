@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
@@ -251,8 +250,6 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
             children: [
               _buildStatsRow(data),
-              const SizedBox(height: 14),
-              _buildOrderStatsChart(data.orderStats),
               const SizedBox(height: 18),
               if (sortedOrders.isEmpty)
                 _buildNoOrdersForFilter(OrderFilter.all)
@@ -989,134 +986,6 @@ class _KitchenDashboardScreenState extends State<KitchenDashboardScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildOrderStatsChart(OrderStats stats) {
-    final total =
-        stats.ongoingOrders + stats.ordersDelivered + stats.ordersReceived;
-    if (total == 0) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.modeBorder.withValues(alpha: 0.55)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Order Statistics',
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                flex: 4,
-                child: SizedBox(
-                  height: 120,
-                  child: PieChart(
-                    PieChartData(
-                      sectionsSpace: 4,
-                      centerSpaceRadius: 28,
-                      sections: [
-                        PieChartSectionData(
-                          color: context.modePrimary,
-                          value: stats.ongoingOrders.toDouble(),
-                          title:
-                              '${((stats.ongoingOrders / total) * 100).toStringAsFixed(0)}%',
-                          radius: 25,
-                          titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: context.modeTextInverse,
-                          ),
-                        ),
-                        PieChartSectionData(
-                          color: context.modeSuccess,
-                          value: stats.ordersDelivered.toDouble(),
-                          title:
-                              '${((stats.ordersDelivered / total) * 100).toStringAsFixed(0)}%',
-                          radius: 25,
-                          titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: context.modeTextInverse,
-                          ),
-                        ),
-                        PieChartSectionData(
-                          color: context.modeInfo,
-                          value: stats.ordersReceived.toDouble(),
-                          title:
-                              '${((stats.ordersReceived / total) * 100).toStringAsFixed(0)}%',
-                          radius: 25,
-                          titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: context.modeTextInverse,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 5,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _chartIndicator(
-                      color: context.modePrimary,
-                      label: 'Ongoing (${stats.ongoingOrders})',
-                    ),
-                    const SizedBox(height: 8),
-                    _chartIndicator(
-                      color: context.modeSuccess,
-                      label: 'Delivered (${stats.ordersDelivered})',
-                    ),
-                    const SizedBox(height: 8),
-                    _chartIndicator(
-                      color: context.modeInfo,
-                      label: 'Received (${stats.ordersReceived})',
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _chartIndicator({required Color color, required String label}) {
-    return Row(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: context.modeTextPrimary,
-          ),
-        ),
-      ],
     );
   }
 }

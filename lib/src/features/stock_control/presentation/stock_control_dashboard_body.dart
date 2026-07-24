@@ -374,24 +374,9 @@ class _StockControlDashboardBodyScreenState
   Widget _buildReportsShortcutSection(double screenWidth) {
     final shortcuts = [
       _ReportShortcut(
-        icon: Icons.event_busy_outlined,
-        title: 'Expiry Tracking',
-        screen: const ExpiryTrackingScreen(),
-      ),
-      _ReportShortcut(
-        icon: Icons.lock_outline,
-        title: 'Locked Stock',
-        screen: const LockedStockScreen(),
-      ),
-      _ReportShortcut(
-        icon: Icons.trending_down,
-        title: 'Negative Stock',
-        screen: const NegativeStockReportScreen(),
-      ),
-      _ReportShortcut(
-        icon: Icons.assignment_returned_outlined,
-        title: 'Reorder Report',
-        screen: const ReorderReportScreen(),
+        icon: Icons.summarize_outlined,
+        title: 'Reports',
+        screen: const StockReportsScreen(),
       ),
     ];
 
@@ -412,10 +397,10 @@ class _StockControlDashboardBodyScreenState
           physics: const NeverScrollableScrollPhysics(),
           itemCount: shortcuts.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: screenWidth < 520 ? 2 : 4,
+            crossAxisCount: 1,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: screenWidth < 360 ? 1.55 : 1.8,
+            childAspectRatio: screenWidth < 360 ? 3.1 : 4.5,
           ),
           itemBuilder: (context, index) {
             final shortcut = shortcuts[index];

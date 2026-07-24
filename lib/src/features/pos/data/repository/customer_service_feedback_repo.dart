@@ -117,12 +117,10 @@ class CustomerServiceFeedbackRepository extends BaseRepository
           )
           .timeout(const Duration(seconds: 30));
 
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to fetch records');
-      }
-
-      return ApiResponse.success(
-        CustomerServiceRecordList.fromJson(response.data),
+      return response.when(
+        success: (data) =>
+            ApiResponse.success(CustomerServiceRecordList.fromJson(data)),
+        error: (error) => ApiResponse.error(error),
       );
     } on SocketException {
       return ApiResponse.errorMessage(
@@ -148,12 +146,11 @@ class CustomerServiceFeedbackRepository extends BaseRepository
           .post(path, data: data)
           .timeout(const Duration(seconds: 30));
 
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to create record');
-      }
-
-      return ApiResponse.success(
-        CustomerServiceRecord.fromJson(_unwrapRecord(response.data)),
+      return response.when(
+        success: (data) => ApiResponse.success(
+          CustomerServiceRecord.fromJson(_unwrapRecord(data)),
+        ),
+        error: (error) => ApiResponse.error(error),
       );
     } on TimeoutException {
       return ApiResponse.errorMessage(
@@ -187,12 +184,11 @@ class CustomerServiceFeedbackRepository extends BaseRepository
           .patch(path, data: data)
           .timeout(const Duration(seconds: 30));
 
-      if (response.data == null) {
-        return ApiResponse.errorMessage('Failed to update record');
-      }
-
-      return ApiResponse.success(
-        CustomerServiceRecord.fromJson(_unwrapRecord(response.data)),
+      return response.when(
+        success: (data) => ApiResponse.success(
+          CustomerServiceRecord.fromJson(_unwrapRecord(data)),
+        ),
+        error: (error) => ApiResponse.error(error),
       );
     } on TimeoutException {
       return ApiResponse.errorMessage(
@@ -207,8 +203,13 @@ class CustomerServiceFeedbackRepository extends BaseRepository
 
   Future<ApiResponse<bool>> _delete(String path) async {
     try {
-      await _apiClient.delete(path).timeout(const Duration(seconds: 30));
-      return ApiResponse.success(true);
+      final response = await _apiClient
+          .delete(path)
+          .timeout(const Duration(seconds: 30));
+      return response.when(
+        success: (_) => ApiResponse.success(true),
+        error: (error) => ApiResponse.error(error),
+      );
     } on TimeoutException {
       return ApiResponse.errorMessage(
         'Connection timeout. Please check your internet and try again.',

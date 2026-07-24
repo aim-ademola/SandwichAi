@@ -309,7 +309,7 @@ class StockRequestDetailsScreen extends StatelessWidget {
       }
 
       final wat = dateTime.toUtc().add(const Duration(hours: 1));
-      return DateFormat('MMM dd, yyyy â€¢ hh:mm a').format(wat);
+      return DateFormat('MMM dd, yyyy - hh:mm a').format(wat);
     } catch (_) {
       return dt.toString();
     }

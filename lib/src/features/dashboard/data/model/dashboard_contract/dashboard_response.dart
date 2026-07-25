@@ -24,13 +24,18 @@ class DashboardResponse {
     final data = json['data'] is Map<String, dynamic>
         ? json['data'] as Map<String, dynamic>
         : json;
+    final parsedMetrics = ((data['metrics'] as List?) ?? [])
+        .whereType<Map>()
+        .map((metric) => DashboardMetric.fromJson(metric.cast()))
+        .toList();
+    final metrics =
+        domain == DashboardDomain.procurement && parsedMetrics.isEmpty
+        ? _procurementOverviewMetrics(data)
+        : parsedMetrics;
 
     return DashboardResponse(
       domain: domain,
-      metrics: ((data['metrics'] as List?) ?? [])
-          .whereType<Map>()
-          .map((metric) => DashboardMetric.fromJson(metric.cast()))
-          .toList(),
+      metrics: metrics,
       sections: ((data['sections'] as List?) ?? [])
           .whereType<Map>()
           .map((section) => DashboardSection.fromJson(section.cast()))
@@ -51,4 +56,52 @@ class DashboardResponse {
   }
 
   bool get isEmpty => metrics.isEmpty && sections.isEmpty;
+}
+
+List<DashboardMetric> _procurementOverviewMetrics(Map<String, dynamic> data) {
+  final overview = _asMap(data['overview']);
+  if (overview.isEmpty) return const [];
+
+  final totalSpend = _asMap(overview['totalSpend']);
+  final purchaseOrders = _asMap(overview['purchaseOrders']);
+  final deliveriesCompleted = _asMap(overview['deliveriesCompleted']);
+
+  return [
+    DashboardMetric(
+      key: 'totalSpend',
+      label: 'Total Spend',
+      value: _asNum(totalSpend['value']),
+      unit: 'NGN',
+      changePercent: _asNullableNum(totalSpend['percentageChange']),
+      status: totalSpend['trend']?.toString(),
+    ),
+    DashboardMetric(
+      key: 'purchaseOrders',
+      label: 'Purchase Orders',
+      value: _asNum(purchaseOrders['total']),
+      previousValue: _asNullableNum(purchaseOrders['value']),
+    ),
+    DashboardMetric(
+      key: 'deliveriesCompleted',
+      label: 'Completed',
+      value: _asNum(deliveriesCompleted['total']),
+      changePercent: _asNullableNum(deliveriesCompleted['onTimeRate']),
+    ),
+  ];
+}
+
+Map<String, dynamic> _asMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return <String, dynamic>{};
+}
+
+num? _asNullableNum(dynamic value) {
+  if (value == null) return null;
+  return _asNum(value);
+}
+
+num _asNum(dynamic value) {
+  if (value is num) return value;
+  return num.tryParse(value?.toString() ?? '') ?? 0;
 }

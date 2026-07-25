@@ -30,10 +30,12 @@ class KitchenOrdersRepository extends BaseRepository
       _validateBranchId(branchId);
 
       final queryParams = <String, dynamic>{'branchId': branchId};
-      if (startDate != null && startDate.isNotEmpty)
+      if (startDate != null && startDate.isNotEmpty) {
         queryParams['startDate'] = startDate;
-      if (endDate != null && endDate.isNotEmpty)
+      }
+      if (endDate != null && endDate.isNotEmpty) {
         queryParams['endDate'] = endDate;
+      }
       if (status != null && status.isNotEmpty) queryParams['status'] = status;
 
       final response = await _apiClient
@@ -46,8 +48,9 @@ class KitchenOrdersRepository extends BaseRepository
 
       return response.when(
         success: (data) {
-          if (data == null)
+          if (data == null) {
             return ApiResponse.errorMessage('No orders data received.');
+          }
           final list = (data as List<dynamic>)
               .map((e) => KitchenOrder.fromJson(e as Map<String, dynamic>))
               .toList();
@@ -87,19 +90,23 @@ class KitchenOrdersRepository extends BaseRepository
       return 'Unauthorized access. Please login again.';
     }
     if (code == 403 || lower.contains('forbidden')) {
-      if (lower.contains('missing permission'))
+      if (lower.contains('missing permission')) {
         return 'Permission denied: $error';
+      }
       return 'Access denied. Please contact support.';
     }
-    if (code == 404 || lower.contains('not found'))
+    if (code == 404 || lower.contains('not found')) {
       return 'No orders found for this branch.';
-    if (code >= 500 || lower.contains('internal server'))
+    }
+    if (code >= 500 || lower.contains('internal server')) {
       return 'Server error. Please try again later.';
+    }
     if (lower.contains('503') || lower.contains('service unavailable')) {
       return 'Service temporarily unavailable. Please try again later.';
     }
-    if (lower.contains('network') || lower.contains('connection'))
+    if (lower.contains('network') || lower.contains('connection')) {
       return 'Network error. Please check your connection.';
+    }
     if (lower.contains('timeout')) return 'Request timeout. Please try again.';
 
     return fallback;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/goods_received_advanced_cubit/goods_received_advanced_cubit.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/goods_received_advanced_cubit/goods_received_advanced_state.dart';
@@ -19,15 +20,22 @@ class _GoodsReceivedOverviewScreenState
   @override
   void initState() {
     super.initState();
-    context.read<GoodsReceivedAdvancedCubit>().loadOverview();
+    _loadOverview();
+  }
+
+  Future<void> _loadOverview() async {
+    final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    if (!mounted) return;
+    await context.read<GoodsReceivedAdvancedCubit>().loadOverview(
+      branchId: branchId.isEmpty ? null : branchId,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
       color: context.modePrimary,
-      onRefresh: () =>
-          context.read<GoodsReceivedAdvancedCubit>().loadOverview(),
+      onRefresh: _loadOverview,
       child:
           BlocBuilder<GoodsReceivedAdvancedCubit, GoodsReceivedAdvancedState>(
             builder: (context, state) {

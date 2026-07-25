@@ -39,13 +39,15 @@ class _GoodsReceivedTabScreenState extends State<GoodsReceivedTabScreen>
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) =>
-              GoodsReceivedBloc(repository: GoodsReceivedRepository()),
+          create: (context) => GoodsReceivedBloc(
+            repository: context.read<GoodsReceivedRepositoryInterface>(),
+          ),
         ),
         BlocProvider(
           create: (context) => GoodsReceivedAdvancedCubit(
-            goodsReceivedRepository: GoodsReceivedRepository(),
-            reorderRepository: ReorderRepository(),
+            goodsReceivedRepository: context
+                .read<GoodsReceivedRepositoryInterface>(),
+            reorderRepository: context.read<ReorderRepositoryInterface>(),
           ),
         ),
       ],

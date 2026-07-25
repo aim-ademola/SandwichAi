@@ -191,7 +191,7 @@ class _StatsChart extends StatelessWidget {
           const SizedBox(height: 18),
           if (total == 0)
             const _StateMessage(
-              icon: Icons.pie_chart_outline,
+              icon: Icons.analytics_outlined,
               title: 'No order statistics yet',
               message: '',
             )

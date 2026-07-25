@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -22,11 +23,13 @@ final NumberFormat _commaFormatter = NumberFormat('#,##0');
 class _ReportShortcut {
   final IconData icon;
   final String title;
+  final String subtitle;
   final Widget screen;
 
   const _ReportShortcut({
     required this.icon,
     required this.title,
+    required this.subtitle,
     required this.screen,
   });
 }
@@ -42,7 +45,6 @@ class StockControlDashboardBodyScreen extends StatefulWidget {
 class _StockControlDashboardBodyScreenState
     extends State<StockControlDashboardBodyScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _isTotalValueVisible = true;
 
   @override
   void initState() {
@@ -267,12 +269,6 @@ class _StockControlDashboardBodyScreenState
   Widget _buildBody(BuildContext context, dynamic loadedState) {
     final state = loadedState is BranchStockSummaryLoaded ? loadedState : null;
 
-    void toggleVisibility() {
-      setState(() {
-        _isTotalValueVisible = !_isTotalValueVisible;
-      });
-    }
-
     if (state == null) return const SizedBox.shrink();
 
     final response = state.response;
@@ -287,7 +283,7 @@ class _StockControlDashboardBodyScreenState
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: maxContentWidth),
             child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.only(top: 8, bottom: 16),
               children: [
                 _buildStatsCards(constraints.maxWidth, overview),
                 SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
@@ -301,8 +297,6 @@ class _StockControlDashboardBodyScreenState
                   child: _buildTotalStockCard(
                     constraints.maxWidth,
                     overview.totalValue,
-                    _isTotalValueVisible,
-                    toggleVisibility,
                   ),
                 ),
                 SizedBox(height: _getSectionSpacing(constraints.maxWidth)),
@@ -332,41 +326,89 @@ class _StockControlDashboardBodyScreenState
   }
 
   Widget _buildStatsCards(double screenWidth, Overview overview) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        child: Row(
-          children: [
-            _buildStatCard(
-              'Total Items',
-              overview.totalItems,
-              context.modePrimary,
-              screenWidth,
+    final horizontalPadding = _getHorizontalPadding(screenWidth);
+    final spacing = _getCardSpacing(screenWidth);
+    final visibleCards = screenWidth < 600 ? 3 : 4;
+    final availableWidth =
+        screenWidth - (horizontalPadding * 2) - (spacing * (visibleCards - 1));
+    final cardWidth = (availableWidth / visibleCards).clamp(86.0, 160.0);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Inventory Overview',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: screenWidth < 360 ? 20 : 22,
+              fontWeight: FontWeight.w800,
+              color: context.modeTextPrimary,
+              height: 1.05,
             ),
-            SizedBox(width: _getCardSpacing(screenWidth)),
-            _buildStatCard(
-              'Total Stock Quantity',
-              overview.totalStockQuantity,
-              context.modePrimary,
-              screenWidth,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'A quick snapshot of your inventory',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: context.modeTextSecondary,
             ),
-            SizedBox(width: _getCardSpacing(screenWidth)),
-            _buildStatCard(
-              'In Stock',
-              overview.statusBreakdown.inStock,
-              context.modePrimary,
-              screenWidth,
+          ),
+          const SizedBox(height: 14),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: cardWidth,
+                  child: _buildStatCard(
+                    icon: Icons.inventory_2_outlined,
+                    label: 'Total Items',
+                    value: overview.totalItems,
+                    valueColor: context.modePrimary,
+                    screenWidth: screenWidth,
+                  ),
+                ),
+                SizedBox(width: spacing),
+                SizedBox(
+                  width: cardWidth,
+                  child: _buildStatCard(
+                    icon: Icons.category_outlined,
+                    label: 'Total Stock Quantity',
+                    value: overview.totalStockQuantity,
+                    valueColor: context.modePrimary,
+                    screenWidth: screenWidth,
+                  ),
+                ),
+                SizedBox(width: spacing),
+                SizedBox(
+                  width: cardWidth,
+                  child: _buildStatCard(
+                    icon: Icons.fact_check_outlined,
+                    label: 'In Stock',
+                    value: overview.statusBreakdown.inStock,
+                    valueColor: context.modePrimary,
+                    screenWidth: screenWidth,
+                  ),
+                ),
+                SizedBox(width: spacing),
+                SizedBox(
+                  width: cardWidth,
+                  child: _buildStatCard(
+                    icon: Icons.warning_amber_rounded,
+                    label: 'Expired',
+                    value: overview.statusBreakdown.expired,
+                    valueColor: context.modePrimary,
+                    screenWidth: screenWidth,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: _getCardSpacing(screenWidth)),
-            _buildStatCard(
-              'Expired Stock',
-              overview.statusBreakdown.expired,
-              context.modeError,
-              screenWidth,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -376,6 +418,7 @@ class _StockControlDashboardBodyScreenState
       _ReportShortcut(
         icon: Icons.summarize_outlined,
         title: 'Reports',
+        subtitle: 'View and analyze detailed stock reports',
         screen: const StockReportsScreen(),
       ),
     ];
@@ -392,116 +435,192 @@ class _StockControlDashboardBodyScreenState
           ),
         ),
         const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: shortcuts.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 1,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: screenWidth < 360 ? 3.1 : 4.5,
-          ),
-          itemBuilder: (context, index) {
-            final shortcut = shortcuts[index];
-            return InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => shortcut.screen),
-                );
-              },
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.modeSurface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: context.modePrimary.withValues(alpha: 0.22),
+        ...shortcuts.map((shortcut) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => shortcut.screen),
+                  );
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Ink(
+                  height: screenWidth < 360 ? 72 : 78,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                    color: context.modeSurface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: context.modePrimary.withValues(alpha: 0.22),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: context.modePrimary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: AppIcon(
+                            shortcut.icon,
+                            color: context.modePrimary,
+                            size: 19,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              shortcut.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: context.modeTextPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              shortcut.subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: context.modeTextSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      AppIcon(
+                        Icons.chevron_right_rounded,
+                        color: context.modePrimary,
+                        size: 20,
+                      ),
+                    ],
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Center(
-                      child: AppIcon(
-                        shortcut.icon,
-                        color: context.modePrimary,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      shortcut.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: context.modeTextPrimary,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        }),
       ],
     );
   }
 
-  Widget _buildStatCard(
-    String label,
-    num value,
-    Color valueColor,
-    double screenWidth,
-  ) {
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required num value,
+    required Color valueColor,
+    required double screenWidth,
+  }) {
     final labelFontSize = _getStatLabelFontSize(screenWidth);
     final valueFontSize = _getStatValueFontSize(screenWidth);
 
     final formattedValue = _commaFormatter.format(value);
 
-    return Container(
-      padding: EdgeInsets.all(_getStatCardPadding(screenWidth)),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modePrimary, width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: labelFontSize,
-              fontWeight: FontWeight.w400,
-              color: context.modeTextMuted,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: _getStatCardHeight(screenWidth),
+        padding: EdgeInsets.all(_getStatCardPadding(screenWidth)),
+        decoration: BoxDecoration(
+          color: context.modeSurface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.2
+                    : 0.06,
+              ),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
-          ),
-          SizedBox(height: _getStatValueSpacing(screenWidth)),
-          Text(
-            formattedValue,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: valueFontSize,
-              fontWeight: FontWeight.w700,
-              color: valueColor,
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -34,
+              bottom: -30,
+              child: Container(
+                width: 104,
+                height: 62,
+                decoration: BoxDecoration(
+                  color: context.modePrimary.withValues(alpha: 0.07),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
             ),
-          ),
-        ],
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: context.modePrimary.withValues(alpha: 0.09),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: AppIcon(icon, color: context.modePrimary, size: 15),
+                  ),
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: labelFontSize,
+                    fontWeight: FontWeight.w500,
+                    color: context.modeTextSecondary,
+                    height: 1.15,
+                  ),
+                ),
+                SizedBox(height: _getStatValueSpacing(screenWidth)),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      formattedValue,
+                      maxLines: 1,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: valueFontSize,
+                        fontWeight: FontWeight.w800,
+                        color: valueColor,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildTotalStockCard(
-    double screenWidth,
-    double totalValue,
-    bool isValueVisible,
-    VoidCallback onToggleVisibility,
-  ) {
+  Widget _buildTotalStockCard(double screenWidth, double totalValue) {
     final labelFontSize = _getTotalStockLabelFontSize(screenWidth);
     final valueFontSize = _getTotalStockValueFontSize(screenWidth);
 
@@ -523,79 +642,76 @@ class _StockControlDashboardBodyScreenState
           ),
         ],
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: context.modePrimary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: AppIcon(
-                Icons.account_balance_wallet_outlined,
-                color: context.modePrimary,
-                size: 24,
+          Positioned(
+            right: screenWidth < 360 ? -32 : -22,
+            bottom: -16,
+            child: Opacity(
+              opacity: Theme.of(context).brightness == Brightness.dark
+                  ? 0.16
+                  : 0.42,
+              child: SvgPicture.asset(
+                'assets/svg/stock_value_wallet.svg',
+                width: screenWidth < 360 ? 116 : 142,
               ),
             ),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Total Stock Value',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: labelFontSize,
-                    fontWeight: FontWeight.w500,
-                    color: context.modeTextSecondary,
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: context.modePrimary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: AppIcon(
+                    Icons.account_balance_wallet_outlined,
+                    color: context.modePrimary,
+                    size: 24,
                   ),
                 ),
-                SizedBox(height: _getTotalStockValueSpacing(screenWidth)),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0, 0.2),
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: child,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: screenWidth < 360 ? 42 : 58),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Stock Value',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: labelFontSize,
+                          fontWeight: FontWeight.w500,
+                          color: context.modeTextSecondary,
+                        ),
                       ),
-                    );
-                  },
-                  child: Text(
-                    isValueVisible ? _formatCurrency(totalValue) : '••••••',
-                    key: ValueKey(isValueVisible),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: valueFontSize,
-                      fontWeight: FontWeight.w700,
-                      color: context.modeTextPrimary,
-                    ),
+                      SizedBox(height: _getTotalStockValueSpacing(screenWidth)),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            _formatCurrency(totalValue),
+                            maxLines: 1,
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: valueFontSize,
+                              fontWeight: FontWeight.w800,
+                              color: context.modeTextPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            tooltip: isValueVisible ? 'Hide value' : 'Show value',
-            onPressed: onToggleVisibility,
-            icon: Center(
-              child: AppIcon(
-                isValueVisible
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                color: context.modeTextMuted,
-                size: 20,
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -841,21 +957,27 @@ class _StockControlDashboardBodyScreenState
   }
 
   double _getStatCardPadding(double width) {
-    if (width < 360) return 16;
-    if (width < 600) return 18;
-    return 20;
+    if (width < 360) return 8;
+    if (width < 600) return 14;
+    return 16;
+  }
+
+  double _getStatCardHeight(double width) {
+    if (width < 360) return 100;
+    if (width < 600) return 122;
+    return 112;
   }
 
   double _getStatLabelFontSize(double width) {
-    if (width < 360) return 13;
-    if (width < 600) return 14;
-    return 15;
+    if (width < 360) return 10;
+    if (width < 600) return 12;
+    return 13;
   }
 
   double _getStatValueFontSize(double width) {
-    if (width < 360) return 28;
-    if (width < 600) return 32;
-    return 36;
+    if (width < 360) return 19;
+    if (width < 600) return 24;
+    return 28;
   }
 
   double _getStatValueSpacing(double width) {
@@ -877,9 +999,9 @@ class _StockControlDashboardBodyScreenState
   }
 
   double _getTotalStockValueFontSize(double width) {
-    if (width < 360) return 28;
-    if (width < 600) return 32;
-    return 36;
+    if (width < 360) return 18;
+    if (width < 600) return 21;
+    return 28;
   }
 
   double _getTotalStockValueSpacing(double width) {

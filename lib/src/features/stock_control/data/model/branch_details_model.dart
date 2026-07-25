@@ -45,12 +45,12 @@ class BranchStockDetails {
       itemId: data['itemId'] as String,
       branchId: data['branchId'] as String,
       organizationId: data['organizationId'] as String,
-      currentStock: data['currentStock'] as String,
-      reorderLevel: data['reorderLevel'] as String,
-      maxLevel: data['maxLevel'] as String,
-      unitCost: data['unitCost'] as String,
-      totalValue: data['totalValue'] as String,
-      status: data['status'] as String,
+      currentStock: _stringValue(data['currentStock']),
+      reorderLevel: _stringValue(data['reorderLevel']),
+      maxLevel: _stringValue(data['maxLevel']),
+      unitCost: _stringValue(data['unitCost']),
+      totalValue: _stringValue(data['totalValue']),
+      status: _stringValue(data['status'], fallback: 'UNKNOWN'),
       expiryDate: data['expiryDate'] != null
           ? DateTime.parse(data['expiryDate'] as String)
           : null,
@@ -137,16 +137,28 @@ class ItemInfo {
   factory ItemInfo.fromJson(Map<String, dynamic> json) {
     return ItemInfo(
       id: json['id'] as String,
-      itemName: json['itemName'] as String,
-      category: json['category'] as String,
-      unit: json['unit'] as String,
-      description: json['description'] as String?,
-      sku: json['sku'] as String,
+      itemName: _stringValue(json['itemName']),
+      category: _stringValue(json['category']),
+      unit: _stringValue(json['unit']),
+      description: _nullableString(json['description']),
+      sku: _stringValue(json['sku']),
       organizationId: json['organizationId'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
+}
+
+String? _nullableString(dynamic value) {
+  if (value == null) return null;
+  final text = value.toString().trim();
+  if (text.isEmpty || text.toLowerCase() == 'null') return null;
+  return text;
+}
+
+String _stringValue(dynamic value, {String fallback = '0'}) {
+  final text = _nullableString(value);
+  return text ?? fallback;
 }
 
 class BranchInfo {
@@ -159,8 +171,8 @@ class BranchInfo {
   factory BranchInfo.fromJson(Map<String, dynamic> json) {
     return BranchInfo(
       id: json['id'] as String,
-      name: json['name'] as String,
-      branchCode: json['branch_code'] as String,
+      name: _stringValue(json['name'], fallback: ''),
+      branchCode: _stringValue(json['branch_code'], fallback: ''),
     );
   }
 }

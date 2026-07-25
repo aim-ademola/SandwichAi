@@ -9,11 +9,11 @@ class ModuleInfoBottomSheet extends StatelessWidget {
   final List<String> useCases;
 
   const ModuleInfoBottomSheet({
-    Key? key,
+    super.key,
     required this.title,
     required this.description,
     required this.useCases,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,8 +133,7 @@ class InfoIconButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final double size;
 
-  const InfoIconButton({Key? key, this.onPressed, this.size = 20})
-    : super(key: key);
+  const InfoIconButton({super.key, this.onPressed, this.size = 20});
 
   @override
   Widget build(BuildContext context) {

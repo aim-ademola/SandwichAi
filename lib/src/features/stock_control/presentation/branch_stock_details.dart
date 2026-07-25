@@ -9,7 +9,9 @@ import 'package:sandwich_ai/src/features/stock_control/bloc/branch_details_bloc/
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/event.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/state.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/model/branch_assignment_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/branch_details_model.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/repo/branch_assignment_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/shimmer_card.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_adjustmnt.dart';
 
@@ -71,6 +73,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: dialogContext.modeSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
@@ -80,10 +83,12 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                 color: const Color(0xFFFFEBEE),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const AppIcon(
-                Icons.warning_rounded,
-                color: Color(0xFFEF4444),
-                size: 24,
+              child: const Center(
+                child: AppIcon(
+                  Icons.warning_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 24,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -93,7 +98,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: kprimaryTextColor1,
+                  color: dialogContext.modeTextPrimary,
                 ),
               ),
             ),
@@ -103,7 +108,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
           'Are you sure you want to delete "${details.item.itemName}"? This action cannot be undone.',
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: kprimaryTextColor2,
+            color: dialogContext.modeTextSecondary,
           ),
         ),
         actions: [
@@ -114,7 +119,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor2,
+                color: dialogContext.modeTextSecondary,
               ),
             ),
           ),
@@ -175,6 +180,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: dialogContext.modeSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
@@ -186,7 +192,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: kprimaryTextColor1,
+                  color: dialogContext.modeTextPrimary,
                 ),
               ),
             ),
@@ -196,13 +202,16 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
           message,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: 14,
-            color: kprimaryTextColor2,
+            color: dialogContext.modeTextSecondary,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: dialogContext.modeTextSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -220,26 +229,183 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
     );
   }
 
+  void _showBranchAvailability(BranchStockDetails details) {
+    final repository = context.read<BranchAssignmentRepositoryInterface>();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.64,
+          minChildSize: 0.42,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: context.modeSurface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              child: FutureBuilder(
+                future: repository.getItemBranchAssignments(details.item.id),
+                builder: (context, snapshot) {
+                  final isLoading =
+                      snapshot.connectionState == ConnectionState.waiting;
+                  final response = snapshot.data;
+                  final assignments =
+                      response?.data?.assignments ??
+                      const <ItemBranchAssignment>[];
+
+                  return Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      Container(
+                        width: 42,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: context.modeDivider,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 18, 12, 12),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: kPrimary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Center(
+                                child: AppIcon(
+                                  Icons.storefront_outlined,
+                                  color: kPrimary,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Available in Branches',
+                                    style: WorkSansAppTextStyles.medium
+                                        .copyWith(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w700,
+                                          color: context.modeTextPrimary,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    details.item.itemName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: WorkSansAppTextStyles.medium
+                                        .copyWith(
+                                          fontSize: 13,
+                                          color: context.modeTextSecondary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => Navigator.pop(context),
+                              icon: AppIcon(
+                                Icons.close,
+                                color: context.modeTextSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(height: 1, color: context.modeDivider),
+                      Expanded(
+                        child: Builder(
+                          builder: (context) {
+                            if (isLoading) {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  color: context.modePrimary,
+                                ),
+                              );
+                            }
+
+                            if (snapshot.hasError ||
+                                (response != null && !response.isSuccess)) {
+                              return _buildBranchAvailabilityMessage(
+                                icon: Icons.lock_outline,
+                                title: 'Could not load branches',
+                                message:
+                                    response?.error?.message ??
+                                    'Please try again.',
+                              );
+                            }
+
+                            if (assignments.isEmpty) {
+                              return _buildBranchAvailabilityMessage(
+                                icon: Icons.storefront_outlined,
+                                title: 'No branches found',
+                                message:
+                                    'This item is not associated with another branch yet.',
+                              );
+                            }
+
+                            return ListView.separated(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(16),
+                              itemCount: assignments.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 10),
+                              itemBuilder: (context, index) {
+                                final assignment = assignments[index];
+                                return _buildBranchAvailabilityTile(
+                                  assignment,
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: context.modeSurface,
           elevation: 0,
+          surfaceTintColor: Colors.transparent,
           title: Text(
             widget.itemName,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
           centerTitle: true,
           leading: IconButton(
-            icon: const AppIcon(Icons.arrow_back, color: kprimaryTextColor1),
+            icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
@@ -247,9 +413,10 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               builder: (context, state) {
                 if (state is BranchStockDetailsLoaded) {
                   return PopupMenuButton<String>(
-                    icon: const AppIcon(
+                    color: context.modeSurface,
+                    icon: AppIcon(
                       Icons.more_vert,
-                      color: kprimaryTextColor1,
+                      color: context.modeTextPrimary,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -300,6 +467,9 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                             },
                           );
                           break;
+                        case 'branch_availability':
+                          _showBranchAvailability(state.details);
+                          break;
                         case 'delete':
                           _showDeleteConfirmation(state.details);
                           break;
@@ -320,7 +490,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                               'Adjust Stock',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                           ],
@@ -340,7 +510,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                               'Allow Negative Stock',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                           ],
@@ -360,7 +530,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                               'Lock Item',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                           ],
@@ -380,7 +550,27 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                               'Unlock Item',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'branch_availability',
+                        child: Row(
+                          children: [
+                            AppIcon(
+                              Icons.storefront_outlined,
+                              size: 20,
+                              color: kPrimary,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Available in Branches',
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 14,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                           ],
@@ -518,7 +708,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 16,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -557,6 +747,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
     final stockPercentage = details.stockPercentage;
     final isLowStock = stockPercentage <= 25;
     final isCritical = stockPercentage <= 10;
+    final description = _cleanDisplayText(details.item.description);
 
     return RefreshIndicator(
       color: kPrimary,
@@ -605,7 +796,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                               'Current Stock',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
-                                color: kprimaryTextColor2,
+                                color: context.modeTextSecondary,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -614,7 +805,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 32,
                                 fontWeight: FontWeight.w700,
-                                color: kprimaryTextColor1,
+                                color: context.modeTextPrimary,
                               ),
                             ),
                           ],
@@ -659,7 +850,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                               'Stock Level',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 13,
-                                color: kprimaryTextColor2,
+                                color: context.modeTextSecondary,
                               ),
                             ),
                             Text(
@@ -678,7 +869,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                           child: LinearProgressIndicator(
                             value: stockPercentage / 100,
                             minHeight: 10,
-                            backgroundColor: Colors.grey.shade200,
+                            backgroundColor: context.modeSurfaceAlt,
                             valueColor: AlwaysStoppedAnimation<Color>(
                               statusColor,
                             ),
@@ -762,6 +953,13 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
 
             const SizedBox(height: 24),
 
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _buildBranchAvailabilityButton(details),
+            ),
+
+            const SizedBox(height: 24),
+
             // Stock Levels Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -770,7 +968,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ),
@@ -780,11 +978,12 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: context.modeBorder, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
+                      color: context.modeTextPrimary.withValues(alpha: 0.04),
                       blurRadius: 12,
                       offset: const Offset(0, 2),
                     ),
@@ -829,7 +1028,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ),
@@ -839,11 +1038,12 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: context.modeBorder, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
+                      color: context.modeTextPrimary.withValues(alpha: 0.04),
                       blurRadius: 12,
                       offset: const Offset(0, 2),
                     ),
@@ -880,7 +1080,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ),
@@ -891,11 +1091,12 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.modeSurface,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: context.modeBorder, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
+                      color: context.modeTextPrimary.withValues(alpha: 0.04),
                       blurRadius: 12,
                       offset: const Offset(0, 2),
                     ),
@@ -910,9 +1111,9 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                     _buildDetailRow('SKU', details.item.sku),
                     const SizedBox(height: 16),
                     _buildDetailRow('Unit', details.item.unit),
-                    if (details.item.description != null) ...[
+                    if (description != null) ...[
                       const SizedBox(height: 16),
-                      _buildDetailRow('Description', details.item.description!),
+                      _buildDetailRow('Description', description),
                     ],
                     const SizedBox(height: 16),
                     _buildDetailRow('Branch', details.branch.name),
@@ -967,7 +1168,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: AppIcon(icon, color: iconColor, size: 22),
+            child: Center(child: AppIcon(icon, color: iconColor, size: 22)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -978,7 +1179,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                   label,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -987,13 +1188,190 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBranchAvailabilityButton(BranchStockDetails details) {
+    return Material(
+      color: context.modeSurface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _showBranchAvailability(details),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.modeBorder),
+            boxShadow: [
+              BoxShadow(
+                color: context.modeTextPrimary.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: kPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Center(
+                  child: AppIcon(
+                    Icons.storefront_outlined,
+                    color: kPrimary,
+                    size: 22,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Available in Branches',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: context.modeTextPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'See branches associated with this item',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 12,
+                        color: context.modeTextSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              AppIcon(Icons.chevron_right, color: context.modeTextSecondary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBranchAvailabilityTile(ItemBranchAssignment assignment) {
+    final name = assignment.branchName.isEmpty
+        ? 'Branch'
+        : assignment.branchName;
+    final code = assignment.branchCode;
+    final status = assignment.status;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.modeSurfaceAlt,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.modeBorder),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: kPrimary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Center(
+              child: AppIcon(
+                Icons.store_mall_directory_outlined,
+                color: kPrimary,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+                if (code.isNotEmpty || status.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    [
+                      if (code.isNotEmpty) code,
+                      if (status.isNotEmpty) status,
+                    ].join(' | '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 12,
+                      color: context.modeTextSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBranchAvailabilityMessage({
+    required IconData icon,
+    required String title,
+    required String message,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppIcon(icon, size: 48, color: context.modeTextMuted),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: context.modeTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 13,
+                color: context.modeTextSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1031,7 +1409,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
               color: kPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: AppIcon(icon, color: kPrimary, size: 22),
+            child: Center(child: AppIcon(icon, color: kPrimary, size: 22)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1042,7 +1420,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                   label,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 13,
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -1051,7 +1429,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: isHighlighted ? 18 : 16,
                     fontWeight: FontWeight.w600,
-                    color: isHighlighted ? kPrimary : kprimaryTextColor1,
+                    color: isHighlighted ? kPrimary : context.modeTextPrimary,
                   ),
                 ),
               ],
@@ -1072,7 +1450,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 14,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
           ),
         ),
@@ -1099,7 +1477,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                     fontWeight: FontWeight.w600,
                     color: isWarning
                         ? const Color(0xFFF59E0B)
-                        : kprimaryTextColor1,
+                        : context.modeTextPrimary,
                   ),
                 ),
               ),
@@ -1113,7 +1491,15 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
   Widget _buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Divider(color: Colors.grey.shade200, height: 1),
+      child: Divider(color: context.modeDivider, height: 1),
     );
+  }
+
+  String? _cleanDisplayText(String? value) {
+    final text = value?.trim();
+    if (text == null || text.isEmpty || text.toLowerCase() == 'null') {
+      return null;
+    }
+    return text;
   }
 }

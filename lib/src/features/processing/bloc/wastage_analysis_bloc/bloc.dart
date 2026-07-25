@@ -21,7 +21,7 @@ class WastageAnalysisBloc
     on<UpdateAnalysisPeriod>(_onUpdateAnalysisPeriod);
   }
 
-  _getIds() async {
+  Future<void> _getIds() async {
     branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
     organizationId = await AuthCacheHelper.instance.getOrgId() ?? '';
   }

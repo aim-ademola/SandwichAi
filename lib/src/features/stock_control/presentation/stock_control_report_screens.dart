@@ -132,6 +132,8 @@ class ExpiryTrackingScreen extends StatefulWidget {
 
 class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
   String _branchId = '';
+  DateTime? _expiryUntilDate;
+  bool _includeExpired = false;
 
   @override
   void initState() {
@@ -144,7 +146,40 @@ class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
     if (!mounted) return;
     context.read<StockControlReportsCubit>().loadExpiryTracking(
       branchId: _branchId,
+      withinDays: _selectedWithinDays,
+      includeExpired: _includeExpired,
     );
+  }
+
+  int? get _selectedWithinDays {
+    final date = _expiryUntilDate;
+    if (date == null) return null;
+    final today = DateUtils.dateOnly(DateTime.now());
+    final selected = DateUtils.dateOnly(date);
+    return selected.difference(today).inDays.clamp(0, 3650);
+  }
+
+  bool get _hasFilters => _expiryUntilDate != null || _includeExpired;
+
+  Future<void> _pickExpiryUntilDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _expiryUntilDate ?? now.add(const Duration(days: 30)),
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 3650)),
+    );
+    if (picked == null) return;
+    setState(() => _expiryUntilDate = picked);
+    await _load();
+  }
+
+  Future<void> _clearFilters() async {
+    setState(() {
+      _expiryUntilDate = null;
+      _includeExpired = false;
+    });
+    await _load();
   }
 
   @override
@@ -167,6 +202,18 @@ class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  _ExpiryFilterBar(
+                    expiryUntilDate: _expiryUntilDate,
+                    includeExpired: _includeExpired,
+                    hasFilters: _hasFilters,
+                    onPickDate: _pickExpiryUntilDate,
+                    onIncludeExpiredChanged: (value) async {
+                      setState(() => _includeExpired = value);
+                      await _load();
+                    },
+                    onClear: _clearFilters,
+                  ),
+                  const SizedBox(height: 16),
                   if (summary != null) _ExpirySummaryGrid(summary: summary),
                   if (summary != null) const SizedBox(height: 16),
                   ...report.items.indexed.expand((entry) sync* {
@@ -269,6 +316,144 @@ class _NegativeStockReportScreenState extends State<NegativeStockReportScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _ExpiryFilterBar extends StatelessWidget {
+  final DateTime? expiryUntilDate;
+  final bool includeExpired;
+  final bool hasFilters;
+  final VoidCallback onPickDate;
+  final ValueChanged<bool> onIncludeExpiredChanged;
+  final VoidCallback onClear;
+
+  const _ExpiryFilterBar({
+    required this.expiryUntilDate,
+    required this.includeExpired,
+    required this.hasFilters,
+    required this.onPickDate,
+    required this.onIncludeExpiredChanged,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _FilterChipButton(
+          icon: Icons.calendar_today_outlined,
+          label: expiryUntilDate == null
+              ? 'Until date'
+              : 'Until ${_formatShortDate(expiryUntilDate!)}',
+          isActive: expiryUntilDate != null,
+          onTap: onPickDate,
+        ),
+        FilterChip(
+          avatar: AppIcon(
+            Icons.history_toggle_off_outlined,
+            size: 18,
+            color: includeExpired
+                ? context.modeTextInverse
+                : context.modeTextSecondary,
+          ),
+          label: Text(
+            'Include expired',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 13,
+              color: includeExpired
+                  ? context.modeTextInverse
+                  : context.modeTextPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          selected: includeExpired,
+          showCheckmark: false,
+          selectedColor: context.modePrimary,
+          backgroundColor: context.modeSurface,
+          side: BorderSide(
+            color: includeExpired ? context.modePrimary : context.modeBorder,
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          onSelected: onIncludeExpiredChanged,
+        ),
+        if (hasFilters)
+          TextButton.icon(
+            onPressed: onClear,
+            icon: const AppIcon(Icons.clear, size: 18),
+            label: Text(
+              'Clear',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  static String _formatShortDate(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '$day/$month/${date.year}';
+  }
+}
+
+class _FilterChipButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _FilterChipButton({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        decoration: BoxDecoration(
+          color: isActive ? context.modePrimary : context.modeSurface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isActive ? context.modePrimary : context.modeBorder,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppIcon(
+              icon,
+              size: 18,
+              color: isActive
+                  ? context.modeTextInverse
+                  : context.modeTextSecondary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 13,
+                color: isActive
+                    ? context.modeTextInverse
+                    : context.modeTextPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

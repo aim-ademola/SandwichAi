@@ -17,16 +17,24 @@ class LoadChatRooms extends ChatEvent {
   final String? branchId;
   final bool includeArchived;
   final bool starredOnly;
+  final bool showLoading;
 
   const LoadChatRooms({
     this.type,
     this.branchId,
     this.includeArchived = false,
     this.starredOnly = false,
+    this.showLoading = true,
   });
 
   @override
-  List<Object?> get props => [type, branchId, includeArchived, starredOnly];
+  List<Object?> get props => [
+    type,
+    branchId,
+    includeArchived,
+    starredOnly,
+    showLoading,
+  ];
 }
 
 class LoadChatRoom extends ChatEvent {

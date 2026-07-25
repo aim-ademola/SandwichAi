@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chatroom_bloc/event.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chatroom_bloc/state.dart';
 import 'package:sandwich_ai/src/core/globals/chat/data/model/cht_model.dart';
@@ -30,12 +29,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   //  Rooms ──
 
+  void _logChat(Object? message) {
+    // Chat is intentionally quiet in debug logs because room/message payloads
+    // are noisy and can contain user content.
+  }
+
   Future<void> _onLoadChatRooms(
     LoadChatRooms event,
     Emitter<ChatState> emit,
   ) async {
     try {
-      emit(const ChatRoomsLoading());
+      if (event.showLoading || state is! ChatRoomsLoaded) {
+        emit(const ChatRoomsLoading());
+      }
 
       final response = await _repository.getChatRooms(
         type: event.type,
@@ -46,8 +52,18 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       await response.when(
         success: (rooms) async {
-          AppLogger.log('Loaded ${rooms.length} chat rooms');
-          emit(ChatRoomsLoaded(rooms: rooms));
+          _logChat('Loaded ${rooms.length} chat rooms');
+          final current = state;
+          final unreadCounts = current is ChatRoomsLoaded
+              ? current.unreadCounts
+              : const <UnreadCountModel>[];
+
+          emit(
+            ChatRoomsLoaded(
+              rooms: _roomsWithUnreadCounts(rooms, unreadCounts),
+              unreadCounts: unreadCounts,
+            ),
+          );
         },
         error: (error) async {
           emit(ChatRoomsError(error: error.toString()));
@@ -71,15 +87,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           final current = state;
           if (current is ChatMessagesLoaded &&
               current.chatRoomId == event.roomId) {
-            emit(current.copyWith(room: room));
+            emit(current.copyWith(room: room.copyWith(unreadCount: 0)));
           }
         },
         error: (error) async {
-          AppLogger.log('Load room error: $error');
+          _logChat('Load room error: $error');
         },
       );
     } catch (e) {
-      AppLogger.log('Load room exception: $e');
+      _logChat('Load room exception: $e');
     }
   }
 
@@ -126,7 +142,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       await response.when(
         success: (messages) async {
-          AppLogger.log(
+          _logChat(
             'Loaded ${messages.length} messages for ${event.chatRoomId}',
           );
 
@@ -195,12 +211,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           );
         },
         error: (error) async {
-          AppLogger.log('Load more messages error (ignored): $error');
+          _logChat('Load more messages error (ignored): $error');
           emit(current.copyWith(isLoadingMore: false));
         },
       );
     } catch (e) {
-      AppLogger.log('Load more messages exception: $e');
+      _logChat('Load more messages exception: $e');
       if (state is ChatMessagesLoaded) {
         emit((state as ChatMessagesLoaded).copyWith(isLoadingMore: false));
       }
@@ -242,7 +258,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       await response.when(
         success: (serverMsg) async {
-          AppLogger.log('Message sent: ${serverMsg.messageId}');
+          _logChat('Message sent: ${serverMsg.messageId}');
           final updated = state;
           if (updated is ChatMessagesLoaded) {
             final newList = updated.messages
@@ -252,7 +268,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           }
         },
         error: (error) async {
-          AppLogger.log('Send message error: $error');
+          _logChat('Send message error: $error');
           final updated = state;
           if (updated is ChatMessagesLoaded) {
             // Remove optimistic message but STAY in ChatMessagesLoaded
@@ -344,15 +360,20 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         success: (counts) async {
           final current = state;
           if (current is ChatRoomsLoaded) {
-            emit(current.copyWith(unreadCounts: counts));
+            emit(
+              current.copyWith(
+                rooms: _roomsWithUnreadCounts(current.rooms, counts),
+                unreadCounts: counts,
+              ),
+            );
           }
         },
         error: (error) async {
-          AppLogger.log('Load unread counts error (ignored): $error');
+          _logChat('Load unread counts error (ignored): $error');
         },
       );
     } catch (e) {
-      AppLogger.log('Load unread counts exception: $e');
+      _logChat('Load unread counts exception: $e');
     }
   }
 
@@ -361,10 +382,53 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     Emitter<ChatState> emit,
   ) async {
     try {
-      await _repository.markAsRead(request: event.request);
+      _clearUnreadCountForRoom(event.request.chatRoomId, emit);
+
+      _logChat(
+        'Marking room as read: room=${event.request.chatRoomId}, lastReadMessage=${event.request.lastReadMessageId}',
+      );
+      final response = await _repository.markAsRead(request: event.request);
+
+      if (!response.isSuccess) {
+        _logChat(
+          'Mark as read error (ignored): ${response.error ?? 'Unknown error'}',
+        );
+      }
     } catch (e) {
-      AppLogger.log('Mark as read exception (ignored): $e');
+      _logChat('Mark as read exception (ignored): $e');
     }
+  }
+
+  void _clearUnreadCountForRoom(String roomId, Emitter<ChatState> emit) {
+    final current = state;
+    if (current is ChatRoomsLoaded) {
+      emit(
+        current.copyWith(
+          rooms: current.rooms.map((room) {
+            if (room.id != roomId) return room;
+            return room.copyWith(unreadCount: 0);
+          }).toList(),
+          unreadCounts: current.unreadCounts
+              .where((count) => count.chatRoomId != roomId)
+              .toList(),
+        ),
+      );
+    } else if (current is ChatMessagesLoaded && current.chatRoomId == roomId) {
+      emit(current.copyWith(room: current.room?.copyWith(unreadCount: 0)));
+    }
+  }
+
+  List<ChatRoomModel> _roomsWithUnreadCounts(
+    List<ChatRoomModel> rooms,
+    List<UnreadCountModel> unreadCounts,
+  ) {
+    final unreadByRoom = {
+      for (final count in unreadCounts) count.chatRoomId: count.unreadCount,
+    };
+
+    return rooms
+        .map((room) => room.copyWith(unreadCount: unreadByRoom[room.id] ?? 0))
+        .toList();
   }
 
   //  Presence ──
@@ -375,9 +439,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ) async {
     try {
       await _repository.updatePresence(request: event.request);
-      AppLogger.log('Presence updated: ${event.request.status}');
+      _logChat('Presence updated: ${event.request.status}');
     } catch (e) {
-      AppLogger.log('Update presence exception (ignored): $e');
+      _logChat('Update presence exception (ignored): $e');
     }
   }
 

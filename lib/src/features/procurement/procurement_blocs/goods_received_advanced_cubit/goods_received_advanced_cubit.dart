@@ -15,8 +15,11 @@ class GoodsReceivedAdvancedCubit extends Cubit<GoodsReceivedAdvancedState> {
        _reorderRepository = reorderRepository,
        super(const GoodsReceivedAdvancedState());
 
-  Future<void> loadOverview() async {
-    await Future.wait([loadQcStats(), loadReorderSuggestions()]);
+  Future<void> loadOverview({String? branchId}) async {
+    await Future.wait([
+      loadQcStats(),
+      loadReorderSuggestions(branchId: branchId),
+    ]);
   }
 
   Future<void> loadQcStats() async {
@@ -43,14 +46,16 @@ class GoodsReceivedAdvancedCubit extends Cubit<GoodsReceivedAdvancedState> {
     );
   }
 
-  Future<void> loadReorderSuggestions() async {
+  Future<void> loadReorderSuggestions({String? branchId}) async {
     emit(
       state.copyWith(
         reorderStatus: GoodsReceivedAdvancedStatus.loading,
         clearReorderError: true,
       ),
     );
-    final response = await _reorderRepository.getReorderSuggestions();
+    final response = await _reorderRepository.getReorderSuggestions(
+      branchId: branchId,
+    );
     response.when(
       success: (data) => emit(
         state.copyWith(

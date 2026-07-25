@@ -50,7 +50,9 @@ class _ProductIntakeTabScreenState extends State<ProductIntakeTabScreen>
               InventoryItemsBloc(repository: InventoryItemsRepository()),
         ),
         BlocProvider(
-          create: (context) => EmployeeBloc(repository: EmployeeRepository()),
+          create: (context) => EmployeeBloc(
+            repository: context.read<EmployeeRepositoryInterface>(),
+          ),
         ),
       ],
       child: DefaultTextStyle.merge(

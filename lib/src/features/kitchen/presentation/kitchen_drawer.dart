@@ -26,7 +26,7 @@ class KitchenAppDrawer extends StatelessWidget {
         const SizedBox(height: 8),
         _buildDrawerItem(
           context,
-          icon: Icons.pie_chart_outline,
+          icon: Icons.analytics_outlined,
           title: 'Order Statistics',
           onTap: () {
             Navigator.push(

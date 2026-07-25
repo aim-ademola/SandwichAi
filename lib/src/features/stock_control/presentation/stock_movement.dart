@@ -419,15 +419,15 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
   Widget _buildSummaryHeader(StockMovementLoaded state) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: context.modePrimary,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: context.modePrimary.withValues(alpha: 0.22),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -437,18 +437,19 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
           Row(
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 34,
+                height: 34,
                 decoration: BoxDecoration(
                   color: context.modeTextInverse.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: AppIcon(
                   Icons.inventory_2_outlined,
                   color: context.modeTextInverse,
+                  size: 19,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -456,16 +457,16 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                     Text(
                       'Stock Flow Summary',
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w800,
                         color: context.modeTextInverse,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(
                       'Track incoming and outgoing inventory',
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: context.modeTextInverse.withValues(alpha: 0.78),
                       ),
@@ -475,7 +476,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -506,10 +507,10 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
     required String value,
   }) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
       decoration: BoxDecoration(
         color: context.modeTextInverse.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: context.modeTextInverse.withValues(alpha: 0.14),
         ),
@@ -517,23 +518,23 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppIcon(icon, color: context.modeTextInverse, size: 19),
-          const SizedBox(height: 10),
+          AppIcon(icon, color: context.modeTextInverse, size: 16),
+          const SizedBox(height: 6),
           Text(
             title,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
               color: context.modeTextInverse.withValues(alpha: 0.76),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 17,
+              fontSize: 15,
               fontWeight: FontWeight.w800,
               color: context.modeTextInverse,
             ),

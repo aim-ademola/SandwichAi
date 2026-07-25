@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_ai/src/core/data/repo/employee_lookup_repo.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -88,13 +89,21 @@ class _KitchenShiftTabScreenState extends State<KitchenShiftTabScreen>
                 controller: _tabController,
                 children: [
                   BlocProvider(
-                    create: (context) =>
-                        KitchenShiftBloc(repository: KitchenShiftRepository()),
+                    create: (context) => KitchenShiftBloc(
+                      repository: KitchenShiftRepository(
+                        employeeLookupRepository: context
+                            .read<EmployeeLookupRepositoryInterface>(),
+                      ),
+                    ),
                     child: const KitchenShiftManagementScreen(),
                   ),
                   BlocProvider(
-                    create: (context) =>
-                        KitchenShiftBloc(repository: KitchenShiftRepository()),
+                    create: (context) => KitchenShiftBloc(
+                      repository: KitchenShiftRepository(
+                        employeeLookupRepository: context
+                            .read<EmployeeLookupRepositoryInterface>(),
+                      ),
+                    ),
                     child: const KitchenShiftHistoryScreen(),
                   ),
                 ],

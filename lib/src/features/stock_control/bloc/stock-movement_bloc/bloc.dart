@@ -54,7 +54,11 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
           emit(
             StockMovementLoaded(
               response: data,
-              filteredItems: data.data,
+              filteredItems: _applyFilters(
+                data.data,
+                movementType: event.query.movementType,
+                searchQuery: '',
+              ),
               currentQuery: event.query,
               searchQuery: '',
             ),
@@ -96,7 +100,11 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
 
     await response.when(
       success: (data) async {
-        final filteredItems = _filterItems(data.data, currentState.searchQuery);
+        final filteredItems = _applyFilters(
+          data.data,
+          movementType: currentState.currentQuery.movementType,
+          searchQuery: currentState.searchQuery,
+        );
 
         emit(
           StockMovementLoaded(
@@ -150,9 +158,10 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
           pagination: data.pagination,
         );
 
-        final filteredItems = _filterItems(
+        final filteredItems = _applyFilters(
           combinedData,
-          currentState.searchQuery,
+          movementType: newQuery.movementType,
+          searchQuery: currentState.searchQuery,
         );
 
         emit(
@@ -224,7 +233,11 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
 
     final currentState = state as StockMovementLoaded;
 
-    final filteredItems = _filterItems(currentState.response.data, event.query);
+    final filteredItems = _applyFilters(
+      currentState.response.data,
+      movementType: currentState.currentQuery.movementType,
+      searchQuery: event.query,
+    );
 
     emit(
       currentState.copyWith(
@@ -244,21 +257,27 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
     add(LoadStockMovements(query: newQuery));
   }
 
-  /// Filter items based on search query
-  List<StockMovementItem> _filterItems(
-    List<StockMovementItem> items,
-    String searchQuery,
-  ) {
-    if (searchQuery.isEmpty) {
-      return items;
-    }
-
+  /// Filter items based on the active movement type and search query.
+  List<StockMovementItem> _applyFilters(
+    List<StockMovementItem> items, {
+    String? movementType,
+    required String searchQuery,
+  }) {
     final query = searchQuery.toLowerCase();
     return items.where((item) {
-      return item.item.itemName.toLowerCase().contains(query) ||
+      final matchesMovementType =
+          movementType == null ||
+          movementType.isEmpty ||
+          item.movementType.name == movementType;
+
+      final matchesSearch =
+          query.isEmpty ||
+          item.item.itemName.toLowerCase().contains(query) ||
           item.note?.toLowerCase().contains(query) == true ||
           item.reference?.toLowerCase().contains(query) == true ||
           item.branch.name.toLowerCase().contains(query);
+
+      return matchesMovementType && matchesSearch;
     }).toList();
   }
 

@@ -16,7 +16,9 @@ class AuthInterceptor extends Interceptor {
     final token = await AuthCacheHelper.instance.getAccessToken();
 
     if (token != null && token.isNotEmpty) {
-      AppLogger.log('Token Gotten =====> $token');
+      if (!_isChatRequest(options)) {
+        AppLogger.log('Authorization token attached');
+      }
       options.headers['Authorization'] = 'Bearer $token';
     }
 
@@ -46,6 +48,16 @@ class AuthInterceptor extends Interceptor {
     final aiBaseUrl = ApiConstants.aiBaseUrl;
     final uri = options.uri.toString();
     return uri.startsWith(aiBaseUrl) || options.path.startsWith(aiBaseUrl);
+  }
+
+  bool _isChatRequest(RequestOptions options) {
+    final path = options.path.toLowerCase();
+    final uriPath = options.uri.path.toLowerCase();
+    return path == 'chat' ||
+        path.startsWith('chat/') ||
+        path.startsWith('/chat/') ||
+        uriPath == '/chat' ||
+        uriPath.startsWith('/chat/');
   }
 }
 

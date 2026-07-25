@@ -60,11 +60,53 @@ class ChatRoomModel {
       lastMessageBy: json['lastMessageBy'] as String?,
       messageCount: json['messageCount'] as int? ?? 0,
       memberCount: json['memberCount'] as int? ?? 0,
-      unreadCount: json['unreadCount'] as int? ?? 0,
+      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
       isStarred: json['isStarred'] as bool? ?? false,
       isPinned: json['isPinned'] as bool? ?? false,
       isMuted: json['isMuted'] as bool? ?? false,
       isAdmin: json['isAdmin'] as bool? ?? false,
+    );
+  }
+
+  ChatRoomModel copyWith({
+    String? id,
+    String? name,
+    String? description,
+    String? type,
+    String? organizationId,
+    String? branchId,
+    String? department,
+    bool? isArchived,
+    DateTime? lastMessageAt,
+    String? lastMessageText,
+    String? lastMessageBy,
+    int? messageCount,
+    int? memberCount,
+    int? unreadCount,
+    bool? isStarred,
+    bool? isPinned,
+    bool? isMuted,
+    bool? isAdmin,
+  }) {
+    return ChatRoomModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      type: type ?? this.type,
+      organizationId: organizationId ?? this.organizationId,
+      branchId: branchId ?? this.branchId,
+      department: department ?? this.department,
+      isArchived: isArchived ?? this.isArchived,
+      lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+      lastMessageText: lastMessageText ?? this.lastMessageText,
+      lastMessageBy: lastMessageBy ?? this.lastMessageBy,
+      messageCount: messageCount ?? this.messageCount,
+      memberCount: memberCount ?? this.memberCount,
+      unreadCount: unreadCount ?? this.unreadCount,
+      isStarred: isStarred ?? this.isStarred,
+      isPinned: isPinned ?? this.isPinned,
+      isMuted: isMuted ?? this.isMuted,
+      isAdmin: isAdmin ?? this.isAdmin,
     );
   }
 }
@@ -188,7 +230,7 @@ class UnreadCountModel {
     return UnreadCountModel(
       chatRoomId: json['chatRoomId'] as String,
       chatRoomName: json['chatRoomName'] as String,
-      unreadCount: json['unreadCount'] as int? ?? 0,
+      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
       lastMessageAt: json['lastMessageAt'] != null
           ? DateTime.tryParse(json['lastMessageAt'] as String)
           : null,

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_interceptors.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/backend_error_parser.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
@@ -34,15 +35,7 @@ class ApiClient {
     );
 
     if (kDebugMode) {
-      _dio.interceptors.add(
-        LogInterceptor(
-          requestBody: true,
-          responseBody: true,
-          requestHeader: true,
-          responseHeader: false,
-          error: true,
-        ),
-      );
+      _dio.interceptors.add(NonChatLogInterceptor());
     }
 
     _dio.interceptors.add(AuthInterceptor());
@@ -457,5 +450,68 @@ class ApiClient {
   // Cancel all requests
   void cancelRequests([String? reason]) {
     _dio.close();
+  }
+}
+
+class NonChatLogInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    if (!_isChatRequest(options)) {
+      AppLogger.log(
+        '*** Request ***\n'
+        'uri: ${options.uri}\n'
+        'method: ${options.method}\n'
+        'responseType: ${options.responseType}\n'
+        'headers: ${_safeHeaders(options.headers)}\n'
+        'data: ${options.data}',
+      );
+    }
+    super.onRequest(options, handler);
+  }
+
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    if (!_isChatRequest(response.requestOptions)) {
+      AppLogger.log(
+        '*** Response ***\n'
+        'uri: ${response.requestOptions.uri}\n'
+        'statusCode: ${response.statusCode}\n'
+        'Response Text:\n${response.data}',
+      );
+    }
+    super.onResponse(response, handler);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    if (!_isChatRequest(err.requestOptions)) {
+      AppLogger.log(
+        '*** DioException ***:\n'
+        'uri: ${err.requestOptions.uri}\n'
+        '${err.toString()}\n'
+        'Response Text:\n${err.response?.data}',
+        level: LogLevel.error,
+      );
+    }
+    super.onError(err, handler);
+  }
+
+  bool _isChatRequest(RequestOptions options) {
+    final path = options.path.toLowerCase();
+    final uriPath = options.uri.path.toLowerCase();
+    return path == 'chat' ||
+        path.startsWith('chat/') ||
+        path.startsWith('/chat/') ||
+        uriPath == '/chat' ||
+        uriPath.startsWith('/chat/');
+  }
+
+  Map<String, dynamic> _safeHeaders(Map<String, dynamic> headers) {
+    return headers.map((key, value) {
+      if (key.toLowerCase() == 'authorization') {
+        return MapEntry(key, 'Bearer ***');
+      }
+      return MapEntry(key, value);
+    });
   }
 }

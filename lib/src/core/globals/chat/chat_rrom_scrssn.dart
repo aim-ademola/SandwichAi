@@ -1,5 +1,7 @@
 // lib/src/core/globals/chat/chat_rooms_screen.dart
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
@@ -27,14 +29,33 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
   // When non-null, we're "inside" a room
   ChatRoomModel? _openRoom;
   String _currentUserId = '';
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ChatBloc>().add(const LoadChatRooms());
+      context.read<ChatBloc>().add(const LoadUnreadCounts());
     });
+    _startRealtimeRefresh();
     _loadCurrentUserId();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startRealtimeRefresh() {
+    _refreshTimer?.cancel();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || _openRoom != null) return;
+
+      context.read<ChatBloc>().add(const LoadChatRooms(showLoading: false));
+      context.read<ChatBloc>().add(const LoadUnreadCounts());
+    });
   }
 
   // In _ChatRoomsScreenState
@@ -50,7 +71,8 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
   void _backToRoomList() {
     setState(() => _openRoom = null);
     // Reload rooms to refresh unread counts
-    context.read<ChatBloc>().add(const LoadChatRooms());
+    context.read<ChatBloc>().add(const LoadChatRooms(showLoading: false));
+    context.read<ChatBloc>().add(const LoadUnreadCounts());
   }
 
   @override

@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/foundation.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
@@ -6,6 +8,8 @@ enum LogLevel { info, warning, error }
 class AppLogger {
   AppLogger._();
 
+  static const int _maxLogChunkLength = 900;
+
   static void log(
     Object? message, {
     LogLevel level = LogLevel.info,
@@ -13,9 +17,9 @@ class AppLogger {
   }) {
     // Debug & Profile
     if (kDebugMode || kProfileMode) {
-      debugPrint(_format(message, level));
+      _developerLog(_format(message, level), level: level);
       if (stackTrace != null) {
-        debugPrint(stackTrace.toString());
+        _developerLog(stackTrace.toString(), level: level);
       }
     }
 
@@ -36,11 +40,34 @@ class AppLogger {
     };
     return '$prefix $message';
   }
+
+  static void _developerLog(String message, {required LogLevel level}) {
+    final name = switch (level) {
+      LogLevel.info => 'SandwichAI.INFO',
+      LogLevel.warning => 'SandwichAI.WARN',
+      LogLevel.error => 'SandwichAI.ERROR',
+    };
+
+    if (message.length <= _maxLogChunkLength) {
+      developer.log(message, name: name);
+      return;
+    }
+
+    final totalChunks = (message.length / _maxLogChunkLength).ceil();
+    for (var index = 0; index < totalChunks; index++) {
+      final start = index * _maxLogChunkLength;
+      final end = (start + _maxLogChunkLength).clamp(0, message.length);
+      developer.log(
+        '[${index + 1}/$totalChunks] ${message.substring(start, end)}',
+        name: name,
+      );
+    }
+  }
 }
 
 void logDebug(Object? message) {
   assert(() {
-    print(message);
+    developer.log('[DEBUG] $message', name: 'SandwichAI.DEBUG');
     return true;
   }());
 }

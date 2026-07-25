@@ -129,7 +129,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
           maxHeight: MediaQuery.of(context).size.height * 0.7,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.modeSurface,
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(_getBorderRadius(screenWidth) * 2),
           ),
@@ -174,14 +174,14 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getSectionTitleFontSize(screenWidth),
                         fontWeight: FontWeight.w600,
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                       ),
                     ),
                   ),
                   IconButton(
                     icon: AppIcon(
                       Icons.close,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                       size: _getIconSize(screenWidth),
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -190,7 +190,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               ),
             ),
 
-            Divider(height: 1, color: Colors.grey.shade200),
+            Divider(height: 1, color: context.modeDivider),
 
             // Content
             Expanded(
@@ -204,7 +204,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                       description,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getInputFontSize(screenWidth),
-                        color: kprimaryTextColor1,
+                        color: context.modeTextPrimary,
                         height: 1.5,
                       ),
                     ),
@@ -275,7 +275,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                                     screenWidth,
                                                   ) +
                                                   1,
-                                              color: kprimaryTextColor1,
+                                              color: context.modeTextPrimary,
                                               height: 1.4,
                                             ),
                                       ),
@@ -283,7 +283,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                   ],
                                 ),
                               );
-                            }).toList(),
+                            }),
                           ],
                         ),
                       ),
@@ -308,11 +308,13 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: kPrimary,
-              onPrimary: Colors.white,
-              onSurface: kprimaryTextColor1,
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: context.modePrimary,
+              onPrimary: context.modeTextInverse,
+              surface: context.modeSurface,
+              onSurface: context.modeTextPrimary,
             ),
+            dialogTheme: DialogThemeData(backgroundColor: context.modeSurface),
           ),
           child: child!,
         );
@@ -432,9 +434,10 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               );
 
               // Navigate back after a short delay
+              final navigator = Navigator.of(context);
               Future.delayed(const Duration(milliseconds: 500), () {
                 if (mounted) {
-                  Navigator.pop(context, true);
+                  navigator.pop(true);
                 }
               });
             } else if (state is addbranchstock.BranchStockError) {
@@ -488,7 +491,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               final maxContentWidth = _getMaxContentWidth(screenWidth);
 
               return Scaffold(
-                backgroundColor: const Color(0xFFF8F6F6),
+                backgroundColor: context.modeBackground,
                 appBar: _buildAppBar(screenWidth),
                 body: Center(
                   child: ConstrainedBox(
@@ -702,12 +705,13 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
 
   PreferredSizeWidget _buildAppBar(double screenWidth) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
         icon: AppIcon(
           Icons.arrow_back,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
           size: _getIconSize(screenWidth),
         ),
         onPressed: () => Navigator.pop(context),
@@ -717,7 +721,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: _getAppBarTitleFontSize(screenWidth),
           fontWeight: FontWeight.w600,
-          color: kprimaryTextColor1,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: true,
@@ -730,7 +734,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: _getSectionTitleFontSize(screenWidth),
         fontWeight: FontWeight.w600,
-        color: kprimaryTextColor1,
+        color: context.modeTextPrimary,
       ),
     );
   }
@@ -746,7 +750,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getLabelFontSize(screenWidth),
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             SizedBox(width: 8),
@@ -788,14 +792,14 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
             ),
             decoration: BoxDecoration(
               color: widget.itemId != null
-                  ? const Color(0xFFF5F5F5)
-                  : Colors.white,
+                  ? context.modeSurfaceAlt
+                  : context.modeSurface,
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
               border: Border.all(
                 color: _selectedItemId == null && _isSearching == false
-                    ? const Color(0xFFE0E0E0)
+                    ? context.modeBorder
                     : kPrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
@@ -804,7 +808,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               children: [
                 AppIcon(
                   Icons.search,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 SizedBox(width: 20),
@@ -815,8 +819,8 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                       fontSize: _getInputFontSize(screenWidth),
                       fontWeight: FontWeight.w400,
                       color: _selectedItemName != null
-                          ? kprimaryTextColor1
-                          : kprimaryTextColor2,
+                          ? context.modeTextPrimary
+                          : context.modeTextSecondary,
                     ),
                   ),
                 ),
@@ -824,14 +828,14 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                   _isOpened
                       ? AppIcon(
                           Icons.arrow_drop_down,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth) + 4,
                         )
                       : Transform.rotate(
                           angle: -90 * 3.14159 / 180,
                           child: AppIcon(
                             Icons.arrow_drop_down,
-                            color: kprimaryTextColor2,
+                            color: context.modeTextSecondary,
                             size: _getIconSize(screenWidth) + 4,
                           ),
                         ),
@@ -851,12 +855,12 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
     return Container(
       constraints: BoxConstraints(maxHeight: 300),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: context.modeTextPrimary.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -871,24 +875,24 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               autofocus: true,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Type to search...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getInputFontSize(screenWidth),
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
                 prefixIcon: AppIconSlot(
                   Icons.search,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: AppIcon(
                           Icons.clear,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth),
                         ),
                         onPressed: () {
@@ -900,7 +904,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                   borderRadius: BorderRadius.circular(
                     _getBorderRadius(screenWidth),
                   ),
-                  borderSide: BorderSide(color: const Color(0xFFE0E0E0)),
+                  borderSide: BorderSide(color: context.modeBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(
@@ -915,7 +919,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           Expanded(
             child: _filteredItems.isEmpty
                 ? Center(
@@ -927,7 +931,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                         'No items found',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getInputFontSize(screenWidth),
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ),
@@ -977,7 +981,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.grey.shade200,
+                                color: context.modeDivider,
                                 width: 1,
                               ),
                             ),
@@ -1010,7 +1014,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                               screenWidth,
                                             ),
                                             fontWeight: FontWeight.w600,
-                                            color: kprimaryTextColor1,
+                                            color: context.modeTextPrimary,
                                           ),
                                     ),
                                     const SizedBox(height: 2),
@@ -1021,7 +1025,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                                             fontSize: _getCaptionFontSize(
                                               screenWidth,
                                             ),
-                                            color: kprimaryTextColor2,
+                                            color: context.modeTextSecondary,
                                           ),
                                     ),
                                   ],
@@ -1059,7 +1063,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getLabelFontSize(screenWidth),
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             if (onHelpTap != null) ...[
@@ -1082,40 +1086,34 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             prefixText: prefixText,
             prefixStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w600,
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
@@ -1169,7 +1167,7 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getLabelFontSize(screenWidth),
                 fontWeight: FontWeight.w500,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             SizedBox(width: 8),
@@ -1204,14 +1202,14 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
                 fontWeight: FontWeight.w400,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Select expiry date',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getInputFontSize(screenWidth),
                   fontWeight: FontWeight.w400,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
                 suffixIcon: AppIconSlot(
                   Icons.calendar_today,
@@ -1219,24 +1217,18 @@ class _AddEditStockScreenState extends State<AddEditStockScreen> {
                   size: _getIconSize(screenWidth),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.modeSurface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(
                     _getBorderRadius(screenWidth),
                   ),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFE0E0E0),
-                    width: 1.5,
-                  ),
+                  borderSide: BorderSide(color: context.modeBorder, width: 1.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(
                     _getBorderRadius(screenWidth),
                   ),
-                  borderSide: const BorderSide(
-                    color: Color(0xFFE0E0E0),
-                    width: 1.5,
-                  ),
+                  borderSide: BorderSide(color: context.modeBorder, width: 1.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(

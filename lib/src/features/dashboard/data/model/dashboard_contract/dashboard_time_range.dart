@@ -13,4 +13,17 @@ extension DashboardTimeRangeX on DashboardTimeRange {
         return 'custom';
     }
   }
+
+  String get procurementValue {
+    switch (this) {
+      case DashboardTimeRange.today:
+        return 'DAILY';
+      case DashboardTimeRange.week:
+        return 'WEEKLY';
+      case DashboardTimeRange.month:
+        return 'MONTHLY';
+      case DashboardTimeRange.custom:
+        return 'MONTHLY';
+    }
+  }
 }

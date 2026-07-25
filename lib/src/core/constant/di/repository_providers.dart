@@ -17,6 +17,7 @@ import 'package:sandwich_ai/src/features/pos/data/repository/pos_dashboradd_repo
 import 'package:sandwich_ai/src/features/pos/data/repository/pos_order_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/tax-config_repo.dart';
 import 'package:sandwich_ai/src/features/processing/data/repo/fetch_recipe_coml.dart';
+import 'package:sandwich_ai/src/features/processing/data/repo/employee_repo.dart';
 import 'package:sandwich_ai/src/features/processing/data/repo/processing_dashboard_repo.dart';
 import 'package:sandwich_ai/src/features/processing/data/repo/processsing_task_repo.dart';
 import 'package:sandwich_ai/src/features/processing/data/repo/recipe_compliance_repo.dart';
@@ -32,6 +33,7 @@ import 'package:sandwich_ai/src/features/procurement/data/repository/procurement
 import 'package:sandwich_ai/src/features/procurement/data/repository/purchase_order_repo.dart';
 import 'package:sandwich_ai/src/features/procurement/data/repository/supplier_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/add_branch_stock.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/repo/branch_assignment_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/branch_details_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/branch_stock_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/bulk_inventory_upload_repo.dart';
@@ -50,6 +52,9 @@ class RepositoryProviders {
     ),
     RepositoryProvider<BranchStockRepositoryInterface>(
       create: (context) => BranchStockRepository(),
+    ),
+    RepositoryProvider<BranchAssignmentRepositoryInterface>(
+      create: (context) => BranchAssignmentRepository(),
     ),
     RepositoryProvider<BranchStockSummaryRepositoryInterface>(
       create: (context) => BranchStockSummaryRepository(),
@@ -71,6 +76,9 @@ class RepositoryProviders {
     ),
     RepositoryProvider<EmployeeLookupRepositoryInterface>(
       create: (context) => EmployeeLookupRepository(),
+    ),
+    RepositoryProvider<EmployeeRepositoryInterface>(
+      create: (context) => EmployeeRepository(),
     ),
     RepositoryProvider<ProcessingDashboardRepositoryInterface>(
       create: (context) => ProcessingDashboardRepository(),

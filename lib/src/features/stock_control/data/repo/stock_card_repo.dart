@@ -6,9 +6,16 @@ import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper
 import 'package:sandwich_ai/src/features/stock_control/data/model/stock_card_model.dart';
 
 abstract class StockCardRepositoryInterface {
-  Future<ApiResponse<StockExpiryReport>> getExpiryReport();
-  Future<ApiResponse<StockExpirySummary>> getExpirySummary();
-  Future<ApiResponse<StockExpiryReport>> getBranchExpiryReport(String branchId);
+  Future<ApiResponse<StockExpiryReport>> getExpiryReport({
+    int? withinDays,
+    bool? includeExpired,
+  });
+  Future<ApiResponse<StockExpirySummary>> getExpirySummary({String? branchId});
+  Future<ApiResponse<StockExpiryReport>> getBranchExpiryReport(
+    String branchId, {
+    int? withinDays,
+    bool? includeExpired,
+  });
   Future<ApiResponse<List<StockBatch>>> getBatches({
     required String branchId,
     required String itemId,
@@ -31,22 +38,38 @@ class StockCardRepository implements StockCardRepositoryInterface {
   final ApiClient _apiClient = ApiClient.instance;
 
   @override
-  Future<ApiResponse<StockExpiryReport>> getExpiryReport() {
-    return _getObject('expiry/expiry-tracking', StockExpiryReport.fromJson);
+  Future<ApiResponse<StockExpiryReport>> getExpiryReport({
+    int? withinDays,
+    bool? includeExpired,
+  }) {
+    return _getObject(
+      'expiry/expiry-tracking',
+      StockExpiryReport.fromJson,
+      queryParameters: _expiryQuery(
+        withinDays: withinDays,
+        includeExpired: includeExpired,
+      ),
+    );
   }
 
   @override
-  Future<ApiResponse<StockExpirySummary>> getExpirySummary() {
+  Future<ApiResponse<StockExpirySummary>> getExpirySummary({String? branchId}) {
     return _getObject(
       'expiry/expiry-tracking/analytics/expiry-summary',
       StockExpirySummary.fromJson,
+      queryParameters: branchId != null && branchId.isNotEmpty
+          ? {'branchId': branchId}
+          : null,
     );
   }
 
   @override
   Future<ApiResponse<StockExpiryReport>> getBranchExpiryReport(
     String branchId,
-  ) {
+    {
+    int? withinDays,
+    bool? includeExpired,
+  }) {
     if (branchId.isEmpty) {
       return Future.value(
         ApiResponse.errorMessage('Branch ID cannot be empty.'),
@@ -55,6 +78,10 @@ class StockCardRepository implements StockCardRepositoryInterface {
     return _getObject(
       'expiry/expiry-tracking/$branchId/expiry-report',
       StockExpiryReport.fromJson,
+      queryParameters: _expiryQuery(
+        withinDays: withinDays,
+        includeExpired: includeExpired,
+      ),
     );
   }
 
@@ -157,6 +184,16 @@ class StockCardRepository implements StockCardRepositoryInterface {
       success: (json) => ApiResponse.success(fromJson(json)),
       error: (error) => ApiResponse.error(error),
     );
+  }
+
+  Map<String, dynamic>? _expiryQuery({
+    int? withinDays,
+    bool? includeExpired,
+  }) {
+    final query = <String, dynamic>{};
+    if (withinDays != null) query['withinDays'] = withinDays;
+    if (includeExpired != null) query['includeExpired'] = includeExpired;
+    return query.isEmpty ? null : query;
   }
 
   Future<ApiResponse<Map<String, dynamic>>> _getRaw(

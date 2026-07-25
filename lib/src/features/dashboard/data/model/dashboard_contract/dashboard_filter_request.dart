@@ -19,6 +19,17 @@ class DashboardFilterRequest {
   });
 
   Map<String, dynamic> toQueryParameters() {
+    if (domain == DashboardDomain.procurement) {
+      return {
+        'organizationId': organizationId,
+        if (branchId != null && branchId!.isNotEmpty) 'branchId': branchId,
+        if (range != DashboardTimeRange.custom)
+          'timePeriod': range.procurementValue,
+        if (startDate != null) 'startDate': startDate!.toIso8601String(),
+        if (endDate != null) 'endDate': endDate!.toIso8601String(),
+      };
+    }
+
     return {
       'organizationId': organizationId,
       if (branchId != null && branchId!.isNotEmpty) 'branchId': branchId,

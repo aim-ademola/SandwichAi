@@ -402,6 +402,7 @@ class _HugeIconMap {
     Icons.store_outlined: HugeIcons.strokeRoundedStore01,
     Icons.storefront_rounded: HugeIcons.strokeRoundedStore01,
     Icons.subject_outlined: HugeIcons.strokeRoundedTextAlignLeft,
+    Icons.summarize_outlined: HugeIcons.strokeRoundedAnalytics01,
     Icons.support_agent: HugeIcons.strokeRoundedCustomerSupport,
     Icons.swap_horiz_rounded: HugeIcons.strokeRoundedArrowLeftRight,
     Icons.sync: HugeIcons.strokeRoundedReload,

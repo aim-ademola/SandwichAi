@@ -11,6 +11,7 @@ class BottomSheetAction extends StatelessWidget {
   final bool isDestructive;
 
   const BottomSheetAction({
+    super.key,
     required this.icon,
     required this.label,
     required this.iconColor,

@@ -6,7 +6,10 @@ import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper
 import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.dart';
 
 abstract class ReorderRepositoryInterface {
-  Future<ApiResponse<ReorderSuggestionsResponse>> getReorderSuggestions();
+  Future<ApiResponse<ReorderSuggestionsResponse>> getReorderSuggestions({
+    String? branchId,
+    String? category,
+  });
   Future<ApiResponse<ReorderReportResponse>> getReorderReport(String branchId);
   Future<ApiResponse<ReorderAcknowledgeResponse>> acknowledgeReorder(
     String branchStockId,
@@ -17,9 +20,19 @@ class ReorderRepository implements ReorderRepositoryInterface {
   final ApiClient _apiClient = ApiClient.instance;
 
   @override
-  Future<ApiResponse<ReorderSuggestionsResponse>> getReorderSuggestions() {
+  Future<ApiResponse<ReorderSuggestionsResponse>> getReorderSuggestions({
+    String? branchId,
+    String? category,
+  }) {
+    final query = <String, dynamic>{
+      if (branchId != null && branchId.isNotEmpty) 'branchId': branchId,
+      if (category != null && category.isNotEmpty) 'category': category,
+    };
     return _request(
-      () => _apiClient.get('reorder/suggestions'),
+      () => _apiClient.get(
+        'reorder/suggestions',
+        queryParameters: query.isEmpty ? null : query,
+      ),
       ReorderSuggestionsResponse.fromJson,
     );
   }

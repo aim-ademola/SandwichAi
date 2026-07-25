@@ -37,8 +37,8 @@ class StockMovementQuery {
       params['startDate'] = startDate;
     }
     if (endDate != null && endDate!.isNotEmpty) params['endDate'] = endDate;
-    // if (page != null) params['page'] = page.toString();
-    // if (limit != null) params['limit'] = limit.toString();
+    if (page != null) params['page'] = page.toString();
+    if (limit != null) params['limit'] = limit.toString();
 
     return params;
   }

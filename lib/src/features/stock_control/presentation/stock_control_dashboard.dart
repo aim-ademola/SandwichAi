@@ -35,7 +35,8 @@ class _StockControlDashboardScreenState
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return SandwichAppBar(
-      title: 'Inventory Overview',
+      title: '',
+      centerTitle: false,
       onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
       actions: const [NotificationBellAction()],
     );

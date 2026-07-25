@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/data/repo/employee_lookup_repo.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
+import 'package:sandwich_ai/src/features/processing/data/model/product_intake_model.dart'
+    as processing;
 import 'package:sandwich_ai/src/features/kitchen/data/model/kitchen_shift_model.dart';
 
 abstract class KitchenShiftRepositoryInterface {
@@ -32,6 +35,12 @@ abstract class KitchenShiftRepositoryInterface {
 class KitchenShiftRepository extends BaseRepository
     implements KitchenShiftRepositoryInterface {
   final ApiClient _apiClient = ApiClient.instance;
+  final EmployeeLookupRepositoryInterface _employeeLookupRepository;
+
+  KitchenShiftRepository({
+    EmployeeLookupRepositoryInterface? employeeLookupRepository,
+  }) : _employeeLookupRepository =
+           employeeLookupRepository ?? EmployeeLookupRepository();
 
   @override
   Future<ApiResponse<List<KitchenShift>>> getKitchenShifts({
@@ -227,37 +236,49 @@ class KitchenShiftRepository extends BaseRepository
     try {
       _validateBranchId(branchId);
 
-      final response = await _apiClient
-          .get(
-            'Employees/branches/$branchId/departments/KITCHEN/employees',
-            queryParameters: {'status': 'ACTIVE', 'page': 1, 'limit': 100},
-          )
-          .timeout(
-            const Duration(seconds: 30),
-            onTimeout: () {
-              throw TimeoutException('Request timed out. Please try again.');
-            },
+      final response = await _employeeLookupRepository
+          .getEmployeesByDepartment(
+            branchId: branchId,
+            department: 'KITCHEN',
+            status: 'ACTIVE',
           );
 
       return response.when(
-        success: (body) {
-          final employeeList = _extractList(body);
-          if (employeeList == null) {
-            return ApiResponse.errorMessage('Invalid response from server');
-          }
-
-          final employees = employeeList
-              .whereType<Map>()
-              .map((e) => Employee.fromJson(Map<String, dynamic>.from(e)))
-              .toList();
-
-          return ApiResponse.success(employees);
-        },
+        success: (employeesResponse) => ApiResponse.success(
+          employeesResponse.data.map(_toKitchenEmployee).toList(),
+        ),
         error: (error) => ApiResponse.error(error),
       );
     } catch (e) {
       return ApiResponse.errorMessage(_parseErrorMessage(e.toString()));
     }
+  }
+
+  Employee _toKitchenEmployee(processing.Employee employee) {
+    return Employee.fromJson({
+      'id': employee.id,
+      'employeeId': employee.employeeId,
+      'firstName': employee.firstName,
+      'lastName': employee.lastName,
+      'email': employee.email,
+      'phone': employee.phone,
+      'address': employee.address,
+      'dateOfBirth': employee.dateOfBirth.toIso8601String(),
+      'role': employee.role,
+      'department': employee.department,
+      'isDepartmentManager': employee.isDepartmentManager,
+      'status': employee.status.name.toUpperCase(),
+      'hireDate': employee.hireDate.toIso8601String(),
+      'terminationDate': employee.terminationDate?.toIso8601String(),
+      'lastLogin': employee.lastLogin.toIso8601String(),
+      'emergencyContactName': employee.emergencyContactName,
+      'emergencyContactPhone': employee.emergencyContactPhone,
+      'emergencyContactRelation': employee.emergencyContactRelation,
+      'organizationId': employee.organizationId,
+      'branchId': employee.branchId,
+      'createdAt': employee.createdAt.toIso8601String(),
+      'updatedAt': employee.updatedAt.toIso8601String(),
+    });
   }
 
   void _validateBranchId(String branchId) {

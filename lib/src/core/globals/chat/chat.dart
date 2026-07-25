@@ -51,6 +51,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   bool _isRecording = false;
   String? _recordingPath;
   DateTime? _recordingStartTime;
+  String? _lastMarkedReadMessageId;
 
   // Search overlay
   bool _isSearching = false;
@@ -204,7 +205,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
   //  Mark read â”€â”€
 
-  // In _markRoomAsRead â€” use .id not .messageId
   void _markRoomAsRead(List<ChatMessageModel> messages) {
     if (messages.isEmpty) return;
 
@@ -215,11 +215,15 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
 
     if (lastReal.id.startsWith('temp_')) return;
 
+    final lastReadMessageId = lastReal.id;
+    if (_lastMarkedReadMessageId == lastReadMessageId) return;
+    _lastMarkedReadMessageId = lastReadMessageId;
+
     context.read<ChatBloc>().add(
       MarkRoomAsRead(
         request: MarkReadRequest(
           chatRoomId: widget.roomId,
-          lastReadMessageId: lastReal.id,
+          lastReadMessageId: lastReadMessageId,
         ),
       ),
     );

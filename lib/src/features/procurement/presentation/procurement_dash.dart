@@ -144,6 +144,8 @@ class _ProcurementDashboardScreenState
                     const SizedBox(height: 24),
                     _buildStatusCards(constraints.maxWidth),
                     const SizedBox(height: 32),
+                    _buildDashboardFeedSection(constraints.maxWidth),
+                    const SizedBox(height: 32),
                     _buildPerformanceSection(constraints.maxWidth),
                     const SizedBox(height: 32),
                     _buildSupplierRankingsSection(constraints.maxWidth),
@@ -247,6 +249,31 @@ class _ProcurementDashboardScreenState
   }
 
   List<_OverviewCardData> _overviewCards(DashboardResponse? data) {
+    final procurementOverview = _asMap(data?.rawData['overview']);
+    if (data?.domain == DashboardDomain.procurement &&
+        procurementOverview.isNotEmpty) {
+      final totalSpend = _asMap(procurementOverview['totalSpend']);
+      final purchaseOrders = _asMap(procurementOverview['purchaseOrders']);
+      final deliveriesCompleted = _asMap(
+        procurementOverview['deliveriesCompleted'],
+      );
+
+      return [
+        _OverviewCardData(
+          label: 'Total Spend',
+          value: _formatFullMoney(_asDouble(totalSpend['value'])),
+        ),
+        _OverviewCardData(
+          label: 'POs',
+          value: _asInt(purchaseOrders['total']).toString(),
+        ),
+        _OverviewCardData(
+          label: 'Completed',
+          value: _asInt(deliveriesCompleted['total']).toString(),
+        ),
+      ];
+    }
+
     final metrics = data?.metrics ?? const <DashboardMetric>[];
     final pending = _metricByTerms(metrics, const ['pending']);
     final approved = _metricByTerms(metrics, const ['approved']);
@@ -282,6 +309,326 @@ class _ProcurementDashboardScreenState
     return null;
   }
 
+  Map<String, dynamic> _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return <String, dynamic>{};
+  }
+
+  List<Map<String, dynamic>> _asMapList(dynamic value) {
+    if (value is! List) return const [];
+    return value
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+  }
+
+  double _asDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  int _asInt(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  Widget _buildDashboardFeedSection(double width) {
+    final titleFontSize = _getSectionTitleSize(width);
+
+    return BlocBuilder<DashboardContractBloc, DashboardContractState>(
+      builder: (context, state) {
+        DashboardResponse? data;
+        final isLoading =
+            state is DashboardContractLoading ||
+            state is DashboardContractRefreshing;
+        if (state is DashboardContractLoaded) {
+          data = state.data;
+        } else if (state is DashboardContractRefreshing) {
+          data = state.currentData;
+        }
+
+        final requests = _asMapList(data?.rawData['requestsReceived']);
+        final orders = _asMapList(data?.rawData['purchaseOrders']);
+        final goodsLogs = _asMapList(data?.rawData['goodsReceivedLogs']);
+        final supplierSpend = _asMapList(
+          data?.rawData['supplierSpendAnalysis'],
+        );
+        final aiInsight = data?.rawData['aiInsight']?.toString() ?? '';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Dashboard Feed',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.w600,
+                      color: context.modeTextPrimary,
+                    ),
+                  ),
+                ),
+                if (isLoading)
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        context.modePrimary,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            _buildDashboardRecordCard(
+              width: width,
+              child: _buildDashboardRecordGroup(
+                title: 'Requests Received',
+                emptyText: 'No requests received yet.',
+                records: requests,
+                icon: Icons.assignment_outlined,
+                titleKey: 'requestId',
+                subtitleKeys: const ['item', 'requestedBy'],
+                metaKeys: const ['qtyNeeded', 'status'],
+                width: width,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildDashboardRecordCard(
+              width: width,
+              child: _buildDashboardRecordGroup(
+                title: 'Purchase Orders',
+                emptyText: 'No purchase orders in this period.',
+                records: orders,
+                icon: Icons.receipt_long_outlined,
+                titleKey: 'orderNumber',
+                fallbackTitleKey: 'purchaseOrderId',
+                subtitleKeys: const ['supplierName', 'supplier'],
+                metaKeys: const ['totalAmount', 'status'],
+                width: width,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildDashboardRecordCard(
+              width: width,
+              child: _buildDashboardRecordGroup(
+                title: 'Goods Received',
+                emptyText: 'No goods received logs yet.',
+                records: goodsLogs,
+                icon: Icons.inventory_2_outlined,
+                titleKey: 'grnId',
+                fallbackTitleKey: 'goodsReceivedId',
+                subtitleKeys: const ['itemName', 'supplier'],
+                metaKeys: const ['receivedQty', 'qcStatus'],
+                width: width,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildDashboardRecordCard(
+              width: width,
+              child: _buildDashboardRecordGroup(
+                title: 'Supplier Spend',
+                emptyText: 'No supplier spend analysis yet.',
+                records: supplierSpend,
+                icon: Icons.payments_outlined,
+                titleKey: 'supplier',
+                subtitleKeys: const ['category'],
+                metaKeys: const ['totalSpend', 'orderCount'],
+                width: width,
+              ),
+            ),
+            if (aiInsight.trim().isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _buildDashboardRecordCard(
+                width: width,
+                child: _buildAiInsightCard(aiInsight, width),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDashboardRecordCard({
+    required double width,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(_getContainerPadding(width)),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        border: Border.all(color: context.modeBorder),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildDashboardRecordGroup({
+    required String title,
+    required String emptyText,
+    required List<Map<String, dynamic>> records,
+    required IconData icon,
+    required String titleKey,
+    String? fallbackTitleKey,
+    required List<String> subtitleKeys,
+    required List<String> metaKeys,
+    required double width,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: _getSupplierLabelSize(width) + 1,
+            fontWeight: FontWeight.w700,
+            color: context.modeTextPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (records.isEmpty)
+          Text(
+            emptyText,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: _getSupplierLabelSize(width),
+              color: context.modeTextSecondary,
+            ),
+          )
+        else
+          ...records
+              .take(3)
+              .map(
+                (record) => _buildDashboardRecordRow(
+                  record: record,
+                  icon: icon,
+                  titleKey: titleKey,
+                  fallbackTitleKey: fallbackTitleKey,
+                  subtitleKeys: subtitleKeys,
+                  metaKeys: metaKeys,
+                  width: width,
+                ),
+              ),
+      ],
+    );
+  }
+
+  Widget _buildDashboardRecordRow({
+    required Map<String, dynamic> record,
+    required IconData icon,
+    required String titleKey,
+    String? fallbackTitleKey,
+    required List<String> subtitleKeys,
+    required List<String> metaKeys,
+    required double width,
+  }) {
+    final titleKeys = <String>[titleKey];
+    if (fallbackTitleKey != null) titleKeys.add(fallbackTitleKey);
+    final title = _firstText(record, titleKeys);
+    final subtitle = _firstText(record, subtitleKeys);
+    final meta = metaKeys
+        .map((key) => record[key]?.toString() ?? '')
+        .where((value) => value.isNotEmpty)
+        .join(' | ');
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: context.modePrimary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: AppIcon(icon, size: 18, color: context.modePrimary),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.isEmpty ? 'Untitled record' : title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: _getSupplierLabelSize(width),
+                    fontWeight: FontWeight.w700,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  [
+                    subtitle,
+                    meta,
+                  ].where((value) => value.isNotEmpty).join(' | '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: _getSupplierLabelSize(width) - 1,
+                    color: context.modeTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _firstText(Map<String, dynamic> record, List<String> keys) {
+    for (final key in keys) {
+      final value = record[key]?.toString().trim() ?? '';
+      if (value.isNotEmpty && value.toLowerCase() != 'null') return value;
+    }
+    return '';
+  }
+
+  Widget _buildAiInsightCard(String insight, double width) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.modeWarning.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.modeWarning.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppIcon(
+            Icons.lightbulb_outline,
+            color: context.modeWarning,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              insight,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: _getSupplierLabelSize(width),
+                color: context.modeTextPrimary,
+                height: 1.25,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatusCard({
     required double height,
     required String number,
@@ -311,21 +658,33 @@ class _ProcurementDashboardScreenState
               ),
             )
           else
-            Text(
-              number,
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: numberFontSize,
-                fontWeight: FontWeight.w700,
-                color: numberColor,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  number,
+                  maxLines: 1,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: numberFontSize,
+                    fontWeight: FontWeight.w700,
+                    color: numberColor,
+                    height: 1,
+                  ),
+                ),
               ),
             ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: fontSize,
+              fontSize: fontSize - 1,
               fontWeight: FontWeight.w500,
               color: context.modeTextSecondary,
+              height: 1.1,
             ),
           ),
         ],
@@ -1066,8 +1425,8 @@ class _ProcurementDashboardScreenState
   }
 
   double _getStatusCardNumberSize(double width) {
-    if (width < 360) return 28;
-    if (width < 600) return 32;
+    if (width < 360) return 24;
+    if (width < 600) return 26;
     return 36;
   }
 
@@ -1271,6 +1630,17 @@ class _ProcurementDashboardScreenState
     if (value >= 1000000) return 'N${(value / 1000000).toStringAsFixed(1)}m';
     if (value >= 1000) return 'N${(value / 1000).toStringAsFixed(1)}k';
     return 'N${value.toStringAsFixed(0)}';
+  }
+
+  String _formatFullMoney(double value) {
+    final amount = value.round().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < amount.length; i++) {
+      final remaining = amount.length - i;
+      buffer.write(amount[i]);
+      if (remaining > 1 && remaining % 3 == 1) buffer.write(',');
+    }
+    return 'N$buffer';
   }
 
   String _formatPercent(double value) {

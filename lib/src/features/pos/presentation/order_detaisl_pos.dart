@@ -385,7 +385,7 @@ class _OrderDetailsDialogState extends State<OrderDetailsDialog> {
                 ),
               ),
             );
-          }).toList(),
+          }),
 
           const SizedBox(height: 16),
 

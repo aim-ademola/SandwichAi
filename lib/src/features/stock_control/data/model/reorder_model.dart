@@ -64,15 +64,22 @@ class ReorderSuggestion {
       ),
       currentStock: _double(json['currentStock']),
       reorderLevel: _double(json['reorderLevel']),
-      suggestedQty: _double(json['suggestedQty'] ?? json['quantityNeeded']),
+      suggestedQty: _double(
+        json['suggestedOrderQty'] ??
+            json['suggestedQty'] ??
+            json['quantityNeeded'],
+      ),
       suggestedQtyInPurchaseUnit: _nullableDouble(
-        json['suggestedQtyInPurchaseUnit'],
+        json['suggestedOrderInPurchaseUnit'] ??
+            json['suggestedQtyInPurchaseUnit'],
       ),
       purchaseConfig: purchaseConfigMap.isEmpty
           ? null
           : ReorderPurchaseConfig.fromJson(purchaseConfigMap),
       estimatedUnitCost: _nullableDouble(json['estimatedUnitCost']),
-      estimatedTotalCost: _nullableDouble(json['estimatedTotalCost']),
+      estimatedTotalCost: _nullableDouble(
+        json['estimatedOrderValue'] ?? json['estimatedTotalCost'],
+      ),
       daysUntilStockout: _nullableInt(json['daysUntilStockout']),
       unit: _string(
         json['unit'] ??

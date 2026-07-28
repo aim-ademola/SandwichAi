@@ -78,6 +78,7 @@ class BranchStockItem {
   final int batchCount;
   final int expiringBatchCount;
   final String? nearestExpiryDate;
+  final String storageLocation;
   final List<StockBatch> batches;
   final ItemDetails item;
 
@@ -108,6 +109,7 @@ class BranchStockItem {
     this.batchCount = 0,
     this.expiringBatchCount = 0,
     this.nearestExpiryDate,
+    this.storageLocation = '',
     this.batches = const [],
     required this.item,
   });
@@ -147,6 +149,15 @@ class BranchStockItem {
       batchCount: _toInt(json['batchCount'], fallback: batches.length),
       expiringBatchCount: _toInt(json['expiringBatchCount']),
       nearestExpiryDate: json['nearestExpiryDate'],
+      storageLocation: _firstString(json, const [
+        'storage',
+        'storageLocation',
+        'storageType',
+        'location',
+        'storageName',
+        'storageCondition',
+        'storageConditions',
+      ]),
       batches: batches,
       item: ItemDetails.fromJson(json['item'] ?? {}),
     );
@@ -271,25 +282,13 @@ class BranchStockItem {
     return null;
   }
 
-  // Get storage location from category or other fields
+  // Use backend storage wording first, then the backend category as display text.
   String get storage {
-    final category = item.category.toLowerCase();
-    if (category.contains('protein') ||
-        category.contains('meat') ||
-        category.contains('dairy') ||
-        category.contains('frozen')) {
-      return 'Freezer';
-    } else if (category.contains('vegetable') ||
-        category.contains('fruit') ||
-        category.contains('fresh')) {
-      return 'Refrigerator';
-    } else if (category.contains('grain') ||
-        category.contains('spice') ||
-        category.contains('seasoning') ||
-        category.contains('dry')) {
-      return 'Dry Storage';
+    if (storageLocation.trim().isNotEmpty) return storageLocation.trim();
+    if (item.storageLocation.trim().isNotEmpty) {
+      return item.storageLocation.trim();
     }
-    return '';
+    return item.category.trim();
   }
 
   // Convert to CatalogItem format for UI
@@ -350,6 +349,7 @@ class BranchStockItem {
       'batchCount': batchCount,
       'expiringBatchCount': expiringBatchCount,
       'nearestExpiryDate': nearestExpiryDate,
+      'storageLocation': storageLocation,
       'batches': batches.map((batch) => batch.toJson()).toList(),
       'item': item.toJson(),
     };
@@ -447,6 +447,7 @@ class ItemDetails {
   final String unit;
   final String description;
   final String sku;
+  final String storageLocation;
   final String organizationId;
   final String createdAt;
   final String updatedAt;
@@ -458,6 +459,7 @@ class ItemDetails {
     required this.unit,
     required this.description,
     required this.sku,
+    this.storageLocation = '',
     required this.organizationId,
     required this.createdAt,
     required this.updatedAt,
@@ -471,6 +473,15 @@ class ItemDetails {
       unit: json['unit'] ?? '',
       description: json['description'] ?? '',
       sku: json['sku'] ?? '',
+      storageLocation: _firstString(json, const [
+        'storage',
+        'storageLocation',
+        'storageType',
+        'location',
+        'storageName',
+        'storageCondition',
+        'storageConditions',
+      ]),
       organizationId: json['organizationId'] ?? '',
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
@@ -485,6 +496,7 @@ class ItemDetails {
       'unit': unit,
       'description': description,
       'sku': sku,
+      'storageLocation': storageLocation,
       'organizationId': organizationId,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
@@ -703,4 +715,14 @@ double _toDouble(dynamic value) {
 
 int _toInt(dynamic value, {int fallback = 0}) {
   return int.tryParse(value?.toString() ?? '') ?? fallback;
+}
+
+String _firstString(Map<String, dynamic> json, List<String> keys) {
+  for (final key in keys) {
+    final value = json[key]?.toString().trim();
+    if (value != null && value.isNotEmpty && value.toLowerCase() != 'null') {
+      return value;
+    }
+  }
+  return '';
 }

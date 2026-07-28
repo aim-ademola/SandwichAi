@@ -792,13 +792,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     final noteController = TextEditingController();
     final submittedBy = await AuthCacheHelper.instance.getEmpID() ?? '';
     if (!mounted) return;
+    final cubit = context.read<PurchaseOrderActionsCubit>();
+    final orderId = widget.order.id;
     final ok = await _showTextActionDialog(
       title: 'Submit Approval',
       label: 'Approval note',
       controller: noteController,
       actionText: 'Submit',
-      onAction: () => context.read<PurchaseOrderActionsCubit>().submitApproval(
-        orderId: widget.order.id,
+      onAction: () => cubit.submitApproval(
+        orderId: orderId,
         request: SubmitPurchaseOrderApprovalRequest(
           submittedBy: submittedBy,
           note: noteController.text.trim(),
@@ -806,6 +808,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
       ),
     );
     noteController.dispose();
+    if (!mounted) return;
     if (ok == true) _showSuccessSnackBar('Order submitted for approval.');
   }
 
@@ -813,17 +816,20 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     final noteController = TextEditingController(
       text: widget.order.internalNotes ?? widget.order.buyerNotes ?? '',
     );
+    final cubit = context.read<PurchaseOrderActionsCubit>();
+    final orderId = widget.order.id;
     final ok = await _showTextActionDialog(
       title: 'Edit Order Notes',
       label: 'Internal note',
       controller: noteController,
       actionText: 'Save',
-      onAction: () => context.read<PurchaseOrderActionsCubit>().updateOrder(
-        orderId: widget.order.id,
+      onAction: () => cubit.updateOrder(
+        orderId: orderId,
         data: {'internalNotes': noteController.text.trim()},
       ),
     );
     noteController.dispose();
+    if (!mounted) return;
     if (ok == true) _showSuccessSnackBar('Order updated.');
   }
 
@@ -837,59 +843,64 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
     final noteController = TextEditingController();
     final dispatchedBy = await AuthCacheHelper.instance.getEmpID() ?? '';
     if (!mounted) return;
+    final cubit = context.read<PurchaseOrderActionsCubit>();
+    final orderId = widget.order.id;
 
     final ok = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Dispatch Order'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: trackingController,
-              decoration: const InputDecoration(labelText: 'Tracking number'),
+      builder: (dialogContext) {
+        final navigator = Navigator.of(dialogContext);
+        return AlertDialog(
+          title: const Text('Dispatch Order'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: trackingController,
+                decoration: const InputDecoration(labelText: 'Tracking number'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: courierController,
+                decoration: const InputDecoration(labelText: 'Courier name'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: noteController,
+                minLines: 2,
+                maxLines: 4,
+                decoration: const InputDecoration(labelText: 'Dispatch note'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => navigator.pop(false),
+              child: const Text('Cancel'),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: courierController,
-              decoration: const InputDecoration(labelText: 'Courier name'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: noteController,
-              minLines: 2,
-              maxLines: 4,
-              decoration: const InputDecoration(labelText: 'Dispatch note'),
+            ElevatedButton(
+              onPressed: () async {
+                final ok = await cubit.dispatchOrder(
+                  orderId: orderId,
+                  request: PurchaseOrderDispatchRequest(
+                    dispatchedBy: dispatchedBy,
+                    trackingNumber: _blankToNull(trackingController.text),
+                    courierName: _blankToNull(courierController.text),
+                    dispatchNote: _blankToNull(noteController.text),
+                  ),
+                );
+                if (navigator.mounted) navigator.pop(ok);
+              },
+              child: const Text('Dispatch'),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final cubit = context.read<PurchaseOrderActionsCubit>();
-              final ok = await cubit.dispatchOrder(
-                orderId: widget.order.id,
-                request: PurchaseOrderDispatchRequest(
-                  dispatchedBy: dispatchedBy,
-                  trackingNumber: trackingController.text.trim(),
-                  courierName: courierController.text.trim(),
-                  dispatchNote: noteController.text.trim(),
-                ),
-              );
-              if (dialogContext.mounted) Navigator.pop(dialogContext, ok);
-            },
-            child: const Text('Dispatch'),
-          ),
-        ],
-      ),
+        );
+      },
     );
     trackingController.dispose();
     courierController.dispose();
     noteController.dispose();
+    if (!mounted) return;
     if (ok == true) _showSuccessSnackBar('Order dispatched.');
   }
 
@@ -902,61 +913,73 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   }) {
     return showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: TextField(
-          controller: controller,
-          minLines: 2,
-          maxLines: 4,
-          decoration: InputDecoration(labelText: label),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+      builder: (dialogContext) {
+        final navigator = Navigator.of(dialogContext);
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: controller,
+            minLines: 2,
+            maxLines: 4,
+            decoration: InputDecoration(labelText: label),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final ok = await onAction();
-              if (dialogContext.mounted) Navigator.pop(dialogContext, ok);
-            },
-            child: Text(actionText),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => navigator.pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final ok = await onAction();
+                if (navigator.mounted) navigator.pop(ok);
+              },
+              child: Text(actionText),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Future<void> _confirmDeleteOrder() async {
+    final cubit = context.read<PurchaseOrderActionsCubit>();
+    final orderId = widget.order.id;
+    final errorColor = context.modeError;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Order'),
-        content: Text(
-          'Delete ${widget.order.orderNumber}? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+      builder: (dialogContext) {
+        final navigator = Navigator.of(dialogContext);
+        return AlertDialog(
+          title: const Text('Delete Order'),
+          content: Text(
+            'Delete ${widget.order.orderNumber}? This action cannot be undone.',
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: context.modeError),
-            onPressed: () async {
-              final ok = await context
-                  .read<PurchaseOrderActionsCubit>()
-                  .deleteOrder(widget.order.id);
-              if (dialogContext.mounted) Navigator.pop(dialogContext, ok);
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => navigator.pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: errorColor),
+              onPressed: () async {
+                final ok = await cubit.deleteOrder(orderId);
+                if (navigator.mounted) navigator.pop(ok);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
     );
     if (ok == true && mounted) {
       _showSuccessSnackBar('Order deleted.');
       Navigator.pop(context, true);
     }
+  }
+
+  String? _blankToNull(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   Widget _buildBody(BuildContext context) {

@@ -59,6 +59,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -143,66 +144,65 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
   Widget _buildSearchBar(double screenWidth) {
     final fontSize = _getSearchFontSize(screenWidth);
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: _getSearchPaddingHorizontal(screenWidth),
-        vertical: 4,
+    return TextField(
+      cursorColor: context.modePrimary,
+      controller: _searchController,
+      onChanged: (value) {
+        setState(() {
+          _searchQuery = value;
+        });
+      },
+      style: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w400,
+        color: context.modeTextPrimary,
       ),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: context.modeBorder),
-      ),
-      child: Row(
-        children: [
-          AppIcon(
-            Icons.search,
-            color: context.modeTextMuted,
-            size: _getSearchIconSize(screenWidth),
-          ),
-          SizedBox(width: _getSearchIconSpacing(screenWidth)),
-          Expanded(
-            child: TextField(
-              cursorColor: context.modePrimary,
-              controller: _searchController,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w400,
-                color: context.modeTextPrimary,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Search by item or department...',
-                hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w400,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: context.modeSurface,
+        hintText: 'Search by item or department...',
+        hintStyle: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w400,
+          color: context.modeTextMuted,
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: _getSearchPaddingHorizontal(screenWidth),
+          vertical: _getSearchPaddingVertical(screenWidth),
+        ),
+        prefixIcon: AppIconSlot(
+          Icons.search,
+          color: context.modeTextMuted,
+          size: _getSearchIconSize(screenWidth),
+        ),
+        suffixIcon: _searchQuery.isEmpty
+            ? null
+            : IconButton(
+                onPressed: () {
+                  setState(() {
+                    _searchController.clear();
+                    _searchQuery = '';
+                  });
+                },
+                icon: AppIcon(
+                  Icons.clear,
                   color: context.modeTextMuted,
+                  size: _getSearchIconSize(screenWidth),
                 ),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 12),
-                isDense: true,
+                tooltip: 'Clear search',
               ),
-            ),
-          ),
-          if (_searchQuery.isNotEmpty)
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _searchController.clear();
-                  _searchQuery = '';
-                });
-              },
-              child: AppIcon(
-                Icons.clear,
-                color: context.modeTextMuted,
-                size: _getSearchIconSize(screenWidth),
-              ),
-            ),
-        ],
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: context.modeBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: context.modePrimary),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: context.modeBorder),
+        ),
       ),
     );
   }
@@ -363,24 +363,27 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
 
           // Action buttons
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              _buildActionButton(
-                'Reject',
-                context.modeSurfaceMuted,
-                context.modeTextPrimary,
-                buttonFontSize,
-                screenWidth,
-                () {},
+              Expanded(
+                child: _buildActionButton(
+                  'Reject',
+                  context.modeSurfaceMuted,
+                  context.modeTextPrimary,
+                  buttonFontSize,
+                  screenWidth,
+                  () {},
+                ),
               ),
               SizedBox(width: _getButtonGap(screenWidth)),
-              _buildActionButton(
-                'Approve',
-                context.modePrimary,
-                context.modeTextInverse,
-                buttonFontSize,
-                screenWidth,
-                () {},
+              Expanded(
+                child: _buildActionButton(
+                  'Approve',
+                  context.modePrimary,
+                  context.modeTextInverse,
+                  buttonFontSize,
+                  screenWidth,
+                  () {},
+                ),
               ),
             ],
           ),
@@ -400,6 +403,8 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        alignment: Alignment.center,
+        width: double.infinity,
         padding: EdgeInsets.symmetric(
           horizontal: _getButtonPaddingHorizontal(screenWidth),
           vertical: _getButtonPaddingVertical(screenWidth),
@@ -544,16 +549,16 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     return 16;
   }
 
+  double _getSearchPaddingVertical(double width) {
+    if (width < 360) return 12;
+    if (width < 600) return 14;
+    return 16;
+  }
+
   double _getSearchIconSize(double width) {
     if (width < 360) return 20;
     if (width < 600) return 22;
     return 24;
-  }
-
-  double _getSearchIconSpacing(double width) {
-    if (width < 360) return 8;
-    if (width < 600) return 10;
-    return 12;
   }
 
   double _getFilterHeight(double width) {

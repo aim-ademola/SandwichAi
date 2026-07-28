@@ -1102,12 +1102,29 @@ class _InventoryBodyState extends State<InventoryBody> {
   }
 
   IconData _getStorageIcon(String storage) {
-    if (storage.toLowerCase().contains('freezer')) {
+    final label = storage.toLowerCase();
+    if (label.contains('freezer') || label.contains('frozen')) {
       return Icons.ac_unit;
-    } else if (storage.toLowerCase().contains('dry')) {
+    } else if (label.contains('dry')) {
       return Icons.inventory_2_outlined;
+    } else if (label.contains('protein') ||
+        label.contains('meat') ||
+        label.contains('chicken')) {
+      return Icons.set_meal_outlined;
+    } else if (label.contains('spice') || label.contains('seasoning')) {
+      return Icons.spa_outlined;
+    } else if (label.contains('grain') || label.contains('rice')) {
+      return Icons.grass_outlined;
+    } else if (label.contains('dairy') || label.contains('milk')) {
+      return Icons.local_drink_outlined;
+    } else if (label.contains('oil')) {
+      return Icons.opacity_outlined;
+    } else if (label.contains('fruit') ||
+        label.contains('vegetable') ||
+        label.contains('fresh')) {
+      return Icons.eco_outlined;
     }
-    return Icons.storage;
+    return Icons.category_outlined;
   }
 
   // Responsive sizing functions

@@ -3,6 +3,7 @@ import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -325,7 +326,11 @@ class _ProcurementDashboardScreenState
 
   double _asDouble(dynamic value) {
     if (value is num) return value.toDouble();
-    return double.tryParse(value?.toString() ?? '') ?? 0;
+    final cleaned = value
+        ?.toString()
+        .replaceAll(',', '')
+        .replaceAll(RegExp(r'[^0-9.\-]'), '');
+    return double.tryParse(cleaned ?? '') ?? 0;
   }
 
   int _asInt(dynamic value) {
@@ -396,6 +401,7 @@ class _ProcurementDashboardScreenState
                 subtitleKeys: const ['item', 'requestedBy'],
                 metaKeys: const ['qtyNeeded', 'status'],
                 width: width,
+                onSeeMore: () => context.push('/procurement_requests'),
               ),
             ),
             const SizedBox(height: 12),
@@ -411,6 +417,7 @@ class _ProcurementDashboardScreenState
                 subtitleKeys: const ['supplierName', 'supplier'],
                 metaKeys: const ['totalAmount', 'status'],
                 width: width,
+                onSeeMore: () => context.push('/order-list'),
               ),
             ),
             const SizedBox(height: 12),
@@ -426,6 +433,7 @@ class _ProcurementDashboardScreenState
                 subtitleKeys: const ['itemName', 'supplier'],
                 metaKeys: const ['receivedQty', 'qcStatus'],
                 width: width,
+                onSeeMore: () => context.push('/goods-received'),
               ),
             ),
             const SizedBox(height: 12),
@@ -440,6 +448,7 @@ class _ProcurementDashboardScreenState
                 subtitleKeys: const ['category'],
                 metaKeys: const ['totalSpend', 'orderCount'],
                 width: width,
+                onSeeMore: () => context.push('/Procurement-nav?tab=suppliers'),
               ),
             ),
             if (aiInsight.trim().isNotEmpty) ...[
@@ -481,17 +490,44 @@ class _ProcurementDashboardScreenState
     required List<String> subtitleKeys,
     required List<String> metaKeys,
     required double width,
+    VoidCallback? onSeeMore,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: _getSupplierLabelSize(width) + 1,
-            fontWeight: FontWeight.w700,
-            color: context.modeTextPrimary,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: _getSupplierLabelSize(width) + 1,
+                  fontWeight: FontWeight.w700,
+                  color: context.modeTextPrimary,
+                ),
+              ),
+            ),
+            if (onSeeMore != null)
+              TextButton(
+                onPressed: onSeeMore,
+                style: TextButton.styleFrom(
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
+                ),
+                child: Text(
+                  'See more',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: _getSupplierLabelSize(width) - 1,
+                    fontWeight: FontWeight.w700,
+                    color: context.modePrimary,
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 8),
         if (records.isEmpty)
@@ -534,7 +570,7 @@ class _ProcurementDashboardScreenState
     final title = _firstText(record, titleKeys);
     final subtitle = _firstText(record, subtitleKeys);
     final meta = metaKeys
-        .map((key) => record[key]?.toString() ?? '')
+        .map((key) => _formatDashboardField(key, record[key], record))
         .where((value) => value.isNotEmpty)
         .join(' | ');
 
@@ -589,12 +625,118 @@ class _ProcurementDashboardScreenState
     );
   }
 
+  String _formatDashboardField(
+    String key,
+    dynamic value,
+    Map<String, dynamic> record,
+  ) {
+    if (value == null) return '';
+    final text = value.toString().trim();
+    if (text.isEmpty || text.toLowerCase() == 'null') return '';
+
+    if (_isMoneyField(key)) {
+      return _formatFullMoney(
+        _asDouble(value),
+        currencySymbol: _currencySymbolForRecord(record),
+      );
+    }
+
+    if (_isStockField(key)) {
+      final quantity = _formatNumberWithCommas(_asDouble(value));
+      final unit = _unitForRecord(record);
+      return unit.isEmpty ? quantity : '$quantity $unit';
+    }
+
+    return text;
+  }
+
+  bool _isMoneyField(String key) {
+    final normalized = key.toLowerCase();
+    return normalized.contains('amount') ||
+        normalized.contains('spend') ||
+        normalized.contains('cost') ||
+        normalized.contains('price') ||
+        normalized.contains('value');
+  }
+
+  bool _isStockField(String key) {
+    final normalized = key.toLowerCase();
+    return normalized.contains('qty') ||
+        normalized.contains('quantity') ||
+        normalized.contains('stock');
+  }
+
+  String _currencySymbolForRecord(Map<String, dynamic> record) {
+    final currency = _firstText(record, const [
+      'currencySymbol',
+      'currency',
+      'currencyCode',
+    ]).toUpperCase();
+
+    switch (currency) {
+      case '₦':
+      case 'NGN':
+      case 'NAIRA':
+        return '₦';
+      case r'$':
+      case 'USD':
+        return r'$';
+      case 'GBP':
+        return '£';
+      case 'EUR':
+        return '€';
+      default:
+        return '₦';
+    }
+  }
+
+  String _unitForRecord(Map<String, dynamic> record) {
+    return _firstText(record, const [
+      'unit',
+      'uom',
+      'measurementUnit',
+      'unitOfMeasurement',
+      'unitOfMeasure',
+      'requestedUnit',
+      'receivedUnit',
+      'quantityUnit',
+      'qtyUnit',
+      'stockUnit',
+      'unitType',
+      'item.unit',
+      'item.uom',
+      'item.unitOfMeasurement',
+      'item.unitOfMeasure',
+    ]);
+  }
+
+  String _formatNumberWithCommas(double value) {
+    final pattern = value == value.roundToDouble() ? '#,##0' : '#,##0.##';
+    return NumberFormat(pattern).format(value);
+  }
+
   String _firstText(Map<String, dynamic> record, List<String> keys) {
     for (final key in keys) {
-      final value = record[key]?.toString().trim() ?? '';
+      final value = _readDashboardValue(record, key)?.toString().trim() ?? '';
       if (value.isNotEmpty && value.toLowerCase() != 'null') return value;
     }
     return '';
+  }
+
+  dynamic _readDashboardValue(Map<String, dynamic> record, String key) {
+    if (!key.contains('.')) return record[key];
+
+    dynamic current = record;
+    for (final segment in key.split('.')) {
+      if (current is Map<String, dynamic>) {
+        current = current[segment];
+      } else if (current is Map) {
+        current = current[segment];
+      } else {
+        return null;
+      }
+    }
+    return current;
   }
 
   Widget _buildAiInsightCard(String insight, double width) {
@@ -1627,20 +1769,13 @@ class _ProcurementDashboardScreenState
   }
 
   String _formatMoney(double value) {
-    if (value >= 1000000) return 'N${(value / 1000000).toStringAsFixed(1)}m';
-    if (value >= 1000) return 'N${(value / 1000).toStringAsFixed(1)}k';
-    return 'N${value.toStringAsFixed(0)}';
+    if (value >= 1000000) return '₦${(value / 1000000).toStringAsFixed(1)}m';
+    if (value >= 1000) return '₦${(value / 1000).toStringAsFixed(1)}k';
+    return '₦${NumberFormat('#,##0').format(value)}';
   }
 
-  String _formatFullMoney(double value) {
-    final amount = value.round().toString();
-    final buffer = StringBuffer();
-    for (var i = 0; i < amount.length; i++) {
-      final remaining = amount.length - i;
-      buffer.write(amount[i]);
-      if (remaining > 1 && remaining % 3 == 1) buffer.write(',');
-    }
-    return 'N$buffer';
+  String _formatFullMoney(double value, {String currencySymbol = '₦'}) {
+    return '$currencySymbol${NumberFormat('#,##0.00').format(value)}';
   }
 
   String _formatPercent(double value) {

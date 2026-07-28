@@ -340,6 +340,34 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     return null;
   }
 
+  bool _isProductMatchForRequestedItem(OrderLineItem item, dynamic product) {
+    final requestedName = item.requestedItemName.trim();
+    if (requestedName.isEmpty) return true;
+
+    final productName = _dynamicString(product.productName).trim();
+    return _doItemNamesMatch(requestedName, productName);
+  }
+
+  bool _isSelectedProductValidForRequestedItem(OrderLineItem item) {
+    final requestedName = item.requestedItemName.trim();
+    if (requestedName.isEmpty) return true;
+
+    final selectedProductName = item.selectedProductName?.trim() ?? '';
+    if (selectedProductName.isEmpty) return false;
+
+    return _doItemNamesMatch(requestedName, selectedProductName);
+  }
+
+  bool _doItemNamesMatch(String requestedName, String productName) {
+    final target = _normalizeItemName(requestedName);
+    final candidate = _normalizeItemName(productName);
+    if (target.isEmpty || candidate.isEmpty) return false;
+
+    return candidate == target ||
+        candidate.contains(target) ||
+        target.contains(candidate);
+  }
+
   String _normalizeItemName(String value) {
     return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
   }
@@ -1569,12 +1597,52 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         }
 
         if (state is SupplierProductsLoaded) {
-          final productIds = state.products
+          final products = state.products
+              .where(
+                (product) => _isProductMatchForRequestedItem(item, product),
+              )
+              .toList();
+          final productIds = products
               .map((product) => product.id)
               .whereType<String>()
               .toSet();
+          final selectedProductStillValid =
+              item.selectedProductId == null ||
+              productIds.contains(item.selectedProductId);
+
+          if (!selectedProductStillValid) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              setState(() {
+                item.selectedProductId = null;
+                item.selectedProductName = null;
+                item.selectedProductPrice = null;
+                item.calculateTotal();
+              });
+            });
+          }
+
+          if (products.isEmpty) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: context.modeSurfaceAlt,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: context.modeBorder),
+              ),
+              child: Text(
+                item.requestedItemName.trim().isEmpty
+                    ? 'No products available'
+                    : 'No supplier products match ${item.requestedItemName}',
+                style: TextStyle(color: context.modeTextSecondary),
+              ),
+            );
+          }
 
           return DropdownButtonFormField<String>(
+            key: ValueKey(
+              '${item.requestedItemName}_${item.selectedProductId}_${productIds.join(',')}',
+            ),
             initialValue: productIds.contains(item.selectedProductId)
                 ? item.selectedProductId
                 : null,
@@ -1615,7 +1683,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             ),
             dropdownColor: context.modeSurface,
             selectedItemBuilder: (context) {
-              return state.products.map((product) {
+              return products.map((product) {
                 return Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -1630,7 +1698,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 );
               }).toList();
             },
-            items: state.products.map((product) {
+            items: products.map((product) {
               return DropdownMenuItem<String>(
                 value: product.id,
                 child: Column(
@@ -1661,7 +1729,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             }).toList(),
             onChanged: (String? value) {
               if (value != null) {
-                final product = state.products.firstWhere((p) => p.id == value);
+                final product = products.firstWhere((p) => p.id == value);
+                if (!_isProductMatchForRequestedItem(item, product)) {
+                  _showErrorSnackBar(
+                    '${product.productName} does not match ${item.requestedItemName}',
+                  );
+                  return;
+                }
                 setState(() {
                   item.selectedProductId = value;
                   item.selectedProductName = product.productName;
@@ -1853,6 +1927,14 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           lineItem.selectedProductId == null) {
         _showErrorSnackBar(
           'Please match ${lineItem.requestedItemName} to a supplier product',
+        );
+        return null;
+      }
+
+      if (lineItem.requestedItemName.trim().isNotEmpty &&
+          !_isSelectedProductValidForRequestedItem(lineItem)) {
+        _showErrorSnackBar(
+          'Select the matching supplier product for ${lineItem.requestedItemName}',
         );
         return null;
       }

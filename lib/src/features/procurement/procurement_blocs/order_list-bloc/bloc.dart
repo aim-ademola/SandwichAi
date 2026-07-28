@@ -138,11 +138,17 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
     LoadPendingApprovalOrders event,
     Emitter<OrdersListState> emit,
   ) async {
+    if (branchId.isEmpty) {
+      branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    }
+
     await _loadSpecialOrders(
       emit: emit,
       mode: OrdersListMode.pendingApprovals,
       page: event.page,
-      request: () => _repository.getPendingApprovalOrders(
+      request: () => _repository.getPurchaseOrders(
+        status: 'PENDING_APPROVAL',
+        buyerBranchId: branchId,
         page: event.page,
         limit: event.limit,
       ),
@@ -222,8 +228,13 @@ class OrdersListBloc extends Bloc<OrdersListEvent, OrdersListState> {
     try {
       emit(OrdersLoadingMore(currentState.orders));
       if (_currentMode == OrdersListMode.pendingApprovals) {
+        if (branchId.isEmpty) {
+          branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+        }
         final nextPage = _currentPage + 1;
-        final response = await _repository.getPendingApprovalOrders(
+        final response = await _repository.getPurchaseOrders(
+          status: 'PENDING_APPROVAL',
+          buyerBranchId: branchId,
           page: nextPage,
         );
         await _appendOrders(response, currentState, nextPage, emit);

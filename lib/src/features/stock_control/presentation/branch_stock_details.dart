@@ -9,9 +9,7 @@ import 'package:sandwich_ai/src/features/stock_control/bloc/branch_details_bloc/
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/event.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/state.dart';
-import 'package:sandwich_ai/src/features/stock_control/data/model/branch_assignment_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/branch_details_model.dart';
-import 'package:sandwich_ai/src/features/stock_control/data/repo/branch_assignment_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/shimmer_card.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_adjustmnt.dart';
 
@@ -328,160 +326,6 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
     }
   }
 
-  void _showBranchAvailability(BranchStockDetails details) {
-    final repository = context.read<BranchAssignmentRepositoryInterface>();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.64,
-          minChildSize: 0.42,
-          maxChildSize: 0.9,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: context.modeSurface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
-              ),
-              child: FutureBuilder(
-                future: repository.getItemBranchAssignments(details.item.id),
-                builder: (context, snapshot) {
-                  final isLoading =
-                      snapshot.connectionState == ConnectionState.waiting;
-                  final response = snapshot.data;
-                  final assignments =
-                      response?.data?.assignments ??
-                      const <ItemBranchAssignment>[];
-
-                  return Column(
-                    children: [
-                      const SizedBox(height: 10),
-                      Container(
-                        width: 42,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: context.modeDivider,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 18, 12, 12),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 42,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                color: kPrimary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Center(
-                                child: AppIcon(
-                                  Icons.storefront_outlined,
-                                  color: kPrimary,
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Available in Branches',
-                                    style: WorkSansAppTextStyles.medium
-                                        .copyWith(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w700,
-                                          color: context.modeTextPrimary,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    details.item.itemName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: WorkSansAppTextStyles.medium
-                                        .copyWith(
-                                          fontSize: 13,
-                                          color: context.modeTextSecondary,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () => Navigator.pop(context),
-                              icon: AppIcon(
-                                Icons.close,
-                                color: context.modeTextSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Divider(height: 1, color: context.modeDivider),
-                      Expanded(
-                        child: Builder(
-                          builder: (context) {
-                            if (isLoading) {
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  color: context.modePrimary,
-                                ),
-                              );
-                            }
-
-                            if (snapshot.hasError ||
-                                (response != null && !response.isSuccess)) {
-                              return _buildBranchAvailabilityMessage(
-                                icon: Icons.lock_outline,
-                                title: 'Could not load branches',
-                                message:
-                                    response?.error?.message ??
-                                    'Please try again.',
-                              );
-                            }
-
-                            if (assignments.isEmpty) {
-                              return _buildBranchAvailabilityMessage(
-                                icon: Icons.storefront_outlined,
-                                title: 'No branches found',
-                                message:
-                                    'This item is not associated with another branch yet.',
-                              );
-                            }
-
-                            return ListView.separated(
-                              controller: scrollController,
-                              padding: const EdgeInsets.all(16),
-                              itemCount: assignments.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(height: 10),
-                              itemBuilder: (context, index) {
-                                final assignment = assignments[index];
-                                return _buildBranchAvailabilityTile(assignment);
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
@@ -542,9 +386,6 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                         case 'lock':
                           _showLockStockConfirmation(state.details);
                           break;
-                        case 'branch_availability':
-                          _showBranchAvailability(state.details);
-                          break;
                         case 'delete':
                           _showDeleteConfirmation(state.details);
                           break;
@@ -603,26 +444,6 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                             const SizedBox(width: 12),
                             Text(
                               'Lock Stock',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 14,
-                                color: context.modeTextPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'branch_availability',
-                        child: Row(
-                          children: [
-                            AppIcon(
-                              Icons.storefront_outlined,
-                              size: 20,
-                              color: kPrimary,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Available in Branches',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
                                 color: context.modeTextPrimary,
@@ -1008,13 +829,6 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
 
             const SizedBox(height: 24),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _buildBranchAvailabilityButton(details),
-            ),
-
-            const SizedBox(height: 24),
-
             // Stock Levels Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1250,183 +1064,6 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBranchAvailabilityButton(BranchStockDetails details) {
-    return Material(
-      color: context.modeSurface,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => _showBranchAvailability(details),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.modeBorder),
-            boxShadow: [
-              BoxShadow(
-                color: context.modeTextPrimary.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: kPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(
-                  child: AppIcon(
-                    Icons.storefront_outlined,
-                    color: kPrimary,
-                    size: 22,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Available in Branches',
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: context.modeTextPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'See branches associated with this item',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 12,
-                        color: context.modeTextSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              AppIcon(Icons.chevron_right, color: context.modeTextSecondary),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBranchAvailabilityTile(ItemBranchAssignment assignment) {
-    final name = assignment.branchName.isEmpty
-        ? 'Branch'
-        : assignment.branchName;
-    final code = assignment.branchCode;
-    final status = assignment.status;
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.modeSurfaceAlt,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modeBorder),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: kPrimary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Center(
-              child: AppIcon(
-                Icons.store_mall_directory_outlined,
-                color: kPrimary,
-                size: 20,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: context.modeTextPrimary,
-                  ),
-                ),
-                if (code.isNotEmpty || status.isNotEmpty) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    [
-                      if (code.isNotEmpty) code,
-                      if (status.isNotEmpty) status,
-                    ].join(' | '),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 12,
-                      color: context.modeTextSecondary,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBranchAvailabilityMessage({
-    required IconData icon,
-    required String title,
-    required String message,
-  }) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppIcon(icon, size: 48, color: context.modeTextMuted),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: context.modeTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 13,
-                color: context.modeTextSecondary,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

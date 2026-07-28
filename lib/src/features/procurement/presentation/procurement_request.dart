@@ -29,6 +29,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
   String _selectedFilter = 'All';
   final TextEditingController _searchController = TextEditingController();
   final Set<String> _actioningRequestIds = {};
+  bool _isManager = false;
   String _searchInput = '';
   String _searchQuery = '';
 
@@ -66,6 +67,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
       'ProcurementRequestsScreen is wired to GET /procurement/requests?branchId={branchId}.',
     );
     AppLogger.log('==============================================');
+    _loadManagerPermission();
     _loadRequests();
   }
 
@@ -83,6 +85,17 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     context.read<ProcurementBloc>().add(
       LoadProcurementOrders(branchId: branchId),
     );
+  }
+
+  Future<void> _loadManagerPermission() async {
+    final user = await AuthCacheHelper.instance.getUserData();
+    if (!mounted) return;
+
+    final role = user?.role?.toLowerCase() ?? '';
+    setState(() {
+      _isManager =
+          user?.isDepartmentManager == true || role.contains('manager');
+    });
   }
 
   @override
@@ -513,40 +526,42 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                     color: context.modePrimary,
                   ),
                 ),
-                SizedBox(height: _getButtonSpacing(screenWidth)),
+                if (_canReview(request)) ...[
+                  SizedBox(height: _getButtonSpacing(screenWidth)),
 
-                // Action buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionButton(
-                        'Reject',
-                        context.modeSurfaceMuted,
-                        context.modeTextPrimary,
-                        buttonFontSize,
-                        screenWidth,
-                        () => _showRequestDetails(
-                          request,
-                          initialAction: 'Reject',
+                  // Action buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildActionButton(
+                          'Reject',
+                          context.modeSurfaceMuted,
+                          context.modeTextPrimary,
+                          buttonFontSize,
+                          screenWidth,
+                          () => _showRequestDetails(
+                            request,
+                            initialAction: 'Reject',
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: _getButtonGap(screenWidth)),
-                    Expanded(
-                      child: _buildActionButton(
-                        'Approve',
-                        context.modePrimary,
-                        context.modeTextInverse,
-                        buttonFontSize,
-                        screenWidth,
-                        () => _showRequestDetails(
-                          request,
-                          initialAction: 'Approve',
+                      SizedBox(width: _getButtonGap(screenWidth)),
+                      Expanded(
+                        child: _buildActionButton(
+                          'Approve',
+                          context.modePrimary,
+                          context.modeTextInverse,
+                          buttonFontSize,
+                          screenWidth,
+                          () => _showRequestDetails(
+                            request,
+                            initialAction: 'Approve',
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -635,40 +650,42 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                         ],
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildActionButton(
-                            _actioningRequestIds.contains(request.id)
-                                ? 'Working...'
-                                : initialAction == 'Reject'
-                                ? 'Confirm Reject'
-                                : 'Reject',
-                            context.modeSurfaceMuted,
-                            context.modeTextPrimary,
-                            14,
-                            390,
-                            () => _completeReview(request, 'reject'),
+                    if (_canReview(request)) ...[
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildActionButton(
+                              _actioningRequestIds.contains(request.id)
+                                  ? 'Working...'
+                                  : initialAction == 'Reject'
+                                  ? 'Confirm Reject'
+                                  : 'Reject',
+                              context.modeSurfaceMuted,
+                              context.modeTextPrimary,
+                              14,
+                              390,
+                              () => _completeReview(request, 'reject'),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildActionButton(
-                            _actioningRequestIds.contains(request.id)
-                                ? 'Working...'
-                                : initialAction == 'Approve'
-                                ? 'Confirm Approve'
-                                : 'Approve',
-                            context.modePrimary,
-                            context.modeTextInverse,
-                            14,
-                            390,
-                            () => _completeReview(request, 'approve'),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildActionButton(
+                              _actioningRequestIds.contains(request.id)
+                                  ? 'Working...'
+                                  : initialAction == 'Approve'
+                                  ? 'Confirm Approve'
+                                  : 'Approve',
+                              context.modePrimary,
+                              context.modeTextInverse,
+                              14,
+                              390,
+                              () => _completeReview(request, 'approve'),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               );
@@ -820,6 +837,10 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
 
   Future<void> _completeReview(Request request, String action) async {
     if (_actioningRequestIds.contains(request.id)) return;
+    if (!_canReview(request)) {
+      _showSnackBar('Only pending requests can be approved or rejected.');
+      return;
+    }
 
     final actor = await _currentApprovalActor();
     if (actor.isEmpty) {
@@ -947,6 +968,9 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
   String _formatMoney(double value) {
     return 'NGN ${NumberFormat('#,##0.00').format(value)}';
   }
+
+  bool _canReview(Request request) =>
+      _isManager && request.status.toUpperCase() == 'PENDING';
 
   String _fallbackText(String? value, String fallback) {
     final trimmed = value?.trim() ?? '';

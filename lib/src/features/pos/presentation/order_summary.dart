@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/oder_session/order_session_cubit.dart';
@@ -169,7 +170,10 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
                   behavior: SnackBarBehavior.floating,
                 ),
               );
-              Navigator.of(context).popUntil((route) => route.isFirst);
+              Future<void>.delayed(const Duration(milliseconds: 900), () {
+                if (!mounted) return;
+                context.goNamed('Pos-nav', extra: 1);
+              });
             } else if (state is PosOrderError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

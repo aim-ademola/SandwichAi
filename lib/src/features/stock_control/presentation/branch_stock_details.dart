@@ -229,6 +229,105 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
     );
   }
 
+  Future<void> _showLockStockConfirmation(BranchStockDetails details) async {
+    final reasonController = TextEditingController();
+    try {
+      await showDialog(
+        context: context,
+        builder: (dialogContext) {
+          var reason = '';
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              final isValid = reason.trim().length >= 5;
+              return AlertDialog(
+                backgroundColor: dialogContext.modeSurface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Row(
+                  children: [
+                    const AppIcon(Icons.lock_outline, color: kPrimary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Lock Stock?',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: dialogContext.modeTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'This will lock "${details.item.itemName}" and prevent stock movement until it is unlocked by an authorized user.',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 14,
+                        color: dialogContext.modeTextSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: reasonController,
+                      minLines: 2,
+                      maxLines: 3,
+                      onChanged: (value) =>
+                          setDialogState(() => reason = value),
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        color: dialogContext.modeTextPrimary,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 'Reason',
+                        hintText: 'Enter lock reason',
+                        errorText: reason.isNotEmpty && !isValid
+                            ? 'Reason must be at least 5 characters'
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: dialogContext.modeTextSecondary),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: isValid
+                        ? () {
+                            Navigator.pop(dialogContext);
+                            context.read<AddBranchStockBloc>().add(
+                              LockBranchStock(
+                                stockId: widget.stockId,
+                                reason: reason.trim(),
+                              ),
+                            );
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kPrimary,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Confirm'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } finally {
+      reasonController.dispose();
+    }
+  }
+
   void _showBranchAvailability(BranchStockDetails details) {
     final repository = context.read<BranchAssignmentRepositoryInterface>();
     showModalBottomSheet(
@@ -366,9 +465,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                                   const SizedBox(height: 10),
                               itemBuilder: (context, index) {
                                 final assignment = assignments[index];
-                                return _buildBranchAvailabilityTile(
-                                  assignment,
-                                );
+                                return _buildBranchAvailabilityTile(assignment);
                               },
                             );
                           },
@@ -436,36 +533,14 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                               context.read<AddBranchStockBloc>().add(
                                 AllowNegativeBranchStock(
                                   stockId: widget.stockId,
+                                  allow: true,
                                 ),
                               );
                             },
                           );
                           break;
                         case 'lock':
-                          _showStockControlConfirmation(
-                            title: 'Lock Stock Item?',
-                            message:
-                                'This locks "${state.details.item.itemName}" from normal stock movement until it is unlocked.',
-                            icon: Icons.lock_outline,
-                            onConfirm: () {
-                              context.read<AddBranchStockBloc>().add(
-                                LockBranchStock(stockId: widget.stockId),
-                              );
-                            },
-                          );
-                          break;
-                        case 'unlock':
-                          _showStockControlConfirmation(
-                            title: 'Unlock Stock Item?',
-                            message:
-                                'This unlocks "${state.details.item.itemName}" and allows normal stock movement again.',
-                            icon: Icons.lock_open_outlined,
-                            onConfirm: () {
-                              context.read<AddBranchStockBloc>().add(
-                                UnlockBranchStock(stockId: widget.stockId),
-                              );
-                            },
-                          );
+                          _showLockStockConfirmation(state.details);
                           break;
                         case 'branch_availability':
                           _showBranchAvailability(state.details);
@@ -527,27 +602,7 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'Lock Item',
-                              style: WorkSansAppTextStyles.medium.copyWith(
-                                fontSize: 14,
-                                color: context.modeTextPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'unlock',
-                        child: Row(
-                          children: [
-                            AppIcon(
-                              Icons.lock_open_outlined,
-                              size: 20,
-                              color: kPrimary,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Unlock Item',
+                              'Lock Stock',
                               style: WorkSansAppTextStyles.medium.copyWith(
                                 fontSize: 14,
                                 color: context.modeTextPrimary,

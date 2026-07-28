@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/globals/analytics/analytics_service.dart';
+import 'package:sandwich_ai/src/core/globals/notifications/firebase_messaging_service.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/features/auth/data/repo/login_repo.dart';
 import 'package:sandwich_ai/src/features/auth/login_bloc/login_event.dart';
@@ -76,6 +77,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
             // Store auth data
             await _authCacheHelper.storeAuthData(data);
+            await FirebaseMessagingService.instance
+                .logAndRegisterCurrentToken();
 
             // Store remember me preference and credentials if needed
             if (currentRememberMe) {

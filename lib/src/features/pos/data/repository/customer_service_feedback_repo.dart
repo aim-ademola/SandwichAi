@@ -79,7 +79,7 @@ class CustomerServiceFeedbackRepository extends BaseRepository
     int page = 1,
     int limit = 10,
   }) {
-    return _getList('customer-service/reviews', page: page, limit: limit);
+    return _getReviewsList(page: page, limit: limit);
   }
 
   @override
@@ -108,12 +108,17 @@ class CustomerServiceFeedbackRepository extends BaseRepository
     String path, {
     required int page,
     required int limit,
+    bool includeBranchId = true,
   }) async {
     try {
       final response = await _apiClient
           .get(
             path,
-            queryParameters: await _listQuery(page: page, limit: limit),
+            queryParameters: await _listQuery(
+              page: page,
+              limit: limit,
+              includeBranchId: includeBranchId,
+            ),
           )
           .timeout(const Duration(seconds: 30));
 
@@ -135,6 +140,53 @@ class CustomerServiceFeedbackRepository extends BaseRepository
     } catch (e) {
       return ApiResponse.errorMessage(_messageFor(e));
     }
+  }
+
+  Future<ApiResponse<CustomerServiceRecordList>> _getReviewsList({
+    required int page,
+    required int limit,
+  }) async {
+    final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    final response = await _getList(
+      'customer-service/reviews',
+      page: page,
+      limit: limit,
+    );
+
+    return response.when(
+      success: (records) async {
+        if (records.data.isNotEmpty || branchId.trim().isEmpty) {
+          return ApiResponse.success(records);
+        }
+
+        final fallback = await _getList(
+          'customer-service/reviews',
+          page: page,
+          limit: limit,
+          includeBranchId: false,
+        );
+
+        return fallback.when(
+          success: (fallbackRecords) async {
+            final branchReviews = fallbackRecords.data
+                .where((record) => record.branchId == branchId.trim())
+                .toList();
+
+            if (branchReviews.isEmpty) return ApiResponse.success(records);
+
+            return ApiResponse.success(
+              fallbackRecords.copyWith(
+                data: branchReviews,
+                total: branchReviews.length,
+                totalPages: branchReviews.isEmpty ? 0 : 1,
+              ),
+            );
+          },
+          error: (_) async => ApiResponse.success(records),
+        );
+      },
+      error: (error) async => ApiResponse.error(error),
+    );
   }
 
   Future<ApiResponse<CustomerServiceRecord>> _create(
@@ -166,12 +218,14 @@ class CustomerServiceFeedbackRepository extends BaseRepository
   Future<Map<String, dynamic>> _listQuery({
     required int page,
     required int limit,
+    bool includeBranchId = true,
   }) async {
     final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
     return {
       'page': page,
       'limit': limit,
-      if (branchId.trim().isNotEmpty) 'branchId': branchId.trim(),
+      if (includeBranchId && branchId.trim().isNotEmpty)
+        'branchId': branchId.trim(),
     };
   }
 

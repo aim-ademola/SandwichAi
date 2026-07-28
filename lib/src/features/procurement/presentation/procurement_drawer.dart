@@ -7,6 +7,7 @@ import 'package:sandwich_ai/src/core/globals/app_drawer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
+import 'package:sandwich_ai/src/features/processing/presentation/processing_to_stock_requisitin_tab.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_good_reveived_tab.dart';
 
 class ProcurementAppDrawer extends StatelessWidget {
@@ -36,7 +37,7 @@ class _ProcurementAppDrawerContent extends StatefulWidget {
 class _ProcurementAppDrawerContentState
     extends State<_ProcurementAppDrawerContent> {
   final GlobalKey _goodsReceivedKey = GlobalKey();
-  // final GlobalKey _stockRequisitionKey = GlobalKey();
+  final GlobalKey _stockRequestKey = GlobalKey();
 
   @override
   void initState() {
@@ -98,32 +99,33 @@ class _ProcurementAppDrawerContentState
           ),
         ),
         const SizedBox(height: 8),
-
-        // Showcase(
-        //   key: _stockRequisitionKey,
-        //   description:
-        //       'Create and manage stock requisition requests for procurement. View pending and completed requisitions.',
-        //   targetBorderRadius: BorderRadius.circular(12),
-        //   tooltipBackgroundColor: kPrimary,
-        //   textColor: Colors.white,
-        //   targetPadding: const EdgeInsets.all(8),
-        //   child: _buildDrawerItem(
-        //     context,
-        //     icon: Icons.call_made,
-        //     title: 'Stock Requisition',
-        //     onTap: () {
-        //       Navigator.push(
-        //         context,
-        //         CupertinoPageRoute(
-        //           builder: (_) =>
-        //               ProcesssingToStockRequisitionTabScreen(
-        //                 dpt: 'PROCUREMENT',
-        //               ),
-        //         ),
-        //       );
-        //     },
-        //   ),
-        // ),
+        Showcase(
+          key: _stockRequestKey,
+          description:
+              'Create and track stock requests, including interbranch requests from Procurement.',
+          targetBorderRadius: BorderRadius.circular(12),
+          tooltipBackgroundColor: kPrimary,
+          textColor: Colors.white,
+          targetPadding: const EdgeInsets.all(8),
+          child: _buildDrawerItem(
+            context,
+            icon: Icons.inventory_2_outlined,
+            title: 'Stock Requests',
+            onTap: () {
+              _closeDrawerAndOpen(
+                context,
+                () => Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (_) => ProcesssingToStockRequisitionTabScreen(
+                      dpt: 'PROCUREMENT',
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }

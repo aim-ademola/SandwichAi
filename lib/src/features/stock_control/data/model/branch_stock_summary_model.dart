@@ -30,8 +30,14 @@ class BranchStockSummaryData {
   });
 
   factory BranchStockSummaryData.fromJson(Map<String, dynamic> json) {
+    final overviewJson = Map<String, dynamic>.from(json['overview'] ?? {});
+    if (json.containsKey('itemsWithExpiringBatches')) {
+      overviewJson['itemsWithExpiringBatches'] =
+          json['itemsWithExpiringBatches'];
+    }
+
     return BranchStockSummaryData(
-      overview: Overview.fromJson(json['overview'] ?? {}),
+      overview: Overview.fromJson(overviewJson),
       stockByCategory:
           (json['stockByCategory'] as List<dynamic>?)
               ?.map((e) => StockByCategory.fromJson(e))
@@ -60,12 +66,14 @@ class Overview {
   final int totalItems;
   final int totalStockQuantity;
   final double totalValue;
+  final int itemsWithExpiringBatches;
   final StatusBreakdown statusBreakdown;
 
   Overview({
     required this.totalItems,
     required this.totalStockQuantity,
     required this.totalValue,
+    this.itemsWithExpiringBatches = 0,
     required this.statusBreakdown,
   });
 
@@ -74,6 +82,11 @@ class Overview {
       totalItems: _parseInt(json['totalItems']),
       totalStockQuantity: _parseInt(json['totalStockQuantity']),
       totalValue: _parseDouble(json['totalValue']),
+      itemsWithExpiringBatches: _parseInt(
+        json['itemsWithExpiringBatches'] ??
+            json['expiringBatchCount'] ??
+            json['expiringBatches'],
+      ),
       statusBreakdown: StatusBreakdown.fromJson(json['statusBreakdown'] ?? {}),
     );
   }

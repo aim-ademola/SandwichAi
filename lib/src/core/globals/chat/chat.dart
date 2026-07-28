@@ -4,15 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
-import 'package:record/record.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chatroom_bloc/bloc.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chatroom_bloc/event.dart';
 import 'package:sandwich_ai/src/core/globals/chat/chatroom_bloc/state.dart';
@@ -43,14 +40,10 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _messageFocusNode = FocusNode();
   final ImagePicker _imagePicker = ImagePicker();
-  final AudioRecorder _audioRecorder = AudioRecorder();
   late ChatBloc _chatBloc;
 
   ChatMessageModel? _replyToMessage;
   bool _isTyping = false;
-  bool _isRecording = false;
-  String? _recordingPath;
-  DateTime? _recordingStartTime;
   String? _lastMarkedReadMessageId;
 
   // Search overlay
@@ -62,7 +55,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     super.initState();
     _chatBloc = context.read<ChatBloc>();
     _messageController.addListener(_onTextChanged);
-    _checkMicrophonePermission();
     _loadInitialData();
     _scrollController.addListener(_onScroll);
   }
@@ -95,13 +87,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     }
   }
 
-  Future<void> _checkMicrophonePermission() async {
-    final hasPermission = await _audioRecorder.hasPermission();
-    if (!hasPermission) {
-      AppLogger.log('Microphone permission not granted');
-    }
-  }
-
   void _onTextChanged() {
     final isTyping = _messageController.text.trim().isNotEmpty;
     if (isTyping != _isTyping) {
@@ -116,7 +101,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     _scrollController.dispose();
     _messageFocusNode.dispose();
     _searchController.dispose();
-    _audioRecorder.dispose();
 
     _chatBloc.add(
       const UpdatePresence(request: UpdatePresenceRequest(status: 'OFFLINE')),
@@ -159,8 +143,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
         .toList();
   }
 
-  //  Send image â”€
-
   Future<void> _sendImageMessage(File imageFile) async {
     context.read<ChatBloc>().add(
       SendMessage(
@@ -188,22 +170,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     );
     _scrollToBottom();
   }
-
-  Future<void> _sendVoiceMessage(String filePath, Duration duration) async {
-    context.read<ChatBloc>().add(
-      SendMessage(
-        request: SendMessageRequest(
-          chatRoomId: widget.roomId,
-          content: 'ðŸŽ¤ Voice message ${_formatDuration(duration)}',
-          messageType: 'VOICE',
-          attachments: [filePath],
-        ),
-      ),
-    );
-    _scrollToBottom();
-  }
-
-  //  Mark read â”€â”€
 
   void _markRoomAsRead(List<ChatMessageModel> messages) {
     if (messages.isEmpty) return;
@@ -342,72 +308,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       }
     } catch (e) {
       _showErrorSnackBar('Failed to pick file: $e');
-    }
-  }
-
-  //  Recording
-
-  // ignore: unused_element
-  Future<void> _startRecording() async {
-    try {
-      if (await _audioRecorder.hasPermission()) {
-        final directory = await getTemporaryDirectory();
-        final filePath =
-            '${directory.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
-
-        await _audioRecorder.start(
-          RecordConfig(
-            encoder: AudioEncoder.aacLc,
-            bitRate: 128000,
-            sampleRate: 44100,
-          ),
-          path: filePath,
-        );
-
-        setState(() {
-          _isRecording = true;
-          _recordingPath = filePath;
-          _recordingStartTime = DateTime.now();
-        });
-      } else {
-        _showErrorSnackBar('Microphone permission required');
-      }
-    } catch (e) {
-      _showErrorSnackBar('Failed to start recording: $e');
-    }
-  }
-
-  Future<void> _stopRecording() async {
-    try {
-      final path = await _audioRecorder.stop();
-      if (path != null && _recordingStartTime != null) {
-        final duration = DateTime.now().difference(_recordingStartTime!);
-        await _sendVoiceMessage(path, duration);
-      }
-      setState(() {
-        _isRecording = false;
-        _recordingPath = null;
-        _recordingStartTime = null;
-      });
-    } catch (e) {
-      _showErrorSnackBar('Failed to stop recording: $e');
-    }
-  }
-
-  Future<void> _cancelRecording() async {
-    try {
-      await _audioRecorder.stop();
-      if (_recordingPath != null) {
-        final file = File(_recordingPath!);
-        if (await file.exists()) await file.delete();
-      }
-      setState(() {
-        _isRecording = false;
-        _recordingPath = null;
-        _recordingStartTime = null;
-      });
-    } catch (e) {
-      _showErrorSnackBar('Failed to cancel recording: $e');
     }
   }
 
@@ -713,10 +613,8 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
                 Expanded(child: _buildBody(state, messages)),
                 // Reply preview
                 if (_replyToMessage != null) _buildReplyPreview(),
-                // Recording indicator
-                if (_isRecording) _buildRecordingIndicator(),
                 // Message input
-                if (!_isRecording) _buildMessageInput(),
+                _buildMessageInput(),
               ],
             ),
           );
@@ -1497,78 +1395,6 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     );
   }
 
-  //  Recording indicator
-
-  Widget _buildRecordingIndicator() {
-    final duration = _recordingStartTime != null
-        ? DateTime.now().difference(_recordingStartTime!)
-        : Duration.zero;
-
-    return Container(
-      color: context.modeSurface,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: context.modeError.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: context.modeError,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Recording...',
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: context.modeError,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _formatDuration(duration),
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 13,
-                      color: context.modeTextSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              icon: AppIcon(Icons.delete_outline, color: context.modeError),
-              onPressed: _cancelRecording,
-            ),
-            IconButton(
-              icon: AppIcon(Icons.send, color: context.modePrimary),
-              onPressed: _stopRecording,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  //  Message input bar â”€â”€
-
   Widget _buildMessageInput() {
     return Container(
       color: context.modeSurface,
@@ -1649,11 +1475,5 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
       return 'Yesterday';
     }
     return DateFormat('EEE, MMM d').format(date);
-  }
-
-  String _formatDuration(Duration d) {
-    final minutes = d.inMinutes.toString().padLeft(2, '0');
-    final seconds = (d.inSeconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
   }
 }

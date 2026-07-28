@@ -98,10 +98,12 @@ class _CreateOutputVerificationScreenState
         _showSnackBar('Please enter valid numeric values', isError: true);
         return;
       }
+      final bloc = context.read<OutputVerificationBloc>();
       final id = await AuthCacheHelper.instance.getEmpID() ?? '';
+      if (!mounted) return;
 
       final request = CreateOutputVerificationRequest(
-        branchId: context.read<OutputVerificationBloc>().branchId,
+        branchId: bloc.branchId,
         batchId: _batchIdController.text.trim(),
         productName: _selectedMenuItem!.dishName,
         recipeId: _selectedRecipe!.id,
@@ -112,9 +114,7 @@ class _CreateOutputVerificationScreenState
         verifiedBy: id,
       );
 
-      context.read<OutputVerificationBloc>().add(
-        CreateOutputVerification(request: request),
-      );
+      bloc.add(CreateOutputVerification(request: request));
     } catch (e) {
       _showSnackBar('Invalid input: ${e.toString()}', isError: true);
     }
@@ -342,7 +342,7 @@ class _CreateOutputVerificationScreenState
             'Loading recipe...',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
-              color: kprimaryTextColor1,
+              color: context.modeTextPrimary,
             ),
           ),
         ],
@@ -355,15 +355,15 @@ class _CreateOutputVerificationScreenState
     return Container(
       padding: EdgeInsets.all(_getInputPaddingHorizontal(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.green.withValues(alpha: 0.05),
+        color: context.modeSuccess.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+        border: Border.all(color: context.modeSuccess.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
           AppIcon(
             Icons.check_circle,
-            color: Colors.green,
+            color: context.modeSuccess,
             size: _getIconSize(screenWidth),
           ),
           SizedBox(width: 12),
@@ -376,7 +376,7 @@ class _CreateOutputVerificationScreenState
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getInputFontSize(screenWidth),
                     fontWeight: FontWeight.w600,
-                    color: kprimaryTextColor1,
+                    color: context.modeTextPrimary,
                   ),
                 ),
                 SizedBox(height: 2),
@@ -384,7 +384,7 @@ class _CreateOutputVerificationScreenState
                   'Serving Size: ${_selectedRecipe!.servingSize}',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: _getCaptionFontSize(screenWidth),
-                    color: kprimaryTextColor2,
+                    color: context.modeTextSecondary,
                   ),
                 ),
               ],
@@ -401,7 +401,7 @@ class _CreateOutputVerificationScreenState
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: _getSectionTitleFontSize(screenWidth),
         fontWeight: FontWeight.w600,
-        color: kprimaryTextColor1,
+        color: context.modeTextPrimary,
       ),
     );
   }
@@ -415,7 +415,7 @@ class _CreateOutputVerificationScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -432,13 +432,13 @@ class _CreateOutputVerificationScreenState
               vertical: _getInputPaddingVertical(screenWidth),
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.modeSurface,
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
               border: Border.all(
                 color: _selectedMenuItem == null && !_isSearching
-                    ? const Color(0xFFE0E0E0)
+                    ? context.modeBorder
                     : kPrimary.withValues(alpha: 0.3),
                 width: 1.5,
               ),
@@ -447,7 +447,7 @@ class _CreateOutputVerificationScreenState
               children: [
                 AppIcon(
                   Icons.restaurant_menu,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 const SizedBox(width: 12),
@@ -459,14 +459,14 @@ class _CreateOutputVerificationScreenState
                       fontSize: _getInputFontSize(screenWidth),
                       fontWeight: FontWeight.w400,
                       color: _selectedMenuItem != null
-                          ? kprimaryTextColor1
-                          : kprimaryTextColor2,
+                          ? context.modeTextPrimary
+                          : context.modeTextSecondary,
                     ),
                   ),
                 ),
                 AppIcon(
                   _isDropdownOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth) + 4,
                 ),
               ],
@@ -485,12 +485,16 @@ class _CreateOutputVerificationScreenState
     return Container(
       constraints: const BoxConstraints(maxHeight: 300),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.22
+                  : 0.08,
+            ),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -505,24 +509,24 @@ class _CreateOutputVerificationScreenState
               autofocus: true,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: _getInputFontSize(screenWidth),
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: 'Type to search...',
                 hintStyle: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getInputFontSize(screenWidth),
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
                 prefixIcon: AppIconSlot(
                   Icons.search,
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                   size: _getIconSize(screenWidth),
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: AppIcon(
                           Icons.clear,
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth),
                         ),
                         onPressed: () => _searchController.clear(),
@@ -532,7 +536,7 @@ class _CreateOutputVerificationScreenState
                   borderRadius: BorderRadius.circular(
                     _getBorderRadius(screenWidth),
                   ),
-                  borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                  borderSide: BorderSide(color: context.modeBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(
@@ -547,7 +551,7 @@ class _CreateOutputVerificationScreenState
               ),
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.modeDivider),
           Expanded(
             child: _filteredItems.isEmpty
                 ? Center(
@@ -559,7 +563,7 @@ class _CreateOutputVerificationScreenState
                         'No products found',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getInputFontSize(screenWidth),
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ),
@@ -590,7 +594,7 @@ class _CreateOutputVerificationScreenState
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.grey.shade200,
+                                color: context.modeDivider,
                                 width: 1,
                               ),
                             ),
@@ -630,7 +634,7 @@ class _CreateOutputVerificationScreenState
                                               screenWidth,
                                             ),
                                             fontWeight: FontWeight.w600,
-                                            color: kprimaryTextColor1,
+                                            color: context.modeTextPrimary,
                                           ),
                                     ),
                                     const SizedBox(height: 2),
@@ -641,7 +645,7 @@ class _CreateOutputVerificationScreenState
                                             fontSize: _getCaptionFontSize(
                                               screenWidth,
                                             ),
-                                            color: kprimaryTextColor2,
+                                            color: context.modeTextSecondary,
                                           ),
                                     ),
                                   ],
@@ -676,7 +680,7 @@ class _CreateOutputVerificationScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getLabelFontSize(screenWidth),
             fontWeight: FontWeight.w500,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -687,34 +691,28 @@ class _CreateOutputVerificationScreenState
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getInputFontSize(screenWidth),
             fontWeight: FontWeight.w400,
-            color: kprimaryTextColor1,
+            color: context.modeTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WorkSansAppTextStyles.medium.copyWith(
               fontSize: _getInputFontSize(screenWidth),
               fontWeight: FontWeight.w400,
-              color: kprimaryTextColor2,
+              color: context.modeTextSecondary,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.modeSurface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 _getBorderRadius(screenWidth),
               ),
-              borderSide: const BorderSide(
-                color: Color(0xFFE0E0E0),
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(

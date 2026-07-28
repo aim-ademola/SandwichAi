@@ -105,6 +105,7 @@ class BranchStockSummaryRepository extends BaseRepository
           totalItems: 0,
           totalStockQuantity: 0,
           totalValue: 0,
+          itemsWithExpiringBatches: 0,
           statusBreakdown: StatusBreakdown(inStock: 0, expired: 0),
         ),
         stockByCategory: [],

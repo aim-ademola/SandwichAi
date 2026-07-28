@@ -2,10 +2,20 @@ class ReorderSuggestion {
   final String branchStockId;
   final String itemId;
   final String itemName;
+  final String category;
   final String branchId;
+  final String branchName;
+  final String supplierId;
+  final String supplierName;
   final double currentStock;
   final double reorderLevel;
   final double suggestedQty;
+  final double? suggestedQtyInPurchaseUnit;
+  final ReorderPurchaseConfig? purchaseConfig;
+  final double? estimatedUnitCost;
+  final double? estimatedTotalCost;
+  final int? daysUntilStockout;
+  final String unit;
   final String urgency;
   final Map<String, dynamic> raw;
 
@@ -13,29 +23,106 @@ class ReorderSuggestion {
     required this.branchStockId,
     required this.itemId,
     required this.itemName,
+    required this.category,
     required this.branchId,
+    required this.branchName,
+    required this.supplierId,
+    required this.supplierName,
     required this.currentStock,
     required this.reorderLevel,
     required this.suggestedQty,
+    required this.suggestedQtyInPurchaseUnit,
+    required this.purchaseConfig,
+    required this.estimatedUnitCost,
+    required this.estimatedTotalCost,
+    required this.daysUntilStockout,
+    required this.unit,
     required this.urgency,
     required this.raw,
   });
 
   factory ReorderSuggestion.fromJson(Map<String, dynamic> json) {
     final item = _asMap(json['item']);
+    final supplier = _asMap(json['supplier']);
+    final branch = _asMap(json['branch']);
+    final purchaseConfigMap = _asMap(json['purchaseConfig']);
     return ReorderSuggestion(
       branchStockId: _string(
         json['branchStockId'] ?? json['stockId'] ?? json['id'],
       ),
       itemId: _string(json['itemId'] ?? item['id']),
       itemName: _string(json['itemName'] ?? item['itemName'] ?? item['name']),
-      branchId: _string(json['branchId']),
+      category: _string(json['category'] ?? item['category']),
+      branchId: _string(json['branchId'] ?? branch['id']),
+      branchName: _string(json['branchName'] ?? branch['name']),
+      supplierId: _string(json['supplierId'] ?? supplier['id']),
+      supplierName: _string(
+        json['supplierName'] ??
+            supplier['businessName'] ??
+            supplier['supplierName'] ??
+            supplier['name'],
+      ),
       currentStock: _double(json['currentStock']),
       reorderLevel: _double(json['reorderLevel']),
       suggestedQty: _double(json['suggestedQty'] ?? json['quantityNeeded']),
+      suggestedQtyInPurchaseUnit: _nullableDouble(
+        json['suggestedQtyInPurchaseUnit'],
+      ),
+      purchaseConfig: purchaseConfigMap.isEmpty
+          ? null
+          : ReorderPurchaseConfig.fromJson(purchaseConfigMap),
+      estimatedUnitCost: _nullableDouble(json['estimatedUnitCost']),
+      estimatedTotalCost: _nullableDouble(json['estimatedTotalCost']),
+      daysUntilStockout: _nullableInt(json['daysUntilStockout']),
+      unit: _string(
+        json['unit'] ??
+            json['uom'] ??
+            json['unitOfMeasurement'] ??
+            item['unit'] ??
+            item['uom'] ??
+            item['unitOfMeasurement'],
+      ),
       urgency: _string(json['urgency'] ?? json['priority']),
       raw: json,
     );
+  }
+
+  String get currentStockDisplay => _quantityWithUnit(currentStock, unit);
+  String get reorderLevelDisplay => _quantityWithUnit(reorderLevel, unit);
+  String get suggestedQtyDisplay => _quantityWithUnit(suggestedQty, unit);
+  String get purchaseQtyDisplay {
+    final config = purchaseConfig;
+    final qty = suggestedQtyInPurchaseUnit;
+    if (config == null || qty == null) return '';
+    return _quantityWithUnit(qty, config.displayUnit);
+  }
+}
+
+class ReorderPurchaseConfig {
+  final String unitName;
+  final String abbreviation;
+  final double conversionFactor;
+  final Map<String, dynamic> raw;
+
+  const ReorderPurchaseConfig({
+    required this.unitName,
+    required this.abbreviation,
+    required this.conversionFactor,
+    required this.raw,
+  });
+
+  factory ReorderPurchaseConfig.fromJson(Map<String, dynamic> json) {
+    return ReorderPurchaseConfig(
+      unitName: _string(json['unitName']),
+      abbreviation: _string(json['abbreviation']),
+      conversionFactor: _double(json['conversionFactor']),
+      raw: json,
+    );
+  }
+
+  String get displayUnit {
+    if (abbreviation.trim().isNotEmpty) return abbreviation;
+    return unitName;
   }
 }
 
@@ -142,4 +229,25 @@ String _string(dynamic value) => value?.toString() ?? '';
 double _double(dynamic value) {
   if (value is num) return value.toDouble();
   return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+double? _nullableDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
+}
+
+int? _nullableInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString());
+}
+
+String _quantityWithUnit(double value, String unit) {
+  final formatted = value % 1 == 0
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(2);
+  final trimmedUnit = unit.trim();
+  return trimmedUnit.isEmpty ? formatted : '$formatted $trimmedUnit';
 }

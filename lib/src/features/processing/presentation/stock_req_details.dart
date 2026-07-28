@@ -251,11 +251,30 @@ class StockRequestDetailsScreen extends StatelessWidget {
           _buildInfoRow(
             context: context,
             icon: Icons.business_outlined,
+            label: 'Request Type',
+            value: request.isInterbranch ? 'Interbranch' : 'Interdepartment',
+            screenWidth: screenWidth,
+          ),
+          _buildDivider(context),
+          _buildInfoRow(
+            context: context,
+            icon: Icons.business_outlined,
             label: 'Requesting Branch',
             value: request.requestingBranch?.name ?? 'Unknown',
             sublabel: request.requestingBranch?.branchCode,
             screenWidth: screenWidth,
           ),
+          if (request.isInterbranch) ...[
+            _buildDivider(context),
+            _buildInfoRow(
+              context: context,
+              icon: Icons.account_tree_outlined,
+              label: 'Issuing Branch',
+              value: request.issuingBranch?.name ?? request.issuingBranchId!,
+              sublabel: request.issuingBranch?.branchCode,
+              screenWidth: screenWidth,
+            ),
+          ],
           _buildDivider(context),
           _buildInfoRow(
             context: context,
@@ -642,6 +661,12 @@ class StockRequestDetailsScreen extends StatelessWidget {
         return context.modeWarning;
       case 'APPROVED':
         return context.modeInfo;
+      case 'IN_QUEUE':
+        return const Color(0xFFAB47BC);
+      case 'PROCESSING':
+        return const Color(0xFF26A69A);
+      case 'IN_TRANSIT':
+        return const Color(0xFF5C6BC0);
       case 'COMPLETED':
         return context.modeSuccess;
       case 'REJECTED':
@@ -657,6 +682,12 @@ class StockRequestDetailsScreen extends StatelessWidget {
         return 'Pending';
       case 'APPROVED':
         return 'Approved';
+      case 'IN_QUEUE':
+        return 'In Queue';
+      case 'PROCESSING':
+        return 'Processing';
+      case 'IN_TRANSIT':
+        return 'In Transit';
       case 'COMPLETED':
         return 'Completed';
       case 'REJECTED':

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/event.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/stock_request_bloc/state.dart';
@@ -46,9 +47,14 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
   BranchStockResponse? _branchStockData;
 
   String _branchId = '';
+  String _branchName = '';
   String _employeeId = '';
   String _department = '';
   String _orgID = '';
+  bool _isInterbranch = false;
+  bool _isLoadingBranches = false;
+  String? _selectedIssuingBranchId;
+  List<_StockRequestBranch> _branches = [];
 
   @override
   void initState() {
@@ -62,6 +68,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
   // Replace _loadUserData with this:
   Future<void> _loadUserData() async {
     final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    final branchName = await AuthCacheHelper.instance.getBranchName() ?? '';
     final orgId = await AuthCacheHelper.instance.getOrgId() ?? '';
     final userData = await AuthCacheHelper.instance.getUserData();
     final department =
@@ -70,6 +77,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     if (mounted) {
       setState(() {
         _branchId = branchId;
+        _branchName = branchName;
         _employeeId = userData?.id ?? '';
         _department = department;
         _orgID = orgId;
@@ -83,8 +91,83 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         context.read<BranchStockBloc>().add(
           LoadBranchStock(branchId: branchId),
         );
+        await _loadBranches();
       }
     }
+  }
+
+  bool get _canCreateInterbranch =>
+      _department.trim().toLowerCase().contains('procurement');
+
+  String get _sourceBranchId =>
+      _isInterbranch ? (_selectedIssuingBranchId ?? '') : _branchId;
+
+  String get _sourceBranchLabel {
+    if (!_isInterbranch) {
+      return _branchName.isEmpty ? 'your branch Stock Control' : _branchName;
+    }
+    final selected = _branches.where((branch) {
+      return branch.id == _selectedIssuingBranchId;
+    });
+    if (selected.isEmpty) return 'selected issuing branch';
+    return selected.first.displayName;
+  }
+
+  Future<void> _loadBranches() async {
+    if (!_canCreateInterbranch) return;
+
+    setState(() => _isLoadingBranches = true);
+    final branches = await _StockRequestBranchDirectory().loadBranches(
+      fallbackBranch: _StockRequestBranch(id: _branchId, name: _branchName),
+    );
+    if (!mounted) return;
+
+    setState(() {
+      _branches = branches
+          .where((branch) => branch.id.isNotEmpty && branch.id != _branchId)
+          .toList();
+      _isLoadingBranches = false;
+    });
+  }
+
+  void _setRequestType(bool isInterbranch) {
+    if (isInterbranch && !_canCreateInterbranch) return;
+
+    setState(() {
+      _isInterbranch = isInterbranch;
+      _selectedIssuingBranchId = null;
+      _branchStockData = null;
+      _addedItems.clear();
+      _clearSelectedItem();
+    });
+
+    if (!isInterbranch && _branchId.isNotEmpty) {
+      context.read<BranchStockBloc>().add(LoadBranchStock(branchId: _branchId));
+    }
+  }
+
+  void _selectIssuingBranch(String? branchId) {
+    if (branchId == null || branchId.isEmpty || branchId == _branchId) return;
+
+    setState(() {
+      _selectedIssuingBranchId = branchId;
+      _branchStockData = null;
+      _addedItems.clear();
+      _clearSelectedItem();
+    });
+
+    context.read<BranchStockBloc>().add(LoadBranchStock(branchId: branchId));
+  }
+
+  void _clearSelectedItem() {
+    _selectedItemId = null;
+    _selectedItemName = null;
+    _selectedItemUnit = null;
+    _currentStock = null;
+    _reorderLevel = null;
+    _qtyController.clear();
+    _isSearching = false;
+    _isOpened = false;
   }
 
   @override
@@ -154,6 +237,11 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
   /// AUTO-FILL: Get stock data for selected item
   Future<void> _autoFillStockData(String inventoryItemId) async {
+    if (_sourceBranchId.isEmpty) {
+      _showSnackBar('Select a source branch first.', isError: true);
+      return;
+    }
+
     if (_branchStockData == null) {
       _showSnackBar('Loading stock data...', isError: false);
       return;
@@ -183,11 +271,16 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         }
       });
 
-      _showSnackBar('Stock data auto-filled successfully');
+      _showSnackBar('Stock availability loaded', isInfo: true);
     } catch (e) {
+      setState(() {
+        _currentStock = 0;
+        _reorderLevel = 0;
+        _qtyController.clear();
+      });
       _showSnackBar(
-        'Stock data not available. Please enter manually.',
-        isError: false,
+        'This item is not available in $_sourceBranchLabel.',
+        isError: true,
       );
     }
   }
@@ -410,6 +503,11 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
   }
 
   void _onItemSelected(InventoryItem item) {
+    if (_sourceBranchId.isEmpty) {
+      _showSnackBar('Select a source branch first.', isError: true);
+      return;
+    }
+
     setState(() {
       _selectedItemId = item.id;
       _selectedItemName = item.name;
@@ -429,6 +527,11 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       return;
     }
 
+    if (_sourceBranchId.isEmpty) {
+      _showSnackBar('Select a source branch first.', isError: true);
+      return;
+    }
+
     if (_qtyController.text.isEmpty) {
       _showSnackBar('Please enter quantity', isError: true);
       return;
@@ -438,6 +541,22 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
     if (qty == null || qty <= 0) {
       _showSnackBar('Please enter a valid quantity', isError: true);
+      return;
+    }
+
+    if (_currentStock == null) {
+      _showSnackBar(
+        'Stock availability is still loading. Please wait.',
+        isError: true,
+      );
+      return;
+    }
+
+    if (_currentStock != null && qty > _currentStock!) {
+      _showSnackBar(
+        'Only ${_currentStock!.toStringAsFixed(2)} $_selectedItemUnit available in $_sourceBranchLabel.',
+        isError: true,
+      );
       return;
     }
 
@@ -498,9 +617,32 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       return;
     }
 
+    if (_isInterbranch) {
+      if (!_canCreateInterbranch) {
+        _showSnackBar(
+          'Only Procurement can create interbranch stock requests.',
+          isError: true,
+        );
+        return;
+      }
+      if (_selectedIssuingBranchId == null ||
+          _selectedIssuingBranchId!.isEmpty) {
+        _showSnackBar('Please select the issuing branch.', isError: true);
+        return;
+      }
+      if (_selectedIssuingBranchId == _branchId) {
+        _showSnackBar(
+          'Issuing branch must be different from your branch.',
+          isError: true,
+        );
+        return;
+      }
+    }
+
     try {
       final request = stock.CreateStockRequestRequest(
         requestingBranchId: _branchId,
+        issuingBranchId: _isInterbranch ? _selectedIssuingBranchId : null,
         requestedBy: _employeeId,
         department: _department,
         notes: _notesController.text.trim().isEmpty
@@ -583,6 +725,11 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               setState(() {
                 _branchStockData = state.response;
               });
+            } else if (state is BranchStockError) {
+              _showSnackBar(
+                'Failed to load source stock: ${state.error}',
+                isError: true,
+              );
             }
           },
         ),
@@ -633,6 +780,12 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                   children: [
                                     // Info banner
                                     _buildInfoBanner(screenWidth),
+                                    SizedBox(
+                                      height:
+                                          _getSectionSpacing(screenWidth) * 3,
+                                    ),
+
+                                    _buildRequestSourceSection(screenWidth),
                                     SizedBox(
                                       height:
                                           _getSectionSpacing(screenWidth) * 3,
@@ -772,13 +925,250 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Stock levels and quantities are auto-calculated based on your inventory',
+                  'Check source branch availability before submitting a request',
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 12,
                     color: context.modeTextSecondary,
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequestSourceSection(double screenWidth) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Request Source', screenWidth),
+        SizedBox(height: _getSectionSpacing(screenWidth)),
+        if (_canCreateInterbranch) _buildRequestTypeSelector(screenWidth),
+        if (_canCreateInterbranch && _isInterbranch) ...[
+          SizedBox(height: _getSectionSpacing(screenWidth) * 2),
+          _buildIssuingBranchSelector(screenWidth),
+          if (_selectedIssuingBranchId != null) ...[
+            SizedBox(height: _getFieldSpacing(screenWidth)),
+            _buildSourceBranchNote(),
+          ],
+        ],
+        if (!_canCreateInterbranch || !_isInterbranch) ...[
+          SizedBox(height: _getFieldSpacing(screenWidth)),
+          _buildSourceBranchNote(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildRequestTypeSelector(double screenWidth) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildTypeOption(
+            title: 'Interdepartment',
+            subtitle: 'Request from your branch Stock Control',
+            icon: Icons.storefront_outlined,
+            selected: !_isInterbranch,
+            onTap: () => _setRequestType(false),
+            screenWidth: screenWidth,
+          ),
+        ),
+        SizedBox(width: _getFieldSpacing(screenWidth)),
+        Expanded(
+          child: _buildTypeOption(
+            title: 'Interbranch',
+            subtitle: 'Request from another branch',
+            icon: Icons.sync_alt_outlined,
+            selected: _isInterbranch,
+            onTap: () => _setRequestType(true),
+            screenWidth: screenWidth,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTypeOption({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool selected,
+    required VoidCallback onTap,
+    required double screenWidth,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 96),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: selected
+              ? context.modePrimary.withValues(alpha: 0.08)
+              : context.modeSurface,
+          borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+          border: Border.all(
+            color: selected ? context.modePrimary : context.modeBorder,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                AppIcon(
+                  icon,
+                  color: selected
+                      ? context.modePrimary
+                      : context.modeTextSecondary,
+                  size: _getIconSize(screenWidth),
+                ),
+                const Spacer(),
+                AppIcon(
+                  selected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: selected
+                      ? context.modePrimary
+                      : context.modeTextSecondary,
+                  size: _getIconSize(screenWidth),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: _getInputFontSize(screenWidth),
+                fontWeight: FontWeight.w600,
+                color: context.modeTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: _getCaptionFontSize(screenWidth),
+                color: context.modeTextSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIssuingBranchSelector(double screenWidth) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Issuing Branch *',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: _getLabelFontSize(screenWidth),
+            fontWeight: FontWeight.w500,
+            color: context.modeTextPrimary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          initialValue: _selectedIssuingBranchId,
+          isExpanded: true,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: context.modeSurface,
+            prefixIcon: AppIconSlot(
+              Icons.account_tree_outlined,
+              color: context.modePrimary,
+              size: _getIconSize(screenWidth),
+            ),
+            prefixIconConstraints: AppIconSlot.constraints(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _getBorderRadius(screenWidth),
+              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _getBorderRadius(screenWidth),
+              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _getBorderRadius(screenWidth),
+              ),
+              borderSide: BorderSide(color: context.modePrimary, width: 1.5),
+            ),
+          ),
+          hint: Text(
+            _isLoadingBranches ? 'Loading branches...' : 'Select source branch',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: _getInputFontSize(screenWidth),
+              color: context.modeTextSecondary,
+            ),
+          ),
+          items: _branches.map((branch) {
+            return DropdownMenuItem<String>(
+              value: branch.id,
+              child: Text(
+                branch.displayName,
+                overflow: TextOverflow.ellipsis,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: _getInputFontSize(screenWidth),
+                  color: context.modeTextPrimary,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: _branches.isEmpty ? null : _selectIssuingBranch,
+          validator: (_) {
+            if (_isInterbranch &&
+                (_selectedIssuingBranchId == null ||
+                    _selectedIssuingBranchId!.isEmpty)) {
+              return 'Please select issuing branch';
+            }
+            return null;
+          },
+        ),
+        if (_branches.isEmpty && !_isLoadingBranches) ...[
+          const SizedBox(height: 8),
+          Text(
+            'No external branches found. Please confirm branch endpoint with backend.',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: _getCaptionFontSize(screenWidth),
+              color: context.modeWarning,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSourceBranchNote() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.modeSurface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.modeBorder),
+      ),
+      child: Row(
+        children: [
+          AppIcon(Icons.inventory_2_outlined, color: context.modePrimary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Availability will be checked from $_sourceBranchLabel.',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 13,
+                color: context.modeTextSecondary,
+              ),
             ),
           ),
         ],
@@ -822,6 +1212,10 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
         SizedBox(height: 12),
         GestureDetector(
           onTap: () {
+            if (_sourceBranchId.isEmpty) {
+              _showSnackBar('Select a source branch first.', isError: true);
+              return;
+            }
             setState(() {
               _isOpened = !_isOpened;
               _isSearching = true;
@@ -998,6 +1392,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                       }
 
                       final item = _filteredItems[index];
+                      final branchStockItem = _branchStockForItem(item.id);
                       return InkWell(
                         onTap: () => _onItemSelected(item),
                         child: Container(
@@ -1057,6 +1452,22 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                                             color: context.modeTextSecondary,
                                           ),
                                     ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _availabilityLabel(
+                                        branchStockItem,
+                                        item.unit,
+                                      ),
+                                      style: WorkSansAppTextStyles.medium
+                                          .copyWith(
+                                            fontSize: _getCaptionFontSize(
+                                              screenWidth,
+                                            ),
+                                            color: _availabilityColor(
+                                              branchStockItem,
+                                            ),
+                                          ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1072,7 +1483,37 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     );
   }
 
+  BranchStockItem? _branchStockForItem(String itemId) {
+    final data = _branchStockData;
+    if (data == null) return null;
+    for (final stockItem in data.data) {
+      if (stockItem.itemId == itemId || stockItem.item.id == itemId) {
+        return stockItem;
+      }
+    }
+    return null;
+  }
+
+  String _availabilityLabel(BranchStockItem? stockItem, String fallbackUnit) {
+    if (stockItem == null || stockItem.currentStockValue <= 0) {
+      return 'Not available in $_sourceBranchLabel';
+    }
+    return 'Available: ${stockItem.currentStock} ${stockItem.item.unit.isEmpty ? fallbackUnit : stockItem.item.unit}';
+  }
+
+  Color _availabilityColor(BranchStockItem? stockItem) {
+    if (stockItem == null || stockItem.currentStockValue <= 0) {
+      return context.modeError;
+    }
+    if (stockItem.isAtOrBelowReorder || stockItem.isNearReorder) {
+      return context.modeWarning;
+    }
+    return context.modeTextSecondary;
+  }
+
   Widget _buildAutoFilledFields(double screenWidth) {
+    final isUnavailable = _currentStock != null && _currentStock! <= 0;
+
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1088,7 +1529,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
               AppIcon(Icons.auto_awesome, color: context.modePrimary, size: 20),
               SizedBox(width: 8),
               Text(
-                'Auto-filled Data',
+                'Source Availability',
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -1098,157 +1539,203 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
             ],
           ),
           SizedBox(height: 16),
-
-          // Stock info display
           if (_currentStock != null && _reorderLevel != null) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: _buildInfoCard(
-                    'Current Stock',
-                    '${_currentStock!.toStringAsFixed(0)} $_selectedItemUnit',
-                    Icons.inventory,
-                    context.modeInfo,
-                    screenWidth,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _buildInfoCard(
-                    'Reorder Level',
-                    '${_reorderLevel!.toStringAsFixed(0)} $_selectedItemUnit',
-                    Icons.warning_amber,
-                    context.modeWarning,
-                    screenWidth,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-          ],
-
-          // Quantity field
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Quantity Requested *',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: _getLabelFontSize(screenWidth),
-                  fontWeight: FontWeight.w500,
-                  color: context.modeTextPrimary,
-                ),
-              ),
-              SizedBox(height: 12),
-              TextFormField(
-                controller: _qtyController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: _getInputFontSize(screenWidth),
-                  fontWeight: FontWeight.w400,
-                  color: context.modeTextPrimary,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Enter quantity',
-                  hintStyle: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: _getInputFontSize(screenWidth),
-                    fontWeight: FontWeight.w400,
-                    color: context.modeTextSecondary,
-                  ),
-                  suffix: _selectedItemUnit != null
-                      ? Text(
-                          _selectedItemUnit!,
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: _getInputFontSize(screenWidth),
-                            color: context.modeTextSecondary,
-                          ),
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: context.modeSurface,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      _getBorderRadius(screenWidth),
-                    ),
-                    borderSide: BorderSide(
-                      color: context.modeBorder,
-                      width: 1.5,
+            if (isUnavailable)
+              _buildUnavailableStockState(screenWidth)
+            else ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoCard(
+                      'Current Stock',
+                      '${_currentStock!.toStringAsFixed(0)} $_selectedItemUnit',
+                      Icons.inventory,
+                      context.modeInfo,
+                      screenWidth,
                     ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      _getBorderRadius(screenWidth),
-                    ),
-                    borderSide: BorderSide(
-                      color: context.modeBorder,
-                      width: 1.5,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      _getBorderRadius(screenWidth),
-                    ),
-                    borderSide: BorderSide(
-                      color: context.modePrimary,
-                      width: 1.5,
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: _buildInfoCard(
+                      'Reorder Level',
+                      '${_reorderLevel!.toStringAsFixed(0)} $_selectedItemUnit',
+                      Icons.warning_amber,
+                      context.modeWarning,
+                      screenWidth,
                     ),
                   ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: _getInputPaddingHorizontal(screenWidth),
-                    vertical: _getInputPaddingVertical(screenWidth),
-                  ),
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter quantity';
-                  }
-                  final qty = double.tryParse(value);
-                  if (qty == null || qty <= 0) {
-                    return 'Please enter a valid quantity';
-                  }
-                  return null;
-                },
               ),
+              SizedBox(height: 16),
+              _buildQuantityField(screenWidth),
+              SizedBox(height: 16),
+              _buildAddItemButton(screenWidth),
             ],
-          ),
-          SizedBox(height: 16),
+          ],
+        ],
+      ),
+    );
+  }
 
-          // Add button
-          SizedBox(
-            width: double.infinity,
-            height: _getButtonHeight(screenWidth) - 8,
-            child: OutlinedButton.icon(
-              onPressed: _addItemToList,
-              icon: AppIcon(
-                Icons.add_circle_outline,
-                size: _getIconSize(screenWidth),
-                color: context.modePrimary,
+  Widget _buildUnavailableStockState(double screenWidth) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      decoration: BoxDecoration(
+        color: context.modeError.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+        border: Border.all(color: context.modeError.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Center(
+            child: Container(
+              width: 48,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: context.modeError.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
               ),
-              label: Text(
-                'Add Item to Request',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: _getButtonFontSize(screenWidth),
-                  fontWeight: FontWeight.w600,
-                  color: context.modePrimary,
-                ),
+              child: AppIcon(
+                Icons.inventory_2_outlined,
+                color: context.modeError,
+                size: 26,
               ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: context.modePrimary,
-                side: BorderSide(color: context.modePrimary, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    _getBorderRadius(screenWidth),
-                  ),
-                ),
-              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Item not available',
+            textAlign: TextAlign.center,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: _getInputFontSize(screenWidth),
+              fontWeight: FontWeight.w600,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'There is no stock for this item in $_sourceBranchLabel.',
+            textAlign: TextAlign.center,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: _getCaptionFontSize(screenWidth),
+              color: context.modeTextSecondary,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityField(double screenWidth) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Quantity Requested *',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: _getLabelFontSize(screenWidth),
+            fontWeight: FontWeight.w500,
+            color: context.modeTextPrimary,
+          ),
+        ),
+        SizedBox(height: 12),
+        TextFormField(
+          controller: _qtyController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: _getInputFontSize(screenWidth),
+            fontWeight: FontWeight.w400,
+            color: context.modeTextPrimary,
+          ),
+          decoration: InputDecoration(
+            hintText: 'Enter quantity',
+            hintStyle: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: _getInputFontSize(screenWidth),
+              fontWeight: FontWeight.w400,
+              color: context.modeTextSecondary,
+            ),
+            suffix: _selectedItemUnit != null
+                ? Text(
+                    _selectedItemUnit!,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: _getInputFontSize(screenWidth),
+                      color: context.modeTextSecondary,
+                    ),
+                  )
+                : null,
+            filled: true,
+            fillColor: context.modeSurface,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _getBorderRadius(screenWidth),
+              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _getBorderRadius(screenWidth),
+              ),
+              borderSide: BorderSide(color: context.modeBorder, width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _getBorderRadius(screenWidth),
+              ),
+              borderSide: BorderSide(color: context.modePrimary, width: 1.5),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: _getInputPaddingHorizontal(screenWidth),
+              vertical: _getInputPaddingVertical(screenWidth),
+            ),
+          ),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+          ],
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter quantity';
+            }
+            final qty = double.tryParse(value);
+            if (qty == null || qty <= 0) {
+              return 'Please enter a valid quantity';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddItemButton(double screenWidth) {
+    return SizedBox(
+      width: double.infinity,
+      height: _getButtonHeight(screenWidth) - 8,
+      child: OutlinedButton.icon(
+        onPressed: _addItemToList,
+        icon: AppIcon(
+          Icons.add_circle_outline,
+          size: _getIconSize(screenWidth),
+          color: context.modePrimary,
+        ),
+        label: Text(
+          'Add Item to Request',
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: _getButtonFontSize(screenWidth),
+            fontWeight: FontWeight.w600,
+            color: context.modePrimary,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: context.modePrimary,
+          side: BorderSide(color: context.modePrimary, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+          ),
+        ),
       ),
     );
   }
@@ -1601,4 +2088,126 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
     if (width < 600) return 14;
     return 16;
   }
+}
+
+class _StockRequestBranch {
+  const _StockRequestBranch({
+    required this.id,
+    required this.name,
+    this.code = '',
+    this.city = '',
+  });
+
+  final String id;
+  final String name;
+  final String code;
+  final String city;
+
+  String get displayName {
+    final details = [
+      if (code.isNotEmpty) code,
+      if (city.isNotEmpty) city,
+    ].join(' - ');
+    if (details.isEmpty) return name.isEmpty ? id : name;
+    return '${name.isEmpty ? id : name} ($details)';
+  }
+
+  factory _StockRequestBranch.fromJson(Map<String, dynamic> json) {
+    return _StockRequestBranch(
+      id: _parseString(json['id'] ?? json['branchId'] ?? json['branch_id']),
+      name: _parseString(json['name'] ?? json['branchName'] ?? json['branch']),
+      code: _parseString(
+        json['code'] ?? json['branchCode'] ?? json['branch_code'],
+      ),
+      city: _parseString(json['city']),
+    );
+  }
+}
+
+class _StockRequestBranchDirectory {
+  final ApiClient _apiClient = ApiClient.instance;
+
+  Future<List<_StockRequestBranch>> loadBranches({
+    required _StockRequestBranch fallbackBranch,
+  }) async {
+    final candidates = <({String path, Map<String, dynamic>? query})>[
+      (path: 'Branches/active', query: null),
+      (
+        path: 'Branches',
+        query: {
+          'isActive': true,
+          'limit': 100,
+          'sortBy': 'name',
+          'sortOrder': 'asc',
+        },
+      ),
+    ];
+
+    for (final candidate in candidates) {
+      try {
+        final response = await _apiClient
+            .get<dynamic>(candidate.path, queryParameters: candidate.query)
+            .timeout(const Duration(seconds: 8));
+
+        if (!response.isSuccess || response.data == null) continue;
+
+        final branches = _parseBranches(response.data);
+        if (branches.isNotEmpty) {
+          return _mergeFallback(branches, fallbackBranch);
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return fallbackBranch.id.isEmpty ? const [] : [fallbackBranch];
+  }
+
+  List<_StockRequestBranch> _parseBranches(dynamic payload) {
+    if (payload is List) {
+      return payload
+          .whereType<Map>()
+          .map(
+            (item) =>
+                _StockRequestBranch.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .where((branch) => branch.id.isNotEmpty)
+          .toList();
+    }
+
+    if (payload is Map) {
+      final json = Map<String, dynamic>.from(payload);
+      final possibleLists = [
+        json['data'],
+        json['branches'],
+        if (json['data'] is Map) (json['data'] as Map)['branches'],
+        if (json['data'] is Map) (json['data'] as Map)['items'],
+      ];
+
+      for (final value in possibleLists) {
+        if (value is List) return _parseBranches(value);
+      }
+
+      final branch = _StockRequestBranch.fromJson(json);
+      if (branch.id.isNotEmpty) return [branch];
+    }
+
+    return const [];
+  }
+
+  List<_StockRequestBranch> _mergeFallback(
+    List<_StockRequestBranch> branches,
+    _StockRequestBranch fallbackBranch,
+  ) {
+    if (fallbackBranch.id.isEmpty) return branches;
+    if (branches.any((branch) => branch.id == fallbackBranch.id)) {
+      return branches;
+    }
+    return [fallbackBranch, ...branches];
+  }
+}
+
+String _parseString(dynamic value) {
+  if (value == null || value is Map) return '';
+  return value.toString();
 }

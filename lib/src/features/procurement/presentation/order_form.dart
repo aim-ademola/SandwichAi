@@ -14,15 +14,18 @@ import 'package:sandwich_ai/src/features/procurement/procurement_blocs/porchase_
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/supplier_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/supplier_bloc/event.dart';
 import 'package:sandwich_ai/src/features/procurement/procurement_blocs/supplier_bloc/state.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.dart';
 import 'package:intl/intl.dart';
 
 class OrderFormScreen extends StatefulWidget {
   final ProcurementRequest? sourceRequest;
+  final ReorderSuggestion? reorderSuggestion;
   final bool showAppBar;
 
   const OrderFormScreen({
     super.key,
     this.sourceRequest,
+    this.reorderSuggestion,
     this.showAppBar = true,
   });
 
@@ -78,6 +81,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
     // Load suppliers
     context.read<SupplierBloc>().add(LoadSuppliers());
+    final prefilledSupplierId = _selectedSupplierId;
+    if (prefilledSupplierId != null) {
+      _isLoadingProducts = true;
+      context.read<SupplierBloc>().add(
+        LoadSupplierProducts(supplierId: prefilledSupplierId),
+      );
+    }
   }
 
   @override
@@ -103,6 +113,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   }
 
   void _prefillFromSourceRequest() {
+    final reorderSuggestion = widget.reorderSuggestion;
+    if (reorderSuggestion != null) {
+      _prefillFromReorderSuggestion(reorderSuggestion);
+      return;
+    }
+
     final request = widget.sourceRequest;
     if (request == null || request.items.isEmpty) {
       _lineItems.add(OrderLineItem());
@@ -133,6 +149,136 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           quantity: item.qtyNeeded,
           unit: item.item.unit,
         ),
+      ),
+    );
+  }
+
+  void _prefillFromReorderSuggestion(ReorderSuggestion suggestion) {
+    if (suggestion.supplierId.trim().isNotEmpty) {
+      _selectedSupplierId = suggestion.supplierId;
+      _selectedSupplierName = suggestion.supplierName.trim().isEmpty
+          ? null
+          : suggestion.supplierName;
+    }
+
+    _selectedPriority = _priorityFromUrgency(suggestion.urgency);
+    _noteController.text = [
+      'From reorder suggestion',
+      'Current stock: ${suggestion.currentStockDisplay}',
+      'Reorder level: ${suggestion.reorderLevelDisplay}',
+      'Suggested order: ${suggestion.suggestedQtyDisplay}',
+    ].join('\n');
+
+    _lineItems.add(
+      OrderLineItem.fromRequestItem(
+        requestedItemId: suggestion.itemId,
+        requestedItemName: suggestion.itemName.isEmpty
+            ? 'Stock item'
+            : suggestion.itemName,
+        quantity: suggestion.suggestedQty.toString(),
+        unit: suggestion.unit,
+      ),
+    );
+  }
+
+  String _priorityFromUrgency(String urgency) {
+    final normalized = urgency.trim().toUpperCase();
+    if (normalized.contains('URGENT') ||
+        normalized.contains('CRITICAL') ||
+        normalized.contains('HIGH')) {
+      return 'URGENT';
+    }
+    return 'NORMAL';
+  }
+
+  Widget _buildReorderPrefillSummary(double labelFontSize) {
+    final suggestion = widget.reorderSuggestion;
+    if (suggestion == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.modePrimary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.modePrimary.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              AppIcon(
+                Icons.inventory_2_outlined,
+                color: context.modePrimary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Reorder suggestion',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: labelFontSize,
+                    fontWeight: FontWeight.w800,
+                    color: context.modePrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _buildPrefillSummaryRow(
+            'Item',
+            suggestion.itemName.isEmpty ? 'Stock item' : suggestion.itemName,
+          ),
+          _buildPrefillSummaryRow(
+            'Current stock',
+            suggestion.currentStockDisplay,
+          ),
+          _buildPrefillSummaryRow(
+            'Reorder level',
+            suggestion.reorderLevelDisplay,
+          ),
+          _buildPrefillSummaryRow(
+            'Suggested order',
+            suggestion.suggestedQtyDisplay,
+          ),
+          if (suggestion.urgency.trim().isNotEmpty)
+            _buildPrefillSummaryRow('Urgency', suggestion.urgency),
+          if (suggestion.supplierName.trim().isNotEmpty)
+            _buildPrefillSummaryRow('Supplier', suggestion.supplierName),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrefillSummaryRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 108,
+            child: Text(
+              label,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: context.modeTextMuted,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: context.modeTextPrimary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -246,6 +392,31 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     context.read<SupplierBloc>().add(
       LoadSupplierProducts(supplierId: supplierId),
     );
+  }
+
+  void _syncSelectedSupplierFromList(List<dynamic> suppliers) {
+    final selectedSupplierId = _selectedSupplierId;
+    if (selectedSupplierId == null) return;
+
+    dynamic selectedSupplier;
+    for (final supplier in suppliers) {
+      if (_dynamicString(supplier.id) == selectedSupplierId) {
+        selectedSupplier = supplier;
+        break;
+      }
+    }
+
+    if (selectedSupplier == null) return;
+
+    final nextSupplierName = _dynamicString(selectedSupplier.businessName);
+    if (_selectedSupplierName != nextSupplierName &&
+        nextSupplierName.isNotEmpty) {
+      setState(() => _selectedSupplierName = nextSupplierName);
+    }
+
+    if (!_isLoadingProducts) {
+      _loadSupplierProducts(selectedSupplierId);
+    }
   }
 
   void _changeSupplier() {
@@ -1367,7 +1538,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
     return BlocBuilder<SupplierBloc, SupplierState>(
       builder: (context, state) {
-        if (_isLoadingProducts || state is SupplierLoading) {
+        if (_isLoadingProducts) {
           return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -1590,7 +1761,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            icon: const AppIcon(Icons.playlist_add_check_outlined, size: 19),
+            icon: const AppIcon(Icons.add_shopping_cart_rounded, size: 19),
             label: Text(
               'Bulk Create',
               style: WorkSansAppTextStyles.medium.copyWith(
@@ -2016,11 +2187,21 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         BlocListener<SupplierBloc, SupplierState>(
           listener: (context, state) {
             // Update loading state when products are loaded
-            if (state is SupplierProductsLoaded) {
+            if (state is SupplierListLoaded) {
+              _availableSuppliers = state.suppliers;
+              _syncSelectedSupplierFromList(state.suppliers);
+            } else if (state is SupplierRefreshing) {
+              _availableSuppliers = state.currentSuppliers;
+              _syncSelectedSupplierFromList(state.currentSuppliers);
+            } else if (state is SupplierProductsLoaded) {
               setState(() {
                 _isLoadingProducts = false;
               });
               _matchRequestedItemsToSupplierProducts(state.products);
+            } else if (state is SupplierEmpty && _isLoadingProducts) {
+              setState(() {
+                _isLoadingProducts = false;
+              });
             } else if (state is SupplierError && _isLoadingProducts) {
               setState(() {
                 _isLoadingProducts = false;
@@ -2090,6 +2271,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const SizedBox(height: 24),
+
+                            if (widget.reorderSuggestion != null) ...[
+                              _buildReorderPrefillSummary(labelFontSize),
+                              const SizedBox(height: 16),
+                            ],
 
                             // PO Number and Order Date Row
                             Row(

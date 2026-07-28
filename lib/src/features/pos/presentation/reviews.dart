@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,10 +7,13 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
+import 'package:sandwich_ai/src/features/auth/login/presentation/snack_bar.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/customer_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/customer_service_feedback_model.dart';
+import 'package:sandwich_ai/src/features/pos/data/model/oder_status_model.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/customer_repo.dart';
 import 'package:sandwich_ai/src/features/pos/data/repository/customer_service_feedback_repo.dart';
+import 'package:sandwich_ai/src/features/pos/data/repository/order_statua_repo.dart';
 import 'package:sandwich_ai/src/features/pos/presentation/widgets/pos_design_system.dart';
 
 class ReviewsScreen extends StatefulWidget {
@@ -29,6 +34,11 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   final _customerEmailController = TextEditingController();
   final _orderIdController = TextEditingController();
   final _reviewSourceController = TextEditingController(text: 'Internal');
+  Timer? _orderLookupDebounce;
+  KitchenOrder? _matchedOrder;
+  String? _orderVerificationError;
+  String _lastVerifiedOrderInput = '';
+  int _orderLookupRequestId = 0;
   int _rating = 5;
   int _foodQuality = 5;
   int _serviceQuality = 5;
@@ -49,6 +59,10 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   void initState() {
     super.initState();
     _restoreCreateDraft();
+    _orderIdController.addListener(_onOrderIdChanged);
+    if (_orderIdController.text.trim().isNotEmpty) {
+      _verifyOrderId(_orderIdController.text.trim());
+    }
     _loadCustomers();
     _loadReviews();
   }
@@ -77,6 +91,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   void dispose() {
     _saveCreateDraft();
+    _orderLookupDebounce?.cancel();
     _titleController.dispose();
     _commentController.dispose();
     _customerNameController.dispose();
@@ -122,6 +137,19 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       return;
     }
 
+    final enteredOrderId = _orderIdController.text.trim();
+    if (enteredOrderId.isNotEmpty &&
+        (_matchedOrder == null || _lastVerifiedOrderInput != enteredOrderId)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select a valid order before submitting.'),
+          backgroundColor: context.modeError,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
     final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
 
@@ -153,7 +181,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     _putIfNotEmpty(payload, 'customerName', _customerNameController.text);
     _putIfNotEmpty(payload, 'customerPhone', _customerPhoneController.text);
     _putIfNotEmpty(payload, 'customerEmail', _customerEmailController.text);
-    _putIfNotEmpty(payload, 'orderId', _orderIdController.text);
+    if (_matchedOrder != null) {
+      payload['orderId'] = _matchedOrder!.id;
+    }
 
     final response = await context
         .read<CustomerServiceFeedbackRepositoryInterface>()
@@ -167,7 +197,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         setState(() {
           _reviews = _upsertReview(_reviews, review);
         });
-        _loadReviews();
+        showSuccessSnackBar('Review submitted successfully!', context);
       },
       error: (error) {
         ScaffoldMessenger.of(
@@ -189,6 +219,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     _customerPhoneController.clear();
     _customerEmailController.clear();
     _orderIdController.clear();
+    _matchedOrder = null;
+    _orderVerificationError = null;
+    _lastVerifiedOrderInput = '';
     _reviewSourceController.text = 'Internal';
     _selectedCustomerId = _newCustomerValue;
     _rating = 5;
@@ -311,6 +344,72 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       _customerPhoneController.text = customer.phone;
       _customerEmailController.text = customer.email;
     });
+  }
+
+  void _onOrderIdChanged() {
+    final query = _orderIdController.text.trim();
+    _orderLookupDebounce?.cancel();
+
+    setState(() {
+      _matchedOrder = null;
+      _orderVerificationError = null;
+      _lastVerifiedOrderInput = '';
+    });
+
+    if (query.isEmpty) return;
+
+    _orderLookupDebounce = Timer(const Duration(milliseconds: 500), () {
+      _verifyOrderId(query);
+    });
+  }
+
+  Future<void> _verifyOrderId(String query) async {
+    final requestId = ++_orderLookupRequestId;
+
+    setState(() {
+      _orderVerificationError = null;
+    });
+
+    final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    if (!mounted || requestId != _orderLookupRequestId) return;
+
+    if (branchId.isEmpty) {
+      setState(() {
+        _orderVerificationError = 'Branch not found';
+      });
+      return;
+    }
+
+    final response = await context
+        .read<KitchenOrdersRepositoryInterface>()
+        .getKitchenOrders(branchId: branchId);
+
+    if (!mounted || requestId != _orderLookupRequestId) return;
+
+    response.when(
+      success: (orders) {
+        final normalizedQuery = query.toLowerCase();
+        KitchenOrder? match;
+        for (final order in orders) {
+          if (order.orderId.toLowerCase() == normalizedQuery ||
+              order.id.toLowerCase() == normalizedQuery) {
+            match = order;
+            break;
+          }
+        }
+
+        setState(() {
+          _matchedOrder = match;
+          _lastVerifiedOrderInput = match == null ? '' : query;
+          _orderVerificationError = match == null ? 'Order not found' : null;
+        });
+      },
+      error: (error) {
+        setState(() {
+          _orderVerificationError = error.toString();
+        });
+      },
+    );
   }
 
   Future<void> _deleteReview(CustomerServiceRecord review) async {
@@ -641,6 +740,16 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
               _buildTextField(
                 controller: _orderIdController,
                 label: 'Order ID',
+                suffixIcon: _buildOrderIdSuffixIcon(),
+                helperText: _matchedOrder == null
+                    ? _orderVerificationError
+                    : 'Order found: ${_matchedOrder!.orderId}',
+                helperStyle: WorkSansAppTextStyles.medium.copyWith(
+                  color: _matchedOrder == null
+                      ? context.modeError
+                      : context.modeSuccess,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 12),
               _buildTextField(
@@ -734,6 +843,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     required TextEditingController controller,
     required String label,
     TextInputType? keyboardType,
+    Widget? suffixIcon,
+    String? helperText,
+    TextStyle? helperStyle,
   }) {
     return TextField(
       controller: controller,
@@ -741,6 +853,34 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
+        suffixIcon: suffixIcon,
+        helperText: helperText,
+        helperStyle: helperStyle,
+      ),
+    );
+  }
+
+  Widget? _buildOrderIdSuffixIcon() {
+    final query = _orderIdController.text.trim();
+    if (query.isEmpty) return null;
+
+    if (_matchedOrder != null && _lastVerifiedOrderInput == query) {
+      return Icon(Icons.check_circle_rounded, color: context.modeSuccess);
+    }
+
+    if (_orderVerificationError != null) {
+      return Icon(Icons.cancel_rounded, color: context.modeError);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(14),
+      child: SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: context.modePrimary,
+        ),
       ),
     );
   }

@@ -32,7 +32,7 @@ class AddBranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
   ) async {
     await _runControlAction(
       emit,
-      () => _repository.allowNegativeStock(event.stockId),
+      () => _repository.allowNegativeStock(event.stockId, event.allow),
       fallbackMessage: 'Negative stock is now allowed for this item',
     );
   }
@@ -43,7 +43,7 @@ class AddBranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
   ) async {
     await _runControlAction(
       emit,
-      () => _repository.lockStock(event.stockId),
+      () => _repository.lockStock(event.stockId, event.reason),
       fallbackMessage: 'Stock item locked successfully',
     );
   }

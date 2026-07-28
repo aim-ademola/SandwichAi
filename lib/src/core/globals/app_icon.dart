@@ -39,12 +39,27 @@ class AppIcon extends StatelessWidget {
     final effectiveSize = (size ?? iconTheme.size ?? 24) * sizeScale;
     final effectiveColor = color ?? iconTheme.color ?? Colors.black;
 
-    Widget child = HugeIcon(
-      icon: _HugeIconMap.resolve(icon),
-      color: effectiveColor,
-      size: effectiveSize,
-      strokeWidth: _strokeWidth,
-    );
+    final hugeIcon = _HugeIconMap.resolve(icon);
+    Widget child = hugeIcon == null
+        ? Icon(
+            icon,
+            color: effectiveColor,
+            size: effectiveSize,
+            semanticLabel: semanticLabel,
+            textDirection: textDirection,
+            shadows: shadows,
+            fill: fill,
+            weight: weight,
+            grade: grade,
+            opticalSize: opticalSize,
+            applyTextScaling: applyTextScaling,
+          )
+        : HugeIcon(
+            icon: hugeIcon,
+            color: effectiveColor,
+            size: effectiveSize,
+            strokeWidth: _strokeWidth,
+          );
 
     if (blendMode != null) {
       child = ColorFiltered(
@@ -112,8 +127,8 @@ class AppIconSlot extends StatelessWidget {
 class _HugeIconMap {
   const _HugeIconMap._();
 
-  static List<List<dynamic>> resolve(IconData icon) {
-    return _icons[icon] ?? HugeIcons.strokeRoundedSquare;
+  static List<List<dynamic>>? resolve(IconData icon) {
+    return _icons[icon];
   }
 
   static final Map<IconData, List<List<dynamic>>> _icons = {

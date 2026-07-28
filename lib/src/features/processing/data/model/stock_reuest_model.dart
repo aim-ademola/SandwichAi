@@ -73,20 +73,26 @@ class StockRequestItemDetails {
 }
 
 class RequestingBranch {
+  final String id;
   final String name;
   final String branchCode;
 
-  RequestingBranch({required this.name, required this.branchCode});
+  RequestingBranch({
+    required this.id,
+    required this.name,
+    required this.branchCode,
+  });
 
   factory RequestingBranch.fromJson(Map<String, dynamic> json) {
     return RequestingBranch(
+      id: _parseString(json['id']),
       name: _parseString(json['name']),
       branchCode: _parseString(json['branch_code'] ?? json['branchCode']),
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'name': name, 'branch_code': branchCode};
+    return {'id': id, 'name': name, 'branch_code': branchCode};
   }
 }
 
@@ -94,6 +100,7 @@ class StockRequest {
   final String id;
   final String requestId;
   final String requestingBranchId;
+  final String? issuingBranchId;
   final StockRequestUser? requestedBy; // ← was String?
   final String department;
   final String organizationId;
@@ -112,11 +119,13 @@ class StockRequest {
   final DateTime updatedAt;
   final List<StockRequestItem> items;
   final RequestingBranch? requestingBranch;
+  final RequestingBranch? issuingBranch;
 
   StockRequest({
     required this.id,
     required this.requestId,
     required this.requestingBranchId,
+    this.issuingBranchId,
     this.requestedBy,
     required this.department,
     required this.organizationId,
@@ -135,6 +144,7 @@ class StockRequest {
     required this.updatedAt,
     required this.items,
     this.requestingBranch,
+    this.issuingBranch,
   });
 
   factory StockRequest.fromJson(Map<String, dynamic> json) {
@@ -143,6 +153,9 @@ class StockRequest {
       requestId: _parseString(json['requestId'] ?? json['request_id']),
       requestingBranchId: _parseString(
         json['requestingBranchId'] ?? json['requesting_branch_id'],
+      ),
+      issuingBranchId: _parseStringOrNull(
+        json['issuingBranchId'] ?? json['issuing_branch_id'],
       ),
       requestedBy: _parseUser(json['requestedBy']),
       department: _parseString(json['department']),
@@ -171,6 +184,9 @@ class StockRequest {
       requestingBranch: _asMap(json['requestingBranch']).isNotEmpty
           ? RequestingBranch.fromJson(_asMap(json['requestingBranch']))
           : null,
+      issuingBranch: _asMap(json['issuingBranch']).isNotEmpty
+          ? RequestingBranch.fromJson(_asMap(json['issuingBranch']))
+          : null,
     );
   }
 
@@ -179,6 +195,7 @@ class StockRequest {
       'id': id,
       'requestId': requestId,
       'requestingBranchId': requestingBranchId,
+      if (issuingBranchId != null) 'issuingBranchId': issuingBranchId,
       'requestedBy': requestedBy?.toJson(),
       'department': department,
       'organizationId': organizationId,
@@ -197,6 +214,7 @@ class StockRequest {
       'updatedAt': updatedAt.toIso8601String(),
       'items': items.map((item) => item.toJson()).toList(),
       'requestingBranch': requestingBranch?.toJson(),
+      'issuingBranch': issuingBranch?.toJson(),
     };
   }
 
@@ -206,6 +224,11 @@ class StockRequest {
     0.0,
     (sum, item) => sum + (double.tryParse(item.qtyRequested) ?? 0.0),
   );
+
+  bool get isInterbranch =>
+      issuingBranchId != null &&
+      issuingBranchId!.isNotEmpty &&
+      issuingBranchId != requestingBranchId;
 }
 
 // Create Stock Request Models
@@ -222,6 +245,7 @@ class CreateStockRequestItem {
 
 class CreateStockRequestRequest {
   final String requestingBranchId;
+  final String? issuingBranchId;
   final String requestedBy;
   final String department;
   final String notes;
@@ -229,6 +253,7 @@ class CreateStockRequestRequest {
 
   CreateStockRequestRequest({
     required this.requestingBranchId,
+    this.issuingBranchId,
     required this.requestedBy,
     required this.department,
     required this.notes,
@@ -238,6 +263,8 @@ class CreateStockRequestRequest {
   Map<String, dynamic> toJson() {
     return {
       'requestingBranchId': requestingBranchId,
+      if (issuingBranchId != null && issuingBranchId!.isNotEmpty)
+        'issuingBranchId': issuingBranchId,
       'requestedBy': requestedBy,
       'department': department,
       'notes': notes,

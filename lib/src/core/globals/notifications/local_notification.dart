@@ -20,12 +20,26 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+  static const bool _localDeliveryEnabled = false;
 
   // Global navigator key - set this in your MaterialApp
   static GlobalKey<NavigatorState>? navigatorKey;
 
   /// Initialize the notification service
   Future<void> initialize() async {
+    if (!_localDeliveryEnabled) {
+      AppLogger.log('Local notification delivery is disabled; using FCM only');
+      return;
+    }
+    await _initializePlugin();
+  }
+
+  /// Initialize local notifications for Firebase foreground display only.
+  Future<void> initializeForFcm() async {
+    await _initializePlugin();
+  }
+
+  Future<void> _initializePlugin() async {
     if (_initialized) return;
 
     try {
@@ -57,6 +71,16 @@ class NotificationService {
       AppLogger.log(' Notification Service initialized successfully');
     } catch (e) {
       AppLogger.log(' Failed to initialize Notification Service: $e');
+    }
+  }
+
+  /// Cancel existing local notifications without re-enabling local delivery.
+  Future<void> disableLocalDelivery() async {
+    try {
+      await _notifications.cancelAll();
+      AppLogger.log('Local notification delivery disabled');
+    } catch (e) {
+      AppLogger.log('Failed to disable local notifications: $e');
     }
   }
 
@@ -263,7 +287,14 @@ class NotificationService {
     String? payload,
     NotificationPriority priority = NotificationPriority.high,
     NotificationImportance importance = NotificationImportance.high,
+    bool allowFcmDelivery = false,
   }) async {
+    if (!_localDeliveryEnabled && !allowFcmDelivery) {
+      AppLogger.log(
+        'Skipped local notification because FCM-only mode is active',
+      );
+      return;
+    }
     if (!_initialized) {
       AppLogger.log('Notification Service not initialized');
       return;
@@ -277,9 +308,14 @@ class NotificationService {
         importance: _mapImportance(importance),
         priority: _mapPriority(priority),
         icon: '@mipmap/ic_launcher',
+        playSound: true,
       );
 
-      const iosDetails = DarwinNotificationDetails();
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
 
       final details = NotificationDetails(
         android: androidDetails,
@@ -308,6 +344,10 @@ class NotificationService {
     int? daysUntilExpiry,
     int? reorderLevel, // NEW parameter
   }) async {
+    if (!_localDeliveryEnabled) {
+      AppLogger.log('Skipped stock alert because FCM-only mode is active');
+      return;
+    }
     // Check if this notification type is enabled
     final isEnabled = await _isNotificationEnabled(type);
     if (!isEnabled) {
@@ -344,6 +384,12 @@ class NotificationService {
     NotificationPriority priority = NotificationPriority.high,
     NotificationImportance importance = NotificationImportance.high,
   }) async {
+    if (!_localDeliveryEnabled) {
+      AppLogger.log(
+        'Skipped local notification schedule because FCM-only mode is active',
+      );
+      return;
+    }
     if (!_initialized) {
       AppLogger.log('Notification Service not initialized');
       return;

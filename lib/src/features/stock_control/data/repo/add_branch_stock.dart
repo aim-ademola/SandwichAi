@@ -23,11 +23,19 @@ abstract class AddBranchStockRepositoryInterface {
   );
   Future<ApiResponse<BranchStockControlResponse>> allowNegativeStock(
     String stockId,
+    bool allow,
   );
-  Future<ApiResponse<BranchStockControlResponse>> lockStock(String stockId);
+  Future<ApiResponse<BranchStockControlResponse>> lockStock(
+    String stockId,
+    String reason,
+  );
   Future<ApiResponse<BranchStockControlResponse>> unlockStock(String stockId);
-  Future<ApiResponse<BranchStockControlListResponse>> getLockedStock();
-  Future<ApiResponse<BranchStockControlListResponse>> getNegativeStockReport();
+  Future<ApiResponse<BranchStockControlListResponse>> getLockedStock({
+    String? branchId,
+  });
+  Future<ApiResponse<BranchStockControlListResponse>> getNegativeStockReport({
+    String? branchId,
+  });
 }
 
 class AddBranchStockRepository extends BaseRepository
@@ -194,13 +202,25 @@ class AddBranchStockRepository extends BaseRepository
   @override
   Future<ApiResponse<BranchStockControlResponse>> allowNegativeStock(
     String stockId,
+    bool allow,
   ) {
-    return _patchStockControl('branch-stock/$stockId/allow-negative', stockId);
+    return _patchStockControl(
+      'branch-stock/$stockId/allow-negative',
+      stockId,
+      body: {'allow': allow},
+    );
   }
 
   @override
-  Future<ApiResponse<BranchStockControlResponse>> lockStock(String stockId) {
-    return _patchStockControl('branch-stock/$stockId/lock', stockId);
+  Future<ApiResponse<BranchStockControlResponse>> lockStock(
+    String stockId,
+    String reason,
+  ) {
+    return _patchStockControl(
+      'branch-stock/$stockId/lock',
+      stockId,
+      body: {'reason': reason},
+    );
   }
 
   @override
@@ -209,13 +229,20 @@ class AddBranchStockRepository extends BaseRepository
   }
 
   @override
-  Future<ApiResponse<BranchStockControlListResponse>> getLockedStock() {
-    return _getStockControlList('branch-stock/locked');
+  Future<ApiResponse<BranchStockControlListResponse>> getLockedStock({
+    String? branchId,
+  }) {
+    return _getStockControlList('branch-stock/locked', branchId: branchId);
   }
 
   @override
-  Future<ApiResponse<BranchStockControlListResponse>> getNegativeStockReport() {
-    return _getStockControlList('branch-stock/negative-stock-report');
+  Future<ApiResponse<BranchStockControlListResponse>> getNegativeStockReport({
+    String? branchId,
+  }) {
+    return _getStockControlList(
+      'branch-stock/negative-stock-report',
+      branchId: branchId,
+    );
   }
 
   /// Validates branch stock request fields
@@ -395,8 +422,9 @@ class AddBranchStockRepository extends BaseRepository
 
   Future<ApiResponse<BranchStockControlResponse>> _patchStockControl(
     String endpoint,
-    String stockId,
-  ) async {
+    String stockId, {
+    Map<String, dynamic> body = const <String, dynamic>{},
+  }) async {
     try {
       if (stockId.isEmpty) {
         throw FormatException('Stock ID cannot be empty');
@@ -405,7 +433,7 @@ class AddBranchStockRepository extends BaseRepository
       final online = await ConnectivityService.instance.isOnline;
       if (!online) {
         await OfflineQueueManager.instance.add(
-          PendingRequest(method: "PATCH", url: endpoint, body: {}),
+          PendingRequest(method: "PATCH", url: endpoint, body: body),
         );
         return ApiResponse.errorMessage(
           "Offline detected. Stock control request cached and will sync automatically.",
@@ -413,7 +441,7 @@ class AddBranchStockRepository extends BaseRepository
       }
 
       final response = await _apiClient
-          .patch(endpoint, data: const <String, dynamic>{})
+          .patch(endpoint, data: body)
           .timeout(const Duration(seconds: 30));
 
       return response.when(
@@ -432,11 +460,17 @@ class AddBranchStockRepository extends BaseRepository
   }
 
   Future<ApiResponse<BranchStockControlListResponse>> _getStockControlList(
-    String endpoint,
-  ) async {
+    String endpoint, {
+    String? branchId,
+  }) async {
     try {
       final response = await _apiClient
-          .get(endpoint)
+          .get(
+            endpoint,
+            queryParameters: branchId != null && branchId.isNotEmpty
+                ? {'branchId': branchId}
+                : null,
+          )
           .timeout(const Duration(seconds: 30));
 
       return response.when(
@@ -498,13 +532,15 @@ class BranchStockControlListResponse {
 
   factory BranchStockControlListResponse.fromJson(Map<String, dynamic> json) {
     final list = _extractControlList(json);
+    final data = _asMap(json['data']);
+    final summary = _asMap(json['summary']);
     return BranchStockControlListResponse(
       message: json['message']?.toString() ?? '',
       items: list
           .whereType<Map>()
           .map((item) => Map<String, dynamic>.from(item))
           .toList(),
-      summary: _asMap(json['summary']),
+      summary: summary.isNotEmpty ? summary : data,
       raw: json,
     );
   }
@@ -523,7 +559,7 @@ List<dynamic> _extractControlList(Map<String, dynamic> json) {
   }
   final data = json['data'];
   if (data is Map) {
-    for (final key in const ['items', 'results', 'stocks']) {
+    for (final key in const ['records', 'items', 'results', 'stocks']) {
       final value = data[key];
       if (value is List) return value;
     }

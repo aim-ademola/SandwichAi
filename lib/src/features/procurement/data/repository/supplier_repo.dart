@@ -16,7 +16,7 @@ abstract class SupplierRepositoryInterface {
     String? search,
     double? minRating,
     int page = 1,
-    int limit = 10,
+    int limit = 100,
     String sortBy = 'createdAt',
     String sortOrder = 'desc',
   });
@@ -78,10 +78,7 @@ class SupplierRepository extends BaseRepository
       if (minRating != null) queryParams['minRating'] = minRating;
 
       final response = await _apiClient
-          .get(
-            'suppliers',
-            //  queryParameters: queryParams,
-          )
+          .get('suppliers', queryParameters: queryParams)
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -131,7 +128,7 @@ class SupplierRepository extends BaseRepository
     double? minPrice,
     double? maxPrice,
     int page = 1,
-    int limit = 20,
+    int limit = 100,
     String sortBy = 'createdAt',
     String sortOrder = 'desc',
   }) async {
@@ -156,10 +153,7 @@ class SupplierRepository extends BaseRepository
       if (maxPrice != null) queryParams['maxPrice'] = maxPrice;
 
       final response = await _apiClient
-          .get(
-            'suppliers/$supplierId/products',
-            //  queryParameters: queryParams
-          )
+          .get('suppliers/$supplierId/products', queryParameters: queryParams)
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {

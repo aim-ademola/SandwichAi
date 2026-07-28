@@ -301,10 +301,7 @@ class OrdersListResponse {
   factory OrdersListResponse.fromJson(Map<String, dynamic> json) {
     final data = json['data'];
     final payload = data is Map ? Map<String, dynamic>.from(data) : json;
-    final rawOrders =
-        (data is List ? data : payload['items'] ?? payload['orders'])
-            as List? ??
-        const [];
+    final rawOrders = _extractOrdersList(data, payload);
     final meta = Map<String, dynamic>.from(
       (json['meta'] as Map?) ?? (payload['meta'] as Map?) ?? payload,
     );
@@ -319,9 +316,7 @@ class OrdersListResponse {
     return OrdersListResponse(
       orders: rawOrders
           .whereType<Map>()
-          .map(
-            (order) => PurchaseOrder.fromJson(Map<String, dynamic>.from(order)),
-          )
+          .map((order) => PurchaseOrder.fromJson(_purchaseOrderMap(order)))
           .toList(),
       total: total,
       page: page,
@@ -332,6 +327,33 @@ class OrdersListResponse {
       hasPreviousPage: meta['hasPreviousPage'] as bool? ?? page > 1,
     );
   }
+}
+
+List<dynamic> _extractOrdersList(dynamic data, Map<String, dynamic> payload) {
+  if (data is List) return data;
+  for (final key in const [
+    'items',
+    'orders',
+    'records',
+    'results',
+    'purchaseOrders',
+    'purchase_orders',
+  ]) {
+    final value = payload[key];
+    if (value is List) return value;
+  }
+  return const [];
+}
+
+Map<String, dynamic> _purchaseOrderMap(Map order) {
+  final map = Map<String, dynamic>.from(order);
+  for (final key in const ['purchaseOrder', 'purchase_order', 'order']) {
+    final nested = map[key];
+    if (nested is Map) {
+      return Map<String, dynamic>.from(nested);
+    }
+  }
+  return map;
 }
 
 int _parseInt(dynamic value, int fallback) {

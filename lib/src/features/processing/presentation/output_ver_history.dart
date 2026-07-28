@@ -117,7 +117,7 @@ class _OutputVerificationHistoryScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -126,7 +126,7 @@ class _OutputVerificationHistoryScreenState
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
           ],
@@ -153,7 +153,7 @@ class _OutputVerificationHistoryScreenState
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: kprimaryTextColor1,
+                color: context.modeTextPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -162,7 +162,7 @@ class _OutputVerificationHistoryScreenState
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
                 fontSize: 14,
-                color: kprimaryTextColor2,
+                color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -204,17 +204,22 @@ class _OutputVerificationHistoryScreenState
   ) {
     final variance = int.tryParse(verification.variance) ?? 0;
     final isPositive = variance >= 0;
-    final statusColor = _getStatusColor(verification.qcStatus);
+    final statusColor = _getStatusColor(context, verification.qcStatus);
     final statusText = _getStatusText(verification.qcStatus);
 
     return Container(
       margin: EdgeInsets.only(bottom: _getCardSpacing(screenWidth)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(_getBorderRadius(screenWidth)),
+        border: Border.all(color: context.modeBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.18
+                  : 0.04,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -273,7 +278,7 @@ class _OutputVerificationHistoryScreenState
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getTitleFontSize(screenWidth),
                           fontWeight: FontWeight.w600,
-                          color: kprimaryTextColor1,
+                          color: context.modeTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -281,7 +286,7 @@ class _OutputVerificationHistoryScreenState
                         'Batch: ${verification.batchId}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: _getCaptionFontSize(screenWidth),
-                          color: kprimaryTextColor2,
+                          color: context.modeTextSecondary,
                         ),
                       ),
                     ],
@@ -352,7 +357,7 @@ class _OutputVerificationHistoryScreenState
                 ),
 
                 const SizedBox(height: 16),
-                Divider(height: 1, color: Colors.grey.shade200),
+                Divider(height: 1, color: context.modeDivider),
                 const SizedBox(height: 16),
 
                 // Reason
@@ -388,7 +393,7 @@ class _OutputVerificationHistoryScreenState
                 ),
 
                 const SizedBox(height: 16),
-                Divider(height: 1, color: Colors.grey.shade200),
+                Divider(height: 1, color: context.modeDivider),
                 const SizedBox(height: 12),
 
                 // Timestamp
@@ -397,14 +402,14 @@ class _OutputVerificationHistoryScreenState
                     AppIcon(
                       Icons.access_time,
                       size: 14,
-                      color: kprimaryTextColor2,
+                      color: context.modeTextSecondary,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       _formatDateTime(verification.timestamp),
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getCaptionFontSize(screenWidth),
-                        color: kprimaryTextColor2,
+                        color: context.modeTextSecondary,
                       ),
                     ),
                   ],
@@ -441,7 +446,7 @@ class _OutputVerificationHistoryScreenState
           label,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getCaptionFontSize(screenWidth),
-            color: kprimaryTextColor2,
+            color: context.modeTextSecondary,
           ),
         ),
       ],
@@ -460,7 +465,7 @@ class _OutputVerificationHistoryScreenState
         AppIcon(
           icon,
           size: _getIconSize(screenWidth) - 4,
-          color: kprimaryTextColor2,
+          color: context.modeTextSecondary,
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -471,7 +476,7 @@ class _OutputVerificationHistoryScreenState
                 label,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getCaptionFontSize(screenWidth),
-                  color: kprimaryTextColor2,
+                  color: context.modeTextSecondary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -480,7 +485,7 @@ class _OutputVerificationHistoryScreenState
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: _getBodyFontSize(screenWidth),
                   fontWeight: FontWeight.w500,
-                  color: kprimaryTextColor1,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
@@ -490,7 +495,7 @@ class _OutputVerificationHistoryScreenState
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(BuildContext context, String status) {
     switch (status.toUpperCase()) {
       case 'ACCEPTABLE':
         return const Color(0xFF4CAF50);
@@ -501,7 +506,7 @@ class _OutputVerificationHistoryScreenState
       case 'UNDERUSE':
         return const Color(0xFF2196F3);
       default:
-        return kprimaryTextColor2;
+        return context.modeTextSecondary;
     }
   }
 

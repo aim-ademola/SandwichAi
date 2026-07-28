@@ -1,5 +1,6 @@
 class CreateStockRequestRequest {
   final String requestingBranchId;
+  final String? issuingBranchId;
   final String requestedBy;
   final String department;
   final String? notes;
@@ -7,6 +8,7 @@ class CreateStockRequestRequest {
 
   CreateStockRequestRequest({
     required this.requestingBranchId,
+    this.issuingBranchId,
     required this.requestedBy,
     required this.department,
     this.notes,
@@ -16,6 +18,8 @@ class CreateStockRequestRequest {
   Map<String, dynamic> toJson() {
     return {
       'requestingBranchId': requestingBranchId,
+      if (issuingBranchId != null && issuingBranchId!.isNotEmpty)
+        'issuingBranchId': issuingBranchId,
       'requestedBy': requestedBy,
       'department': department,
       if (notes != null && notes!.isNotEmpty) 'notes': notes,
@@ -55,6 +59,7 @@ class StockRequest {
   final String id;
   final String requestId;
   final String requestingBranchId;
+  final String? issuingBranchId;
   final String requestedBy;
   final String department;
   final String organizationId;
@@ -73,6 +78,7 @@ class StockRequest {
     required this.id,
     required this.requestId,
     required this.requestingBranchId,
+    this.issuingBranchId,
     required this.requestedBy,
     required this.department,
     required this.organizationId,
@@ -93,6 +99,8 @@ class StockRequest {
       id: json['id'] ?? '',
       requestId: json['requestId'] ?? '',
       requestingBranchId: json['requestingBranchId'] ?? '',
+      issuingBranchId: (json['issuingBranchId'] ?? json['issuing_branch_id'])
+          ?.toString(),
       requestedBy: json['requestedBy'] ?? '',
       department: json['department'] ?? '',
       organizationId: json['organizationId'] ?? '',
@@ -123,6 +131,10 @@ class StockRequest {
   bool get isApproved => status == 'APPROVED';
   bool get isCompleted => status == 'COMPLETED';
   bool get isRejected => status == 'REJECTED';
+  bool get isInterbranch =>
+      issuingBranchId != null &&
+      issuingBranchId!.isNotEmpty &&
+      issuingBranchId != requestingBranchId;
 }
 
 class StockRequestItem {

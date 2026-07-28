@@ -4,11 +4,17 @@ import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/order_form.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/order_list.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.dart';
 
 class PurchaseOrdersTabScreen extends StatefulWidget {
   final int initialIndex;
+  final ReorderSuggestion? reorderSuggestion;
 
-  const PurchaseOrdersTabScreen({super.key, this.initialIndex = 0});
+  const PurchaseOrdersTabScreen({
+    super.key,
+    this.initialIndex = 0,
+    this.reorderSuggestion,
+  });
 
   @override
   State<PurchaseOrdersTabScreen> createState() =>
@@ -86,9 +92,12 @@ class _PurchaseOrdersTabScreenState extends State<PurchaseOrdersTabScreen>
         ),
         body: TabBarView(
           controller: _tabController,
-          children: const [
-            OrderFormScreen(showAppBar: false),
-            OrdersListScreen(showAppBar: false),
+          children: [
+            OrderFormScreen(
+              showAppBar: false,
+              reorderSuggestion: widget.reorderSuggestion,
+            ),
+            const OrdersListScreen(showAppBar: false),
           ],
         ),
       ),

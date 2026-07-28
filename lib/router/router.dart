@@ -42,6 +42,7 @@ import 'package:sandwich_ai/src/features/procurement/presentation/procurement_re
 import 'package:sandwich_ai/src/features/procurement/presentation/procuremnt_purchase_req.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/purchase_orders_tab.dart';
 import 'package:sandwich_ai/src/features/splash/splash.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.dart';
 
 class AppRouter {
   static final GoRouter _router = GoRouter(
@@ -352,9 +353,15 @@ class AppRouter {
         path: '/order-form',
         name: 'order-form',
         pageBuilder: (context, state) {
+          final reorderSuggestion = state.extra is ReorderSuggestion
+              ? state.extra as ReorderSuggestion
+              : null;
           return CupertinoPage(
             key: state.pageKey,
-            child: const PurchaseOrdersTabScreen(initialIndex: 0),
+            child: PurchaseOrdersTabScreen(
+              initialIndex: 0,
+              reorderSuggestion: reorderSuggestion,
+            ),
           );
         },
       ),

@@ -30,6 +30,7 @@ const List<_TabDef> _tabs = [
   _TabDef(label: 'Approved', apiStatus: 'APPROVED', showActions: true),
   _TabDef(label: 'In Queue', apiStatus: 'IN_QUEUE', showActions: true),
   _TabDef(label: 'Processing', apiStatus: 'PROCESSING', showActions: true),
+  _TabDef(label: 'In Transit', apiStatus: 'IN_TRANSIT', showActions: false),
   _TabDef(label: 'Completed', apiStatus: 'COMPLETED', showActions: false),
   _TabDef(label: 'Rejected', apiStatus: 'REJECTED', showActions: false),
   _TabDef(label: 'Cancelled', apiStatus: 'CANCELLED', showActions: false),
@@ -178,6 +179,13 @@ class _CompleteStockRequestDetailsScreenState
         body:
             'Are you sure you want to complete the transfer for $requestId?\n\nThis will mark all items as transferred and complete the request.',
         confirmLabel: 'Complete Transfer',
+        confirmColor: context.modePrimary,
+      ),
+      StockRequestAction.dispatch => _ActionDialogConfig(
+        title: 'Dispatch Transfer',
+        body:
+            'Are you sure you want to dispatch $requestId?\n\nThis will move the request to IN_TRANSIT.',
+        confirmLabel: 'Dispatch',
         confirmColor: context.modePrimary,
       ),
       StockRequestAction.reject => _ActionDialogConfig(
@@ -519,6 +527,8 @@ class _CompleteStockRequestDetailsScreenState
                   _buildStatusBadge(request.status, screenWidth),
                 ],
               ),
+              const SizedBox(height: 10),
+              _buildRequestTypeRow(request, screenWidth),
               SizedBox(height: _getFieldSpacing(screenWidth)),
               _buildItemsSection(request, screenWidth),
               if (request.notes.isNotEmpty) ...[
@@ -585,6 +595,28 @@ class _CompleteStockRequestDetailsScreenState
 
   // â”€â”€â”€ Action Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+  Widget _buildRequestTypeRow(StockRequest request, double screenWidth) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _buildInfoChip(
+          icon: request.isInterbranch
+              ? Icons.sync_alt_outlined
+              : Icons.storefront_outlined,
+          label: request.isInterbranch ? 'External branch' : 'Internal branch',
+          screenWidth: screenWidth,
+        ),
+        if (request.isInterbranch)
+          _buildInfoChip(
+            icon: Icons.account_tree_outlined,
+            label: request.requestingBranch?.name ?? 'Requesting branch',
+            screenWidth: screenWidth,
+          ),
+      ],
+    );
+  }
+
   Widget _buildActionButtons(
     StockRequest request,
     double screenWidth,
@@ -643,9 +675,13 @@ class _CompleteStockRequestDetailsScreenState
       ],
       'PROCESSING' => [
         _ActionButtonConfig(
-          action: StockRequestAction.complete,
-          label: 'Complete Transfer',
-          icon: Icons.send_outlined,
+          action: request.isInterbranch
+              ? StockRequestAction.dispatch
+              : StockRequestAction.complete,
+          label: request.isInterbranch ? 'Dispatch' : 'Complete Transfer',
+          icon: request.isInterbranch
+              ? Icons.local_shipping_outlined
+              : Icons.send_outlined,
           color: context.modePrimary,
           flex: 2,
         ),
@@ -933,6 +969,7 @@ class _CompleteStockRequestDetailsScreenState
       'APPROVED' => const Color(0xFF42A5F5),
       'IN_QUEUE' => const Color(0xFFAB47BC),
       'PROCESSING' => const Color(0xFF26A69A),
+      'IN_TRANSIT' => const Color(0xFF5C6BC0),
       'COMPLETED' => const Color(0xFF66BB6A),
       'REJECTED' => const Color(0xFFEF5350),
       'CANCELLED' => const Color(0xFFBDBDBD),
@@ -946,6 +983,7 @@ class _CompleteStockRequestDetailsScreenState
       'APPROVED' => 'Approved',
       'IN_QUEUE' => 'In Queue',
       'PROCESSING' => 'Processing',
+      'IN_TRANSIT' => 'In Transit',
       'COMPLETED' => 'Completed',
       'REJECTED' => 'Rejected',
       'CANCELLED' => 'Cancelled',

@@ -3,6 +3,7 @@ class CustomerServiceRecord {
   final String title;
   final String details;
   final String status;
+  final String? branchId;
   final int? rating;
   final String? customerId;
   final String? customerName;
@@ -33,6 +34,7 @@ class CustomerServiceRecord {
     required this.title,
     required this.details,
     required this.status,
+    this.branchId,
     this.rating,
     this.customerId,
     this.customerName,
@@ -79,6 +81,7 @@ class CustomerServiceRecord {
             json['review'],
       ),
       status: _string(json['status'], fallback: 'Pending'),
+      branchId: _stringOrNull(json['branchId'] ?? json['branch_id']),
       rating: _intOrNull(
         json['overallRating'] ?? json['rating'] ?? json['score'],
       ),
@@ -200,5 +203,21 @@ class CustomerServiceRecordList {
     if (value is num) return value.toInt();
     if (value is String) return int.tryParse(value) ?? fallback;
     return fallback;
+  }
+
+  CustomerServiceRecordList copyWith({
+    List<CustomerServiceRecord>? data,
+    int? page,
+    int? limit,
+    int? total,
+    int? totalPages,
+  }) {
+    return CustomerServiceRecordList(
+      data: data ?? this.data,
+      page: page ?? this.page,
+      limit: limit ?? this.limit,
+      total: total ?? this.total,
+      totalPages: totalPages ?? this.totalPages,
+    );
   }
 }

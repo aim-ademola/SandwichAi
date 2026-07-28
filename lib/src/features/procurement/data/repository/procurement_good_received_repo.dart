@@ -236,7 +236,9 @@ class GoodsReceivedRepository extends BaseRepository
       return ApiResponse.errorMessage('Purchase order ID cannot be empty');
     }
 
-    final response = await _getRaw('goods-received/purchase-order/$poId');
+    final response = await _getRaw(
+      'procurement/goods-received/purchase-order/$poId',
+    );
     return response.when(
       success: (json) {
         final list = _extractList(json);
@@ -263,7 +265,7 @@ class GoodsReceivedRepository extends BaseRepository
       );
     }
     return _getObject(
-      'goods-received/purchase-order/$poId/delivery-status',
+      'procurement/goods-received/purchase-order/$poId/delivery-status',
       PurchaseOrderDeliveryStatusResponse.fromJson,
     );
   }
@@ -276,7 +278,7 @@ class GoodsReceivedRepository extends BaseRepository
       return ApiResponse.errorMessage('Purchase order ID cannot be empty');
     }
     return _patchObject(
-      'goods-received/purchase-order/$poId/mark-complete',
+      'procurement/goods-received/purchase-order/$poId/mark-complete',
       const <String, dynamic>{},
       (json) => json,
     );
@@ -300,14 +302,28 @@ class GoodsReceivedRepository extends BaseRepository
     if (request.branchId.isEmpty) {
       throw FormatException('Branch ID cannot be empty');
     }
-    if (request.supplierName.isEmpty) {
+    final hasPurchaseOrder =
+        request.purchaseOrderId != null && request.purchaseOrderId!.isNotEmpty;
+    final hasStockRequest =
+        request.stockRequestId != null && request.stockRequestId!.isNotEmpty;
+    if (hasPurchaseOrder && hasStockRequest) {
+      throw FormatException(
+        'Goods received cannot reference both a purchase order and a stock request',
+      );
+    }
+    if (!hasStockRequest && request.supplierName.isEmpty) {
       throw FormatException('Supplier name cannot be empty');
     }
-    if (request.invoiceNo.isEmpty) {
+    if (!hasStockRequest && request.invoiceNo.isEmpty) {
       throw FormatException('Invoice number cannot be empty');
     }
-    if (request.poNumber.isEmpty) {
+    if (hasPurchaseOrder && request.poNumber.isEmpty) {
       throw FormatException('PO number cannot be empty');
+    }
+    if (hasStockRequest && request.stockRequestId!.trim().isEmpty) {
+      throw FormatException(
+        'Stock request ID is required for interbranch goods received',
+      );
     }
     if (request.receivedBy.isEmpty) {
       throw FormatException('Received by field cannot be empty');

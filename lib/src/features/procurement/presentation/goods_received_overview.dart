@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -141,65 +142,154 @@ class _GoodsReceivedOverviewScreenState
           .map(
             (item) => Container(
               margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: context.modeSurface,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: context.modeBorder),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: context.modePrimary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: AppIcon(
-                        Icons.inventory_2_outlined,
-                        color: context.modePrimary,
-                        size: 18,
+                  Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: context.modePrimary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: AppIcon(
+                            Icons.inventory_2_outlined,
+                            color: context.modePrimary,
+                            size: 20,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
                           item.itemName.isEmpty ? 'Stock item' : item.itemName,
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
                             color: context.modeTextPrimary,
                           ),
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Current: ${item.currentStock} | Suggested: ${item.suggestedQty}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.modePrimary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          item.urgency.isEmpty ? 'Reorder' : item.urgency,
                           style: WorkSansAppTextStyles.medium.copyWith(
                             fontSize: 12,
-                            color: context.modeTextMuted,
+                            fontWeight: FontWeight.w800,
+                            color: context.modePrimary,
                           ),
                         ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildReorderDetailChip(
+                        'Current',
+                        item.currentStockDisplay,
+                      ),
+                      _buildReorderDetailChip(
+                        'Reorder level',
+                        item.reorderLevelDisplay,
+                      ),
+                      _buildReorderDetailChip(
+                        'Suggested',
+                        item.suggestedQtyDisplay,
+                      ),
+                      if (item.purchaseQtyDisplay.isNotEmpty)
+                        _buildReorderDetailChip(
+                          'Purchase qty',
+                          item.purchaseQtyDisplay,
+                        ),
+                      if (item.estimatedUnitCost != null)
+                        _buildReorderDetailChip(
+                          'Unit cost',
+                          _formatCurrency(item.estimatedUnitCost!),
+                        ),
+                      if (item.estimatedTotalCost != null)
+                        _buildReorderDetailChip(
+                          'Est. total',
+                          _formatCurrency(item.estimatedTotalCost!),
+                        ),
+                      if (item.daysUntilStockout != null)
+                        _buildReorderDetailChip(
+                          'Stockout',
+                          '${item.daysUntilStockout} days',
+                        ),
+                    ],
+                  ),
+                  if (item.category.trim().isNotEmpty ||
+                      item.branchName.trim().isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        if (item.category.trim().isNotEmpty)
+                          _buildReorderMetaText('Category: ${item.category}'),
+                        if (item.branchName.trim().isNotEmpty)
+                          _buildReorderMetaText('Branch: ${item.branchName}'),
                       ],
                     ),
-                  ),
-                  Text(
-                    item.urgency,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: context.modePrimary,
+                  ],
+                  if (item.supplierName.trim().isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      'Supplier: ${item.supplierName}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: context.modeTextSecondary,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: OutlinedButton(
+                      onPressed: () =>
+                          context.pushNamed('order-form', extra: item),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: context.modePrimary,
+                        side: BorderSide(color: context.modePrimary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Create PO',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: context.modePrimary,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -207,6 +297,58 @@ class _GoodsReceivedOverviewScreenState
             ),
           )
           .toList(),
+    );
+  }
+
+  String _formatCurrency(double value) {
+    final rounded = value % 1 == 0
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(2);
+    return 'NGN $rounded';
+  }
+
+  Widget _buildReorderMetaText(String text) {
+    return Text(
+      text,
+      style: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: context.modeTextSecondary,
+      ),
+    );
+  }
+
+  Widget _buildReorderDetailChip(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: context.modeSurfaceAlt,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.modeBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: context.modeTextMuted,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: context.modeTextPrimary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

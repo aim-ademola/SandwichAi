@@ -378,41 +378,52 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
   }
 
   Widget _buildLoadedMovements(StockMovementLoaded state) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSummaryHeader(state),
-          const SizedBox(height: 18),
-          _buildQuickFilters(),
-          const SizedBox(height: 24),
-          _buildMovementListHeader(state.filteredItems.length),
-          const SizedBox(height: 10),
-          if (state.filteredItems.isEmpty)
-            _buildEmptyMovementState()
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: state.filteredItems.length,
-              itemBuilder: (context, index) {
-                final movement = state.filteredItems[index];
-                return _buildMovementCard(movement);
-              },
-            ),
-          if (state.isLoadingMore)
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Center(
-                child: CircularProgressIndicator(color: context.modePrimary),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSummaryHeader(state),
+                  const SizedBox(height: 18),
+                  _buildQuickFilters(),
+                  const SizedBox(height: 24),
+                  _buildMovementListHeader(state.filteredItems.length),
+                  const SizedBox(height: 10),
+                  if (state.filteredItems.isEmpty)
+                    _buildEmptyMovementState()
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: state.filteredItems.length,
+                      itemBuilder: (context, index) {
+                        final movement = state.filteredItems[index];
+                        return _buildMovementCard(movement);
+                      },
+                    ),
+                  if (state.isLoadingMore)
+                    Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: context.modePrimary,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-          const SizedBox(height: 24),
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -437,8 +448,8 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
           Row(
             children: [
               Container(
-                width: 34,
-                height: 34,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
                   color: context.modeTextInverse.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(10),
@@ -446,7 +457,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                 child: AppIcon(
                   Icons.inventory_2_outlined,
                   color: context.modeTextInverse,
-                  size: 19,
+                  size: 16,
                 ),
               ),
               const SizedBox(width: 10),
@@ -518,7 +529,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppIcon(icon, color: context.modeTextInverse, size: 16),
+          AppIcon(icon, color: context.modeTextInverse, size: 13),
           const SizedBox(height: 6),
           Text(
             title,
@@ -701,7 +712,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                 color: accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: AppIcon(iconData, color: accent, size: 22),
+              child: Center(child: AppIcon(iconData, color: accent, size: 24)),
             ),
             const SizedBox(width: 13),
             Expanded(
@@ -751,7 +762,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                         ),
                       ),
                       Text(
-                        '${movement.balanceBefore} â†’ ${movement.balanceAfter}',
+                        '${movement.balanceBefore} -> ${movement.balanceAfter}',
                         style: WorkSansAppTextStyles.medium.copyWith(
                           fontSize: 12,
                           color: context.modeTextMuted,
@@ -763,7 +774,11 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            AppIcon(Icons.chevron_right_rounded, color: context.modeTextMuted),
+            AppIcon(
+              Icons.chevron_right_rounded,
+              color: context.modeTextMuted,
+              size: 18,
+            ),
           ],
         ),
       ),

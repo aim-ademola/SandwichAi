@@ -231,7 +231,9 @@ class BranchStockBloc extends Bloc<BranchStockEvent, BranchStockState> {
       final query = searchQuery.toLowerCase();
       catalogItems = catalogItems.where((item) {
         return item.name.toLowerCase().contains(query) ||
-            item.category.toLowerCase().contains(query);
+            item.category.toLowerCase().contains(query) ||
+            item.sku.toLowerCase().contains(query) ||
+            item.description.toLowerCase().contains(query);
       }).toList();
     }
 

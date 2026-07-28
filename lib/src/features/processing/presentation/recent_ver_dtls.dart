@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
-import 'package:flutter/services.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/processing/data/model/processing_dash_model.dart';
 
 class VerificationDetailsScreen extends StatelessWidget {
@@ -14,24 +14,24 @@ class VerificationDetailsScreen extends StatelessWidget {
     return DefaultTextStyle.merge(
       style: WorkSansAppTextStyles.medium,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F6F6),
+        backgroundColor: context.modeBackground,
         appBar: _buildAppBar(context),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildStatusCard(),
+              _buildStatusCard(context),
               const SizedBox(height: 20),
               _buildBatchInfoCard(context),
               const SizedBox(height: 20),
-              _buildProductionMetricsCard(),
+              _buildProductionMetricsCard(context),
               const SizedBox(height: 20),
-              _buildQualityControlCard(),
+              _buildQualityControlCard(context),
               const SizedBox(height: 20),
-              _buildTeamInfoCard(),
+              _buildTeamInfoCard(context),
               const SizedBox(height: 20),
-              _buildTimestampCard(),
+              _buildTimestampCard(context),
             ],
           ),
         ),
@@ -41,25 +41,26 @@ class VerificationDetailsScreen extends StatelessWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: context.modeSurface,
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const AppIcon(Icons.arrow_back, color: Colors.black),
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
         'Verification Details',
         style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 20,
+          fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: Colors.black,
+          color: context.modeTextPrimary,
         ),
       ),
       centerTitle: false,
     );
   }
 
-  Widget _buildStatusCard() {
+  Widget _buildStatusCard(BuildContext context) {
     final statusColor = verification.status.toLowerCase() == 'verified'
         ? const Color(0xFF4CAF50)
         : const Color(0xFFFF9800);
@@ -106,7 +107,7 @@ class VerificationDetailsScreen extends StatelessWidget {
                     Text(
                       verification.status.toUpperCase(),
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Colors.white.withValues(alpha: 0.9),
                         letterSpacing: 1.2,
@@ -116,7 +117,7 @@ class VerificationDetailsScreen extends StatelessWidget {
                     Text(
                       verification.productName,
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 22,
+                        fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         height: 1.2,
@@ -149,7 +150,7 @@ class VerificationDetailsScreen extends StatelessWidget {
                 Text(
                   qcStatusText,
                   style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -164,19 +165,20 @@ class VerificationDetailsScreen extends StatelessWidget {
 
   Widget _buildBatchInfoCard(BuildContext context) {
     return _buildInfoCard(
+      context,
       title: 'Batch Information',
       icon: Icons.inventory_2_outlined,
       children: [
-        _buildInfoRow('Batch ID', verification.batchId),
+        _buildInfoRow(context, 'Batch ID', verification.batchId),
         const SizedBox(height: 16),
-        _buildInfoRow('Batch Code', verification.batchCode ?? 'N/A'),
+        _buildInfoRow(context, 'Batch Code', verification.batchCode ?? 'N/A'),
         const SizedBox(height: 16),
         // _buildCopyableInfoRow('Recipe ID', verification.recipeId, context),
       ],
     );
   }
 
-  Widget _buildProductionMetricsCard() {
+  Widget _buildProductionMetricsCard(BuildContext context) {
     final expectedOutput = double.tryParse(verification.expectedOutput) ?? 0;
     final actualOutput = double.tryParse(verification.actualOutput) ?? 0;
     final variance = double.tryParse(verification.variance) ?? 0;
@@ -185,6 +187,7 @@ class VerificationDetailsScreen extends StatelessWidget {
         : '0.0';
 
     return _buildInfoCard(
+      context,
       title: 'Production Metrics',
       icon: Icons.analytics_outlined,
       children: [
@@ -192,6 +195,7 @@ class VerificationDetailsScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildMetricBox(
+                context,
                 label: 'Expected',
                 value: verification.expectedOutput,
                 color: const Color(0xFF2196F3),
@@ -201,6 +205,7 @@ class VerificationDetailsScreen extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _buildMetricBox(
+                context,
                 label: 'Actual',
                 value: verification.actualOutput,
                 color: const Color(0xFF4CAF50),
@@ -214,6 +219,7 @@ class VerificationDetailsScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildMetricBox(
+                context,
                 label: 'Variance',
                 value: verification.variance,
                 color: variance < 0
@@ -225,6 +231,7 @@ class VerificationDetailsScreen extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _buildMetricBox(
+                context,
                 label: 'Efficiency',
                 value: '$efficiency%',
                 color: const Color(0xFFFF9800),
@@ -237,10 +244,11 @@ class VerificationDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQualityControlCard() {
+  Widget _buildQualityControlCard(BuildContext context) {
     final qcStatusColor = _getQcStatusColor(verification.qcStatus);
 
     return _buildInfoCard(
+      context,
       title: 'Quality Control',
       icon: Icons.assignment_turned_in_outlined,
       children: [
@@ -277,14 +285,14 @@ class VerificationDetailsScreen extends StatelessWidget {
                       'QC Status',
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: 12,
-                        color: const Color(0xFF757575),
+                        color: context.modeTextSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       _getQcStatusText(verification.qcStatus),
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: qcStatusColor,
                       ),
@@ -297,18 +305,20 @@ class VerificationDetailsScreen extends StatelessWidget {
         ),
         if (verification.reason.isNotEmpty) ...[
           const SizedBox(height: 16),
-          _buildInfoRow('Reason', verification.reason),
+          _buildInfoRow(context, 'Reason', verification.reason),
         ],
       ],
     );
   }
 
-  Widget _buildTeamInfoCard() {
+  Widget _buildTeamInfoCard(BuildContext context) {
     return _buildInfoCard(
+      context,
       title: 'Team Information',
       icon: Icons.group_outlined,
       children: [
         _buildTeamMemberRow(
+          context,
           role: 'Assigned To',
           name: verification.assignedTo,
           icon: Icons.person_outline,
@@ -316,6 +326,7 @@ class VerificationDetailsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _buildTeamMemberRow(
+          context,
           role: 'Verified By',
           name: verification.verifiedBy,
           icon: Icons.verified_user_outlined,
@@ -325,32 +336,46 @@ class VerificationDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTimestampCard() {
+  Widget _buildTimestampCard(BuildContext context) {
     return _buildInfoCard(
+      context,
       title: 'Timeline',
       icon: Icons.schedule_outlined,
       children: [
-        _buildInfoRow('Timestamp', _formatDateTime(verification.timestamp)),
+        _buildInfoRow(
+          context,
+          'Timestamp',
+          _formatDateTime(verification.timestamp),
+        ),
         const SizedBox(height: 16),
-        _buildInfoRow('Created At', _formatDateTime(verification.createdAt)),
+        _buildInfoRow(
+          context,
+          'Created At',
+          _formatDateTime(verification.createdAt),
+        ),
         const SizedBox(height: 16),
-        _buildInfoRow('Updated At', _formatDateTime(verification.updatedAt)),
+        _buildInfoRow(
+          context,
+          'Updated At',
+          _formatDateTime(verification.updatedAt),
+        ),
       ],
     );
   }
 
-  Widget _buildInfoCard({
+  Widget _buildInfoCard(
+    BuildContext context, {
     required String title,
     required IconData icon,
     required List<Widget> children,
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        border: Border.all(color: context.modeBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,18 +385,18 @@ class VerificationDetailsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: context.modeSurfaceMuted,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: AppIcon(icon, size: 20, color: Colors.black87),
+                child: AppIcon(icon, size: 18, color: context.modeTextPrimary),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],
@@ -383,7 +408,7 @@ class VerificationDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -392,8 +417,8 @@ class VerificationDetailsScreen extends StatelessWidget {
           child: Text(
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 14,
-              color: const Color(0xFF757575),
+              fontSize: 13,
+              color: context.modeTextSecondary,
             ),
           ),
         ),
@@ -402,9 +427,9 @@ class VerificationDetailsScreen extends StatelessWidget {
           child: Text(
             value,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: context.modeTextPrimary,
             ),
           ),
         ),
@@ -412,96 +437,15 @@ class VerificationDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCopyableInfoRow(
-    String label,
-    String value,
-    BuildContext context,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            label,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 14,
-              color: const Color(0xFF757575),
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 3,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  value,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              InkWell(
-                onTap: () => _copyToClipboard(value, context),
-                borderRadius: BorderRadius.circular(6),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const AppIcon(
-                    Icons.copy,
-                    size: 16,
-                    color: Color(0xFF757575),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _copyToClipboard(String text, BuildContext context) {
-    Clipboard.setData(ClipboardData(text: text));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const AppIcon(Icons.check_circle, color: Colors.white, size: 20),
-            const SizedBox(width: 12),
-            Text(
-              'Recipe ID copied to clipboard',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                color: Colors.white,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF4CAF50),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
-  }
-
-  Widget _buildMetricBox({
+  Widget _buildMetricBox(
+    BuildContext context, {
     required String label,
     required String value,
     required Color color,
     required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
@@ -510,20 +454,20 @@ class VerificationDetailsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppIcon(icon, color: color, size: 20),
+          AppIcon(icon, color: color, size: 18),
           const SizedBox(height: 12),
           Text(
             label,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
-              color: const Color(0xFF757575),
+              color: context.modeTextSecondary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 20,
+              fontSize: 17,
               fontWeight: FontWeight.w700,
               color: color,
             ),
@@ -533,7 +477,8 @@ class VerificationDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamMemberRow({
+  Widget _buildTeamMemberRow(
+    BuildContext context, {
     required String role,
     required String name,
     required IconData icon,
@@ -542,12 +487,12 @@ class VerificationDetailsScreen extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: AppIcon(icon, color: color, size: 22),
+          child: AppIcon(icon, color: color, size: 20),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -558,16 +503,16 @@ class VerificationDetailsScreen extends StatelessWidget {
                 role,
                 style: WorkSansAppTextStyles.medium.copyWith(
                   fontSize: 12,
-                  color: const Color(0xFF757575),
+                  color: context.modeTextSecondary,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 name,
                 style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: context.modeTextPrimary,
                 ),
               ),
             ],

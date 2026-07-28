@@ -66,6 +66,19 @@ class BranchStockItem {
   final String lastUpdated;
   final String createdAt;
   final String updatedAt;
+  final bool allowNegativeStock;
+  final bool isLocked;
+  final String? lockReason;
+  final String? lockedAt;
+  final String? lockedBy;
+  final String? lockedUntil;
+  final String? nearExpiryAlertSentAt;
+  final String? negativeStockNote;
+  final double reservedStock;
+  final int batchCount;
+  final int expiringBatchCount;
+  final String? nearestExpiryDate;
+  final List<StockBatch> batches;
   final ItemDetails item;
 
   BranchStockItem({
@@ -83,10 +96,30 @@ class BranchStockItem {
     required this.lastUpdated,
     required this.createdAt,
     required this.updatedAt,
+    this.allowNegativeStock = false,
+    this.isLocked = false,
+    this.lockReason,
+    this.lockedAt,
+    this.lockedBy,
+    this.lockedUntil,
+    this.nearExpiryAlertSentAt,
+    this.negativeStockNote,
+    this.reservedStock = 0,
+    this.batchCount = 0,
+    this.expiringBatchCount = 0,
+    this.nearestExpiryDate,
+    this.batches = const [],
     required this.item,
   });
 
   factory BranchStockItem.fromJson(Map<String, dynamic> json) {
+    final batches =
+        (json['batches'] as List<dynamic>?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(StockBatch.fromJson)
+            .toList() ??
+        [];
+
     return BranchStockItem(
       id: json['id'] ?? '',
       itemId: json['itemId'] ?? '',
@@ -102,6 +135,19 @@ class BranchStockItem {
       lastUpdated: json['lastUpdated'] ?? '',
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
+      allowNegativeStock: json['allowNegativeStock'] == true,
+      isLocked: json['isLocked'] == true,
+      lockReason: json['lockReason'],
+      lockedAt: json['lockedAt'],
+      lockedBy: json['lockedBy'],
+      lockedUntil: json['lockedUntil'],
+      nearExpiryAlertSentAt: json['nearExpiryAlertSentAt'],
+      negativeStockNote: json['negativeStockNote'],
+      reservedStock: _toDouble(json['reservedStock']),
+      batchCount: _toInt(json['batchCount'], fallback: batches.length),
+      expiringBatchCount: _toInt(json['expiringBatchCount']),
+      nearestExpiryDate: json['nearestExpiryDate'],
+      batches: batches,
       item: ItemDetails.fromJson(json['item'] ?? {}),
     );
   }
@@ -152,9 +198,10 @@ class BranchStockItem {
 
   // Calculate days until expiry
   int get daysUntilExpiry {
-    if (expiryDate == null) return 999;
+    final effectiveExpiryDate = batchExpiryDate;
+    if (effectiveExpiryDate == null) return 999;
     try {
-      final expiry = DateTime.parse(expiryDate!);
+      final expiry = DateTime.parse(effectiveExpiryDate);
       final now = DateTime.now();
       return expiry.difference(now).inDays;
     } catch (e) {
@@ -162,15 +209,31 @@ class BranchStockItem {
     }
   }
 
+  String? get batchExpiryDate {
+    if (nearestExpiryDate != null) return nearestExpiryDate;
+
+    final batchExpiryDates =
+        batches
+            .map((batch) => batch.expiryDate)
+            .whereType<String>()
+            .map(DateTime.tryParse)
+            .whereType<DateTime>()
+            .toList()
+          ..sort();
+
+    if (batchExpiryDates.isEmpty) return null;
+    return batchExpiryDates.first.toIso8601String();
+  }
+
   // Check if expired
   bool get isExpired {
-    if (expiryDate == null) return false;
+    if (batchExpiryDate == null) return false;
     return daysUntilExpiry <= 0;
   }
 
   // Check if expiring soon (within 30 days)
   bool get isExpiringSoon {
-    if (expiryDate == null) return false;
+    if (batchExpiryDate == null) return false;
     return daysUntilExpiry > 0 && daysUntilExpiry <= 30;
   }
 
@@ -179,17 +242,19 @@ class BranchStockItem {
     // Priority: expired > out of stock > low stock > near reorder > use soon
 
     // Check if expired (highest priority)
-    if (isExpired || status.toUpperCase() == 'EXPIRED') {
+    final normalizedStatus = status.toUpperCase();
+
+    if (isExpired || normalizedStatus == 'EXPIRED') {
       return ItemStatus.expired;
     }
 
     // Check if out of stock
-    if (isOutOfStock || status.toUpperCase() == 'OUT_OF_STOCK') {
+    if (isOutOfStock || normalizedStatus == 'OUT_OF_STOCK') {
       return ItemStatus.outOfStock;
     }
 
     // Check if at or below reorder level
-    if (isAtOrBelowReorder || status.toUpperCase() == 'LOW_STOCK') {
+    if (isAtOrBelowReorder || normalizedStatus == 'LOW_STOCK') {
       return ItemStatus.lowStock;
     }
 
@@ -224,7 +289,7 @@ class BranchStockItem {
         category.contains('dry')) {
       return 'Dry Storage';
     }
-    return 'Storage';
+    return '';
   }
 
   // Convert to CatalogItem format for UI
@@ -237,7 +302,7 @@ class BranchStockItem {
       unit: item.unit,
       expiryDays: daysUntilExpiry,
       storage: storage,
-      batches: 1,
+      batches: batchCount,
       category: item.category,
       status: itemStatus,
       reorderLevel: reorderLevelValue,
@@ -246,6 +311,14 @@ class BranchStockItem {
       unitCost: unitCostValue,
       totalValue: totalValueValue,
       stockPercentage: stockToReorderPercentage,
+      sku: item.sku,
+      description: item.description,
+      isLocked: isLocked,
+      lockReason: lockReason,
+      allowNegativeStock: allowNegativeStock,
+      reservedStock: reservedStock,
+      expiringBatchCount: expiringBatchCount,
+      nearestExpiryDate: batchExpiryDate,
     );
   }
 
@@ -265,7 +338,104 @@ class BranchStockItem {
       'lastUpdated': lastUpdated,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'allowNegativeStock': allowNegativeStock,
+      'isLocked': isLocked,
+      'lockReason': lockReason,
+      'lockedAt': lockedAt,
+      'lockedBy': lockedBy,
+      'lockedUntil': lockedUntil,
+      'nearExpiryAlertSentAt': nearExpiryAlertSentAt,
+      'negativeStockNote': negativeStockNote,
+      'reservedStock': reservedStock,
+      'batchCount': batchCount,
+      'expiringBatchCount': expiringBatchCount,
+      'nearestExpiryDate': nearestExpiryDate,
+      'batches': batches.map((batch) => batch.toJson()).toList(),
       'item': item.toJson(),
+    };
+  }
+}
+
+class StockBatch {
+  final String id;
+  final String organizationId;
+  final String branchId;
+  final String itemId;
+  final String grnId;
+  final String grnItemId;
+  final String batchCode;
+  final double quantity;
+  final double remainingQty;
+  final double? unitCost;
+  final String? expiryDate;
+  final String receivedAt;
+  final String receivedBy;
+  final String status;
+  final String? notes;
+  final String createdAt;
+  final String updatedAt;
+
+  StockBatch({
+    required this.id,
+    required this.organizationId,
+    required this.branchId,
+    required this.itemId,
+    required this.grnId,
+    required this.grnItemId,
+    required this.batchCode,
+    required this.quantity,
+    required this.remainingQty,
+    this.unitCost,
+    this.expiryDate,
+    required this.receivedAt,
+    required this.receivedBy,
+    required this.status,
+    this.notes,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory StockBatch.fromJson(Map<String, dynamic> json) {
+    return StockBatch(
+      id: json['id'] ?? '',
+      organizationId: json['organizationId'] ?? '',
+      branchId: json['branchId'] ?? '',
+      itemId: json['itemId'] ?? '',
+      grnId: json['grnId'] ?? '',
+      grnItemId: json['grnItemId'] ?? '',
+      batchCode: json['batchCode'] ?? '',
+      quantity: _toDouble(json['quantity']),
+      remainingQty: _toDouble(json['remainingQty']),
+      unitCost: json['unitCost'] == null ? null : _toDouble(json['unitCost']),
+      expiryDate: json['expiryDate'],
+      receivedAt: json['receivedAt'] ?? '',
+      receivedBy: json['receivedBy'] ?? '',
+      status: json['status'] ?? '',
+      notes: json['notes'],
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'organizationId': organizationId,
+      'branchId': branchId,
+      'itemId': itemId,
+      'grnId': grnId,
+      'grnItemId': grnItemId,
+      'batchCode': batchCode,
+      'quantity': quantity,
+      'remainingQty': remainingQty,
+      'unitCost': unitCost,
+      'expiryDate': expiryDate,
+      'receivedAt': receivedAt,
+      'receivedBy': receivedBy,
+      'status': status,
+      'notes': notes,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 }
@@ -328,7 +498,9 @@ class StockSummary {
   final int lowStock;
   final int outOfStock;
   final int expired;
+  final int locked;
   final int totalValue;
+  final int itemsWithExpiringBatches;
 
   StockSummary({
     required this.totalItems,
@@ -336,7 +508,9 @@ class StockSummary {
     required this.lowStock,
     required this.outOfStock,
     required this.expired,
+    this.locked = 0,
     required this.totalValue,
+    this.itemsWithExpiringBatches = 0,
   });
 
   factory StockSummary.fromJson(Map<String, dynamic> json) {
@@ -346,7 +520,11 @@ class StockSummary {
       lowStock: int.tryParse(json['lowStock']?.toString() ?? '0') ?? 0,
       outOfStock: int.tryParse(json['outOfStock']?.toString() ?? '0') ?? 0,
       expired: int.tryParse(json['expired']?.toString() ?? '0') ?? 0,
+      locked: int.tryParse(json['locked']?.toString() ?? '0') ?? 0,
       totalValue: int.tryParse(json['totalValue']?.toString() ?? '0') ?? 0,
+      itemsWithExpiringBatches:
+          int.tryParse(json['itemsWithExpiringBatches']?.toString() ?? '0') ??
+          0,
     );
   }
 
@@ -357,7 +535,9 @@ class StockSummary {
       'lowStock': lowStock,
       'outOfStock': outOfStock,
       'expired': expired,
+      'locked': locked,
       'totalValue': totalValue,
+      'itemsWithExpiringBatches': itemsWithExpiringBatches,
     };
   }
 
@@ -449,6 +629,14 @@ class CatalogItem {
   final double unitCost;
   final double totalValue;
   final double stockPercentage;
+  final String sku;
+  final String description;
+  final bool isLocked;
+  final String? lockReason;
+  final bool allowNegativeStock;
+  final double reservedStock;
+  final int expiringBatchCount;
+  final String? nearestExpiryDate;
 
   CatalogItem({
     required this.id,
@@ -467,6 +655,14 @@ class CatalogItem {
     required this.unitCost,
     required this.totalValue,
     required this.stockPercentage,
+    this.sku = '',
+    this.description = '',
+    this.isLocked = false,
+    this.lockReason,
+    this.allowNegativeStock = false,
+    this.reservedStock = 0,
+    this.expiringBatchCount = 0,
+    this.nearestExpiryDate,
   });
 
   // Helper to check if item needs attention
@@ -491,10 +687,20 @@ class CatalogItem {
 
   // Helper to format expiry display
   String get expiryDisplay {
-    if (expiryDays == 999) return 'No expiry';
+    if (expiryDays == 999) {
+      return status == ItemStatus.expired ? 'Batch expired' : 'No batch expiry';
+    }
     if (expiryDays < 0) return 'Expired ${expiryDays.abs()} days ago';
     if (expiryDays == 0) return 'Expires today';
     if (expiryDays == 1) return 'Expires tomorrow';
     return 'Expires in $expiryDays days';
   }
+}
+
+double _toDouble(dynamic value) {
+  return double.tryParse(value?.toString() ?? '0') ?? 0;
+}
+
+int _toInt(dynamic value, {int fallback = 0}) {
+  return int.tryParse(value?.toString() ?? '') ?? fallback;
 }

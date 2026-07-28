@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -131,6 +132,8 @@ class ExpiryTrackingScreen extends StatefulWidget {
 }
 
 class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
+  static const int _defaultWithinDays = 100;
+
   String _branchId = '';
   DateTime? _expiryUntilDate;
   bool _includeExpired = false;
@@ -153,7 +156,7 @@ class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
 
   int? get _selectedWithinDays {
     final date = _expiryUntilDate;
-    if (date == null) return null;
+    if (date == null) return _defaultWithinDays;
     final today = DateUtils.dateOnly(DateTime.now());
     final selected = DateUtils.dateOnly(date);
     return selected.difference(today).inDays.clamp(0, 3650);
@@ -165,7 +168,8 @@ class _ExpiryTrackingScreenState extends State<ExpiryTrackingScreen> {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: _expiryUntilDate ?? now.add(const Duration(days: 30)),
+      initialDate:
+          _expiryUntilDate ?? now.add(const Duration(days: _defaultWithinDays)),
       firstDate: now,
       lastDate: now.add(const Duration(days: 3650)),
     );
@@ -245,6 +249,8 @@ class LockedStockScreen extends StatefulWidget {
 }
 
 class _LockedStockScreenState extends State<LockedStockScreen> {
+  String _branchId = '';
+
   @override
   void initState() {
     super.initState();
@@ -252,7 +258,11 @@ class _LockedStockScreenState extends State<LockedStockScreen> {
   }
 
   Future<void> _load() async {
-    context.read<StockControlReportsCubit>().loadLockedStock();
+    _branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    if (!mounted) return;
+    context.read<StockControlReportsCubit>().loadLockedStock(
+      branchId: _branchId,
+    );
   }
 
   @override
@@ -287,6 +297,8 @@ class NegativeStockReportScreen extends StatefulWidget {
 }
 
 class _NegativeStockReportScreenState extends State<NegativeStockReportScreen> {
+  String _branchId = '';
+
   @override
   void initState() {
     super.initState();
@@ -294,7 +306,11 @@ class _NegativeStockReportScreenState extends State<NegativeStockReportScreen> {
   }
 
   Future<void> _load() async {
-    context.read<StockControlReportsCubit>().loadNegativeStockReport();
+    _branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    if (!mounted) return;
+    context.read<StockControlReportsCubit>().loadNegativeStockReport(
+      branchId: _branchId,
+    );
   }
 
   @override
@@ -348,7 +364,7 @@ class _ExpiryFilterBar extends StatelessWidget {
         _FilterChipButton(
           icon: Icons.calendar_today_outlined,
           label: expiryUntilDate == null
-              ? 'Until date'
+              ? 'Next 100 days'
               : 'Until ${_formatShortDate(expiryUntilDate!)}',
           isActive: expiryUntilDate != null,
           onTap: onPickDate,
@@ -823,14 +839,29 @@ class _RawStockList extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = items[index];
         final nestedItem = _asMap(item['item']);
+        final branch = _asMap(item['branch']);
         final name = _string(
           item['itemName'] ?? nestedItem['itemName'] ?? nestedItem['name'],
         );
         final stock = _string(item['currentStock'] ?? item['stock']);
         final unit = _string(item['unit'] ?? nestedItem['unit']);
+        final sku = _string(item['sku'] ?? nestedItem['sku']);
+        final branchName = _string(branch['name']);
+        final branchCode = _string(
+          branch['branch_code'] ?? branch['branchCode'],
+        );
+        final lockReason = _string(item['lockReason']);
+        final subtitleParts = [
+          'Current: ${stock.isEmpty ? '0' : stock}${unit.isEmpty ? '' : ' $unit'}',
+          if (branchName.isNotEmpty)
+            'Branch: $branchName${branchCode.isEmpty ? '' : ' ($branchCode)'}',
+          if (sku.isNotEmpty) 'SKU: $sku',
+          if (!highlightNegative && lockReason.isNotEmpty)
+            'Reason: $lockReason',
+        ];
         return _ReportCard(
           title: name.isEmpty ? 'Stock item' : name,
-          subtitle: 'Current: ${stock.isEmpty ? '0' : stock} $unit',
+          subtitle: subtitleParts.join(' | '),
           trailing: highlightNegative
               ? AppIcon(Icons.trending_down, color: context.modeError)
               : AppIcon(Icons.lock_outline, color: context.modePrimary),
@@ -860,51 +891,80 @@ class _ReorderCard extends StatelessWidget {
     return _ReportCard(
       title: item.itemName.isEmpty ? 'Stock item' : item.itemName,
       subtitle:
-          'Current: ${item.currentStock} | Reorder: ${item.reorderLevel} | Suggested: ${item.suggestedQty}',
-      trailing: ElevatedButton.icon(
-        onPressed: isAcknowledging || isAcknowledged ? null : onAcknowledge,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isAcknowledged
-              ? context.modeSuccess
-              : context.modePrimary,
-          foregroundColor: context.modeTextInverse,
-          disabledBackgroundColor: isAcknowledged
-              ? context.modeSuccess
-              : context.modePrimary.withValues(alpha: 0.45),
-          disabledForegroundColor: context.modeTextInverse,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        icon: isAcknowledging
-            ? SizedBox(
-                width: 13,
-                height: 13,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: context.modeTextInverse,
-                ),
-              )
-            : AppIcon(
-                isAcknowledged
-                    ? Icons.check_circle
-                    : Icons.check_circle_outline,
-                size: 15,
+          'Current: ${item.currentStockDisplay} | Reorder: ${item.reorderLevelDisplay} | Suggested: ${item.suggestedQtyDisplay}',
+      trailing: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          OutlinedButton(
+            onPressed: () => context.pushNamed('order-form', extra: item),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: context.modePrimary,
+              side: BorderSide(color: context.modePrimary),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-        label: Text(
-          isAcknowledging
-              ? 'Saving'
-              : isAcknowledged
-              ? 'Acknowledged'
-              : 'Acknowledge',
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: context.modeTextInverse,
+            ),
+            child: Text(
+              'Create PO',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: context.modePrimary,
+              ),
+            ),
           ),
-        ),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: isAcknowledging || isAcknowledged ? null : onAcknowledge,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isAcknowledged
+                  ? context.modeSuccess
+                  : context.modePrimary,
+              foregroundColor: context.modeTextInverse,
+              disabledBackgroundColor: isAcknowledged
+                  ? context.modeSuccess
+                  : context.modePrimary.withValues(alpha: 0.45),
+              disabledForegroundColor: context.modeTextInverse,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            icon: isAcknowledging
+                ? SizedBox(
+                    width: 13,
+                    height: 13,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: context.modeTextInverse,
+                    ),
+                  )
+                : AppIcon(
+                    isAcknowledged
+                        ? Icons.check_circle
+                        : Icons.check_circle_outline,
+                    size: 15,
+                  ),
+            label: Text(
+              isAcknowledging
+                  ? 'Saving'
+                  : isAcknowledged
+                  ? 'Acknowledged'
+                  : 'Acknowledge',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: context.modeTextInverse,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

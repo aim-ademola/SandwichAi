@@ -132,9 +132,6 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               }
 
               if (state is StockRequestEmpty) {
-                return _buildEmptyState(screenWidth);
-              }
-              if (state is StockRequestEmpty) {
                 return Column(
                   children: [
                     _buildTabBar(screenWidth),
@@ -396,6 +393,8 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                   _buildStatusBadge(request.status, screenWidth),
                 ],
               ),
+              SizedBox(height: 10),
+              _buildRequestTypeRow(request, screenWidth),
               SizedBox(height: _getFieldSpacing(screenWidth)),
 
               // Items Section with Show More/Less
@@ -456,6 +455,28 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRequestTypeRow(StockRequest request, double screenWidth) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _buildInfoChip(
+          icon: request.isInterbranch
+              ? Icons.sync_alt_outlined
+              : Icons.storefront_outlined,
+          label: request.isInterbranch ? 'Interbranch' : 'Interdepartment',
+          screenWidth: screenWidth,
+        ),
+        if (request.isInterbranch)
+          _buildInfoChip(
+            icon: Icons.account_tree_outlined,
+            label: request.issuingBranch?.name ?? 'External branch',
+            screenWidth: screenWidth,
+          ),
+      ],
     );
   }
 
@@ -685,6 +706,12 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
         return context.modeWarning;
       case 'APPROVED':
         return context.modeInfo;
+      case 'IN_QUEUE':
+        return const Color(0xFFAB47BC);
+      case 'PROCESSING':
+        return const Color(0xFF26A69A);
+      case 'IN_TRANSIT':
+        return const Color(0xFF5C6BC0);
       case 'COMPLETED':
         return context.modeSuccess;
       case 'REJECTED':
@@ -700,6 +727,12 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
         return 'Pending';
       case 'APPROVED':
         return 'Approved';
+      case 'IN_QUEUE':
+        return 'In Queue';
+      case 'PROCESSING':
+        return 'Processing';
+      case 'IN_TRANSIT':
+        return 'In Transit';
       case 'COMPLETED':
         return 'Completed';
       case 'REJECTED':

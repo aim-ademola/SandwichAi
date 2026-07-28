@@ -250,10 +250,12 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
   ) {
     var filtered = data;
     if (department != null && department.isNotEmpty) {
-      filtered = data.where((r) => r.department == department).toList();
+      final normalizedDepartment = _normalizeFilterValue(department);
+      filtered = data.where((request) {
+        return _normalizeFilterValue(request.department) ==
+            normalizedDepartment;
+      }).toList();
     }
-
-    if (filtered.isEmpty) return const StockRequestEmpty();
 
     final pending = filtered
         .where((r) => r.status == 'PENDING' || r.status == 'APPROVED')
@@ -268,6 +270,10 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
       completedRequests: completed,
       currentFilter: status,
     );
+  }
+
+  String _normalizeFilterValue(String value) {
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
   }
 
   StockRequestError _buildError(String error) {

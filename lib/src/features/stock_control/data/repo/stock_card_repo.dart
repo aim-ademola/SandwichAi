@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/stock_card_model.dart';
 
 abstract class StockCardRepositoryInterface {
   Future<ApiResponse<StockExpiryReport>> getExpiryReport({
+    String? branchId,
     int? withinDays,
     bool? includeExpired,
   });
@@ -39,6 +41,7 @@ class StockCardRepository implements StockCardRepositoryInterface {
 
   @override
   Future<ApiResponse<StockExpiryReport>> getExpiryReport({
+    String? branchId,
     int? withinDays,
     bool? includeExpired,
   }) {
@@ -46,6 +49,7 @@ class StockCardRepository implements StockCardRepositoryInterface {
       'expiry/expiry-tracking',
       StockExpiryReport.fromJson,
       queryParameters: _expiryQuery(
+        branchId: branchId,
         withinDays: withinDays,
         includeExpired: includeExpired,
       ),
@@ -65,17 +69,19 @@ class StockCardRepository implements StockCardRepositoryInterface {
 
   @override
   Future<ApiResponse<StockExpiryReport>> getBranchExpiryReport(
-    String branchId,
-    {
+    String branchId, {
     int? withinDays,
     bool? includeExpired,
-  }) {
+  }) async {
     if (branchId.isEmpty) {
       return Future.value(
         ApiResponse.errorMessage('Branch ID cannot be empty.'),
       );
     }
-    return _getObject(
+    AppLogger.log(
+      'Expiry report attempt 1: /expiry/expiry-tracking/$branchId/expiry-report',
+    );
+    final branchReport = await _getObject(
       'expiry/expiry-tracking/$branchId/expiry-report',
       StockExpiryReport.fromJson,
       queryParameters: _expiryQuery(
@@ -83,6 +89,23 @@ class StockCardRepository implements StockCardRepositoryInterface {
         includeExpired: includeExpired,
       ),
     );
+
+    if (branchReport.isSuccess &&
+        (branchReport.data?.items.isNotEmpty ?? false)) {
+      return branchReport;
+    }
+
+    AppLogger.log(
+      'Expiry report attempt 2: /expiry/expiry-tracking?branchId=$branchId',
+    );
+    final queryReport = await getExpiryReport(
+      branchId: branchId,
+      withinDays: withinDays,
+      includeExpired: includeExpired,
+    );
+
+    if (queryReport.isSuccess) return queryReport;
+    return branchReport;
   }
 
   @override
@@ -187,10 +210,12 @@ class StockCardRepository implements StockCardRepositoryInterface {
   }
 
   Map<String, dynamic>? _expiryQuery({
+    String? branchId,
     int? withinDays,
     bool? includeExpired,
   }) {
     final query = <String, dynamic>{};
+    if (branchId != null && branchId.isNotEmpty) query['branchId'] = branchId;
     if (withinDays != null) query['withinDays'] = withinDays;
     if (includeExpired != null) query['includeExpired'] = includeExpired;
     return query.isEmpty ? null : query;

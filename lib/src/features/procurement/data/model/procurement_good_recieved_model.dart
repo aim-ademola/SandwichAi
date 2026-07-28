@@ -48,33 +48,44 @@ class GoodsReceivedItem {
 
 class CreateGoodsReceivedRequest {
   final String branchId;
+  final String? purchaseOrderId;
+  final String? stockRequestId;
   final String supplierName;
   final String invoiceNo;
   final String poNumber;
   final String receivedBy;
   final String inspectedBy;
   final String qualityNotes;
+  final bool? isFinalDelivery;
   final List<GoodsReceivedItem> items;
 
   CreateGoodsReceivedRequest({
     required this.branchId,
+    this.purchaseOrderId,
+    this.stockRequestId,
     required this.supplierName,
     required this.invoiceNo,
     required this.poNumber,
     required this.receivedBy,
     required this.inspectedBy,
     required this.qualityNotes,
+    this.isFinalDelivery,
     required this.items,
   });
 
   Map<String, dynamic> toJson() => {
     'branchId': branchId,
+    if (purchaseOrderId != null && purchaseOrderId!.isNotEmpty)
+      'purchaseOrderId': purchaseOrderId,
+    if (stockRequestId != null && stockRequestId!.isNotEmpty)
+      'stockRequestId': stockRequestId,
     'supplierName': supplierName,
     'invoiceNo': invoiceNo,
     'poNumber': poNumber,
     'receivedBy': receivedBy,
     'inspectedBy': inspectedBy,
     'qualityNotes': qualityNotes,
+    if (isFinalDelivery != null) 'isFinalDelivery': isFinalDelivery,
     'items': items.map((item) => item.toJson()).toList(),
   };
 }
@@ -96,6 +107,8 @@ class GoodsReceived {
   final String id;
   final String receiptNo;
   final String branchId;
+  final String? purchaseOrderId;
+  final String? stockRequestId;
   final String organizationId;
   final String supplierName;
   final String invoiceNo;
@@ -116,6 +129,8 @@ class GoodsReceived {
     required this.id,
     required this.receiptNo,
     required this.branchId,
+    this.purchaseOrderId,
+    this.stockRequestId,
     required this.organizationId,
     required this.supplierName,
     required this.invoiceNo,
@@ -137,6 +152,8 @@ class GoodsReceived {
     id: json['id'] ?? '',
     receiptNo: json['receiptNo'] ?? '',
     branchId: json['branchId'] ?? '',
+    purchaseOrderId: _nullableString(json['purchaseOrderId']),
+    stockRequestId: _nullableString(json['stockRequestId']),
     organizationId: json['organizationId'] ?? '',
     supplierName: json['supplierName'] ?? '',
     invoiceNo: json['invoiceNo'] ?? '',
@@ -366,6 +383,11 @@ Map<String, dynamic> _asMap(dynamic value) {
 }
 
 String _string(dynamic value) => value?.toString() ?? '';
+
+String? _nullableString(dynamic value) {
+  final parsed = _string(value);
+  return parsed.isEmpty ? null : parsed;
+}
 
 double _double(dynamic value) {
   if (value is num) return value.toDouble();

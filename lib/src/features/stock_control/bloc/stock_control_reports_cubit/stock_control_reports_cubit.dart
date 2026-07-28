@@ -63,13 +63,21 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
     if (summaryResponse.isSuccess &&
         reportResponse.isSuccess &&
         report != null) {
+      final sortedItems = [...report.items]
+        ..sort((a, b) => a.daysUntilExpiry.compareTo(b.daysUntilExpiry));
+      final sortedReport = StockExpiryReport(
+        message: report.message,
+        items: sortedItems,
+        summary: report.summary,
+        raw: report.raw,
+      );
       emit(
         state.copyWith(
-          expiryStatus: report.items.isEmpty
+          expiryStatus: sortedReport.items.isEmpty
               ? StockControlReportStatus.empty
               : StockControlReportStatus.loaded,
           expirySummary: summary ?? _emptyExpirySummary(),
-          expiryReport: report,
+          expiryReport: sortedReport,
         ),
       );
       return;
@@ -104,7 +112,7 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
     );
   }
 
-  Future<void> loadLockedStock() async {
+  Future<void> loadLockedStock({String? branchId}) async {
     emit(
       state.copyWith(
         lockedStatus: StockControlReportStatus.loading,
@@ -112,7 +120,9 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
       ),
     );
 
-    final response = await _branchStockRepository.getLockedStock();
+    final response = await _branchStockRepository.getLockedStock(
+      branchId: branchId,
+    );
     response.when(
       success: (data) {
         emit(
@@ -135,7 +145,7 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
     );
   }
 
-  Future<void> loadNegativeStockReport() async {
+  Future<void> loadNegativeStockReport({String? branchId}) async {
     emit(
       state.copyWith(
         negativeStatus: StockControlReportStatus.loading,
@@ -143,7 +153,9 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
       ),
     );
 
-    final response = await _branchStockRepository.getNegativeStockReport();
+    final response = await _branchStockRepository.getNegativeStockReport(
+      branchId: branchId,
+    );
     response.when(
       success: (data) {
         emit(

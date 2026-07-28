@@ -317,11 +317,30 @@ class _InventoryBodyState extends State<InventoryBody> {
           children: [
             Row(
               children: [
-                if (item.status != null) ...[
-                  _buildStatusBadge(item.status!, screenWidth),
-                  const Spacer(),
-                ] else
-                  const Spacer(),
+                Expanded(
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      if (item.status != null)
+                        _buildStatusBadge(item.status!, screenWidth),
+                      if (item.isLocked)
+                        _buildInfoBadge(
+                          'LOCKED',
+                          Icons.lock_outline,
+                          context.modeError,
+                          screenWidth,
+                        ),
+                      if (item.allowNegativeStock)
+                        _buildInfoBadge(
+                          'NEGATIVE OK',
+                          Icons.remove_circle_outline,
+                          context.modeWarning,
+                          screenWidth,
+                        ),
+                    ],
+                  ),
+                ),
                 _buildQuantityControl(item, screenWidth),
               ],
             ),
@@ -334,6 +353,22 @@ class _InventoryBodyState extends State<InventoryBody> {
                 color: context.modeTextPrimary,
               ),
             ),
+            if (item.sku.isNotEmpty || item.description.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                [
+                  if (item.sku.isNotEmpty) item.sku,
+                  if (item.description.isNotEmpty) item.description,
+                ].join(' - '),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: detailsFontSize,
+                  fontWeight: FontWeight.w400,
+                  color: context.modeTextSecondary,
+                ),
+              ),
+            ],
             if (item.expiryDays > 0 && item.expiryDays < 999) ...[
               const SizedBox(height: 4),
               Text(
@@ -355,21 +390,24 @@ class _InventoryBodyState extends State<InventoryBody> {
               ),
               child: Row(
                 children: [
-                  AppIcon(
-                    _getStorageIcon(item.storage),
-                    size: _getInfoIconSize(screenWidth),
-                    color: context.modeTextSecondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    item.storage,
-                    style: WorkSansAppTextStyles.medium.copyWith(
-                      fontSize: detailsFontSize,
-                      fontWeight: FontWeight.w700,
-                      color: context.modeTextPrimary,
+                  if (item.storage.trim().isNotEmpty) ...[
+                    AppIcon(
+                      _getStorageIcon(item.storage),
+                      size: _getInfoIconSize(screenWidth),
+                      color: context.modeTextSecondary,
                     ),
-                  ),
-                  const Spacer(),
+                    const SizedBox(width: 6),
+                    Text(
+                      item.storage,
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: detailsFontSize,
+                        fontWeight: FontWeight.w700,
+                        color: context.modeTextPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                  ] else
+                    const Spacer(),
                   AppIcon(
                     Icons.layers_outlined,
                     size: _getInfoIconSize(screenWidth),
@@ -384,6 +422,23 @@ class _InventoryBodyState extends State<InventoryBody> {
                       color: context.modeTextPrimary,
                     ),
                   ),
+                  if (item.expiringBatchCount > 0) ...[
+                    const SizedBox(width: 10),
+                    AppIcon(
+                      Icons.warning_amber_rounded,
+                      size: _getInfoIconSize(screenWidth),
+                      color: context.modeWarning,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${item.expiringBatchCount} expiring',
+                      style: WorkSansAppTextStyles.medium.copyWith(
+                        fontSize: detailsFontSize,
+                        fontWeight: FontWeight.w700,
+                        color: context.modeWarning,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -406,6 +461,7 @@ class _InventoryBodyState extends State<InventoryBody> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        width: double.infinity,
         padding: EdgeInsets.symmetric(
           horizontal: _getRestockButtonPaddingHorizontal(screenWidth),
           vertical: _getRestockButtonPaddingVertical(screenWidth),
@@ -415,7 +471,10 @@ class _InventoryBodyState extends State<InventoryBody> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
-          'Restock Now',
+          'Raise Procurement Request',
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: WorkSansAppTextStyles.medium.copyWith(
             fontSize: _getRestockButtonFontSize(screenWidth),
             fontWeight: FontWeight.w600,
@@ -677,7 +736,11 @@ class _InventoryBodyState extends State<InventoryBody> {
                       );
                     },
                     Text(
-                      item.name,
+                      item.sku.isEmpty
+                          ? item.name
+                          : '${item.name}\n${item.sku}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getTableCellFontSize(screenWidth),
                         fontWeight: FontWeight.w600,
@@ -686,16 +749,30 @@ class _InventoryBodyState extends State<InventoryBody> {
                     ),
                   ),
                   DataCell(
-                    item.status != null
-                        ? _buildTableStatusBadge(item.status!, screenWidth)
-                        : Text(
-                            'Good',
-                            style: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: _getTableCellFontSize(screenWidth),
-                              fontWeight: FontWeight.w500,
-                              color: context.modeTextSecondary,
-                            ),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        item.status != null
+                            ? _buildTableStatusBadge(item.status!, screenWidth)
+                            : Text(
+                                'Good',
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: _getTableCellFontSize(screenWidth),
+                                  fontWeight: FontWeight.w500,
+                                  color: context.modeTextSecondary,
+                                ),
+                              ),
+                        if (item.isLocked)
+                          _buildInfoBadge(
+                            'LOCKED',
+                            Icons.lock_outline,
+                            context.modeError,
+                            screenWidth,
+                            compact: true,
                           ),
+                      ],
+                    ),
                   ),
                   DataCell(
                     Text(
@@ -709,37 +786,44 @@ class _InventoryBodyState extends State<InventoryBody> {
                   ),
                   DataCell(
                     Text(
-                      item.expiryDays > 0
-                          ? '${item.expiryDays} days'
-                          : 'Expired',
+                      item.expiryDisplay,
                       style: WorkSansAppTextStyles.medium.copyWith(
                         fontSize: _getTableCellFontSize(screenWidth),
                         fontWeight: FontWeight.w400,
-                        color: item.expiryDays > 0
+                        color: item.expiryDays >= 0
                             ? context.modeTextSecondary
                             : context.modeError,
                       ),
                     ),
                   ),
                   DataCell(
-                    Row(
-                      children: [
-                        AppIcon(
-                          _getStorageIcon(item.storage),
-                          size: _getTableIconSize(screenWidth),
-                          color: context.modeTextSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          item.storage,
-                          style: WorkSansAppTextStyles.medium.copyWith(
-                            fontSize: _getTableCellFontSize(screenWidth),
-                            fontWeight: FontWeight.w500,
-                            color: context.modeTextSecondary,
+                    item.storage.trim().isEmpty
+                        ? Text(
+                            '-',
+                            style: WorkSansAppTextStyles.medium.copyWith(
+                              fontSize: _getTableCellFontSize(screenWidth),
+                              fontWeight: FontWeight.w500,
+                              color: context.modeTextMuted,
+                            ),
+                          )
+                        : Row(
+                            children: [
+                              AppIcon(
+                                _getStorageIcon(item.storage),
+                                size: _getTableIconSize(screenWidth),
+                                color: context.modeTextSecondary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                item.storage,
+                                style: WorkSansAppTextStyles.medium.copyWith(
+                                  fontSize: _getTableCellFontSize(screenWidth),
+                                  fontWeight: FontWeight.w500,
+                                  color: context.modeTextSecondary,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                   DataCell(
                     Text(
@@ -917,6 +1001,52 @@ class _InventoryBodyState extends State<InventoryBody> {
               fontSize: _getStatusFontSize(screenWidth),
               fontWeight: FontWeight.w600,
               color: iconColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoBadge(
+    String label,
+    IconData icon,
+    Color color,
+    double screenWidth, {
+    bool compact = false,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact
+            ? _getTableBadgePaddingHorizontal(screenWidth)
+            : _getStatusBadgePaddingHorizontal(screenWidth),
+        vertical: compact
+            ? _getTableBadgePaddingVertical(screenWidth)
+            : _getStatusBadgePaddingVertical(screenWidth),
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppIcon(
+            icon,
+            size: compact
+                ? _getTableIconSize(screenWidth)
+                : _getStatusIconSize(screenWidth),
+            color: color,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: compact
+                  ? _getTableBadgeFontSize(screenWidth)
+                  : _getStatusFontSize(screenWidth),
+              fontWeight: FontWeight.w600,
+              color: color,
             ),
           ),
         ],

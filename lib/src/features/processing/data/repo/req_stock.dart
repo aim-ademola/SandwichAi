@@ -174,6 +174,13 @@ class StockRequestRepository extends BaseRepository
     if (request.requestingBranchId.isEmpty) {
       throw FormatException('Requesting branch ID cannot be empty');
     }
+    if (request.issuingBranchId != null &&
+        request.issuingBranchId!.isNotEmpty &&
+        request.issuingBranchId == request.requestingBranchId) {
+      throw FormatException(
+        'Leave issuing branch empty for interdepartment stock requests',
+      );
+    }
 
     if (request.requestedBy.isEmpty) {
       throw FormatException('Requested by cannot be empty');

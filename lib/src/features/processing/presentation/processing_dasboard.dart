@@ -1,9 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:sandwich_ai/src/core/globals/app_icon.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/processing_dash_bloc/bloc.dart';
@@ -86,7 +83,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
+        icon: Icon(Icons.menu, color: context.modeTextPrimary),
         onPressed: () {
           _scaffoldKey.currentState?.openDrawer();
         },
@@ -94,18 +91,17 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
       title: Text(
         'Today\'s Overview',
         style: WorkSansAppTextStyles.medium.copyWith(
-          fontSize: 17,
-          fontWeight: FontWeight.w600,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
           color: context.modeTextPrimary,
         ),
       ),
       centerTitle: false,
       actions: [
-        const NotificationBellAction(margin: EdgeInsets.zero),
         BlocBuilder<ProcessingDashboardBloc, ProcessingDashboardState>(
           builder: (context, state) {
             return IconButton(
-              icon: AppIcon(Icons.refresh, color: context.modeTextPrimary),
+              icon: Icon(Icons.refresh, color: context.modeTextPrimary),
               onPressed: state is ProcessingDashboardLoading
                   ? null
                   : () => _onRefresh(),
@@ -156,12 +152,12 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppIcon(errorIcon, size: 64, color: context.modeTextMuted),
+            Icon(errorIcon, size: 56, color: context.modeTextMuted),
             const SizedBox(height: 16),
             Text(
               errorTitle,
               style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: context.modeTextPrimary,
               ),
@@ -171,18 +167,18 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               error,
               textAlign: TextAlign.center,
               style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: 14,
+                fontSize: 13,
                 color: context.modeTextSecondary,
               ),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _loadDashboard,
-              icon: const AppIcon(Icons.refresh),
+              icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: context.modePrimary,
-                foregroundColor: context.modeTextInverse,
+                backgroundColor: kPrimary,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -201,10 +197,10 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
   Widget _buildDashboardContent(ProcessingDashboardData data) {
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      color: context.modePrimary,
+      color: kPrimary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -223,10 +219,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final spacing = 16.0;
-        final useSingleColumn = constraints.maxWidth < 360;
-        final cardWidth = useSingleColumn
-            ? constraints.maxWidth
-            : (constraints.maxWidth - spacing) / 2;
+        final cardWidth = (constraints.maxWidth - spacing) / 2;
 
         return Wrap(
           spacing: spacing,
@@ -263,81 +256,13 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
     String? trend,
   }) {
     final Color? trendColor = trend != null
-        ? (trend.startsWith('+') ? context.modeSuccess : context.modeError)
+        ? (trend.startsWith('+')
+              ? const Color(0xFF4CAF50)
+              : const Color(0xFFF44336))
         : null;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxWidth < 180;
-
-        return Container(
-          padding: EdgeInsets.all(compact ? 14 : 18),
-          decoration: BoxDecoration(
-            color: context.modeSurface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.modeBorder, width: 1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: 13,
-                  height: 1.25,
-                  color: context.modeTextSecondary,
-                ),
-              ),
-              const SizedBox(height: 12),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  value,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: compact ? 26 : 30,
-                    fontWeight: FontWeight.w700,
-                    color: context.modeTextPrimary,
-                    height: 1.0,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (trend != null)
-                Text(
-                  trend,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: trendColor,
-                  ),
-                )
-              else if (subtitle != null)
-                Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 12,
-                    color: context.modeTextMuted,
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDailyProcessingTasks(ProcessingTasks tasks) {
-    final total = tasks.pending + tasks.inProcess + tasks.completedToday;
-
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: context.modeSurface,
         borderRadius: BorderRadius.circular(16),
@@ -347,126 +272,131 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Daily Processing Tasks',
+            title,
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: context.modeTextPrimary,
+              fontSize: 13,
+              height: 1.3,
+              color: context.modeTextSecondary,
             ),
           ),
-          const SizedBox(height: 18),
-          if (total == 0)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Text(
-                  'No tasks today',
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: 14,
-                    color: context.modeTextSecondary,
-                  ),
-                ),
+          const SizedBox(height: 16),
+          Text(
+            value,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: context.modeTextPrimary,
+              height: 1.0,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (trend != null)
+            Text(
+              trend,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: trendColor,
               ),
             )
-          else
-            Row(
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: SizedBox(
-                    height: 120,
-                    child: PieChart(
-                      PieChartData(
-                        sectionsSpace: 3,
-                        centerSpaceRadius: 25,
-                        sections: [
-                          PieChartSectionData(
-                            color: context.modeTextMuted,
-                            value: tasks.pending.toDouble(),
-                            title:
-                                '${((tasks.pending / total) * 100).toStringAsFixed(0)}%',
-                            radius: 25,
-                            titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: context.modeTextInverse,
-                            ),
-                          ),
-                          PieChartSectionData(
-                            color: context.modeWarning,
-                            value: tasks.inProcess.toDouble(),
-                            title:
-                                '${((tasks.inProcess / total) * 100).toStringAsFixed(0)}%',
-                            radius: 25,
-                            titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: context.modeTextInverse,
-                            ),
-                          ),
-                          PieChartSectionData(
-                            color: context.modeSuccess,
-                            value: tasks.completedToday.toDouble(),
-                            title:
-                                '${((tasks.completedToday / total) * 100).toStringAsFixed(0)}%',
-                            radius: 25,
-                            titleStyle: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: context.modeTextInverse,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 5,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _chartIndicator(
-                        color: context.modeTextMuted,
-                        label: 'Pending (${tasks.pending})',
-                      ),
-                      const SizedBox(height: 8),
-                      _chartIndicator(
-                        color: context.modeWarning,
-                        label: 'In Process (${tasks.inProcess})',
-                      ),
-                      const SizedBox(height: 8),
-                      _chartIndicator(
-                        color: context.modeSuccess,
-                        label: 'Completed (${tasks.completedToday})',
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+          else if (subtitle != null)
+            Text(
+              subtitle,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 12,
+                color: context.modeTextMuted,
+              ),
             ),
         ],
       ),
     );
   }
 
-  Widget _chartIndicator({required Color color, required String label}) {
-    return Row(
+  Widget _buildDailyProcessingTasks(ProcessingTasks tasks) {
+    final total = tasks.pending + tasks.inProcess + tasks.completedToday;
+
+    return Container(
+      padding: const EdgeInsets.all(0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 20),
+            child: Text(
+              'Daily Processing Tasks',
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: context.modeTextPrimary,
+              ),
+            ),
+          ),
+          _buildTaskProgressRow(
+            label: 'Pending',
+            value: tasks.pending,
+            total: total,
+            color: const Color(0xFF9E9E9E),
+          ),
+          const SizedBox(height: 28),
+          _buildTaskProgressRow(
+            label: 'In Process',
+            value: tasks.inProcess,
+            total: total,
+            color: const Color(0xFFFF9800),
+          ),
+          const SizedBox(height: 28),
+          _buildTaskProgressRow(
+            label: 'Completed',
+            value: tasks.completedToday,
+            total: total,
+            color: const Color(0xFF4CAF50),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskProgressRow({
+    required String label,
+    required int value,
+    required int total,
+    required Color color,
+  }) {
+    final progress = total > 0 ? value / total : 0.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: context.modeTextPrimary,
+              ),
+            ),
+            Text(
+              value.toString(),
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: WorkSansAppTextStyles.medium.copyWith(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: context.modeTextPrimary,
+        const SizedBox(height: 12),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: context.modeSurfaceMuted,
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            color: kPrimary,
+            minHeight: 8,
           ),
         ),
       ],
@@ -487,7 +417,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
           Text(
             'Recent Verifications',
             style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w700,
               color: context.modeTextPrimary,
             ),
@@ -499,7 +429,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                 padding: const EdgeInsets.all(32.0),
                 child: Column(
                   children: [
-                    AppIcon(
+                    Icon(
                       Icons.verified_outlined,
                       size: 48,
                       color: context.modeTextMuted,
@@ -508,7 +438,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                     Text(
                       'No recent verifications',
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 14,
+                        fontSize: 13,
                         color: context.modeTextMuted,
                       ),
                     ),
@@ -535,8 +465,8 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
 
   Widget _buildVerificationItem(RecentVerification verification) {
     final statusColor = verification.status.toLowerCase() == 'verified'
-        ? context.modeSuccess
-        : context.modeWarning;
+        ? const Color(0xFF4CAF50)
+        : const Color(0xFFFF9800);
 
     return InkWell(
       onTap: () {
@@ -555,31 +485,23 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
           child: Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Center(
-                  child: AppIcon(
-                    Icons.check_circle,
-                    color: statusColor,
-                    size: 18,
-                  ),
-                ),
+                child: Icon(Icons.check_circle, color: statusColor, size: 20),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       verification.productName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: context.modeTextPrimary,
                       ),
@@ -587,10 +509,8 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'By ${verification.verifiedBy}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: 13,
+                        fontSize: 12,
                         color: context.modeTextMuted,
                       ),
                     ),
@@ -599,8 +519,8 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
+                  horizontal: 12,
+                  vertical: 6,
                 ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.1),
@@ -608,8 +528,6 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                 ),
                 child: Text(
                   verification.status,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: WorkSansAppTextStyles.medium.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -618,7 +536,7 @@ class _ProcessingDashboardScreenState extends State<ProcessingDashboardScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              AppIcon(
+              Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
                 color: context.modeTextMuted,

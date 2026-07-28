@@ -47,9 +47,7 @@ Future<void> bootstrapSandwichAi(AppEnvironment environment) async {
     };
   }
 
-  NotificationService.navigatorKey = navigatorKey;
-
-  await NotificationService().initialize();
+  await NotificationService().disableLocalDelivery();
   await FirebaseMessagingService.instance.initialize();
 
   await ThemeController.instance.load();

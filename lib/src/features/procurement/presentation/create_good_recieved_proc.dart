@@ -41,6 +41,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
   List<SelectedItem> _selectedItems = [];
   String _branchId = '';
   String _inspectedBy = '';
+  String? _purchaseOrderId;
   String? _selectedSupplierId;
   String? _selectedSupplierName;
 
@@ -63,6 +64,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     }
 
     setState(() {
+      _purchaseOrderId = prefill.purchaseOrderId.isEmpty
+          ? poId
+          : prefill.purchaseOrderId;
       _selectedSupplierName = prefill.supplierName;
       _poNumberController.text = prefill.poNumber.isEmpty
           ? poId
@@ -470,6 +474,10 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
 
     final request = CreateGoodsReceivedRequest(
       branchId: _branchId,
+      purchaseOrderId:
+          (_purchaseOrderId ?? _poNumberController.text.trim()).isEmpty
+          ? null
+          : (_purchaseOrderId ?? _poNumberController.text.trim()),
       supplierName: _selectedSupplierName!,
       invoiceNo: _invoiceNoController.text.trim(),
       poNumber: _poNumberController.text.trim(),
@@ -2105,6 +2113,7 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     _qualityNotesController.clear();
     setState(() {
       _selectedSupplierId = null;
+      _purchaseOrderId = null;
       _selectedSupplierName = null;
       _selectedItems = [];
     });

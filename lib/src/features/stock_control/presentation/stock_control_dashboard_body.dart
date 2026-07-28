@@ -399,8 +399,8 @@ class _StockControlDashboardBodyScreenState
                   width: cardWidth,
                   child: _buildStatCard(
                     icon: Icons.warning_amber_rounded,
-                    label: 'Expired',
-                    value: overview.statusBreakdown.expired,
+                    label: 'Expiring Batches',
+                    value: overview.itemsWithExpiringBatches,
                     valueColor: context.modePrimary,
                     screenWidth: screenWidth,
                   ),
@@ -538,7 +538,7 @@ class _StockControlDashboardBodyScreenState
       borderRadius: BorderRadius.circular(12),
       child: Container(
         height: _getStatCardHeight(screenWidth),
-        padding: EdgeInsets.all(_getStatCardPadding(screenWidth)),
+
         decoration: BoxDecoration(
           color: context.modeSurface,
           borderRadius: BorderRadius.circular(12),
@@ -568,51 +568,58 @@ class _StockControlDashboardBodyScreenState
                 ),
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: context.modePrimary.withValues(alpha: 0.09),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: AppIcon(icon, color: context.modePrimary, size: 15),
-                  ),
-                ),
-                const SizedBox(height: 7),
-                Text(
-                  label,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: WorkSansAppTextStyles.medium.copyWith(
-                    fontSize: labelFontSize,
-                    fontWeight: FontWeight.w500,
-                    color: context.modeTextSecondary,
-                    height: 1.15,
-                  ),
-                ),
-                SizedBox(height: _getStatValueSpacing(screenWidth)),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      formattedValue,
-                      maxLines: 1,
-                      style: WorkSansAppTextStyles.medium.copyWith(
-                        fontSize: valueFontSize,
-                        fontWeight: FontWeight.w800,
-                        color: valueColor,
-                        height: 1,
+            Padding(
+              padding: EdgeInsets.all(_getStatCardPadding(screenWidth)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: context.modePrimary.withValues(alpha: 0.09),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: AppIcon(
+                        icon,
+                        color: context.modePrimary,
+                        size: 15,
                       ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 7),
+                  Text(
+                    label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: labelFontSize,
+                      fontWeight: FontWeight.w500,
+                      color: context.modeTextSecondary,
+                      height: 1.15,
+                    ),
+                  ),
+                  SizedBox(height: _getStatValueSpacing(screenWidth)),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        formattedValue,
+                        maxLines: 1,
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: valueFontSize,
+                          fontWeight: FontWeight.w800,
+                          color: valueColor,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -625,7 +632,6 @@ class _StockControlDashboardBodyScreenState
     final valueFontSize = _getTotalStockValueFontSize(screenWidth);
 
     return Container(
-      padding: EdgeInsets.all(_getTotalStockPadding(screenWidth)),
       decoration: BoxDecoration(
         color: context.modeSurface,
         borderRadius: BorderRadius.circular(12),
@@ -645,73 +651,80 @@ class _StockControlDashboardBodyScreenState
       child: Stack(
         children: [
           Positioned(
-            right: screenWidth < 360 ? -32 : -22,
-            bottom: -16,
+            right: screenWidth < 360 ? -22 : -12,
+            bottom: 18,
             child: Opacity(
               opacity: Theme.of(context).brightness == Brightness.dark
                   ? 0.16
                   : 0.42,
               child: SvgPicture.asset(
                 'assets/svg/stock_value_wallet.svg',
-                width: screenWidth < 360 ? 116 : 142,
+                width: screenWidth < 360 ? 76 : 96,
               ),
             ),
           ),
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: context.modePrimary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: AppIcon(
-                    Icons.account_balance_wallet_outlined,
-                    color: context.modePrimary,
-                    size: 24,
+          Padding(
+            padding: EdgeInsets.all(_getTotalStockPadding(screenWidth)),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: context.modePrimary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: AppIcon(
+                      Icons.account_balance_wallet_outlined,
+                      color: context.modePrimary,
+                      size: 24,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: screenWidth < 360 ? 42 : 58),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Total Stock Value',
-                        style: WorkSansAppTextStyles.medium.copyWith(
-                          fontSize: labelFontSize,
-                          fontWeight: FontWeight.w500,
-                          color: context.modeTextSecondary,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: screenWidth < 360 ? 42 : 58,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Total Stock Value',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: labelFontSize,
+                            fontWeight: FontWeight.w500,
+                            color: context.modeTextSecondary,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: _getTotalStockValueSpacing(screenWidth)),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
+                        SizedBox(
+                          height: _getTotalStockValueSpacing(screenWidth),
+                        ),
+                        Align(
                           alignment: Alignment.centerLeft,
-                          child: Text(
-                            _formatCurrency(totalValue),
-                            maxLines: 1,
-                            style: WorkSansAppTextStyles.medium.copyWith(
-                              fontSize: valueFontSize,
-                              fontWeight: FontWeight.w800,
-                              color: context.modeTextPrimary,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _formatCurrency(totalValue),
+                              maxLines: 1,
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: valueFontSize,
+                                fontWeight: FontWeight.w800,
+                                color: context.modeTextPrimary,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

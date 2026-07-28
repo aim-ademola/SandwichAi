@@ -7,6 +7,7 @@ import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/theme/context_theme_extension.dart';
@@ -50,7 +51,7 @@ class _OrderScreenState extends State<OrderScreen>
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _orderNoteController = TextEditingController();
   final _animateToController = AnimateToController();
-  Timer? _searchDebounce;
+  late final Debouncer _searchDebouncer;
 
   final Map<String, int> _orderItems = {};
   final Map<String, String> _itemSpecialRequests = {};
@@ -63,6 +64,9 @@ class _OrderScreenState extends State<OrderScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _sessionCubit = context.read<OrderSessionCubit>();
     _tabController = TabController(length: 1, vsync: this);
     context.read<MenuItemsBloc>().add(const LoadMenuItems());
@@ -446,7 +450,7 @@ class _OrderScreenState extends State<OrderScreen>
     _syncToCubit();
     WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
-    _searchDebounce?.cancel();
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _orderNoteController.dispose();
     _animateToController.dispose();
@@ -1312,10 +1316,11 @@ class _OrderScreenState extends State<OrderScreen>
         controller: _searchController,
         onChanged: (value) {
           setState(() {});
-          _searchDebounce?.cancel();
-          _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+          _searchDebouncer(() {
             if (!mounted) return;
-            context.read<MenuItemsBloc>().add(SearchMenuItems(query: value));
+            context.read<MenuItemsBloc>().add(
+              SearchMenuItems(query: value.trim()),
+            );
           });
         },
         decoration: InputDecoration(
@@ -1338,7 +1343,7 @@ class _OrderScreenState extends State<OrderScreen>
                     width: 24,
                   ),
                   onPressed: () {
-                    _searchDebounce?.cancel();
+                    _searchDebouncer.cancel();
                     _searchController.clear();
                     setState(() {});
                     context.read<MenuItemsBloc>().add(

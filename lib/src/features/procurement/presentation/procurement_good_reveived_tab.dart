@@ -12,7 +12,9 @@ import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_rece
 import 'package:sandwich_ai/src/features/stock_control/data/repo/reorder_repo.dart';
 
 class GoodsReceivedTabScreen extends StatefulWidget {
-  const GoodsReceivedTabScreen({super.key});
+  final int initialIndex;
+
+  const GoodsReceivedTabScreen({super.key, this.initialIndex = 0});
 
   @override
   State<GoodsReceivedTabScreen> createState() => _GoodsReceivedTabScreenState();
@@ -25,7 +27,11 @@ class _GoodsReceivedTabScreenState extends State<GoodsReceivedTabScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      initialIndex: widget.initialIndex.clamp(0, 2),
+      vsync: this,
+    );
   }
 
   @override
@@ -38,11 +44,6 @@ class _GoodsReceivedTabScreenState extends State<GoodsReceivedTabScreen>
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => GoodsReceivedBloc(
-            repository: context.read<GoodsReceivedRepositoryInterface>(),
-          ),
-        ),
         BlocProvider(
           create: (context) => GoodsReceivedAdvancedCubit(
             goodsReceivedRepository: context
@@ -101,10 +102,20 @@ class _GoodsReceivedTabScreenState extends State<GoodsReceivedTabScreen>
           ),
           body: TabBarView(
             controller: _tabController,
-            children: const [
-              GoodsReceivedOverviewScreen(),
-              CreateGoodsReceivedScreen(),
-              GoodsReceivedHistoryScreen(),
+            children: [
+              const GoodsReceivedOverviewScreen(),
+              BlocProvider(
+                create: (context) => GoodsReceivedBloc(
+                  repository: context.read<GoodsReceivedRepositoryInterface>(),
+                ),
+                child: const CreateGoodsReceivedScreen(),
+              ),
+              BlocProvider(
+                create: (context) => GoodsReceivedBloc(
+                  repository: context.read<GoodsReceivedRepositoryInterface>(),
+                ),
+                child: const GoodsReceivedHistoryScreen(),
+              ),
             ],
           ),
         ),

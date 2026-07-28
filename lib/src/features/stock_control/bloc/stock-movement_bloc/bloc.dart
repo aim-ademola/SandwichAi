@@ -41,16 +41,6 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
 
       await response.when(
         success: (data) async {
-          if (!data.isValid) {
-            emit(
-              const StockMovementError(
-                error: 'No stock movement data found',
-                errorType: StockMovementErrorType.validation,
-              ),
-            );
-            return;
-          }
-
           emit(
             StockMovementLoaded(
               response: data,
@@ -188,7 +178,6 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
     if (state is! StockMovementLoaded) return;
 
     final currentState = state as StockMovementLoaded;
-
     final newQuery = StockMovementQuery(
       branchId: currentState.currentQuery.branchId,
       itemId: currentState.currentQuery.itemId,
@@ -199,7 +188,19 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
       limit: currentState.currentQuery.limit,
     );
 
-    add(LoadStockMovements(query: newQuery));
+    final filteredItems = _applyFilters(
+      currentState.response.data,
+      movementType: event.movementType,
+      searchQuery: currentState.searchQuery,
+    );
+
+    emit(
+      currentState.copyWith(
+        filteredItems: filteredItems,
+        currentQuery: newQuery,
+        isLoadingMore: false,
+      ),
+    );
   }
 
   /// Filter by date range
@@ -264,7 +265,7 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
     required String searchQuery,
   }) {
     final query = searchQuery.toLowerCase();
-    return items.where((item) {
+    final filteredItems = items.where((item) {
       final matchesMovementType =
           movementType == null ||
           movementType.isEmpty ||
@@ -279,6 +280,9 @@ class StockMovementBloc extends Bloc<StockMovementEvent, StockMovementState> {
 
       return matchesMovementType && matchesSearch;
     }).toList();
+
+    filteredItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return filteredItems;
   }
 
   /// Determine error type from error message

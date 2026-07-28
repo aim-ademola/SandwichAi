@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -25,6 +26,8 @@ class _OrdersListScreenState extends State<OrdersListScreen>
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   late final TabController _tabController;
+  late final Debouncer _searchDebouncer;
+  String _searchText = '';
 
   String? _selectedStatus;
   String? _selectedPriority;
@@ -33,6 +36,9 @@ class _OrdersListScreenState extends State<OrdersListScreen>
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _tabController = TabController(length: 3, vsync: this)
       ..addListener(_onTabChanged);
     context.read<OrdersListBloc>().add(const LoadOrders());
@@ -43,6 +49,7 @@ class _OrdersListScreenState extends State<OrdersListScreen>
   void dispose() {
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -249,11 +256,13 @@ class _OrdersListScreenState extends State<OrdersListScreen>
             color: context.modeTextMuted,
             size: 20,
           ),
-          suffixIcon: _searchController.text.isNotEmpty
+          suffixIcon: _searchText.isNotEmpty
               ? IconButton(
                   icon: const AppIcon(Icons.clear, size: 20),
                   onPressed: () {
+                    _searchDebouncer.cancel();
                     _searchController.clear();
+                    setState(() => _searchText = '');
                     context.read<OrdersListBloc>().add(const SearchOrders(''));
                   },
                 )
@@ -261,10 +270,16 @@ class _OrdersListScreenState extends State<OrdersListScreen>
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
+        onChanged: (value) {
+          setState(() => _searchText = value);
+          _searchDebouncer(() {
+            if (!mounted) return;
+            context.read<OrdersListBloc>().add(SearchOrders(value.trim()));
+          });
+        },
         onSubmitted: (value) {
-          if (value.isNotEmpty) {
-            context.read<OrdersListBloc>().add(SearchOrders(value));
-          }
+          _searchDebouncer.cancel();
+          context.read<OrdersListBloc>().add(SearchOrders(value.trim()));
         },
       ),
     );

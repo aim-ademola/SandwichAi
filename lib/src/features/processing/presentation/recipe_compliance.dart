@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/recipe_compliance_bloc.dart/bloc.dart';
@@ -25,6 +26,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
   final _expectedInputController = TextEditingController();
   final _actualInputController = TextEditingController();
   final _notesController = TextEditingController();
+  late final Debouncer _searchDebouncer;
 
   MenuItem? _selectedMenuItem;
   bool _isSearching = false;
@@ -34,6 +36,9 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _searchController.addListener(_onSearchChanged);
 
     // Load menu items on init
@@ -43,6 +48,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _batchesPreparedController.dispose();
     _itemNameController.dispose();
@@ -54,7 +60,12 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
 
   void _onSearchChanged() {
     final query = _searchController.text;
-    context.read<RecipeComplianceBloc>().add(SearchMenuItems(query: query));
+    _searchDebouncer(() {
+      if (!mounted) return;
+      context.read<RecipeComplianceBloc>().add(
+        SearchMenuItems(query: query.trim()),
+      );
+    });
   }
 
   void _applyRecipeFromMenuItem(MenuItem item) {
@@ -499,6 +510,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                                 size: _getIconSize(screenWidth),
                               ),
                               onPressed: () {
+                                _searchDebouncer.cancel();
                                 _searchController.clear();
                                 context.read<RecipeComplianceBloc>().add(
                                   const ClearMenuSearch(),
@@ -568,6 +580,7 @@ class _RecipeComplianceScreenState extends State<RecipeComplianceScreen> {
                             _applyRecipeFromMenuItem(item);
                             _isSearching = false;
                             _isOpened = false;
+                            _searchDebouncer.cancel();
                             _searchController.clear();
                           });
                           context.read<RecipeComplianceBloc>().add(

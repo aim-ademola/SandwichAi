@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -82,11 +81,14 @@ class _StockProcurementRequestScreenState
 
   // Add field:
   String _orgId = '';
-  Timer? _searchDebounce;
+  late final Debouncer _searchDebouncer;
 
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _searchController.addListener(_onSearchChanged);
     _setDefaultDeliveryDate();
     _loadUserData();
@@ -135,7 +137,7 @@ class _StockProcurementRequestScreenState
 
   @override
   void dispose() {
-    _searchDebounce?.cancel();
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _currentStockController.dispose();
     _minLevelController.dispose();
@@ -163,8 +165,8 @@ class _StockProcurementRequestScreenState
     });
 
     if (_orgId.isEmpty) return;
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+    _searchDebouncer.cancel();
+    _searchDebouncer(() {
       if (!mounted) return;
       context.read<InventoryItemsBloc>().add(
         LoadInventoryItems(
@@ -463,7 +465,9 @@ class _StockProcurementRequestScreenState
       _selectedItemCategory = item.category;
       _isSearching = false;
       _isOpened = false;
+      _searchDebouncer.cancel();
       _searchController.clear();
+      _filteredItems = _allItems;
     });
 
     // Auto-fill stock data
@@ -1762,7 +1766,9 @@ class _StockProcurementRequestScreenState
                           size: _getIconSize(screenWidth),
                         ),
                         onPressed: () {
+                          _searchDebouncer.cancel();
                           _searchController.clear();
+                          setState(() => _filteredItems = _allItems);
                         },
                       )
                     : null,

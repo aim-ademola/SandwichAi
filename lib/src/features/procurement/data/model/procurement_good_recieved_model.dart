@@ -35,14 +35,14 @@ class GoodsReceivedItem {
   factory GoodsReceivedItem.fromJson(
     Map<String, dynamic> json,
   ) => GoodsReceivedItem(
-    itemId: json['itemId'] ?? '',
-    itemName: json['itemName'] ?? '',
-    orderedQty: double.tryParse(json['orderedQty']?.toString() ?? '0') ?? 0.0,
-    receivedQty: double.tryParse(json['receivedQty']?.toString() ?? '0') ?? 0.0,
-    qualityCheck: json['qualityCheck'] ?? false,
-    qcStatus: json['qcStatus'] ?? '',
-    qcNote: json['qcNote'],
-    expiryDate: json['expiryDate'],
+    itemId: _string(json['itemId'] ?? json['inventoryItemId']),
+    itemName: _string(json['itemName'] ?? json['name']),
+    orderedQty: _double(json['orderedQty'] ?? json['quantityOrdered']),
+    receivedQty: _double(json['receivedQty'] ?? json['quantityReceived']),
+    qualityCheck: json['qualityCheck'] == true,
+    qcStatus: _string(json['qcStatus']),
+    qcNote: _nullableString(json['qcNote']),
+    expiryDate: _nullableString(json['expiryDate']),
   );
 }
 
@@ -98,8 +98,8 @@ class GoodsReceivedBranch {
 
   factory GoodsReceivedBranch.fromJson(Map<String, dynamic> json) =>
       GoodsReceivedBranch(
-        name: json['name'] ?? '',
-        branchCode: json['branch_code'] ?? '',
+        name: _string(json['name']),
+        branchCode: _string(json['branch_code'] ?? json['branchCode']),
       );
 }
 
@@ -149,31 +149,35 @@ class GoodsReceived {
   });
 
   factory GoodsReceived.fromJson(Map<String, dynamic> json) => GoodsReceived(
-    id: json['id'] ?? '',
-    receiptNo: json['receiptNo'] ?? '',
-    branchId: json['branchId'] ?? '',
+    id: _string(json['id']),
+    receiptNo: _string(json['receiptNo'] ?? json['receiptNumber']),
+    branchId: _string(json['branchId']),
     purchaseOrderId: _nullableString(json['purchaseOrderId']),
     stockRequestId: _nullableString(json['stockRequestId']),
-    organizationId: json['organizationId'] ?? '',
-    supplierName: json['supplierName'] ?? '',
-    invoiceNo: json['invoiceNo'] ?? '',
-    poNumber: json['poNumber'] ?? '',
-    receivedBy: json['receivedBy'] ?? '',
-    inspectedBy: json['inspectedBy'] ?? '',
-    totalItems: json['totalItems'] ?? 0,
-    passedQC: json['passedQC'] ?? 0,
-    failedQC: json['failedQC'] ?? 0,
-    qualityNotes: json['qualityNotes'] ?? '',
-    receivedAt: DateTime.parse(json['receivedAt']),
-    createdAt: DateTime.parse(json['createdAt']),
-    updatedAt: DateTime.parse(json['updatedAt']),
+    organizationId: _string(json['organizationId']),
+    supplierName: _string(json['supplierName']),
+    invoiceNo: _string(json['invoiceNo']),
+    poNumber: _string(json['poNumber']),
+    receivedBy: _string(json['receivedBy']),
+    inspectedBy: _string(json['inspectedBy']),
+    totalItems: _int(json['totalItems']),
+    passedQC: _int(json['passedQC']),
+    failedQC: _int(json['failedQC']),
+    qualityNotes: _string(json['qualityNotes']),
+    receivedAt: _date(json['receivedAt'] ?? json['createdAt']),
+    createdAt: _date(json['createdAt'] ?? json['receivedAt']),
+    updatedAt: _date(json['updatedAt'] ?? json['createdAt']),
     items:
         (json['items'] as List?)
-            ?.map((item) => GoodsReceivedItem.fromJson(item))
+            ?.whereType<Map>()
+            .map(
+              (item) =>
+                  GoodsReceivedItem.fromJson(Map<String, dynamic>.from(item)),
+            )
             .toList() ??
         [],
     branch: json['branch'] != null
-        ? GoodsReceivedBranch.fromJson(json['branch'])
+        ? GoodsReceivedBranch.fromJson(_asMap(json['branch']))
         : null,
   );
 }
@@ -398,4 +402,10 @@ int _int(dynamic value) {
   if (value is int) return value;
   if (value is num) return value.toInt();
   return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+DateTime _date(dynamic value) {
+  if (value is DateTime) return value;
+  if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+  return DateTime.now();
 }

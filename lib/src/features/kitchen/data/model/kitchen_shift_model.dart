@@ -256,7 +256,6 @@ class Branch {
         updatedAt: _parseDateTime(json['updatedAt']),
       );
     } catch (e) {
-      print('Error parsing Branch: $e');
       print('JSON data: $json');
       rethrow;
     }

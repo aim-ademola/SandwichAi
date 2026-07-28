@@ -3,6 +3,7 @@ import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/pos/bloc/add_menu_bloc/bloc.dart';
@@ -28,6 +29,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _servingsController = TextEditingController();
   final _searchController = TextEditingController();
+  late final Debouncer _searchDebouncer;
 
   ApiMenuItem? _selectedMenuItem;
   List<ApiMenuItem> _menuItems = [];
@@ -37,26 +39,34 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     context.read<MenuItemsBloc>().add(const LoadMenuItems());
   }
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _servingsController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
   void _filterMenuItems(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filteredMenuItems = _menuItems;
-      } else {
-        _filteredMenuItems = _menuItems.where((item) {
-          return item.dishName.toLowerCase().contains(query.toLowerCase()) ||
-              item.category.toLowerCase().contains(query.toLowerCase());
-        }).toList();
-      }
+    _searchDebouncer(() {
+      if (!mounted) return;
+      final normalizedQuery = query.trim().toLowerCase();
+      setState(() {
+        if (normalizedQuery.isEmpty) {
+          _filteredMenuItems = _menuItems;
+        } else {
+          _filteredMenuItems = _menuItems.where((item) {
+            return item.dishName.toLowerCase().contains(normalizedQuery) ||
+                item.category.toLowerCase().contains(normalizedQuery);
+          }).toList();
+        }
+      });
     });
   }
 
@@ -90,6 +100,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
     setState(() {
       _selectedMenuItem = null;
       _servingsController.clear();
+      _searchDebouncer.cancel();
       _searchController.clear();
       _filteredMenuItems = _menuItems;
       _showDropdown = false;
@@ -459,6 +470,7 @@ class _RecipeCalculatorScreenState extends State<RecipeCalculatorScreen> {
                           setState(() {
                             _selectedMenuItem = item;
                             _showDropdown = false;
+                            _searchDebouncer.cancel();
                             _searchController.clear();
                             _filteredMenuItems = _menuItems;
                           });

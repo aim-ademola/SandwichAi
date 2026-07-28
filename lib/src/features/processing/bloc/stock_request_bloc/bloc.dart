@@ -74,7 +74,13 @@ class StockRequestBloc extends Bloc<StockRequestEvent, StockRequestState> {
     Emitter<StockRequestState> emit,
   ) async {
     if (state is! StockRequestListLoaded) {
-      add(LoadStockRequests(branchId: branchId, status: event.status));
+      add(
+        LoadStockRequests(
+          branchId: branchId,
+          status: event.status,
+          department: event.department,
+        ),
+      );
       return;
     }
 

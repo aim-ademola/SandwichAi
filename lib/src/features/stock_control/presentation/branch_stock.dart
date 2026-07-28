@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/stock_notification_helper.dart';
@@ -27,16 +28,21 @@ class InventoryBody extends StatefulWidget {
 class _InventoryBodyState extends State<InventoryBody> {
   final _stockNotificationHelper = StockNotificationHelper();
   final _searchController = TextEditingController();
+  late final Debouncer _searchDebouncer;
 
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     // Load branch stock on init
     context.read<BranchStockBloc>().add(LoadBranchStock());
   }
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -529,7 +535,10 @@ class _InventoryBodyState extends State<InventoryBody> {
         color: context.modeTextPrimary,
       ),
       onChanged: (value) {
-        context.read<BranchStockBloc>().add(SearchItems(query: value));
+        _searchDebouncer(() {
+          if (!mounted) return;
+          context.read<BranchStockBloc>().add(SearchItems(query: value.trim()));
+        });
       },
       decoration: InputDecoration(
         hintText: 'Search stock items...',
@@ -552,6 +561,7 @@ class _InventoryBodyState extends State<InventoryBody> {
                   size: _getSearchIconSize(screenWidth),
                 ),
                 onPressed: () {
+                  _searchDebouncer.cancel();
                   _searchController.clear();
                   context.read<BranchStockBloc>().add(const ClearSearch());
                 },

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/features/auth/login/presentation/snack_bar.dart';
 import 'package:sandwich_ai/src/features/pos/data/model/customer_model.dart';
@@ -34,7 +35,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   final _customerEmailController = TextEditingController();
   final _orderIdController = TextEditingController();
   final _reviewSourceController = TextEditingController(text: 'Internal');
-  Timer? _orderLookupDebounce;
+  late final Debouncer _orderLookupDebouncer;
   KitchenOrder? _matchedOrder;
   String? _orderVerificationError;
   String _lastVerifiedOrderInput = '';
@@ -58,6 +59,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   void initState() {
     super.initState();
+    _orderLookupDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _restoreCreateDraft();
     _orderIdController.addListener(_onOrderIdChanged);
     if (_orderIdController.text.trim().isNotEmpty) {
@@ -91,7 +95,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   void dispose() {
     _saveCreateDraft();
-    _orderLookupDebounce?.cancel();
+    _orderLookupDebouncer.dispose();
     _titleController.dispose();
     _commentController.dispose();
     _customerNameController.dispose();
@@ -348,7 +352,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
   void _onOrderIdChanged() {
     final query = _orderIdController.text.trim();
-    _orderLookupDebounce?.cancel();
+    _orderLookupDebouncer.cancel();
 
     setState(() {
       _matchedOrder = null;
@@ -358,7 +362,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
     if (query.isEmpty) return;
 
-    _orderLookupDebounce = Timer(const Duration(milliseconds: 500), () {
+    _orderLookupDebouncer(() {
+      if (!mounted) return;
       _verifyOrderId(query);
     });
   }

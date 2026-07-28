@@ -3,6 +3,7 @@ import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -1145,23 +1146,34 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     double screenWidth,
   ) {
     final TextEditingController searchController = TextEditingController();
+    final searchDebouncer = Debouncer(delay: const Duration(milliseconds: 350));
+    var debouncedQuery = '';
+    var dialogOpen = true;
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
+        builder: (context, setDialogState) {
           final filteredSuppliers = suppliers.where((supplier) {
-            final searchTerm = searchController.text.toLowerCase();
-            return supplier.businessName.toLowerCase().contains(searchTerm);
+            return supplier.businessName.toLowerCase().contains(debouncedQuery);
           }).toList();
+          final mediaQuery = MediaQuery.of(context);
+          final dialogMaxHeight =
+              (mediaQuery.size.height - mediaQuery.viewInsets.bottom - 48)
+                  .clamp(160.0, mediaQuery.size.height * 0.7)
+                  .toDouble();
 
           return Dialog(
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 24,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Container(
+            child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.7,
                 maxWidth: 500,
+                maxHeight: dialogMaxHeight,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1198,7 +1210,14 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         TextField(
                           controller: searchController,
                           autofocus: true,
-                          onChanged: (value) => setState(() {}),
+                          onChanged: (value) {
+                            setDialogState(() {});
+                            searchDebouncer(() {
+                              if (!dialogOpen) return;
+                              debouncedQuery = value.trim().toLowerCase();
+                              setDialogState(() {});
+                            });
+                          },
                           decoration: InputDecoration(
                             hintText: 'Search suppliers...',
                             prefixIcon: AppIconSlot(
@@ -1213,7 +1232,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                     ),
                                     onPressed: () {
                                       searchController.clear();
-                                      setState(() {});
+                                      searchDebouncer.cancel();
+                                      debouncedQuery = '';
+                                      setDialogState(() {});
                                     },
                                   )
                                 : null,
@@ -1260,7 +1281,6 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                             ),
                           )
                         : ListView.separated(
-                            shrinkWrap: true,
                             itemCount: filteredSuppliers.length,
                             separatorBuilder: (context, index) =>
                                 const Divider(height: 1),
@@ -1304,11 +1324,10 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                 selectedTileColor: context.modePrimary
                                     .withValues(alpha: 0.05),
                                 onTap: () {
-                                  this.setState(() {
-                                    _selectedSupplierId = supplier.id;
-                                    _selectedSupplierName =
-                                        supplier.businessName;
-                                  });
+                                  _selectSupplier(
+                                    supplier.id,
+                                    supplier.businessName,
+                                  );
                                   Navigator.pop(context);
                                 },
                               );
@@ -1321,7 +1340,17 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           );
         },
       ),
-    );
+    ).whenComplete(() {
+      dialogOpen = false;
+      searchDebouncer.dispose();
+    });
+  }
+
+  void _selectSupplier(String id, String businessName) {
+    setState(() {
+      _selectedSupplierId = id;
+      _selectedSupplierName = businessName;
+    });
   }
 
   Widget _buildSectionTitle(String title, double screenWidth) {
@@ -1620,31 +1649,42 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
   }
 
   void _showSearchableItemDialog(SelectedItem item, double screenWidth) {
-    final TextEditingController searchController = TextEditingController();
-
     // Check if items are loaded
     if (_allItems.isEmpty) {
       _showSnackBar('Loading items, please wait...', isError: false);
       return;
     }
 
+    final TextEditingController searchController = TextEditingController();
+    final searchDebouncer = Debouncer(delay: const Duration(milliseconds: 350));
+    var debouncedQuery = '';
+    var dialogOpen = true;
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
           final filteredItems = _allItems.where((invItem) {
-            final searchTerm = searchController.text.toLowerCase();
-            return invItem.name.toLowerCase().contains(searchTerm);
+            return invItem.name.toLowerCase().contains(debouncedQuery);
           }).toList();
+          final mediaQuery = MediaQuery.of(context);
+          final dialogMaxHeight =
+              (mediaQuery.size.height - mediaQuery.viewInsets.bottom - 48)
+                  .clamp(160.0, mediaQuery.size.height * 0.7)
+                  .toDouble();
 
           return Dialog(
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 24,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Container(
+            child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.7,
                 maxWidth: 500,
+                maxHeight: dialogMaxHeight,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1681,7 +1721,14 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                         TextField(
                           controller: searchController,
                           autofocus: true,
-                          onChanged: (value) => setDialogState(() {}),
+                          onChanged: (value) {
+                            setDialogState(() {});
+                            searchDebouncer(() {
+                              if (!dialogOpen) return;
+                              debouncedQuery = value.trim().toLowerCase();
+                              setDialogState(() {});
+                            });
+                          },
                           decoration: InputDecoration(
                             hintText: 'Search items...',
                             prefixIcon: AppIconSlot(
@@ -1696,6 +1743,8 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                                     ),
                                     onPressed: () {
                                       searchController.clear();
+                                      searchDebouncer.cancel();
+                                      debouncedQuery = '';
                                       setDialogState(() {});
                                     },
                                   )
@@ -1756,7 +1805,6 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
                             ),
                           )
                         : ListView.separated(
-                            shrinkWrap: true,
                             itemCount: filteredItems.length,
                             separatorBuilder: (context, index) =>
                                 const Divider(height: 1),
@@ -1823,7 +1871,10 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
           );
         },
       ),
-    );
+    ).whenComplete(() {
+      dialogOpen = false;
+      searchDebouncer.dispose();
+    });
   }
 
   Widget _buildQuantityField({
@@ -2111,6 +2162,9 @@ class _CreateGoodsReceivedScreenState extends State<CreateGoodsReceivedScreen> {
     _poNumberController.clear();
     _receivedByController.clear();
     _qualityNotesController.clear();
+    for (final item in _selectedItems) {
+      item.dispose();
+    }
     setState(() {
       _selectedSupplierId = null;
       _purchaseOrderId = null;

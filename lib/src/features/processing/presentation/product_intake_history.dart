@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/product_intake_bloc/bloc.dart';
@@ -24,10 +25,15 @@ class ProductIntakeHistoryScreen extends StatefulWidget {
 class _ProductIntakeHistoryScreenState
     extends State<ProductIntakeHistoryScreen> {
   final TextEditingController _searchController = TextEditingController();
+  late final Debouncer _searchDebouncer;
+  String _searchText = '';
 
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     // Load product intakes when the screen is first shown
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductIntakeBloc>().add(LoadProductIntakes());
@@ -36,16 +42,25 @@ class _ProductIntakeHistoryScreenState
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
   void _onSearch(String query) {
-    context.read<ProductIntakeBloc>().add(SearchProductIntakes(query: query));
+    setState(() => _searchText = query);
+    _searchDebouncer(() {
+      if (!mounted) return;
+      context.read<ProductIntakeBloc>().add(
+        SearchProductIntakes(query: query.trim()),
+      );
+    });
   }
 
   void _clearSearch() {
+    _searchDebouncer.cancel();
     _searchController.clear();
+    setState(() => _searchText = '');
     context.read<ProductIntakeBloc>().add(ClearProductIntakeSearch());
   }
 
@@ -92,7 +107,7 @@ class _ProductIntakeHistoryScreenState
             color: context.modeTextMuted,
           ),
           prefixIcon: AppIconSlot(Icons.search, color: context.modeTextMuted),
-          suffixIcon: _searchController.text.isNotEmpty
+          suffixIcon: _searchText.isNotEmpty
               ? IconButton(
                   icon: AppIcon(Icons.clear, color: context.modeTextMuted),
                   onPressed: _clearSearch,

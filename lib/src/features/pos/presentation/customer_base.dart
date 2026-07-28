@@ -3,6 +3,7 @@ import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 
@@ -23,16 +24,22 @@ class CustomersListScreen extends StatefulWidget {
 class _CustomersListScreenState extends State<CustomersListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late final Debouncer _searchDebouncer;
+  String _searchText = '';
 
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     context.read<CustomerBloc>().add(const LoadCustomers());
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -49,11 +56,16 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
   }
 
   void _onSearchChanged(String query) {
-    if (query.isEmpty) {
-      context.read<CustomerBloc>().add(const LoadCustomers());
-    } else {
-      context.read<CustomerBloc>().add(SearchCustomers(query));
-    }
+    setState(() => _searchText = query);
+    _searchDebouncer(() {
+      if (!mounted) return;
+      final trimmed = query.trim();
+      if (trimmed.isEmpty) {
+        context.read<CustomerBloc>().add(const LoadCustomers());
+      } else {
+        context.read<CustomerBloc>().add(SearchCustomers(trimmed));
+      }
+    });
   }
 
   String _formatCurrency(double? amount) {
@@ -118,7 +130,7 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                   color: context.modeTextMuted,
                 ),
                 prefixIconConstraints: AppIconSlot.constraints(),
-                suffixIcon: _searchController.text.isNotEmpty
+                suffixIcon: _searchText.isNotEmpty
                     ? IconButton(
                         icon: AppIconSlot(
                           Icons.clear,
@@ -126,8 +138,12 @@ class _CustomersListScreenState extends State<CustomersListScreen> {
                           width: 24,
                         ),
                         onPressed: () {
+                          _searchDebouncer.cancel();
                           _searchController.clear();
-                          _onSearchChanged('');
+                          setState(() => _searchText = '');
+                          context.read<CustomerBloc>().add(
+                            const LoadCustomers(),
+                          );
                         },
                       )
                     : null,

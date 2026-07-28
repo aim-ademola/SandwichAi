@@ -7,6 +7,7 @@ import 'package:sandwich_ai/app_initializer.dart';
 import 'package:sandwich_ai/firebase_options.dart';
 import 'package:sandwich_ai/router/router.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
+import 'package:sandwich_ai/src/core/config/app_keys.dart';
 import 'package:sandwich_ai/src/core/constant/di/app_providers.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/firebase_messaging_service.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/local_notification.dart';
@@ -14,10 +15,7 @@ import 'package:sandwich_ai/src/core/theme/app_theme.dart';
 import 'package:sandwich_ai/src/core/theme/theme_controller.dart';
 import 'package:sandwich_ai/src/core/config/feature_registry.dart';
 
-final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
-    GlobalKey<ScaffoldMessengerState>();
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+export 'package:sandwich_ai/src/core/config/app_keys.dart';
 
 Future<void> bootstrapSandwichAi(AppEnvironment environment) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +45,7 @@ Future<void> bootstrapSandwichAi(AppEnvironment environment) async {
     };
   }
 
+  NotificationService.navigatorKey = navigatorKey;
   await NotificationService().disableLocalDelivery();
   await FirebaseMessagingService.instance.initialize();
 
@@ -66,20 +65,16 @@ class MyApp extends StatelessWidget {
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
-            FocusScope.of(context).unfocus();
+            FocusManager.instance.primaryFocus?.unfocus();
           },
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: MaterialApp.router(
-              scaffoldMessengerKey: rootScaffoldMessengerKey,
-              key: navigatorKey,
-              title: AppEnvironment.current.appName,
-              theme: AppTheme.light(),
-              darkTheme: AppTheme.dark(),
-              themeMode: ThemeController.instance.themeMode,
-              routerConfig: AppRouter.router,
-              debugShowCheckedModeBanner: false,
-            ),
+          child: MaterialApp.router(
+            scaffoldMessengerKey: rootScaffoldMessengerKey,
+            title: AppEnvironment.current.appName,
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            themeMode: ThemeController.instance.themeMode,
+            routerConfig: AppRouter.router,
+            debugShowCheckedModeBanner: false,
           ),
         );
       },

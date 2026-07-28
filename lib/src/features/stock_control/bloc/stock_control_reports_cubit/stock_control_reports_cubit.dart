@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/network_exception.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/stock_control_reports_cubit/stock_control_reports_state.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/stock_card_model.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/add_branch_stock.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/repo/reorder_repo.dart';
@@ -189,12 +190,26 @@ class StockControlReportsCubit extends Cubit<StockControlReportsState> {
     final response = await _reorderRepository.getReorderReport(branchId);
     response.when(
       success: (data) {
+        final sortedItems = [...data.items]
+          ..sort((a, b) {
+            final shortageA = a.reorderLevel - a.currentStock;
+            final shortageB = b.reorderLevel - b.currentStock;
+            final shortageCompare = shortageB.compareTo(shortageA);
+            if (shortageCompare != 0) return shortageCompare;
+            return b.suggestedQty.compareTo(a.suggestedQty);
+          });
+        final sortedReport = ReorderReportResponse(
+          branchId: data.branchId,
+          items: sortedItems,
+          summary: data.summary,
+          raw: data.raw,
+        );
         emit(
           state.copyWith(
-            reorderStatus: data.items.isEmpty
+            reorderStatus: sortedReport.items.isEmpty
                 ? StockControlReportStatus.empty
                 : StockControlReportStatus.loaded,
-            reorderReport: data,
+            reorderReport: sortedReport,
           ),
         );
       },

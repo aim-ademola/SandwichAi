@@ -90,7 +90,7 @@ class _ProcesssingToStockRequisitionTabScreenState
             controller: _tabController,
             children: [
               RequestStockScreen(),
-              StockRequestsScreen(branchId: '', department: widget.dpt),
+              const StockRequestsScreen(branchId: ''),
             ],
           ),
         ),

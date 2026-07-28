@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -30,6 +31,7 @@ class _CreateOutputVerificationScreenState
   final _reasonController = TextEditingController();
   final _assignedToController = TextEditingController();
   final _verifiedByController = TextEditingController();
+  late final Debouncer _searchDebouncer;
 
   MenuItem? _selectedMenuItem;
   Recipe? _selectedRecipe;
@@ -42,12 +44,16 @@ class _CreateOutputVerificationScreenState
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _searchController.addListener(_onSearchChanged);
     context.read<OutputVerificationBloc>().add(const LoadMenuItems());
   }
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _batchIdController.dispose();
     _expectedOutputController.dispose();
@@ -59,18 +65,22 @@ class _CreateOutputVerificationScreenState
   }
 
   void _onSearchChanged() {
-    setState(() {
-      if (_searchController.text.isEmpty) {
-        _filteredItems = _allItems;
-      } else {
-        _filteredItems = _allItems
-            .where(
-              (item) => item.dishName.toLowerCase().contains(
-                _searchController.text.toLowerCase(),
-              ),
-            )
-            .toList();
-      }
+    final query = _searchController.text;
+    _searchDebouncer(() {
+      if (!mounted) return;
+      final normalizedQuery = query.trim().toLowerCase();
+      setState(() {
+        if (normalizedQuery.isEmpty) {
+          _filteredItems = _allItems;
+        } else {
+          _filteredItems = _allItems
+              .where(
+                (item) =>
+                    item.dishName.toLowerCase().contains(normalizedQuery),
+              )
+              .toList();
+        }
+      });
     });
   }
 
@@ -529,7 +539,11 @@ class _CreateOutputVerificationScreenState
                           color: context.modeTextSecondary,
                           size: _getIconSize(screenWidth),
                         ),
-                        onPressed: () => _searchController.clear(),
+                        onPressed: () {
+                          _searchController.clear();
+                          _searchDebouncer.cancel();
+                          setState(() => _filteredItems = _allItems);
+                        },
                       )
                     : null,
                 border: OutlineInputBorder(
@@ -579,6 +593,7 @@ class _CreateOutputVerificationScreenState
                             _isSearching = false;
                             _isDropdownOpen = false;
                             _searchController.clear();
+                            _searchDebouncer.cancel();
                             _isLoadingRecipe = true;
                             _selectedRecipe = null;
                           });
@@ -797,6 +812,8 @@ class _CreateOutputVerificationScreenState
 
   void _resetForm() {
     _formKey.currentState?.reset();
+    _searchDebouncer.cancel();
+    _searchController.clear();
     _batchIdController.clear();
     _expectedOutputController.clear();
     _actualOutputController.clear();
@@ -807,6 +824,7 @@ class _CreateOutputVerificationScreenState
       _selectedMenuItem = null;
       _selectedRecipe = null;
       _isLoadingRecipe = false;
+      _filteredItems = _allItems;
     });
     context.read<OutputVerificationBloc>().add(const ResetForm());
   }

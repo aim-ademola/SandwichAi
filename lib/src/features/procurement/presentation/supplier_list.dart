@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/procurement/data/model/supplier_model.dart';
@@ -21,6 +22,8 @@ class SupplierListScreen extends StatefulWidget {
 
 class _SupplierListScreenState extends State<SupplierListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  late final Debouncer _searchDebouncer;
+  String _searchText = '';
   String? _selectedStatus;
   String? _selectedType;
 
@@ -31,6 +34,9 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _loadSuppliers();
   }
 
@@ -62,6 +68,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -131,11 +138,13 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
                 Icons.search,
                 color: context.modeTextMuted,
               ),
-              suffixIcon: _searchController.text.isNotEmpty
+              suffixIcon: _searchText.isNotEmpty
                   ? IconButton(
                       icon: AppIcon(Icons.clear, color: context.modeTextMuted),
                       onPressed: () {
+                        _searchDebouncer.cancel();
                         _searchController.clear();
+                        setState(() => _searchText = '');
                         context.read<SupplierBloc>().add(LoadSuppliers());
                       },
                     )
@@ -149,9 +158,14 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
             onChanged: (value) {
-              if (value.length >= 3 || value.isEmpty) {
-                context.read<SupplierBloc>().add(SearchSuppliers(value));
-              }
+              setState(() => _searchText = value);
+              _searchDebouncer(() {
+                if (!mounted) return;
+                final query = value.trim();
+                if (query.length >= 3 || query.isEmpty) {
+                  context.read<SupplierBloc>().add(SearchSuppliers(query));
+                }
+              });
             },
           ),
           if (_selectedStatus != null || _selectedType != null) ...[

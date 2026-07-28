@@ -6,7 +6,7 @@ import 'package:sandwich_ai/src/features/procurement/procurement_blocs/good_rece
 
 class GoodsReceivedBloc extends Bloc<GoodsReceivedEvent, GoodsReceivedState> {
   final GoodsReceivedRepositoryInterface _repository;
-  String branchId = '';
+  String organizationId = '';
 
   GoodsReceivedBloc({required GoodsReceivedRepositoryInterface repository})
     : _repository = repository,
@@ -19,7 +19,7 @@ class GoodsReceivedBloc extends Bloc<GoodsReceivedEvent, GoodsReceivedState> {
   }
   void _getBranchId() async {
     final id = await AuthCacheHelper.instance.getOrgId() ?? '';
-    branchId = id;
+    organizationId = id;
   }
 
   Future<void> _onLoadInventoryItems(
@@ -30,7 +30,9 @@ class GoodsReceivedBloc extends Bloc<GoodsReceivedEvent, GoodsReceivedState> {
       emit(const GoodsReceivedLoading());
 
       final response = await _repository.getInventoryItems(
-        organizationId: branchId,
+        organizationId: event.organizationId.isNotEmpty
+            ? event.organizationId
+            : organizationId,
       );
 
       await response.when(

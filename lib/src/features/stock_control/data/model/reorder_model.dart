@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class ReorderSuggestion {
   final String branchStockId;
   final String itemId;
@@ -252,9 +254,8 @@ int? _nullableInt(dynamic value) {
 }
 
 String _quantityWithUnit(double value, String unit) {
-  final formatted = value % 1 == 0
-      ? value.toStringAsFixed(0)
-      : value.toStringAsFixed(2);
+  final pattern = value % 1 == 0 ? '#,##0' : '#,##0.##';
+  final formatted = NumberFormat(pattern).format(value);
   final trimmedUnit = unit.trim();
   return trimmedUnit.isEmpty ? formatted : '$formatted $trimmedUnit';
 }

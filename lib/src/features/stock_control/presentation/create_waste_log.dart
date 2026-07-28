@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -39,11 +38,14 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
   List<InventoryItem> _allItems = [];
   // Add field:
   String _orgId = '';
-  Timer? _searchDebounce;
+  late final Debouncer _searchDebouncer;
 
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _searchController.addListener(_onSearchChanged);
     _loadOrgAndInventory();
   }
@@ -60,7 +62,7 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
 
   @override
   void dispose() {
-    _searchDebounce?.cancel();
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _quantityController.dispose();
     _valueLostController.dispose();
@@ -84,8 +86,8 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
     });
 
     if (_orgId.isEmpty) return;
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+    _searchDebouncer.cancel();
+    _searchDebouncer(() {
       if (!mounted) return;
       context.read<InventoryItemsBloc>().add(
         LoadInventoryItems(
@@ -724,7 +726,9 @@ class _CreateWasteLogScreenState extends State<CreateWasteLogScreen> {
                             _selectedItemUnit = item.unit;
                             _isSearching = false;
                             _isOpened = false;
+                            _searchDebouncer.cancel();
                             _searchController.clear();
+                            _filteredItems = _allItems;
                           });
                         },
                         child: Container(

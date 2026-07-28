@@ -6,6 +6,7 @@ import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/app_environment.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/local_notification.dart';
@@ -801,13 +802,16 @@ class _EmailComposerDialogState extends State<_EmailComposerDialog> {
   late final TextEditingController _emailController;
   late final TextEditingController _subjectController;
   late String _htmlBody;
-  Timer? _customerSearchDebounce;
+  late final Debouncer _customerSearchDebouncer;
   List<CustomerModel> _customerMatches = [];
   bool _isSearchingCustomers = false;
 
   @override
   void initState() {
     super.initState();
+    _customerSearchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _emailController = TextEditingController(text: widget.initialEmail ?? '');
     _subjectController = TextEditingController(text: widget.initialSubject);
     _emailController.addListener(_queueCustomerSearch);
@@ -818,7 +822,7 @@ class _EmailComposerDialogState extends State<_EmailComposerDialog> {
 
   @override
   void dispose() {
-    _customerSearchDebounce?.cancel();
+    _customerSearchDebouncer.dispose();
     _emailController.removeListener(_queueCustomerSearch);
     _emailController.dispose();
     _subjectController.dispose();
@@ -827,7 +831,7 @@ class _EmailComposerDialogState extends State<_EmailComposerDialog> {
 
   void _queueCustomerSearch() {
     final query = _emailController.text.trim();
-    _customerSearchDebounce?.cancel();
+    _customerSearchDebouncer.cancel();
 
     if (query.length < 2) {
       if (_customerMatches.isNotEmpty || _isSearchingCustomers) {
@@ -839,7 +843,8 @@ class _EmailComposerDialogState extends State<_EmailComposerDialog> {
       return;
     }
 
-    _customerSearchDebounce = Timer(const Duration(milliseconds: 350), () {
+    _customerSearchDebouncer(() {
+      if (!mounted) return;
       _searchCustomers(query);
     });
   }
@@ -875,7 +880,7 @@ class _EmailComposerDialogState extends State<_EmailComposerDialog> {
   }
 
   void _selectCustomer(CustomerModel customer) {
-    _customerSearchDebounce?.cancel();
+    _customerSearchDebouncer.cancel();
     setState(() {
       _emailController.text = customer.email;
       _customerMatches = [];

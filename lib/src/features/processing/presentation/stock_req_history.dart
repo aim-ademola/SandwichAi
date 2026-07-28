@@ -38,9 +38,14 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_onTabChanged);
 
+    _loadRequests();
+  }
+
+  void _loadRequests() {
     context.read<StockRequestBloc>().add(
       LoadStockRequests(
         branchId: widget.branchId,
+        status: _currentFilter,
         department: widget.department,
       ),
     );
@@ -144,6 +149,21 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
                   ],
                 );
               }
+
+              if (state is StockRequestError) {
+                return Column(
+                  children: [
+                    _buildTabBar(screenWidth),
+                    Expanded(
+                      child: _buildTabEmptyState(
+                        screenWidth,
+                        'Could not load stock requests',
+                      ),
+                    ),
+                  ],
+                );
+              }
+
               if (state is StockRequestListLoaded ||
                   state is StockRequestRefreshing) {
                 final requests = state is StockRequestListLoaded
@@ -341,7 +361,28 @@ class _StockRequestsScreenState extends State<StockRequestsScreen>
               ),
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 16),
+            _buildRetryButton(screenWidth),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRetryButton(double screenWidth) {
+    return TextButton.icon(
+      onPressed: _loadRequests,
+      icon: AppIcon(
+        Icons.refresh,
+        size: _getIconSize(screenWidth) - 4,
+        color: context.modePrimary,
+      ),
+      label: Text(
+        'Retry',
+        style: WorkSansAppTextStyles.medium.copyWith(
+          fontSize: _getInputFontSize(screenWidth),
+          fontWeight: FontWeight.w600,
+          color: context.modePrimary,
         ),
       ),
     );

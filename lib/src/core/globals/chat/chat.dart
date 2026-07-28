@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/globals/drawer_toggle.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:intl/intl.dart';
@@ -49,10 +50,14 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   // Search overlay
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
+  late final Debouncer _searchDebouncer;
 
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _chatBloc = context.read<ChatBloc>();
     _messageController.addListener(_onTextChanged);
     _loadInitialData();
@@ -100,6 +105,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     _messageController.dispose();
     _scrollController.dispose();
     _messageFocusNode.dispose();
+    _searchDebouncer.dispose();
     _searchController.dispose();
 
     _chatBloc.add(
@@ -317,6 +323,7 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
     setState(() {
       _isSearching = !_isSearching;
       if (!_isSearching) {
+        _searchDebouncer.cancel();
         _searchController.clear();
         context.read<ChatBloc>().add(const ClearSearch());
       }
@@ -324,13 +331,17 @@ class _DepartmentChatScreenState extends State<DepartmentChatScreen> {
   }
 
   void _runSearch(String query) {
-    if (query.trim().isEmpty) {
-      context.read<ChatBloc>().add(const ClearSearch());
-      return;
-    }
-    context.read<ChatBloc>().add(
-      SearchMessages(query: query.trim(), chatRoomId: widget.roomId),
-    );
+    _searchDebouncer(() {
+      if (!mounted) return;
+      final trimmed = query.trim();
+      if (trimmed.isEmpty) {
+        context.read<ChatBloc>().add(const ClearSearch());
+        return;
+      }
+      context.read<ChatBloc>().add(
+        SearchMessages(query: trimmed, chatRoomId: widget.roomId),
+      );
+    });
   }
 
   //  Room settings

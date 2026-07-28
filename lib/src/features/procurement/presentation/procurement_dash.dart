@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/globals/notifications/notification_bell.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -36,6 +37,7 @@ class _ProcurementDashboardScreenState
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _branchId = '';
   String? _dashboardSetupError;
+  String? _lastLoggedRequestsSignature;
 
   @override
   void initState() {
@@ -354,6 +356,7 @@ class _ProcurementDashboardScreenState
         }
 
         final requests = _asMapList(data?.rawData['requestsReceived']);
+        _logDashboardRequestsReceived(requests);
         final orders = _asMapList(data?.rawData['purchaseOrders']);
         final goodsLogs = _asMapList(data?.rawData['goodsReceivedLogs']);
         final supplierSpend = _asMapList(
@@ -644,10 +647,24 @@ class _ProcurementDashboardScreenState
     if (_isStockField(key)) {
       final quantity = _formatNumberWithCommas(_asDouble(value));
       final unit = _unitForRecord(record);
-      return unit.isEmpty ? quantity : '$quantity $unit';
+      final quantityText = unit.isEmpty ? quantity : '$quantity $unit';
+      return '${_stockFieldLabel(key)}: $quantityText';
     }
 
     return text;
+  }
+
+  void _logDashboardRequestsReceived(List<Map<String, dynamic>> requests) {
+    final signature = requests.toString();
+    if (signature == _lastLoggedRequestsSignature) return;
+    _lastLoggedRequestsSignature = signature;
+
+    AppLogger.log('Dashboard requestsReceived count: ${requests.length}');
+    for (final request in requests) {
+      AppLogger.log(
+        'Dashboard request raw: $request | visibleUnit: ${_unitForRecord(request).isEmpty ? '(missing)' : _unitForRecord(request)}',
+      );
+    }
   }
 
   bool _isMoneyField(String key) {
@@ -694,6 +711,10 @@ class _ProcurementDashboardScreenState
     return _firstText(record, const [
       'unit',
       'uom',
+      'itemUnit',
+      'productUnit',
+      'inventoryUnit',
+      'requestUnit',
       'measurementUnit',
       'unitOfMeasurement',
       'unitOfMeasure',
@@ -705,9 +726,30 @@ class _ProcurementDashboardScreenState
       'unitType',
       'item.unit',
       'item.uom',
+      'item.unitType',
+      'item.measurementUnit',
       'item.unitOfMeasurement',
       'item.unitOfMeasure',
+      'product.unit',
+      'product.uom',
+      'product.unitType',
+      'inventoryItem.unit',
+      'inventoryItem.uom',
+      'inventoryItem.unitType',
+      'stockItem.unit',
+      'stockItem.uom',
+      'stockItem.unitType',
     ]);
+  }
+
+  String _stockFieldLabel(String key) {
+    final normalized = key.toLowerCase();
+    if (normalized.contains('needed')) return 'Qty needed';
+    if (normalized.contains('received')) return 'Received qty';
+    if (normalized.contains('ordered')) return 'Ordered qty';
+    if (normalized.contains('approved')) return 'Approved qty';
+    if (normalized.contains('stock')) return 'Stock';
+    return 'Qty';
   }
 
   String _formatNumberWithCommas(double value) {

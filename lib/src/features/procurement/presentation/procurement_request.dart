@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
@@ -14,8 +17,10 @@ class ProcurementRequestsScreen extends StatefulWidget {
 class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late final Debouncer _searchDebouncer;
   String _selectedFilter = 'All';
   final TextEditingController _searchController = TextEditingController();
+  String _searchInput = '';
   String _searchQuery = '';
 
   final List<Request> _allRequests = [
@@ -25,6 +30,18 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
       title: 'Stock Replenishment',
       description: '10kg Tomatoes, 5kg Onions, 2L Olive Oil...',
       priority: 'High',
+      requestedBy: 'Chef Ade',
+      reference: 'REQ-KIT-2407',
+      neededBy: 'Today, 4:00 PM',
+      destination: 'Main Kitchen',
+      items: const [
+        RequestLineItem(name: 'Tomatoes', quantity: '10', unit: 'kg'),
+        RequestLineItem(name: 'Onions', quantity: '5', unit: 'kg'),
+        RequestLineItem(name: 'Olive Oil', quantity: '2', unit: 'L'),
+      ],
+      reason:
+          'Prep stock is below par for dinner service and needs replenishment before production starts.',
+      notes: 'Check tomatoes for firmness and avoid bruised cartons.',
     ),
     Request(
       from: 'Procurement',
@@ -33,6 +50,21 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
       supplier: 'Global Foods Inc.',
       amount: 1250.30,
       priority: 'Medium',
+      requestedBy: 'Procurement Officer',
+      reference: 'INV-12045',
+      neededBy: 'Tomorrow, 10:00 AM',
+      destination: 'Accounts Payable',
+      items: const [
+        RequestLineItem(
+          name: 'Dry goods supply invoice',
+          quantity: '1',
+          unit: 'invoice',
+          unitCost: 1250.30,
+        ),
+      ],
+      reason:
+          'Supplier invoice requires approval before payment can be scheduled.',
+      notes: 'Confirm received quantities match the GRN before approving.',
     ),
     Request(
       from: 'Bar',
@@ -40,25 +72,56 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
       title: 'New Cocktail Glassware Order',
       description: '24x Highball, 24x Coupe glasses...',
       priority: 'Low',
+      requestedBy: 'Bar Lead',
+      reference: 'REQ-BAR-1182',
+      neededBy: 'Friday, 12:00 PM',
+      destination: 'Bar Store',
+      items: const [
+        RequestLineItem(name: 'Highball glasses', quantity: '24', unit: 'pcs'),
+        RequestLineItem(name: 'Coupe glasses', quantity: '24', unit: 'pcs'),
+      ],
+      reason:
+          'Replacement glassware needed after breakages reduced service par.',
+      notes: 'Approve only if supplier can deliver matched glassware sets.',
     ),
   ];
 
   List<Request> get _filteredRequests {
-    if (_selectedFilter == 'All') return _allRequests;
-    return _allRequests
-        .where((req) => req.from.toLowerCase() == _selectedFilter.toLowerCase())
-        .toList();
+    final selectedFilter = _selectedFilter.toLowerCase();
+    final query = _searchQuery.trim().toLowerCase();
+    return _allRequests.where((req) {
+      final matchesFilter =
+          selectedFilter == 'all' || req.from.toLowerCase() == selectedFilter;
+      if (!matchesFilter) return false;
+      if (query.isEmpty) return true;
+
+      return req.from.toLowerCase().contains(query) ||
+          req.title.toLowerCase().contains(query) ||
+          (req.description?.toLowerCase().contains(query) ?? false) ||
+          (req.supplier?.toLowerCase().contains(query) ?? false) ||
+          req.priority.toLowerCase().contains(query);
+    }).toList();
   }
 
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(delay: const Duration(milliseconds: 350));
     _tabController = TabController(length: 5, vsync: this);
+    AppLogger.log('=== PROCUREMENT REQUESTS SCREEN DATA SOURCE ===');
+    AppLogger.log(
+      'ProcurementRequestsScreen is currently using local mock data. '
+      'No /procurement/requests API call is made by this screen.',
+      level: LogLevel.warning,
+    );
+    AppLogger.log('Mock request count: ${_allRequests.length}');
+    AppLogger.log('==============================================');
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -81,8 +144,8 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: AppIcon(Icons.menu, color: context.modeTextPrimary),
-        onPressed: () {},
+        icon: AppIcon(Icons.arrow_back, color: context.modeTextPrimary),
+        onPressed: () => Navigator.pop(context),
       ),
       title: Text(
         'Requests',
@@ -149,7 +212,13 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
       controller: _searchController,
       onChanged: (value) {
         setState(() {
-          _searchQuery = value;
+          _searchInput = value;
+        });
+        _searchDebouncer(() {
+          if (!mounted) return;
+          setState(() {
+            _searchQuery = value.trim();
+          });
         });
       },
       style: WorkSansAppTextStyles.medium.copyWith(
@@ -175,12 +244,14 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
           color: context.modeTextMuted,
           size: _getSearchIconSize(screenWidth),
         ),
-        suffixIcon: _searchQuery.isEmpty
+        suffixIcon: _searchInput.isEmpty
             ? null
             : IconButton(
                 onPressed: () {
+                  _searchDebouncer.cancel();
                   setState(() {
                     _searchController.clear();
+                    _searchInput = '';
                     _searchQuery = '';
                   });
                 },
@@ -286,110 +357,411 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     final priorityFontSize = _getPriorityFontSize(screenWidth);
     final buttonFontSize = _getButtonFontSize(screenWidth);
 
-    return Container(
-      padding: EdgeInsets.all(_getCardPadding(screenWidth)),
-      decoration: BoxDecoration(
-        color: context.modeSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.modeBorder),
-      ),
+    return InkWell(
+      onTap: () => _showRequestDetails(request),
+      borderRadius: BorderRadius.circular(12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'From: ${request.from} - ${request.timeAgo}',
-                style: WorkSansAppTextStyles.medium.copyWith(
-                  fontSize: fromFontSize,
-                  fontWeight: FontWeight.w400,
-                  color: context.modeTextSecondary,
+          Container(
+            padding: EdgeInsets.all(_getCardPadding(screenWidth)),
+            decoration: BoxDecoration(
+              color: context.modeSurface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.modeBorder),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'From: ${request.from} - ${request.timeAgo}',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: fromFontSize,
+                          fontWeight: FontWeight.w400,
+                          color: context.modeTextSecondary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildPriorityBadge(
+                      request.priority,
+                      priorityFontSize,
+                      screenWidth,
+                    ),
+                  ],
                 ),
-              ),
-              _buildPriorityBadge(
-                request.priority,
-                priorityFontSize,
-                screenWidth,
-              ),
-            ],
-          ),
-          SizedBox(height: _getTitleSpacing(screenWidth)),
+                SizedBox(height: _getTitleSpacing(screenWidth)),
 
-          // Title
-          Text(
-            request.title,
-            style: WorkSansAppTextStyles.medium.copyWith(
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.w600,
-              color: context.modeTextPrimary,
-            ),
-          ),
-          SizedBox(height: _getDescriptionSpacing(screenWidth)),
-
-          // Description or details
-          if (request.description != null)
-            Text(
-              request.description!,
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: descriptionFontSize,
-                fontWeight: FontWeight.w400,
-                color: context.modeTextSecondary,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          if (request.supplier != null && request.amount != null) ...[
-            Text(
-              'Supplier: ${request.supplier}',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: descriptionFontSize,
-                fontWeight: FontWeight.w400,
-                color: context.modeTextSecondary,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'Amount: \$${request.amount!.toStringAsFixed(2)}',
-              style: WorkSansAppTextStyles.medium.copyWith(
-                fontSize: descriptionFontSize,
-                fontWeight: FontWeight.w400,
-                color: context.modeTextSecondary,
-              ),
-            ),
-          ],
-          SizedBox(height: _getButtonSpacing(screenWidth)),
-
-          // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionButton(
-                  'Reject',
-                  context.modeSurfaceMuted,
-                  context.modeTextPrimary,
-                  buttonFontSize,
-                  screenWidth,
-                  () {},
+                // Title
+                Text(
+                  request.title,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: titleFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: context.modeTextPrimary,
+                  ),
                 ),
-              ),
-              SizedBox(width: _getButtonGap(screenWidth)),
-              Expanded(
-                child: _buildActionButton(
-                  'Approve',
-                  context.modePrimary,
-                  context.modeTextInverse,
-                  buttonFontSize,
-                  screenWidth,
-                  () {},
+                SizedBox(height: _getDescriptionSpacing(screenWidth)),
+
+                // Description or details
+                if (request.description != null)
+                  Text(
+                    request.description!,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: descriptionFontSize,
+                      fontWeight: FontWeight.w400,
+                      color: context.modeTextSecondary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (request.supplier != null && request.amount != null) ...[
+                  Text(
+                    'Supplier: ${request.supplier}',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: descriptionFontSize,
+                      fontWeight: FontWeight.w400,
+                      color: context.modeTextSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Amount: ${_formatMoney(request.amount!)}',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: descriptionFontSize,
+                      fontWeight: FontWeight.w400,
+                      color: context.modeTextSecondary,
+                    ),
+                  ),
+                ],
+                SizedBox(height: _getDescriptionSpacing(screenWidth)),
+                Text(
+                  'Tap to review full details',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: descriptionFontSize - 1,
+                    fontWeight: FontWeight.w700,
+                    color: context.modePrimary,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: _getButtonSpacing(screenWidth)),
+
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildActionButton(
+                        'Reject',
+                        context.modeSurfaceMuted,
+                        context.modeTextPrimary,
+                        buttonFontSize,
+                        screenWidth,
+                        () => _showRequestDetails(
+                          request,
+                          initialAction: 'Reject',
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: _getButtonGap(screenWidth)),
+                    Expanded(
+                      child: _buildActionButton(
+                        'Approve',
+                        context.modePrimary,
+                        context.modeTextInverse,
+                        buttonFontSize,
+                        screenWidth,
+                        () => _showRequestDetails(
+                          request,
+                          initialAction: 'Approve',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _showRequestDetails(
+    Request request, {
+    String? initialAction,
+  }) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.modeSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.84,
+            minChildSize: 0.5,
+            maxChildSize: 0.94,
+            builder: (context, scrollController) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: context.modeBorder,
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: ListView(
+                        controller: scrollController,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  request.title,
+                                  style: WorkSansAppTextStyles.medium.copyWith(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: context.modeTextPrimary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              _buildPriorityBadge(request.priority, 12, 390),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _buildDetailGrid(request),
+                          const SizedBox(height: 18),
+                          _buildDetailSection(
+                            'Items requested',
+                            request.items
+                                .map((item) => _buildLineItemRow(item))
+                                .toList(),
+                          ),
+                          const SizedBox(height: 18),
+                          _buildDetailSection('Reason', [
+                            _buildDetailText(
+                              _fallbackText(
+                                request.reason,
+                                'No reason provided.',
+                              ),
+                            ),
+                          ]),
+                          if ((request.notes ?? '').trim().isNotEmpty) ...[
+                            const SizedBox(height: 18),
+                            _buildDetailSection('Notes', [
+                              _buildDetailText(request.notes!),
+                            ]),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildActionButton(
+                            initialAction == 'Reject'
+                                ? 'Confirm Reject'
+                                : 'Reject',
+                            context.modeSurfaceMuted,
+                            context.modeTextPrimary,
+                            14,
+                            390,
+                            () => _completeReview(request, 'rejected'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildActionButton(
+                            initialAction == 'Approve'
+                                ? 'Confirm Approve'
+                                : 'Approve',
+                            context.modePrimary,
+                            context.modeTextInverse,
+                            14,
+                            390,
+                            () => _completeReview(request, 'approved'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailGrid(Request request) {
+    final rows = [
+      ('From', request.from),
+      ('Requested by', _fallbackText(request.requestedBy, 'Unknown')),
+      ('Reference', _fallbackText(request.reference, 'N/A')),
+      ('Needed by', _fallbackText(request.neededBy, 'Not specified')),
+      ('Destination', _fallbackText(request.destination, 'Not specified')),
+      if (request.supplier != null) ('Supplier', request.supplier!),
+      if (request.amount != null) ('Amount', _formatMoney(request.amount!)),
+    ];
+
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: rows
+          .map(
+            (row) =>
+                SizedBox(width: 150, child: _buildDetailTile(row.$1, row.$2)),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _buildDetailTile(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.modeSurfaceMuted,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: context.modeTextMuted,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: context.modeTextPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: WorkSansAppTextStyles.medium.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: context.modeTextPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildLineItemRow(RequestLineItem item) {
+    final quantity = double.tryParse(item.quantity);
+    final total = item.unitCost == null || quantity == null
+        ? null
+        : _formatMoney(quantity * item.unitCost!);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: context.modeBorder),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+                if (item.unitCost != null) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    'Unit cost: ${_formatMoney(item.unitCost!)}',
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 12,
+                      color: context.modeTextSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '${item.quantity} ${item.unit}${total == null ? '' : '\n$total'}',
+            textAlign: TextAlign.right,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: context.modeTextPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailText(String text) {
+    return Text(
+      text,
+      style: WorkSansAppTextStyles.medium.copyWith(
+        fontSize: 14,
+        height: 1.45,
+        color: context.modeTextSecondary,
+      ),
+    );
+  }
+
+  void _completeReview(Request request, String action) {
+    Navigator.pop(context);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${request.title} $action.')));
+  }
+
+  String _formatMoney(double value) {
+    return 'NGN ${NumberFormat('#,##0.00').format(value)}';
+  }
+
+  String _fallbackText(String? value, String fallback) {
+    final trimmed = value?.trim() ?? '';
+    return trimmed.isEmpty ? fallback : trimmed;
   }
 
   Widget _buildActionButton(
@@ -715,6 +1087,13 @@ class Request {
   final String? supplier;
   final double? amount;
   final String priority;
+  final String? requestedBy;
+  final String? reference;
+  final String? neededBy;
+  final String? destination;
+  final List<RequestLineItem> items;
+  final String? reason;
+  final String? notes;
 
   Request({
     required this.from,
@@ -724,5 +1103,26 @@ class Request {
     this.supplier,
     this.amount,
     required this.priority,
+    this.requestedBy,
+    this.reference,
+    this.neededBy,
+    this.destination,
+    this.items = const [],
+    this.reason,
+    this.notes = '',
+  });
+}
+
+class RequestLineItem {
+  final String name;
+  final String quantity;
+  final String unit;
+  final double? unitCost;
+
+  const RequestLineItem({
+    required this.name,
+    required this.quantity,
+    required this.unit,
+    this.unitCost,
   });
 }

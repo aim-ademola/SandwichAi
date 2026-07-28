@@ -18,9 +18,6 @@ import 'package:sandwich_ai/src/features/processing/presentation/processing_draw
 import 'package:sandwich_ai/src/features/processing/presentation/recipe_calc.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/ai_wastage_analysis.dart';
 
-final GlobalKey<ProcessingBottomNavBarState> stockControlNavBarKey =
-    GlobalKey<ProcessingBottomNavBarState>();
-
 class ProcessingBottomNavBar extends StatefulWidget {
   final int initialIndex;
   final List<Widget> pages;
@@ -253,7 +250,6 @@ class ProcessingControlMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ProcessingBottomNavBar(
-      key: stockControlNavBarKey,
       initialIndex: 0,
       pages: [
         ProcessingDashboardScreen(),

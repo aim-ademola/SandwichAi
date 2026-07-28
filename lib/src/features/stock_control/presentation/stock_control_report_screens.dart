@@ -24,12 +24,12 @@ class _StockReportsScreenState extends State<StockReportsScreen>
   final GlobalKey<_ExpiryTrackingScreenState> _expiryKey = GlobalKey();
   final GlobalKey<_LockedStockScreenState> _lockedKey = GlobalKey();
   final GlobalKey<_NegativeStockReportScreenState> _negativeKey = GlobalKey();
-  final GlobalKey<_ReorderReportScreenState> _reorderKey = GlobalKey();
+  // final GlobalKey<_ReorderReportScreenState> _reorderKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -46,8 +46,8 @@ class _StockReportsScreenState extends State<StockReportsScreen>
         await _lockedKey.currentState?._load();
       case 2:
         await _negativeKey.currentState?._load();
-      case 3:
-        await _reorderKey.currentState?._load();
+      // case 3:
+      //   await _reorderKey.currentState?._load();
     }
   }
 
@@ -84,8 +84,7 @@ class _StockReportsScreenState extends State<StockReportsScreen>
               color: context.modeSurface,
               child: TabBar(
                 controller: _tabController,
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
+                isScrollable: false,
                 labelColor: context.modePrimary,
                 unselectedLabelColor: context.modeTextSecondary,
                 indicatorColor: context.modePrimary,
@@ -102,7 +101,7 @@ class _StockReportsScreenState extends State<StockReportsScreen>
                   Tab(text: 'Expiry'),
                   Tab(text: 'Locked Stock'),
                   Tab(text: 'Negative Stock'),
-                  Tab(text: 'Reorder'),
+                  // Tab(text: 'Reorder'),
                 ],
               ),
             ),
@@ -114,7 +113,7 @@ class _StockReportsScreenState extends State<StockReportsScreen>
             ExpiryTrackingScreen(key: _expiryKey, showAppBar: false),
             LockedStockScreen(key: _lockedKey, showAppBar: false),
             NegativeStockReportScreen(key: _negativeKey, showAppBar: false),
-            ReorderReportScreen(key: _reorderKey, showAppBar: false),
+            // ReorderReportScreen(key: _reorderKey, showAppBar: false),
           ],
         ),
       ),
@@ -503,6 +502,10 @@ class _ReorderReportScreenState extends State<ReorderReportScreen> {
 
   Future<void> _acknowledge(ReorderSuggestion item) async {
     if (_acknowledgingIds.contains(item.branchStockId)) return;
+    // Comment flow disabled for now.
+    // final comment = await _showReorderCommentDialog(item);
+    // if (comment == null || !mounted) return;
+
     setState(() {
       _acknowledgingIds.add(item.branchStockId);
     });
@@ -523,6 +526,117 @@ class _ReorderReportScreenState extends State<ReorderReportScreen> {
       ),
     );
   }
+
+  // Future<String?> _showReorderCommentDialog(ReorderSuggestion item) async {
+  //   final controller = TextEditingController();
+  //   String? errorText;
+  //
+  //   final result = await showDialog<String>(
+  //     context: context,
+  //     builder: (dialogContext) {
+  //       return StatefulBuilder(
+  //         builder: (context, setDialogState) {
+  //           return AlertDialog(
+  //             backgroundColor: context.modeSurface,
+  //             title: Text(
+  //               'Comment reorder',
+  //               style: WorkSansAppTextStyles.medium.copyWith(
+  //                 color: context.modeTextPrimary,
+  //                 fontSize: 17,
+  //                 fontWeight: FontWeight.w700,
+  //               ),
+  //             ),
+  //             content: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Text(
+  //                   item.itemName.isEmpty ? 'Stock item' : item.itemName,
+  //                   style: WorkSansAppTextStyles.medium.copyWith(
+  //                     color: context.modeTextSecondary,
+  //                     fontSize: 13,
+  //                     fontWeight: FontWeight.w600,
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 12),
+  //                 TextField(
+  //                   controller: controller,
+  //                   minLines: 3,
+  //                   maxLines: 5,
+  //                   textInputAction: TextInputAction.newline,
+  //                   style: WorkSansAppTextStyles.medium.copyWith(
+  //                     color: context.modeTextPrimary,
+  //                     fontSize: 14,
+  //                   ),
+  //                   decoration: InputDecoration(
+  //                     hintText: 'Add reorder comment',
+  //                     errorText: errorText,
+  //                     filled: true,
+  //                     fillColor: context.modeBackground,
+  //                     border: OutlineInputBorder(
+  //                       borderRadius: BorderRadius.circular(8),
+  //                       borderSide: BorderSide(color: context.modeBorder),
+  //                     ),
+  //                     enabledBorder: OutlineInputBorder(
+  //                       borderRadius: BorderRadius.circular(8),
+  //                       borderSide: BorderSide(color: context.modeBorder),
+  //                     ),
+  //                     focusedBorder: OutlineInputBorder(
+  //                       borderRadius: BorderRadius.circular(8),
+  //                       borderSide: BorderSide(color: context.modePrimary),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () => Navigator.of(dialogContext).pop(),
+  //                 child: Text(
+  //                   'Cancel',
+  //                   style: WorkSansAppTextStyles.medium.copyWith(
+  //                     color: context.modeTextSecondary,
+  //                     fontWeight: FontWeight.w700,
+  //                   ),
+  //                 ),
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: () {
+  //                   final comment = controller.text.trim();
+  //                   if (comment.isEmpty) {
+  //                     setDialogState(() {
+  //                       errorText = 'Enter a comment before acknowledging.';
+  //                     });
+  //                     return;
+  //                   }
+  //                   Navigator.of(dialogContext).pop(comment);
+  //                 },
+  //                 style: ElevatedButton.styleFrom(
+  //                   backgroundColor: context.modePrimary,
+  //                   foregroundColor: context.modeTextInverse,
+  //                   elevation: 0,
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(8),
+  //                   ),
+  //                 ),
+  //                 child: Text(
+  //                   'Submit',
+  //                   style: WorkSansAppTextStyles.medium.copyWith(
+  //                     color: context.modeTextInverse,
+  //                     fontWeight: FontWeight.w700,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  //
+  //   controller.dispose();
+  //   return result;
+  // }
 
   @override
   Widget build(BuildContext context) {

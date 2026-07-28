@@ -8,7 +8,6 @@ import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/drawer_onboarding_cache.dart';
 import 'package:sandwich_ai/src/features/processing/presentation/processing_to_stock_requisitin_tab.dart';
-import 'package:sandwich_ai/src/features/procurement/presentation/procurement_good_reveived_tab.dart';
 
 class ProcurementAppDrawer extends StatelessWidget {
   const ProcurementAppDrawer({super.key});
@@ -88,13 +87,7 @@ class _ProcurementAppDrawerContentState
             icon: Icons.call_received_outlined,
             title: 'Good Received Log',
             onTap: () {
-              _closeDrawerAndOpen(
-                context,
-                () => Navigator.push(
-                  context,
-                  CupertinoPageRoute(builder: (_) => GoodsReceivedTabScreen()),
-                ),
-              );
+              _closeDrawerAndPush(context, '/goods-received?tab=log');
             },
           ),
         ),

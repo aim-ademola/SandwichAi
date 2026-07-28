@@ -306,7 +306,7 @@ class OrdersListResponse {
       (json['meta'] as Map?) ?? (payload['meta'] as Map?) ?? payload,
     );
     final total = _parseInt(
-      meta['total'] ?? meta['totalItems'],
+      meta['total'] ?? meta['totalItems'] ?? meta['count'],
       rawOrders.length,
     );
     final page = _parseInt(meta['page'] ?? meta['currentPage'], 1);

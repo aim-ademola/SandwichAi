@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
@@ -301,10 +302,7 @@ class _GoodsReceivedOverviewScreenState
   }
 
   String _formatCurrency(double value) {
-    final rounded = value % 1 == 0
-        ? value.toStringAsFixed(0)
-        : value.toStringAsFixed(2);
-    return 'NGN $rounded';
+    return 'NGN ${NumberFormat('#,##0.##').format(value)}';
   }
 
   Widget _buildReorderMetaText(String text) {

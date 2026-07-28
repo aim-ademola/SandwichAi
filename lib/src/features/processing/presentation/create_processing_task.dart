@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/processing_task_bloc/bloc.dart';
@@ -33,6 +34,7 @@ class _CreateProcessingTaskScreenState
   final _assignedStaffController = TextEditingController();
   final _batchesRequestedController = TextEditingController();
   final _notesController = TextEditingController();
+  late final Debouncer _searchDebouncer;
 
   MenuItem? _selectedMenuItem;
   bool _isSearching = false;
@@ -44,11 +46,15 @@ class _CreateProcessingTaskScreenState
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _assignedStaffController.dispose();
     _batchesRequestedController.dispose();
@@ -58,7 +64,12 @@ class _CreateProcessingTaskScreenState
 
   void _onSearchChanged() {
     final query = _searchController.text;
-    context.read<RecipeComplianceBloc>().add(SearchMenuItems(query: query));
+    _searchDebouncer(() {
+      if (!mounted) return;
+      context.read<RecipeComplianceBloc>().add(
+        SearchMenuItems(query: query.trim()),
+      );
+    });
   }
 
   Future<void> _selectDateTime() async {
@@ -390,6 +401,7 @@ class _CreateProcessingTaskScreenState
       _isSearching = false;
       _isOpened = false;
     });
+    _searchDebouncer.cancel();
     _searchController.clear();
     _assignedStaffController.clear();
     _batchesRequestedController.clear();
@@ -542,6 +554,7 @@ class _CreateProcessingTaskScreenState
                                 size: _getIconSize(screenWidth),
                               ),
                               onPressed: () {
+                                _searchDebouncer.cancel();
                                 _searchController.clear();
                                 context.read<RecipeComplianceBloc>().add(
                                   const ClearMenuSearch(),
@@ -607,6 +620,7 @@ class _CreateProcessingTaskScreenState
                             _selectedMenuItem = item;
                             _isSearching = false;
                             _isOpened = false;
+                            _searchDebouncer.cancel();
                             _searchController.clear();
                           });
                           context.read<RecipeComplianceBloc>().add(

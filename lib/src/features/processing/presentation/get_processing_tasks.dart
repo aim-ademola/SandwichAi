@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/features/processing/bloc/processing_task_bloc/bloc.dart';
@@ -22,15 +23,21 @@ class _ProcessingTaskHistoryScreenState
     extends State<ProcessingTaskHistoryScreen> {
   String _selectedStatus = 'ALL';
   final _searchController = TextEditingController();
+  late final Debouncer _searchDebouncer;
+  String _searchText = '';
 
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     context.read<ProcessingTaskBloc>().add(const LoadProcessingTasks());
   }
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -442,13 +449,17 @@ class _ProcessingTaskHistoryScreenState
     return TextField(
       controller: _searchController,
       onChanged: (value) {
-        setState(() {});
-        context.read<ProcessingTaskBloc>().add(
-          FilterProcessingTasks(
-            status: _selectedStatus == 'ALL' ? null : _selectedStatus,
-            assignedStaff: value.isNotEmpty ? value : null,
-          ),
-        );
+        setState(() => _searchText = value);
+        _searchDebouncer(() {
+          if (!mounted) return;
+          final query = value.trim();
+          context.read<ProcessingTaskBloc>().add(
+            FilterProcessingTasks(
+              status: _selectedStatus == 'ALL' ? null : _selectedStatus,
+              assignedStaff: query.isNotEmpty ? query : null,
+            ),
+          );
+        });
       },
       style: WorkSansAppTextStyles.medium.copyWith(
         fontSize: _getInputFontSize(screenWidth),
@@ -465,7 +476,7 @@ class _ProcessingTaskHistoryScreenState
           color: context.modeTextSecondary,
           size: _getIconSize(screenWidth),
         ),
-        suffixIcon: _searchController.text.isNotEmpty
+        suffixIcon: _searchText.isNotEmpty
             ? IconButton(
                 icon: AppIcon(
                   Icons.clear,
@@ -473,8 +484,9 @@ class _ProcessingTaskHistoryScreenState
                   size: _getIconSize(screenWidth),
                 ),
                 onPressed: () {
+                  _searchDebouncer.cancel();
                   _searchController.clear();
-                  setState(() {});
+                  setState(() => _searchText = '');
                   context.read<ProcessingTaskBloc>().add(
                     FilterProcessingTasks(
                       status: _selectedStatus == 'ALL' ? null : _selectedStatus,
@@ -533,6 +545,7 @@ class _ProcessingTaskHistoryScreenState
                 setState(() {
                   _selectedStatus = status;
                 });
+                _searchDebouncer.cancel();
                 context.read<ProcessingTaskBloc>().add(
                   FilterProcessingTasks(
                     status: status == 'ALL' ? null : status,

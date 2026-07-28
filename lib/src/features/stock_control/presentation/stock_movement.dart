@@ -380,7 +380,8 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
   Widget _buildLoadedMovements(StockMovementLoaded state) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Center(
+        return Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
             child: SingleChildScrollView(
@@ -396,7 +397,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
                   _buildMovementListHeader(state.filteredItems.length),
                   const SizedBox(height: 10),
                   if (state.filteredItems.isEmpty)
-                    _buildEmptyMovementState()
+                    _buildEmptyMovementState(state)
                   else
                     ListView.builder(
                       shrinkWrap: true,
@@ -642,7 +643,9 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
     );
   }
 
-  Widget _buildEmptyMovementState() {
+  Widget _buildEmptyMovementState(StockMovementLoaded state) {
+    final hasMovements = state.response.data.isNotEmpty;
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -657,7 +660,7 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
           AppIcon(Icons.receipt_long_outlined, color: context.modeTextMuted),
           const SizedBox(height: 10),
           Text(
-            'No movements found',
+            hasMovements ? 'No matching movements' : 'No stock movements yet',
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -666,7 +669,10 @@ class _InventoryMovementScreenState extends State<InventoryMovementScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Try changing the movement filter.',
+            hasMovements
+                ? 'Try changing the movement filter.'
+                : 'Stock movements will appear here once items are received, consumed, transferred, or adjusted.',
+            textAlign: TextAlign.center,
             style: WorkSansAppTextStyles.medium.copyWith(
               fontSize: 12,
               color: context.modeTextSecondary,

@@ -13,9 +13,6 @@ import 'package:sandwich_ai/src/features/stock_control/presentation/stock_contro
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_control_dashboard.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_movement.dart';
 
-final GlobalKey<StockControlBottomNavBarState> stockControlNavBarKey =
-    GlobalKey<StockControlBottomNavBarState>();
-
 class StockControlBottomNavBar extends StatefulWidget {
   final int initialIndex;
   final List<Widget> pages;
@@ -261,7 +258,6 @@ class StockControlMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StockControlBottomNavBar(
-      key: stockControlNavBarKey,
       initialIndex: 0,
       pages: [
         StockControlDashboardScreen(),

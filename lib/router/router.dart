@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:sandwich_ai/router/notfound.dart';
+import 'package:sandwich_ai/src/core/config/app_keys.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/globals/navbars/kitchen_nav.dart';
 import 'package:sandwich_ai/src/core/globals/navbars/pos_navbar.dart';
@@ -47,6 +48,7 @@ import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.
 
 class AppRouter {
   static final GoRouter _router = GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: '/splash',
     debugLogDiagnostics: true,
     errorBuilder: (context, state) => const NotFoundScreen(),
@@ -380,9 +382,12 @@ class AppRouter {
         path: '/goods-received',
         name: 'goods-received',
         pageBuilder: (context, state) {
+          final initialIndex = state.uri.queryParameters['tab'] == 'log'
+              ? 1
+              : 0;
           return CupertinoPage(
             key: state.pageKey,
-            child: const GoodsReceivedTabScreen(),
+            child: GoodsReceivedTabScreen(initialIndex: initialIndex),
           );
         },
       ),

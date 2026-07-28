@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -33,7 +32,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
   final _qtyReceivedController = TextEditingController();
   final _notesController = TextEditingController();
   final _inventorySearchController = TextEditingController();
-  Timer? _inventorySearchDebounce;
+  late final Debouncer _inventorySearchDebouncer;
 
   // State variables
   String branchId = '';
@@ -50,6 +49,9 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
   @override
   void initState() {
     super.initState();
+    _inventorySearchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _inventorySearchController.addListener(_onInventorySearchChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getBranchId();
@@ -71,8 +73,8 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
 
     if (!_isInventoryPickerOpen || organizationId.isEmpty) return;
 
-    _inventorySearchDebounce?.cancel();
-    _inventorySearchDebounce = Timer(const Duration(milliseconds: 450), () {
+    _inventorySearchDebouncer.cancel();
+    _inventorySearchDebouncer(() {
       if (!mounted) return;
 
       context.read<InventoryItemsBloc>().add(
@@ -112,7 +114,7 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
     _stockBatchIdController.dispose();
     _qtyReceivedController.dispose();
     _notesController.dispose();
-    _inventorySearchDebounce?.cancel();
+    _inventorySearchDebouncer.dispose();
     _inventorySearchController.dispose();
     super.dispose();
   }
@@ -553,7 +555,9 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
       _selectedUnit = Unit.kg;
       _qualityStatus = true;
       _isInventoryPickerOpen = false;
+      _inventorySearchDebouncer.cancel();
       _inventorySearchController.clear();
+      _filteredInventoryItems = _allInventoryItems;
       _issuedByController.clear();
       _stockBatchIdController.clear();
       _qtyReceivedController.clear();
@@ -1108,7 +1112,13 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                     ? null
                     : IconButton(
                         icon: const AppIcon(Icons.clear),
-                        onPressed: _inventorySearchController.clear,
+                        onPressed: () {
+                          _inventorySearchDebouncer.cancel();
+                          _inventorySearchController.clear();
+                          setState(() {
+                            _filteredInventoryItems = _allInventoryItems;
+                          });
+                        },
                       ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -1171,7 +1181,9 @@ class _CreateProductIntakeScreenState extends State<CreateProductIntakeScreen> {
                             _selectedItem = item;
                             _selectedUnit = UnitExtension.fromString(item.unit);
                             _isInventoryPickerOpen = false;
+                            _inventorySearchDebouncer.cancel();
                             _inventorySearchController.clear();
+                            _filteredInventoryItems = _allInventoryItems;
                           });
                           AppLogger.log('Selected item: ${item.itemName}');
                         },

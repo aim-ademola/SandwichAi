@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/branch_details_bloc/bloc.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/branch_details_bloc/event.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/branch_details_bloc/state.dart';
@@ -10,6 +12,9 @@ import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_blo
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/event.dart';
 import 'package:sandwich_ai/src/features/stock_control/bloc/add_branch_stock_bloc/state.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/branch_details_model.dart';
+import 'package:sandwich_ai/src/features/stock_control/data/model/stock_card_model.dart'
+    as stock_card;
+import 'package:sandwich_ai/src/features/stock_control/data/repo/stock_card_repo.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/shimmer_card.dart';
 import 'package:sandwich_ai/src/features/stock_control/presentation/stock_adjustmnt.dart';
 
@@ -29,12 +34,37 @@ class BranchStockDetailsScreen extends StatefulWidget {
 }
 
 class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
+  Future<ApiResponse<List<stock_card.StockBatch>>>? _batchesFuture;
+  String? _batchesKey;
+
   @override
   void initState() {
     super.initState();
     context.read<BranchStockDetailsBloc>().add(
       LoadBranchStockDetails(stockId: widget.stockId),
     );
+  }
+
+  Future<ApiResponse<List<stock_card.StockBatch>>> _getBatchesFuture(
+    BranchStockDetails details,
+  ) {
+    final key = '${details.branchId}:${details.itemId}';
+    if (_batchesFuture == null || _batchesKey != key) {
+      _batchesKey = key;
+      _batchesFuture = context.read<StockCardRepositoryInterface>().getBatches(
+        branchId: details.branchId,
+        itemId: details.itemId,
+      );
+    }
+    return _batchesFuture!;
+  }
+
+  void _reloadBatches(BranchStockDetails details) {
+    setState(() {
+      _batchesKey = null;
+      _batchesFuture = null;
+    });
+    _getBatchesFuture(details);
   }
 
   Color _getStatusColor(String status) {
@@ -628,6 +658,10 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
     return RefreshIndicator(
       color: kPrimary,
       onRefresh: () async {
+        setState(() {
+          _batchesKey = null;
+          _batchesFuture = null;
+        });
         context.read<BranchStockDetailsBloc>().add(
           RefreshBranchStockDetails(stockId: widget.stockId),
         );
@@ -941,6 +975,10 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
 
             const SizedBox(height: 24),
 
+            _buildBatchesSection(details),
+
+            const SizedBox(height: 24),
+
             // Item & Branch Information
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1009,6 +1047,356 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
             const SizedBox(height: 32),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBatchesSection(BranchStockDetails details) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Batches & Expiry',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Refresh batches',
+                onPressed: () => _reloadBatches(details),
+                icon: AppIcon(
+                  Icons.refresh_rounded,
+                  color: context.modeTextSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          FutureBuilder<ApiResponse<List<stock_card.StockBatch>>>(
+            future: _getBatchesFuture(details),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: _sectionDecoration(),
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Loading batches...',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 14,
+                          color: context.modeTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final response = snapshot.data;
+              if (response == null || !response.isSuccess) {
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: _sectionDecoration(),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const AppIcon(
+                        Icons.error_outline,
+                        color: Color(0xFFEF4444),
+                        size: 22,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          response?.error?.toString() ??
+                              'Could not load batch details.',
+                          style: WorkSansAppTextStyles.medium.copyWith(
+                            fontSize: 14,
+                            color: context.modeTextSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final batches = response.data ?? const <stock_card.StockBatch>[];
+              if (batches.isEmpty) {
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: _sectionDecoration(),
+                  child: Row(
+                    children: [
+                      AppIcon(
+                        Icons.inventory_2_outlined,
+                        color: context.modeTextSecondary,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'No batches found for this item.',
+                        style: WorkSansAppTextStyles.medium.copyWith(
+                          fontSize: 14,
+                          color: context.modeTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final previewBatches = batches.take(1).toList();
+              return Container(
+                decoration: _sectionDecoration(),
+                child: Column(
+                  children: [
+                    for (
+                      var index = 0;
+                      index < previewBatches.length;
+                      index++
+                    ) ...[
+                      _buildBatchItem(previewBatches[index], index),
+                      if (index != previewBatches.length - 1 ||
+                          batches.length > 1)
+                        _buildDivider(),
+                    ],
+                    if (batches.length > 1)
+                      _buildShowMoreBatchesButton(details, batches),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShowMoreBatchesButton(
+    BranchStockDetails details,
+    List<stock_card.StockBatch> batches,
+  ) {
+    return TextButton(
+      onPressed: () => _showAllBatchesBottomSheet(details, batches),
+      style: TextButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        foregroundColor: kPrimary,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(16),
+            bottomRight: Radius.circular(16),
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Show more batches',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: kPrimary,
+            ),
+          ),
+          const SizedBox(width: 8),
+          const AppIcon(Icons.keyboard_arrow_up_rounded, size: 20),
+        ],
+      ),
+    );
+  }
+
+  void _showAllBatchesBottomSheet(
+    BranchStockDetails details,
+    List<stock_card.StockBatch> batches,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.modeSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(sheetContext).size.height * 0.72,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'All Batches',
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: context.modeTextPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${details.item.itemName} - ${batches.length} batches',
+                              style: WorkSansAppTextStyles.medium.copyWith(
+                                fontSize: 13,
+                                color: context.modeTextSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Close',
+                        onPressed: () => Navigator.pop(sheetContext),
+                        icon: AppIcon(
+                          Icons.close_rounded,
+                          color: context.modeTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(color: context.modeDivider, height: 1),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    itemCount: batches.length,
+                    separatorBuilder: (_, _) => _buildDivider(),
+                    itemBuilder: (context, index) =>
+                        _buildBatchItem(batches[index], index),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBatchItem(stock_card.StockBatch batch, int index) {
+    final batchName =
+        _cleanDisplayText(batch.batchNumber) ?? 'Batch ${index + 1}';
+    final expiryText = _formatBatchExpiry(batch.expiryDate);
+    final expiryColor = _getBatchExpiryColor(batch.expiryDate);
+    final status = _cleanDisplayText(batch.status);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: expiryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: AppIcon(
+                Icons.qr_code_2_rounded,
+                color: expiryColor,
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  batchName,
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: context.modeTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Qty: ${_formatQuantity(batch.quantity)} ${batch.unit}',
+                  style: WorkSansAppTextStyles.medium.copyWith(
+                    fontSize: 13,
+                    color: context.modeTextSecondary,
+                  ),
+                ),
+                if (status != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    status,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: context.modeTextSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Expiry',
+                style: WorkSansAppTextStyles.medium.copyWith(
+                  fontSize: 12,
+                  color: context.modeTextSecondary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_isBatchExpiringSoon(batch.expiryDate)) ...[
+                    AppIcon(
+                      Icons.warning_rounded,
+                      size: 15,
+                      color: expiryColor,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
+                  Text(
+                    expiryText,
+                    textAlign: TextAlign.right,
+                    style: WorkSansAppTextStyles.medium.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: expiryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1185,6 +1573,73 @@ class _BranchStockDetailsScreenState extends State<BranchStockDetailsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Divider(color: context.modeDivider, height: 1),
     );
+  }
+
+  BoxDecoration _sectionDecoration() {
+    return BoxDecoration(
+      color: context.modeSurface,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: context.modeBorder, width: 1),
+      boxShadow: [
+        BoxShadow(
+          color: context.modeTextPrimary.withValues(alpha: 0.04),
+          blurRadius: 12,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    );
+  }
+
+  String _formatBatchExpiry(DateTime? expiryDate) {
+    if (expiryDate == null) return 'N/A';
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    final expiryOnly = DateTime(
+      expiryDate.year,
+      expiryDate.month,
+      expiryDate.day,
+    );
+    final days = expiryOnly.difference(todayOnly).inDays;
+    final date = DateFormat('MMM dd, yyyy').format(expiryDate);
+
+    if (days < 0) return '$date (${days.abs()}d ago)';
+    if (days == 0) return '$date (today)';
+    if (days == 1) return '$date (tomorrow)';
+    return '$date (${days}d)';
+  }
+
+  bool _isBatchExpiringSoon(DateTime? expiryDate) {
+    if (expiryDate == null) return false;
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    final expiryOnly = DateTime(
+      expiryDate.year,
+      expiryDate.month,
+      expiryDate.day,
+    );
+    final days = expiryOnly.difference(todayOnly).inDays;
+    return days <= 30;
+  }
+
+  Color _getBatchExpiryColor(DateTime? expiryDate) {
+    if (expiryDate == null) return context.modeTextSecondary;
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    final expiryOnly = DateTime(
+      expiryDate.year,
+      expiryDate.month,
+      expiryDate.day,
+    );
+    final days = expiryOnly.difference(todayOnly).inDays;
+    if (days < 0) return const Color(0xFFEF4444);
+    if (days <= 7) return const Color(0xFFF97316);
+    if (days <= 30) return const Color(0xFFF59E0B);
+    return const Color(0xFF10B981);
+  }
+
+  String _formatQuantity(double value) {
+    if (value == value.roundToDouble()) return value.toStringAsFixed(0);
+    return value.toStringAsFixed(2);
   }
 
   String? _cleanDisplayText(String? value) {

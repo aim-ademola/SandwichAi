@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
 import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
@@ -39,7 +38,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
   double? _reorderLevel;
   bool _isSearching = false;
   bool _isOpened = false;
-  Timer? _searchDebounce;
+  late final Debouncer _searchDebouncer;
 
   List<InventoryItem> _filteredItems = [];
   List<InventoryItem> _allItems = [];
@@ -59,6 +58,9 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
   @override
   void initState() {
     super.initState();
+    _searchDebouncer = Debouncer(
+      delay: const Duration(milliseconds: 350),
+    );
     _searchController.addListener(_onSearchChanged);
     _loadUserData();
 
@@ -172,7 +174,7 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
   @override
   void dispose() {
-    _searchDebounce?.cancel();
+    _searchDebouncer.dispose();
     _searchController.dispose();
     _qtyController.dispose();
     _notesController.dispose();
@@ -191,8 +193,8 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
 
     if (_orgID.isEmpty) return;
 
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+    _searchDebouncer.cancel();
+    _searchDebouncer(() {
       if (!mounted) return;
       context.read<InventoryItemsBloc>().add(
         LoadInventoryItems(
@@ -514,7 +516,9 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
       _selectedItemUnit = item.unit;
       _isSearching = false;
       _isOpened = false;
+      _searchDebouncer.cancel();
       _searchController.clear();
+      _filteredItems = _allItems;
     });
 
     // Auto-fill stock data
@@ -1322,7 +1326,9 @@ class _RequestStockScreenState extends State<RequestStockScreen> {
                           size: _getIconSize(screenWidth),
                         ),
                         onPressed: () {
+                          _searchDebouncer.cancel();
                           _searchController.clear();
+                          setState(() => _filteredItems = _allItems);
                         },
                       )
                     : null,

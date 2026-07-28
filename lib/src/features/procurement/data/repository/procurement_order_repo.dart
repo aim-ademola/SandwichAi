@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:sandwich_ai/src/core/config/prod_print.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/api_client.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_private/response_wrapper.dart';
 import 'package:sandwich_ai/src/core/network/api_engine_public/base_repo.dart';
@@ -30,6 +31,21 @@ class ProcurementRepository extends BaseRepository
               throw TimeoutException('Request timed out. Please try again.');
             },
           );
+      AppLogger.log('=== PROCUREMENT REQUESTS API RESPONSE ===');
+      AppLogger.log('Endpoint: /procurement/requests?branchId=$branchId');
+      response.when(
+        success: (data) {
+          AppLogger.log('Success data type: ${data.runtimeType}');
+          AppLogger.log('Success data: $data');
+        },
+        error: (error) {
+          AppLogger.log(
+            'Error: ${error.message} | statusCode: ${error.statusCode}',
+            level: LogLevel.warning,
+          );
+        },
+      );
+      AppLogger.log('=========================================');
 
       return handleObjectResponse(
         Future.value(response),

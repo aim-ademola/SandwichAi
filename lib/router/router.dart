@@ -41,7 +41,6 @@ import 'package:sandwich_ai/src/features/processing/presentation/recipe_complian
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_dash.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_good_reveived_tab.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_request.dart';
-import 'package:sandwich_ai/src/features/procurement/presentation/procuremnt_purchase_req.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/purchase_orders_tab.dart';
 import 'package:sandwich_ai/src/features/splash/splash.dart';
 import 'package:sandwich_ai/src/features/stock_control/data/model/reorder_model.dart';
@@ -397,7 +396,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           return CupertinoPage(
             key: state.pageKey,
-            child: const ProcurementOrdersScreen(),
+            child: const ProcurementRequestsScreen(),
           );
         },
       ),

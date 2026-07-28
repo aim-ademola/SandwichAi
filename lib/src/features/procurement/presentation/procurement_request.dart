@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sandwich_ai/src/core/config/prod_print.dart';
+import 'package:sandwich_ai/src/core/local_sandbox/cache_manager.dart';
 import 'package:sandwich_ai/src/core/utils/debouncer.dart';
 import 'package:sandwich_ai/src/core/globals/app_icon.dart';
 import 'package:sandwich_ai/src/core/theme/app_theme_extension.dart';
 import 'package:sandwich_ai/src/core/constant/textstyle.dart';
+import 'package:sandwich_ai/src/features/procurement/data/model/procurement_order_model.dart'
+    as procurement_model;
+import 'package:sandwich_ai/src/features/procurement/data/repository/procurement_order_repo.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_order_blocs/bloc.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_order_blocs/event.dart';
+import 'package:sandwich_ai/src/features/procurement/procurement_blocs/procurement_order_blocs/state.dart';
 
 class ProcurementRequestsScreen extends StatefulWidget {
   const ProcurementRequestsScreen({super.key});
@@ -20,86 +28,31 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
   late final Debouncer _searchDebouncer;
   String _selectedFilter = 'All';
   final TextEditingController _searchController = TextEditingController();
+  final Set<String> _actioningRequestIds = {};
   String _searchInput = '';
   String _searchQuery = '';
 
-  final List<Request> _allRequests = [
-    Request(
-      from: 'Kitchen',
-      timeAgo: '2h ago',
-      title: 'Stock Replenishment',
-      description: '10kg Tomatoes, 5kg Onions, 2L Olive Oil...',
-      priority: 'High',
-      requestedBy: 'Chef Ade',
-      reference: 'REQ-KIT-2407',
-      neededBy: 'Today, 4:00 PM',
-      destination: 'Main Kitchen',
-      items: const [
-        RequestLineItem(name: 'Tomatoes', quantity: '10', unit: 'kg'),
-        RequestLineItem(name: 'Onions', quantity: '5', unit: 'kg'),
-        RequestLineItem(name: 'Olive Oil', quantity: '2', unit: 'L'),
-      ],
-      reason:
-          'Prep stock is below par for dinner service and needs replenishment before production starts.',
-      notes: 'Check tomatoes for firmness and avoid bruised cartons.',
-    ),
-    Request(
-      from: 'Procurement',
-      timeAgo: '8h ago',
-      title: 'Invoice Approval #INV-12045',
-      supplier: 'Global Foods Inc.',
-      amount: 1250.30,
-      priority: 'Medium',
-      requestedBy: 'Procurement Officer',
-      reference: 'INV-12045',
-      neededBy: 'Tomorrow, 10:00 AM',
-      destination: 'Accounts Payable',
-      items: const [
-        RequestLineItem(
-          name: 'Dry goods supply invoice',
-          quantity: '1',
-          unit: 'invoice',
-          unitCost: 1250.30,
-        ),
-      ],
-      reason:
-          'Supplier invoice requires approval before payment can be scheduled.',
-      notes: 'Confirm received quantities match the GRN before approving.',
-    ),
-    Request(
-      from: 'Bar',
-      timeAgo: '1d ago',
-      title: 'New Cocktail Glassware Order',
-      description: '24x Highball, 24x Coupe glasses...',
-      priority: 'Low',
-      requestedBy: 'Bar Lead',
-      reference: 'REQ-BAR-1182',
-      neededBy: 'Friday, 12:00 PM',
-      destination: 'Bar Store',
-      items: const [
-        RequestLineItem(name: 'Highball glasses', quantity: '24', unit: 'pcs'),
-        RequestLineItem(name: 'Coupe glasses', quantity: '24', unit: 'pcs'),
-      ],
-      reason:
-          'Replacement glassware needed after breakages reduced service par.',
-      notes: 'Approve only if supplier can deliver matched glassware sets.',
-    ),
-  ];
-
-  List<Request> get _filteredRequests {
+  List<Request> _filteredRequests(List<Request> requests) {
     final selectedFilter = _selectedFilter.toLowerCase();
     final query = _searchQuery.trim().toLowerCase();
-    return _allRequests.where((req) {
-      final matchesFilter =
-          selectedFilter == 'all' || req.from.toLowerCase() == selectedFilter;
+    return requests.where((req) {
+      final from = req.from.toLowerCase();
+      final priority = req.priority.toLowerCase();
+      final matchesFilter = selectedFilter == 'all'
+          ? true
+          : selectedFilter == 'urgent'
+          ? priority.contains('urgent') ||
+                priority.contains('high') ||
+                priority.contains('critical')
+          : from.contains(selectedFilter);
       if (!matchesFilter) return false;
       if (query.isEmpty) return true;
 
-      return req.from.toLowerCase().contains(query) ||
+      return from.contains(query) ||
           req.title.toLowerCase().contains(query) ||
           (req.description?.toLowerCase().contains(query) ?? false) ||
           (req.supplier?.toLowerCase().contains(query) ?? false) ||
-          req.priority.toLowerCase().contains(query);
+          priority.contains(query);
     }).toList();
   }
 
@@ -110,12 +63,10 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     _tabController = TabController(length: 5, vsync: this);
     AppLogger.log('=== PROCUREMENT REQUESTS SCREEN DATA SOURCE ===');
     AppLogger.log(
-      'ProcurementRequestsScreen is currently using local mock data. '
-      'No /procurement/requests API call is made by this screen.',
-      level: LogLevel.warning,
+      'ProcurementRequestsScreen is wired to GET /procurement/requests?branchId={branchId}.',
     );
-    AppLogger.log('Mock request count: ${_allRequests.length}');
     AppLogger.log('==============================================');
+    _loadRequests();
   }
 
   @override
@@ -124,6 +75,14 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadRequests() async {
+    final branchId = await AuthCacheHelper.instance.getBranchID() ?? '';
+    if (!mounted) return;
+    context.read<ProcurementBloc>().add(
+      LoadProcurementOrders(branchId: branchId),
+    );
   }
 
   @override
@@ -148,7 +107,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        'Requests',
+        'Procurement Request',
         style: WorkSansAppTextStyles.medium.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -188,13 +147,37 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                 _buildFilterTabs(constraints.maxWidth),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: _filteredRequests.isEmpty
-                      ? _buildEmptyState(constraints.maxWidth)
-                      : _buildRequestsList(
-                          horizontalPadding,
-                          maxContentWidth,
+                  child: BlocBuilder<ProcurementBloc, ProcurementState>(
+                    builder: (context, state) {
+                      if (state is ProcurementLoading ||
+                          state is ProcurementInitial) {
+                        return _buildLoadingState();
+                      }
+
+                      if (state is ProcurementError) {
+                        return _buildErrorState(
                           constraints.maxWidth,
-                        ),
+                          state.error,
+                        );
+                      }
+
+                      final apiRequests = _requestsFromState(state);
+                      final visibleRequests = _filteredRequests(apiRequests);
+
+                      return RefreshIndicator(
+                        color: context.modePrimary,
+                        onRefresh: _loadRequests,
+                        child: visibleRequests.isEmpty
+                            ? _buildEmptyState(constraints.maxWidth)
+                            : _buildRequestsList(
+                                visibleRequests,
+                                horizontalPadding,
+                                maxContentWidth,
+                                constraints.maxWidth,
+                              ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -332,6 +315,7 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
   }
 
   Widget _buildRequestsList(
+    List<Request> requests,
     double horizontalPadding,
     double maxContentWidth,
     double screenWidth,
@@ -342,12 +326,94 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
         right: horizontalPadding,
         bottom: 24,
       ),
-      itemCount: _filteredRequests.length,
+      itemCount: requests.length,
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        return _buildRequestCard(_filteredRequests[index], screenWidth);
+        return _buildRequestCard(requests[index], screenWidth);
       },
     );
+  }
+
+  List<Request> _requestsFromState(ProcurementState state) {
+    if (state is ProcurementLoaded) {
+      return state.response.data.map(_requestFromApi).toList();
+    }
+    if (state is ProcurementRefreshing) {
+      return state.currentData.data.map(_requestFromApi).toList();
+    }
+    return const [];
+  }
+
+  Request _requestFromApi(procurement_model.ProcurementRequest request) {
+    final items = request.items.map(_lineItemFromApi).toList();
+    final description = items.isEmpty
+        ? null
+        : items
+              .take(3)
+              .map((item) => '${item.quantity} ${item.unit} ${item.name}')
+              .join(', ');
+    final extraItems = items.length > 3 ? '...' : '';
+    final branchLabel = [
+      request.branch.name,
+      if (request.branch.branchCode.trim().isNotEmpty)
+        request.branch.branchCode,
+    ].where((part) => part.trim().isNotEmpty).join(' - ');
+
+    return Request(
+      id: request.id,
+      status: request.status,
+      from: request.departmentLabel,
+      timeAgo: _formatTimeAgo(request.createdAt),
+      title: request.requestId.trim().isEmpty
+          ? 'Procurement Request'
+          : 'Request ${request.requestId}',
+      description: description == null ? null : '$description$extraItems',
+      amount: request.totalAmountDouble > 0 ? request.totalAmountDouble : null,
+      priority: _displayPriority(request.priority),
+      requestedBy: request.requestedBy.trim().isEmpty
+          ? request.departmentLabel
+          : request.requestedBy,
+      reference: request.requestId,
+      neededBy: request.formattedExpectedDelivery,
+      destination: branchLabel.isEmpty ? request.branchId : branchLabel,
+      items: items,
+      reason: request.notes ?? 'Procurement request awaiting review.',
+      notes: request.status.trim().isEmpty ? '' : 'Status: ${request.status}',
+    );
+  }
+
+  RequestLineItem _lineItemFromApi(procurement_model.ProcurementItem item) {
+    return RequestLineItem(
+      name: item.item.itemName.trim().isEmpty
+          ? 'Stock item'
+          : item.item.itemName,
+      quantity: _formatQuantity(item.qtyNeededValue),
+      unit: item.item.unit,
+      unitCost: item.unitCostDouble > 0 ? item.unitCostDouble : null,
+    );
+  }
+
+  String _displayPriority(String value) {
+    final normalized = value.trim().toUpperCase();
+    if (normalized.isEmpty) return 'Medium';
+    if (normalized == 'URGENT' || normalized == 'CRITICAL') return 'High';
+    return '${normalized[0]}${normalized.substring(1).toLowerCase()}';
+  }
+
+  String _formatQuantity(double value) {
+    return NumberFormat(value % 1 == 0 ? '#,##0' : '#,##0.##').format(value);
+  }
+
+  String _formatTimeAgo(String isoValue) {
+    final createdAt = DateTime.tryParse(isoValue);
+    if (createdAt == null) return '';
+
+    final diff = DateTime.now().difference(createdAt.toLocal());
+    if (diff.inMinutes < 1) return 'now';
+    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
+    if (diff.inDays < 1) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    return DateFormat('d MMM').format(createdAt.toLocal());
   }
 
   Widget _buildRequestCard(Request request, double screenWidth) {
@@ -574,27 +640,31 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                       children: [
                         Expanded(
                           child: _buildActionButton(
-                            initialAction == 'Reject'
+                            _actioningRequestIds.contains(request.id)
+                                ? 'Working...'
+                                : initialAction == 'Reject'
                                 ? 'Confirm Reject'
                                 : 'Reject',
                             context.modeSurfaceMuted,
                             context.modeTextPrimary,
                             14,
                             390,
-                            () => _completeReview(request, 'rejected'),
+                            () => _completeReview(request, 'reject'),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildActionButton(
-                            initialAction == 'Approve'
+                            _actioningRequestIds.contains(request.id)
+                                ? 'Working...'
+                                : initialAction == 'Approve'
                                 ? 'Confirm Approve'
                                 : 'Approve',
                             context.modePrimary,
                             context.modeTextInverse,
                             14,
                             390,
-                            () => _completeReview(request, 'approved'),
+                            () => _completeReview(request, 'approve'),
                           ),
                         ),
                       ],
@@ -748,11 +818,130 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
     );
   }
 
-  void _completeReview(Request request, String action) {
-    Navigator.pop(context);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('${request.title} $action.')));
+  Future<void> _completeReview(Request request, String action) async {
+    if (_actioningRequestIds.contains(request.id)) return;
+
+    final actor = await _currentApprovalActor();
+    if (actor.isEmpty) {
+      _showSnackBar('Could not identify current employee.', isError: true);
+      return;
+    }
+
+    String? rejectionNote;
+    if (action == 'reject') {
+      rejectionNote = await _promptRejectionReason();
+      if (rejectionNote == null || rejectionNote.trim().isEmpty) return;
+    }
+
+    if (!mounted) return;
+    setState(() => _actioningRequestIds.add(request.id));
+
+    final repository = context.read<ProcurementRepositoryInterface>();
+    final response = action == 'approve'
+        ? await repository.approveProcurementRequest(
+            requestId: request.id,
+            approvedBy: actor,
+            notes: 'Approved from mobile app',
+          )
+        : await repository.rejectProcurementRequest(
+            requestId: request.id,
+            rejectedBy: actor,
+            rejectionNote: rejectionNote!,
+          );
+
+    if (!mounted) return;
+    setState(() => _actioningRequestIds.remove(request.id));
+
+    response.when(
+      success: (updated) {
+        Navigator.pop(context);
+        _showSnackBar(
+          action == 'approve'
+              ? '${request.title} approved.'
+              : '${request.title} rejected.',
+        );
+        _loadRequests();
+      },
+      error: (error) {
+        _showSnackBar(error.toString(), isError: true);
+      },
+    );
+  }
+
+  Future<String> _currentApprovalActor() async {
+    final employeeId = await AuthCacheHelper.instance.getEmpID() ?? '';
+    if (employeeId.trim().isNotEmpty) return employeeId.trim();
+
+    final user = await AuthCacheHelper.instance.getUserData();
+    final fullName = user?.fullName?.trim() ?? '';
+    if (fullName.isNotEmpty) return fullName;
+    return user?.id.trim() ?? '';
+  }
+
+  Future<String?> _promptRejectionReason() async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: context.modeSurface,
+          title: Text(
+            'Reject Request',
+            style: WorkSansAppTextStyles.medium.copyWith(
+              fontWeight: FontWeight.w700,
+              color: context.modeTextPrimary,
+            ),
+          ),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 3,
+            cursorColor: context.modePrimary,
+            style: WorkSansAppTextStyles.medium.copyWith(
+              color: context.modeTextPrimary,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Reason for rejection',
+              hintStyle: WorkSansAppTextStyles.medium.copyWith(
+                color: context.modeTextMuted,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: context.modePrimary),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, controller.text.trim()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
+              ),
+              child: const Text('Reject'),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+    return result;
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? context.modeError : null,
+      ),
+    );
   }
 
   String _formatMoney(double value) {
@@ -888,6 +1077,62 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
                 color: context.modeTextSecondary,
                 height: 1.5,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(child: CircularProgressIndicator(color: context.modePrimary));
+  }
+
+  Widget _buildErrorState(double screenWidth, String message) {
+    final titleFontSize = _getEmptyTitleFontSize(screenWidth);
+    final descriptionFontSize = _getEmptyDescriptionFontSize(screenWidth);
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: _getHorizontalPadding(screenWidth),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppIcon(Icons.error_outline, size: 56, color: context.modeError),
+            const SizedBox(height: 14),
+            Text(
+              'Could not load requests',
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.w700,
+                color: context.modeTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: WorkSansAppTextStyles.medium.copyWith(
+                fontSize: descriptionFontSize,
+                color: context.modeTextSecondary,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 18),
+            ElevatedButton(
+              onPressed: _loadRequests,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.modePrimary,
+                foregroundColor: context.modeTextInverse,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Retry'),
             ),
           ],
         ),
@@ -1080,6 +1325,8 @@ class _ProcurementRequestsScreenState extends State<ProcurementRequestsScreen>
 
 // Request Model
 class Request {
+  final String id;
+  final String status;
   final String from;
   final String timeAgo;
   final String title;
@@ -1096,6 +1343,8 @@ class Request {
   final String? notes;
 
   Request({
+    required this.id,
+    required this.status,
     required this.from,
     required this.timeAgo,
     required this.title,

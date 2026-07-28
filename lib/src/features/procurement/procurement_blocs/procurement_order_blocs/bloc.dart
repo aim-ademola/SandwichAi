@@ -30,7 +30,13 @@ class ProcurementBloc extends Bloc<ProcurementEvent, ProcurementState> {
     try {
       emit(const ProcurementLoading());
 
-      final response = await _repository.getProcurementOrders(branchId);
+      final effectiveBranchId = event.branchId.isNotEmpty
+          ? event.branchId
+          : branchId;
+      branchId = effectiveBranchId;
+      final response = await _repository.getProcurementOrders(
+        effectiveBranchId,
+      );
 
       await response.when(
         success: (data) async {

@@ -8,7 +8,7 @@ import 'package:sandwich_ai/src/core/globals/chat/chat_rrom_scrssn.dart';
 
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_dash.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/procurement_drawer.dart';
-import 'package:sandwich_ai/src/features/procurement/presentation/procuremnt_purchase_req.dart';
+import 'package:sandwich_ai/src/features/procurement/presentation/procurement_request.dart';
 import 'package:sandwich_ai/src/features/procurement/presentation/supplier_list.dart';
 
 class ProcuremntBottomNavBar extends StatefulWidget {
@@ -239,7 +239,7 @@ class ProcurementMainScreen extends StatelessWidget {
       initialIndex: initialIndex,
       pages: [
         ProcurementDashboardScreen(),
-        ProcurementOrdersScreen(),
+        ProcurementRequestsScreen(),
         SupplierListWrapper(),
         ChatRoomsScreen(
           showNavBarCallback: () {
